@@ -1,6 +1,6 @@
 ---
-title: "HMC_learn"
-output: rmarkdown::html_vignette
+title: "HMC Learn"
+output: pdf_document
 vignette: >
   %\VignetteIndexEntry{HMC_learn}
   %\VignetteEngine{knitr::rmarkdown}
@@ -15,5 +15,9 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(hmclearn)
+# library(hmclearn)
 ```
+
+# Introduction
+
+Hamiltonian Monte Carlo (HMC) has emerged as a general purpose tool for Bayesian practitioners.  Modern production software such as Stan usee HMC to fit a variety of statistical models.  
