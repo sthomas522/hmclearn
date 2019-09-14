@@ -1,0 +1,19 @@
+---
+title: "HMC_learn"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{HMC_learn}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(hmclearn)
+```
