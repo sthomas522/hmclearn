@@ -20,4 +20,10 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-Hamiltonian Monte Carlo (HMC) has emerged as a general purpose tool for Bayesian practitioners.  Modern production software such as Stan usee HMC to fit a variety of statistical models.  
+Hamiltonian Monte Carlo (HMC) has emerged as a general purpose tool for Bayesian practitioners.  A key advantage of HMC over more traditional Markov Chain Monte Carlo (MCMC) algorithms is its improved computational efficiency in fitting high-dimensional models.   While the algorithm itself is not difficult to program, the substantial number of tuning parameters can be daunting to those unfamiliar with the theory behind the method.  Until recently, practical access to HMC was limited to individuals with both the mathematical background to understand the algorithm and the programming skill to implement the simulation in a high-performance environment.   
+
+Modern Bayesian software such as Stan has made HMC accessible to practitioners who are comfortable with any one of a variety of well-known programming platforms (e.g. R, Python, Matlab).  The Stan language is similar in style to WinBUGS, which is familiar to many Bayesian statisticians.  The software translates Stan code to a lower-level language to maximize speed and efficiency.  In addition, Stan automates the challenging process of tuning the many parameters in HMC.  As a result, Stan has succeeded in making HMC accessible to many Bayesian practitioners around the world in both academia and industry.  
+
+While Stan and other production-capable software (e.g. PyMC, Edward) provide enormous practical value to analysts, the intuition of how HMC works can be lost in the process of fitting models.  HMC can appear to be an opaque, "black-box" algorithm behind the sophisticated automation.  This is an unfortunate consequence.  While understanding HMC is not necessary to use production software, intuition behind the method can be helpful both in fine-tuning the simulation process and in instilling confidence in the results.  
+
+
