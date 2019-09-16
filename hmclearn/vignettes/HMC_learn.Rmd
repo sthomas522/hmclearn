@@ -8,6 +8,9 @@ vignette: >
 header-includes:
   - \usepackage{setspace}
   - \doublespacing
+  - \usepackage{amsmath}
+  - \usepackage{algorithm}
+  - \usepackage{algpseudocode}
 ---
 
 ```{r, include = FALSE}
@@ -32,6 +35,80 @@ While Stan and other high-performance software (e.g. PyMC, Edward) provide enorm
 The purpose of this paper is to introduce HMC to analysts using R software only, an open-source statistical environment that is familiar to many.  While many excellent introductions to HMC are available on a conceptual level, this paper will focus on learning HMC by doing.  Familiarity with popular MCMC algorithms such as Metropolis-Hastings (MH) is helpful, but not required.  A companion R package called hmclearn contains the R code for all of the functions used in this introduction is freely available to download.  
 
 # MCMC Basic Concepts
+
+We consider $n$ observations from a simple random sample $\pmb{X} = (X_1, ..., X_n)$, where each element is independent and identically distributed (iid).  From this sample, we want to fit the distribution of our k-dimensional parameter of interest $\Theta = (\theta_1, ..., \theta_k)$.  The posterior distribution $p(\Theta | \pmb{X})$ can be written as a function of the Likelihood $p(\pmb{X} | \Theta)$ and prior $p(\Theta)$ using Bayes formula.  
+
+$$
+\begin{aligned}
+p(\Theta | \pmb{X}) &= \frac{p(\pmb{X}|\Theta)p(\Theta)}{\int p(\pmb{X}|\Theta)p(\Theta)d\Theta} \\
+&\propto p(\pmb{X}|\Theta) p(\Theta)
+\end{aligned}
+$$
+
+In many practical data analyses, the integral in the denominator cannot be evaluated directly.  Since the denominator is constant with respect to $\Theta$, only the unnormalized posterior $p(\pmb{X} | \Theta)$ is available.  
+
+## Metropolis-Hastings
+
+The first widely-used MCMC method capable of simulating directly from $p(\pmb{X} | \Theta)$ is called the Metropolis algorithm, originating in the 1950's from an application to statistical physics.  Nearly two decades later, Hastings generalized the algorithm, which is now called Metropolis-Hastings (MH).  We begin with a brief introduction to MH since HMC builds on many similar concepts.  
+
+The objective of MH is to simulate values of $\Theta$ that accurately reflect the posterior density $p(\Theta | \pmb{X})$.  For brevity, we will shorten our notation of the posterior as $p(\Theta)$. The Markov chain simulates values from this density in sequence from $t = 1, .., N$, provided some starting point $\Theta^{(0)}$ which is typically provided by the analyst or the computer program.  
+MH defines a transition probability that produces a Markov chain that is ergodic and satisfies detailed balance.  Values of $\Theta^{(t)}$ in the chain are defined in part by a proposal density, which we define as $q(\Theta^{\text{PROP}} | \Theta^{t-1})$.  Here, $\Theta^{\text{PROP}}$ is a proposal for the next value in the chain.  This proposal density is conditioned on the previously stored value $\Theta^{(t-1)}$.  A variety of proposal functions can be used, with random walk proposals being a common choice.  We now outline the MH algorithm in full.  
+
+\begin{algorithm}
+\caption{Metropolis-Hastings}\label{Metropolis-Hastings}
+\begin{algorithmic}[1]
+\Procedure{MH}{$\theta^{(0)}, \pi^{*}(\theta), q(\theta^{(x)}|\theta^{(y)}), N$} 
+   \State Calculate $\pi^{*}(\theta^{(0)})$ \Comment{Initial value for posterior}
+   \For{$t = 1, ..., N$}\Comment{Repeat simulation $N$ times}
+      \State $\theta^{\text{PROP}} \gets q(\theta^{\text{PROP}} | \theta^{(t-1)})$ \Comment{Randomly sample proposal}
+      \State $u \gets U(0, 1)$ \Comment{Randomly sample from a uniform density, 0 to 1}
+      \State $\alpha = \min\left(1, \frac{\pi(\theta^{\text{PROP}})q(\theta^{\text{PROP}}|\theta^{(t-1)})}{\pi(\theta^{(t-1)})q(\theta^{(t-1)}|\theta^{\text{PROP}})} \right)$ \Comment{Calculate acceptance proposal probability}
+      \State If $\alpha < u$, then $\theta^{(t)} \gets \theta^{\text{PROP}}$.  Otherwise, $\theta^{(t)} \gets \theta^{(t-1)}$ \Comment{Select proposal or previous value}
+   \EndFor\label{markovendfor}
+   \State \textbf{return} $\theta^{(1)} ... \theta^{(N)}$ \Comment{Return simulated values of $\theta$ from the unnormalized posterior}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+Each proposal in MH is accepted at probability
+
+$$
+\alpha = \min\left(1, \frac{p(\Theta^{\text{PROP}})q(\Theta^{\text{PROP}}|\Theta^{(t-1)})}{p(\Theta^{(t-1)})q(\Theta^{(t-1)}|\Theta^{\text{PROP}})} \right)
+$$
+
+which simplifies when $q(\Theta^{PROP} | \Theta^{(t-1)})$ is symmetric (i.e. the Metropolis algorithm)
+
+$$
+\alpha = \min\left(1, \frac{p(\Theta^{\text{PROP}})}{p(\Theta^{(t-1)})} \right).
+$$
+
+Recall that the denominator of the posterior is constant with respect to $\Theta$.  As such, the ratio of posterior densities at two different points $\Theta^{PROP}$ and $\Theta^{(t-1)}$ can be formulated even when the denominator is unknown (i.e. the constants in the denominator cancel).  
+
+Intuition into why MH works can be obtained by examining the acceptance ratio $\alpha$ closely.  Two different outcomes are possible depending on the value of the posterior at the proposed $\Theta^{PROP}$:
+
+\begin{enumerate}
+\item If $p(\Theta^{PROP}) \geq p(\Theta^{(t-1)})$, then the posterior has a higher density at the proposed value of $\Theta$ than at the previous point in the chain $t-1$.  When this occurs, the proposal is always accepted (i.e. at probability 1).  
+\item If $p(\Theta^{PROP}) < p(\Theta^{(t-1)})$, then the posterior has a lower density at the proposed value of $\Theta$ than at the previous point in the chain.  When this occurs, we accept the proposal at random based on the ratio $0 < \alpha < 1$.  If the proposal is not accepted, then the proposal is discarded and the Markov chain remains in place $\Theta^{t} := \Theta^{(t-1)}$.  
+\end{enumerate}
+
+As such, MH tends to sample more points in the region of higher posterior values.  However, the tails of the posterior are also sampled based on acceptance ratio.  Given enough samples, the MCMC chain samples $\Theta$ at the proportion of the true posterior density.  The resulting simulated values can then be used for statistical inference.  Much more can be said regarding MH.  Interested readers can refer to the following references ... (list references here)
+
+## Limitations of Metropolis-Hastings
+
+The theoretical requirements for fitting models using MH are minimal, making MH an attractive choice for Bayesian inference even today.  The limits of MH are primarily computational in nature.  Since the proposals of $\Theta$ are randomly selected, many simulations are required to accurately describe the true posterior.  Even efficient MH implementations may accept less than 25\% of the proposals (cite Gelman).  
+
+The limited efficiency of MH can be overcome by high computational power for certain applications.  When the dimensionality of the data is small to moderate, a well-programmed MH algorithm can sample enough points from the posterior density in a reasonable period of time.  The challenge of relying on MH occurs when dealing with high-dimensional data or complex statistical models.  In these situations, MH is known to be inefficient (reference here) and can be impractical for such applications.  
+
+A popular, often efficient alternative to MH is Gibbs Sampling (footnote that Gibbs is a particular case of MH?).  Gibbs is widely used in many Bayesian software platforms such as WinBUGS and JAGS.  When the conditional posterior densities can be explicitly formulated, Gibbs remains a viable choice for the Bayesian practitioner.  Such restrictions limit the application of Gibbs to particular combinations of models and priors.  Gibbs therefore lacks the flexibility of MH, in addition to having certain other efficiency limitations of its own (cite Robert).  
+
+Given the modern computational demands of large dataset and complex models, a more efficient MCMC algorithm is desirable.  Ideally, such an algorithm would retain the theoretical advantages and flexibility of MH, while providing a more computational efficient method of selecting proposals.  Here we transition to the modern HMC algorithm, and why HMC has emerged as a standard inferential tool for many Bayesian practitioners.  
+
+# HMC Concepts and Theory
+
+
+
+
+
 
 
 
