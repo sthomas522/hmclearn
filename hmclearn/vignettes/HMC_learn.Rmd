@@ -105,6 +105,10 @@ Given the modern computational demands of large dataset and complex models, a mo
 
 # HMC Concepts and Theory
 
+MH and HMC are equally flexible in their theoretical capabilities to fit a variety of model and prior specifications.  The key advantage of HMC over MH is the use of additional information from the posterior to guide proposals.  HMC uses the gradient of the log posterior to direct the Markov chain to the region the region of highest posterior density, where most of the samples should occur.  In contrast, MH relies entirely on the acceptance ratio to guide the chain.   As a result, a well-tuned HMC chain will accept proposals approximately 3 times the frequency of a similarly well-tuned MH algorithm (footnote?:  based on MH theoretical optimal acceptance rate of 0.234 and HMC acceptance of 0.6-0.9).   
+
+One should note that HMC is a MCMC simulation method, not an optimization method.  While the HMC algorithm guides proposals to regions of high density (sometimes called the typical set  Betancourt), the tails of the density are properly sampled as well.  Both MH and HMC produce ergodic Markov chains, but the mathematics of HMC is substantially more complex than MH.  We provide a brief overview of the theoretical basis of HMC here, and refer to other sources for more detailed expositions (refer to Wiley paper, Betancourt).
+
 
 
 
