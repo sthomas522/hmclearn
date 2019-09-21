@@ -103,11 +103,13 @@ A popular, often efficient alternative to MH is Gibbs Sampling (footnote that Gi
 
 Given the modern computational demands of large dataset and complex models, a more efficient MCMC algorithm is desirable.  Ideally, such an algorithm would retain the theoretical advantages and flexibility of MH, while providing a more computational efficient method of selecting proposals.  Here we transition to the modern HMC algorithm, and why HMC has emerged as a standard inferential tool for many Bayesian practitioners.  
 
-# HMC Concepts and Theory
+# HMC Background
 
 MH and HMC are equally flexible in their theoretical capabilities to fit a variety of model and prior specifications.  The key advantage of HMC over MH is the use of additional information from the posterior to guide proposals.  HMC uses the gradient of the log posterior to direct the Markov chain to the region the region of highest posterior density, where most of the samples should occur.  In contrast, MH relies entirely on the acceptance ratio to guide the chain.   As a result, a well-tuned HMC chain will accept proposals approximately 3 times the frequency of a similarly well-tuned MH algorithm (footnote?:  based on MH theoretical optimal acceptance rate of 0.234 and HMC acceptance of 0.6-0.9).   
 
 It should be noted that HMC is a MCMC simulation method, not an optimization method.  While the HMC algorithm guides proposals to regions of high density (sometimes called the typical set  Betancourt), the tails of the density are properly sampled as well.  Both MH and HMC produce ergodic Markov chains, but the mathematics of HMC is substantially more complex than MH.  We provide a brief overview of the theoretical basis of HMC here, and refer to other sources for more detailed expositions (refer to Wiley paper, Betancourt).
+
+## Hamiltonian Monte Carlo Concepts and Theory
 
 As with MH, our objective in HMC is to simulate the posterior $p(\Theta | \pmb{X})$.  The mathematical basis of HMC is the Hamiltonian function
 
@@ -145,6 +147,27 @@ $$
 \end{aligned}
 $$
 Here we see the explicit formulation of the gradient of the log posterior $\nabla_\Theta \log p(\Theta)$.  The combination of these two equations forms deterministic paths for the MCMC chain to travel through the joint distribution $(\pmb{p}, \Theta)$.  Note that while the MCMC produces simulations of both $\pmb{p}$ and $\Theta$, only the values of $\Theta$ are of interest for statistical inference.  
+
+A solution for these differential equations is necessary to produce a practical MCMC simulation.  Since no exact solution exists, a discrete approximation is needed to form the algorithm.  The most commonly used solution is called the leapfrog method.  The leapfrog defines a discrete step size $\epsilon$ individually for $\pmb{p}$ and $\Theta$.  
+
+$$
+\begin{aligned}
+\pmb{p}(t + \epsilon/2) &= \pmb{p}(t) + (\epsilon/2)\nabla_\Theta\log\pi(\Theta(t)) \\
+\Theta(t + \epsilon) &= \Theta(t) + \epsilon M^{-1}\pmb{p}(t + \epsilon/2) \\
+\pmb{p}(t + \epsilon) &= \pmb{p}(t + \epsilon/2) + (\epsilon/2)\nabla_\Theta \log\pi(\Theta(t + \epsilon)).
+\end{aligned}
+$$
+
+The full step $\epsilon$ in $\Theta$ is sandwiched by half-steps $\epsilon/2$ for $\pmb{p}$.  This solution, though slightly more complex than Euler approximations, provides a more accurate approximation of the solution over many samples.  
+
+The paths defined by the Hamiltonian equations are deterministic once $\pmb{p}$ is defined.  An exact solution would always be accepted in a MCMC algorithm.  However, since the solution to the Hamiltonian equations is an approximation, a Metropolis-Hastings style acceptance ratio is used to formally determine whether a proposal is accepted or rejected.
+
+With the overview of the major concepts in HMC complete, we turn to the formulation of the Hamiltonian Monte Carlo algorithm itself.  
+
+## Hamiltonian Monte Carlo Algorithm
+
+
+
 
 
 
