@@ -213,5 +213,87 @@ Developing an intuition and appreciation for how HMC works can be challenging wi
 
 # HMC Implementation
 
+We introduce several functions for implementing HMC in the R language.  First is the main \textit{hmc} function itself.  
+
+```{r, echo=TRUE}
+# M:  number of times to repeat
+# theta.init:  initial values of theta
+# epsilon:  step size
+# Nstep:  number of steps (called L in paper)
+# logDENS:  log of joint density of parameter of interest
+# y: dependent variable
+# X: design matrix
+# verbose:  logical to print step in hmc
+# ...:  additional parameters to pass to logPOSTERIOR
+# Main hmc function
+hmc <- function(N, theta.init, epsilon, L, logPOSTERIOR, glogPOSTERIOR, y, X, Mdiag=NULL,
+                verbose=FALSE, ...) {
+  p <- length(theta.init)
+  mu.p <- rep(0, p)
+
+  if (is.null(Mdiag)) {
+    Mdiag <- rep(1, length(theta.init))
+  }
+
+  # store theta and momentum (usually not of interest)
+  theta <- list()
+  theta[[1]] <- theta.init
+  r <- list()
+  r[[1]] <- NA
+  accept <- 0
+  for (m in 2:N) {
+    theta[[m]] <- theta.new <- theta[[m-1]]
+    # r0 <- MASS::mvrnorm(1, mu.p, diag(p))
+    r0 <- mapply(rnorm, mean=mu.p, sd=Mdiag, MoreArgs=list(n=1))
+    r.new <- r[[m]] <- r0
+    for (i in 1:L) {
+      lf <- leapfrog(theta.new, r.new, epsilon, logPOSTERIOR, glogPOSTERIOR, y, X, ...)
+      theta.new <- lf$theta.new
+      r.new <- lf$r.new
+    }
+
+    if (verbose) print(m)
+
+    # standard metropolis-hastings update
+    u <- runif(1)
+
+    # use log transform for ratio due to low numbers
+    log.alpha <- pmin(0, logPOSTERIOR(theta.new, y=y, X=X, ...) - 0.5*(r.new %*% r.new) -
+                        logPOSTERIOR(theta[[m-1]], y=y, X=X, ...) - 0.5*(r0 %*% r0))
+
+    if (log.alpha < log(u)) {
+      theta[[m]] <- theta.new
+      r[[m]] <- -r.new
+      accept <- accept + 1
+    } else {
+      theta[[m]] <- theta[[m-1]]
+      r[[m]] <- r[[m-1]]
+    }
+
+  }
+  list(theta=theta,
+       r=r,
+       accept = accept)
+}
+
+
+```
+
+The arguments of \textit{hmc} are as follows: 
+
+\begin{itemize}
+\item N:  Number of MCMC simulations
+\item theta.init:  initial values $\Theta^{(0)}$ in vector of length $k$
+\item epsilon:  step size $\epsilon$.  Can be a single value or vector length $k$
+\item L:  number of leapfrog steps per proposal
+\item logPOSTERIOR:  name of function to return the log posterior
+\item glogPOSTERIOR:  name of function to return the gradient of the log posterior
+\item y:  vector of the dependent variable
+\item X:  design matrix of independent variables
+\item Mdiag:  optional vector for the diagonal matrix $M$
+\item verbose:  logical to print step in the MCMC chain
+\item ...:  additional parameters for logPOSTERIOR and glogPOSTERIOR
+\end{itemize}
+
 
 
