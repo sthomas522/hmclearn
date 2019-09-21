@@ -158,7 +158,7 @@ $$
 \end{aligned}
 $$
 
-The full step $\epsilon$ in $\Theta$ is sandwiched by half-steps $\epsilon/2$ for $\pmb{p}$.  This solution, though slightly more complex than Euler approximations, provides a more accurate approximation of the solution over many samples.  
+The full step $\epsilon$ in $\Theta$ is sandwiched by half-steps $\epsilon/2$ for $\pmb{p}$. The number of steps $\epsilon$ in an actual HMC algorithm is typically defined by a tuning parameter $L > 1$.    This leapfrog approximation, though slightly more complex than Euler approximations, provides a more accurate approximation of the solution over the many samples that HMC requires.  
 
 The paths defined by the Hamiltonian equations are deterministic once $\pmb{p}$ is defined.  An exact solution would always be accepted in a MCMC algorithm.  However, since the solution to the Hamiltonian equations is an approximation, a Metropolis-Hastings style acceptance ratio is used to formally determine whether a proposal is accepted or rejected.
 
@@ -166,9 +166,52 @@ With the overview of the major concepts in HMC complete, we turn to the formulat
 
 ## Hamiltonian Monte Carlo Algorithm
 
+The HMC algorithm is presented in full here.  
 
+\begin{algorithm}
+\caption{Euclidean Hamiltonian Monte Carlo}\label{EHMC}
+\begin{algorithmic}[1]
+\Procedure{EHMC}{$\Theta^{(0)}, \log\pi(\Theta), M, N, \epsilon, L$} 
+   \State Calculate $\log\pi(\Theta^{(0)})$ \Comment{Initial value for log posterior}
+   \For{$t = 1, ..., N$}\Comment{Repeat simulation $N$ times}
+      \State $p^0 \gets N(0, M)$ \Comment{Randomly sample momentum from MVN}
+      \State $\Theta^{(t)} \gets \Theta^{(t-1)}, \tilde{\Theta} \gets \Theta^{(t-1)}, \tilde{p} \gets p^{(0)}$ \Comment{Randomly sample from a uniform density, 0 to 1}
+      \For{$i = 1, ..., L$}\Comment{Run Leapfrog $L$ times}
+        \State $\tilde\Theta, \tilde{p} \gets \text{Leapfrog}(\tilde\Theta, \tilde{p}, \epsilon)$
+      \EndFor\label{leapfrogfor}
+      \State $\alpha = \min{\left(1, \frac{\exp(\log\tilde\Theta) - \frac{1}{2}\tilde{p}\cdot\tilde{p}}{\exp(\log\tilde\Theta^{(t-1)}) - \frac{1}{2}p^0 \cdot p^0} \right)}$ \Comment{Calculate acceptance proposal probability}
+      \State With probability $\alpha$, $\Theta^{(t)}\gets\tilde\Theta$ and $p^{(t)} \gets -\tilde{p}$ 
+   \EndFor\label{ehmcendfor}
+   \State \textbf{return} $\Theta^{(1)} ... \Theta^{(N)}$ \Comment{Return simulated values of $\Theta$ from the unnormalized posterior}
+\Function{Leapfrog}{$\Theta, p, \epsilon$}
+\State $\tilde{p} \gets p + (\epsilon/2)\nabla_\Theta\log\pi(\Theta)$
+\State $\tilde\Theta \gets \Theta + \epsilon\tilde{p}$
+\State $\tilde{p} \gets \tilde{p} + (\epsilon/2)\nabla_\Theta\log\pi(\Theta)$
+\State \textbf{return} $\tilde\Theta, \tilde{p}$
+\EndFunction
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
 
+One may notice some similarities with MH:  
 
+\begin{enumerate}
+\item An initial set of values $\Theta^{(0)}$ is required for both MH and HMC.
+\item The random walk Metropolis proposal is often Multivariate Normal.  HMC simulates from the momentum $\pmb{p}$ from a Multivariate Normal.  
+\item Proposals are accepted or rejected based on a ratio of log posteriors in both MH and HMC.  
+\end{enumerate}
+
+The key functional difference between the two algorithms is the leapfrog update process.  HMC generates a proposal $(\pmb{p}^t, \Theta^t)$ based on the randomly selected values of $\pmb{p}$ and the number of leapfrog steps $L$.  In contrast, MH selects a proposal from one simple randomly selected value from a proposal distribution.   MH is therefore computationally simpler, but undirected.  HMC's proposal combines the randomization provided by $\pmb{p}$ with trajectories defined the by the gradient of the log posterior $\nabla_\Theta\log\pi(\Theta(t))$. 
+
+From an implementation standpoint, the additional programming required for HMC is fairly minimal.  Manually determiming the gradient may be tedious, but the derivation is typically not difficult.  Once the gradient is provided and coded, programming the leapfrog loop itself is straightforward.  
+
+The challenge of practical HMC implementation is related to implementation of MH - tuning.  While tuning MH involves adjusting a proposal density and little else, HMC requires the selection and adjustment of the mass matrix $M$, number of leapfrog steps $L$, and step size $\epsilon$.  
+
+While $M$ can be fixed as an identity matrix, some modification of the diagonal, at a minimum, can provide notable improvements in computational efficiency.  The selection of $L$ is also an essential step in HMC implementation.  Selecting $L$ too low will produce a Markov chain that is inefficient, and may behave in pattern similar to random walk Metropolis, but with the penalty of additional computation.  Setting $L$ too high can also be inefficient, where the chain may travel through the entire deterministic trajectory multiple times before a proposal is selected.  Finally, $\epsilon$ can be set as a single constant for all $k$ parameters, but varying $\epsilon$ for each individual parameter may improve computational efficiency.  
+
+Developing an intuition and appreciation for how HMC works can be challenging without direct experience working with the algorithm.  The next section provides R code and some simple examples for the interested reader to gain practical, hands-on experience with implementing and tuning HMC.  
+
+# HMC Implementation
 
 
 
