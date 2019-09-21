@@ -120,8 +120,31 @@ $$
 
 HMC introduces a latent parameter $\pmb{p} = (p_1, ..., p_k)$ of the same length $k$ as the parameter of interest $\Theta = (\theta_1, ..., \theta_k )$.  The latent parameter $\pmb{p}$ is often called the \textit{momentum} based on its original application to physical laws of motion.  The incorporation of the momentum provides the geometrical structure of the space through which the Markov chain travels.  The purpose of the momentum is to ensure that the MCMC simulation is ergodic, covering the entire space of $\Theta$.  
 
+The distribution of $\pmb{p}$ is most often specified to be multivariate Normal with covariance $M$.  The structure of $M$ is often diagonal, but does not have to be.  
 
+$$
+\begin{aligned}
+\pmb{p} &\sim N_k(0, M) \\
+\log p(\pmb{p}) &\propto \frac{1}{2}\pmb{p}^T M^{-1}\pmb{p}
+\end{aligned}
+$$
 
+The Hamiltonian function represents the joint distribution of the multivariate Normal $\pmb{p}$ and the log posterior $p(\Theta | \pmb{X})$, whose notation we simplify to $p(\Theta)$.
+
+$$
+\begin{aligned}
+H(\pmb{p}, \Theta) &= -\frac{1}{2}\pmb{p}^T M^{-1} \pmb{p} - \log p(\Theta)
+\end{aligned}
+$$
+The trajectories over which HMC travels in time are defined by first-order differential equations, 
+
+$$
+\begin{aligned}
+\frac{d\pmb{p}}{dt} &= -\frac{\partial H(\Theta, \pmb{p})}{\partial\Theta}= -\frac{\partial U(\Theta)}{\partial\Theta} = \nabla_\Theta \log p(\Theta) \\
+\frac{d\Theta}{dt} &= \frac{\partial H(\Theta, \pmb{p})}{\partial\pmb{p}} = \frac{\partial K(\pmb{p})}{\partial\pmb{p}} = M^{-1}\pmb{p}
+\end{aligned}
+$$
+Here we see the explicit formulation of the gradient of the log posterior $\nabla_\Theta \log p(\Theta)$.  The combination of these two equations forms deterministic paths for the MCMC chain to travel through the joint distribution $(\pmb{p}, \Theta)$.  Note that while the MCMC produces simulations of both $\pmb{p}$ and $\Theta$, only the values of $\Theta$ are of interest for statistical inference.  
 
 
 

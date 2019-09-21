@@ -1,0 +1,479 @@
+---
+title: "Hamiltonian Monte Carlo"
+author: "Samuel Thomas, Xiaochun Li, Wanzhu Tu"
+date: "October 11, 2018"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+header-includes:
+- \usepackage{setspace}\doublespacing
+- \usepackage{amsmath}
+- \usepackage{algorithm}
+- \usepackage{algpseudocode}
+- \usepackage[utf8]{inputenc}
+- \usepackage{bm}
+- \usepackage{amsthm}
+- \DeclareUnicodeCharacter{2010}{-}
+bibliography: Dissertation.bib
+---
+
+\newtheorem{thm}{Theorem}
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, dev = 'pdf')
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+\section{Introduction}
+
+The essence of Bayesian data analysis is to ascertain posterior distributions.  Posteriors generally do not have closed-form expressions for direct computation in practical application.  In most cases, the posterior distribution is known only to a normalizing constant.  Analysts therefore resort to Markov Chain Monte Carlo (MCMC) methods to generate sample observations that approximate the desired posterior distribution. 
+
+To introduce the concepts of Bayesian data analysis and MCMC methods, we consider $n$ observations from a simple random sample $\pmb{X} = (X_1, ..., X_n)$.  The elements of the sample are independent and identically distributed (i.i.d.).  From this sample, we wish to ascertain the distribution of our $p$ parameters of interest $\Theta = (\theta_1, ..., \theta_k)$.  The posterior distribution $p(\Theta | \pmb{X})$ can be written as a function of the Likelihood $p(\pmb{X} | \Theta)$ and prior $p(\Theta)$.  
+
+$$
+\begin{aligned}
+p(\Theta | \pmb{X}) &= \frac{p(\pmb{X}|\Theta)p(\Theta)}{\int p(\pmb{X}|\Theta)p(\Theta)d\Theta} \\
+&\propto p(\pmb{X}|\Theta) p(\Theta)
+\end{aligned}
+$$
+
+In many practical data analyses, the integral in the denominator cannot be evaluated directly.  Since the denominator is constant with respect to $\Theta$, only the unnormalized posterior is available.  For such cases, MCMC methods may be used to simulate the posterior distribution.  Standard MCMC methods such as Gibbs Sampling [@geman_stochastic_1984] and Metropolis-Hastings [@metropolis_equation_1953][@hastings_monte_1970] are well developed and widely used in analytical practice.   
+
+\section{Standard MCMC Algorithms}
+
+Gibbs Sampling requires the direct formulation of the conditional posterior densities for each parameter $p(\theta_i | \Theta_{-i})$ where $\Theta_{-i} = (\theta_1, ..., \theta_{i-1}, \theta_{i+1}, ..., \theta_k)$.  Gibbs samples each of the conditional posteriors in sequence.  The full posterior $p(\Theta | \pmb{X})$ is ascertained by the combined conditional posterior simulations.  
+
+\begin{algorithm}
+\caption{Gibbs Sampling}\label{Gibbs Sampling}
+\begin{algorithmic}[1]
+\Procedure{Gibbs}{$\theta_2^{(0)}, ..., \theta_k^{(0)}, N$} 
+   \For{$t = 1, ..., N$}\Comment{Repeat simulation $N$ times}
+      \State $\theta_1^{(t)} \gets p(\theta_1 | \theta_{-1}^{(t-1)}, \pmb{X})$ \Comment{Randomly sample from the conditional posterior of $\theta_1 | \pmb{X}$}
+      \State $\theta_2^{(t)} \gets p(\theta_2 | \theta_1^{(t)}, \theta_{(-1,-2)}^{(t-1)}, \pmb{X})$
+      \State $...$
+      \State $\theta_k^{(t)} \gets p(\theta_k | \theta_{-p}^{(t)}, \pmb{X})$
+   \EndFor\label{gibbsendfor}
+   \State \textbf{return} $\Theta^{(1)} ... \Theta^{(N)}$ \Comment{Return simulated values of $\Theta$ from the conditional posteriors}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+
+While Gibbs samples are determined directly from the conditional posterior densities, Metropolis-Hastings requires the selection of a distribution to generate random proposals. We denote this proposal distribution as $q(\Theta^{PROP} | \Theta^{(t-1)})$.   The probability of the acceptance of a proposal is determined by the ratio of the unnormalized posterior densities and their corresponding proposal distributions.  
+
+\begin{algorithm}
+\caption{Metropolis-Hastings}\label{Metropolis-Hastings}
+\begin{algorithmic}[1]
+\Procedure{MH}{$\Theta^{(0)}, p(\Theta) := p(\Theta | \pmb{X}), q(\Theta^{PROP}|\Theta^{t-1}), N$} 
+   \State Calculate $p(\Theta^{(0)})$ \Comment{Initial value for posterior}
+   \For{$t = 1, ..., N$}\Comment{Repeat simulation $N$ times}
+      \State $\Theta^{\text{PROP}} \gets q(\Theta^{\text{PROP}} | \Theta^{(t-1)})$ \Comment{Randomly sample proposal}
+      \State $u \gets U(0, 1)$ \Comment{Randomly sample from a uniform density, 0 to 1}
+      \State $\alpha = \min\left(1, \frac{p(\Theta^{\text{PROP}})q(\Theta^{(t-1)}|\Theta^{\text{PROP}})}{p(\Theta^{(t-1)})q(\Theta^{\text{PROP}}|\Theta^{(t-1)})} \right)$ \Comment{Calculate acceptance proposal probability}
+      \State If $\alpha < u$, then $\Theta^{(t)} \gets \Theta^{\text{PROP}}$.  Otherwise, $\Theta^{(t)} \gets \Theta^{(t-1)}$ \Comment{Select proposal or previous value}
+   \EndFor\label{markovendfor}
+   \State \textbf{return} $\theta^{(1)} ... \theta^{(N)}$ \Comment{Return simulated values of $\Theta$ from the unnormalized posterior}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+Analysts often choose standard symmetric distributions such as the Multivariate Normal or Uniform distributions from which to generate samples. When the proposal distribution is symmetric, the acceptance probability $\alpha$ is simplified.
+
+$$
+\begin{aligned}
+\alpha &= \min\left(1, \frac{p(\Theta^{\text{PROP}})q(\Theta^{(t-1)}|\Theta^{\text{PROP}})}{p(\Theta^{(t-1)})q(\Theta^{\text{PROP}}|\Theta^{(t-1)})} \right) \\
+&= \text{min}\left(1, \frac{p(\Theta^{PROP})}{p(\Theta^{(t-1)})} \right)
+\end{aligned}
+$$
+This particular implementation is called a random walk Metropolis algorithm (RWM) [@sherlock2010random].  RWM always accepts the proposal when the proposed posterior density $\Theta^{PROP}$ is greater than the current density $\Theta^{(t-1)}$ in the Markov chain.  When the proposed density is less than the current density, the proposal is accepted a proportion of the time based on $\alpha$.  
+
+While Metropolis-Hastings and Gibbs Sampling appear to be entirely different MCMC algorithms, one can show that Gibbs is a special case of Metropolis-Hastings [@gelman1993iterative].  In Gibbs, the conditional posterior densities form the proposal densities in a Metropolis-Hastings algorithm [@xing2012].  
+
+$$
+\begin{aligned}
+q(\theta_i ^{PROP}, \Theta_{-i}^{(t-1)}|\theta_i^{(t-1)}, \Theta_{-i}^{(t-1)}) &= p(\theta_i^{PROP} | \Theta_{-i}^{(t-1)}) \\
+\end{aligned}
+$$
+
+The acceptance probability is always one with this proposal.
+
+$$
+\begin{aligned}
+\alpha &=  \min\left(1, \frac{p(\theta_i^{PROP},  \Theta_{-i}^{(t-1)}) q(\theta_i^{(t-1)}, \Theta_{-i}^{(t-1)} | \theta_i^{PROP}, \Theta_{-i}^{(t-1)}) }{p(\theta_i^{(t-1)} , \Theta_{-i}^{(t-1)}) q(\theta_i^{PROP}, \Theta_{-i}^{(t-1)}|\theta_i^{(t-1)}, \Theta_{-i}^{(t-1)})  } \right) \\
+&= \min\left(1, \frac{p(\theta_i^{PROP} | \Theta_{-i}^{(t-1)})p(\Theta_{-i}^{(t-1)}) p(\theta_i^{(t-1)} | \Theta_{-i}^{(t-1)}) }{p(\theta_i^{(t-1)} | \Theta_{-i}^{(t-1)})p(\Theta_{-i}^{(t-1)}) p(\theta_i^{PROP} | \Theta_{-i}^{(t-1)})  } \right) \\
+&= 1
+\end{aligned}
+$$
+
+Metropolis-Hastings and Gibbs Sampling each have their own strengths and weaknesses in exploring the posterior density efficiently.  Metropolis-Hastings is applicable to any unnormalized posterior density and is the more flexible of the two algorithms.  In contrast, Gibbs Sampling requires the derivation of the full conditional posterior densities, which is not always possible.  When Gibbs can be implemented, it has the advantage of accepting every proposal without the need for a separately-defined proposal distribution.  
+
+The theoretical requirements for using these MCMC algorithms for inference are met by most practical applications.  Briefly, a valid Markov chain must meet the following conditions [@carlin_bayesian_2008]:
+
+\begin{enumerate}
+\item Irreducibility:  the chain has a positive probability of moving between any two states in $\Theta$ within in a finite number of steps.
+\item Aperiodicity:  the chain does not move between any two states in $\Theta$ at regular periods greater than one. 
+\end{enumerate}
+
+Most commonly used statistical models are constructed such that a Markov chain has a positive chance of visiting everywhere in the space of $\Theta$, thereby satisfying the irreducibility requirement.  Aperiodicity is rarely a concern for practical applications on moderately complex datasets.  Under these conditions, the Markov chain converges to a unique stationary distribution.  
+
+[@tierney_markov_1994] formalizes these conditions in the following theorem.
+
+\begin{thm}Given: a Markov chain $T$ applied to an invariant distribution $\pi$.  If $T$ is irreducible and $\pi T = \pi$, then $\pi$ is the unique invariant distribution of $T$.  When $T$ is aperiodic and $T(\Theta_n \in A\;\text{i.o.})=1\;\;\forall\Theta$ for each $A$ in $\pi(A) > 0$, then convergence occurs for all $\Theta$. The Markov chain $T$ is then called ergodic\end{thm}
+
+An ergodic Markov chain will converge to the target distribution for any starting point within the support of $\Theta$ [@robert_bayesian_2001].  These theoretical results provide assurance that Metropolis-Hastings (and Gibbs Sampling) can be used for statistical inference based on the simulated values of the posterior.   
+
+However, while Metropolis-Hastings has good theoretical properties, unguided proposal functions are known to be inefficient in covering the support of the target density function [@gelman1996efficient].  Gibbs Sampling can be inefficient as well, particularly when the posterior density has regions of narrow support [@robert_bayesian_2001].  In high dimensional parameter spaces such as those encountered in modern analyses, the convergence of these standard MCMC methods can be prohibitively slow for practical use. 
+
+\section{Hamiltonian Monte Carlo Algorithm}
+
+Hamiltonian Monte Carlo (HMC) [@mackay_information_2003][@neal_handbook_2011] is a relatively new MCMC algorithm designed to improve the efficiency of RWM while retaining its flexibility of application.  HMC replaces the naive proposal in RWM with an informed proposal based in part on the gradient of the log posterior $\nabla_\Theta\log p(\Theta | \pmb{X})$.  This gradient works in cooperation with latent variables $\pmb{p} = (p_1, ..., p_k)$, of the same length as $\Theta$, to form trajectories through the joint state space.  
+
+We present the full Hamiltonian Monte Carlo algorithm, followed by a detailed description of how it works. 
+
+\begin{algorithm}
+\caption{Euclidean Hamiltonian Monte Carlo}\label{EHMC}
+\begin{algorithmic}[1]
+\Procedure{EHMC}{$\Theta^{(0)}, \log\pi(\Theta), M, N, \epsilon, L$} 
+   \State Calculate $\log\pi(\Theta^{(0)})$ \Comment{Initial value for log posterior}
+   \For{$t = 1, ..., N$}\Comment{Repeat simulation $N$ times}
+      \State $p^0 \gets N(0, M)$ \Comment{Randomly sample momentum from MVN}
+      \State $\Theta^{(t)} \gets \Theta^{(t-1)}, \tilde{\Theta} \gets \Theta^{(t-1)}, \tilde{p} \gets p^{(0)}$ \Comment{Randomly sample from a uniform density, 0 to 1}
+      \For{$i = 1, ..., L$}\Comment{Run Leapfrog $L$ times}
+        \State $\tilde\Theta, \tilde{p} \gets \text{Leapfrog}(\tilde\Theta, \tilde{p}, \epsilon)$
+      \EndFor\label{leapfrogfor}
+      \State $\alpha = \min{\left(1, \frac{\exp(\log\tilde\Theta) - \frac{1}{2}\tilde{p}\cdot\tilde{p}}{\exp(\log\tilde\Theta^{(t-1)}) - \frac{1}{2}p^0 \cdot p^0} \right)}$ \Comment{Calculate acceptance proposal probability}
+      \State With probability $\alpha$, $\Theta^{(t)}\gets\tilde\Theta$ and $p^{(t)} \gets -\tilde{p}$ 
+   \EndFor\label{ehmcendfor}
+   \State \textbf{return} $\Theta^{(1)} ... \Theta^{(N)}$ \Comment{Return simulated values of $\Theta$ from the unnormalized posterior}
+\Function{Leapfrog}{$\Theta, p, \epsilon$}
+\State $\tilde{p} \gets p + (\epsilon/2)\nabla_\Theta\log\pi(\Theta)$
+\State $\tilde\Theta \gets \Theta + \epsilon\tilde{p}$
+\State $\tilde{p} \gets \tilde{p} + (\epsilon/2)\nabla_\Theta\log\pi(\Theta)$
+\State \textbf{return} $\tilde\Theta, \tilde{p}$
+\EndFunction
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+
+The distribution of $\pmb{p}$, when $M$ is diagonal, is similar to proposal distributions typically used in RWM.  However, while RWM proposes new values of $\Theta$ directly, HMC proposes trajectories through the joint space of $(\pmb{p}, \Theta)$.    A special set of equations called the Hamiltonian Equations deterministically formulates these trajectories.  
+
+First, the Hamiltonian function is formulated as the 
+
+$$
+\begin{aligned}
+H(\pmb{p}, \Theta) &= K(\pmb{p}, \Theta) + U(\Theta) \\
+&= K(\pmb{p}) + U(\Theta) \\
+&= -\log p(\pmb{p}) - \log p(\Theta) \\
+\end{aligned}
+$$
+The notation for this equation is formed from Physics application to energy, where $K(\pmb{p}, \Theta)$ represents kinetic energy and $U(\Theta)$ represents potential energy [@betancourt_conceptual_2017].  The latent variable, often called momentum in Physics, is often specified as multivariate Normal and independent of $\Theta$. 
+
+$$
+\begin{aligned}
+\pmb{p} &\sim N_k(0, M) \\
+\log p(\pmb{p}) &\propto \frac{1}{2}\pmb{p}^T M^{-1} \pmb{p}
+\end{aligned}
+$$
+
+The covariance matrix of the momentum $M$ is often called the Mass matrix.  $M$ is often diagonal, which allows scaling each of $k$ parameters in $\Theta$ for each simulation step [@gelman_bayesian_2013]. 
+
+The trajectories are described by first-order differential equations with respect to time.
+
+$$
+\begin{aligned}
+\frac{d\pmb{p}}{dt} &= -\frac{\partial H(\Theta, \pmb{p})}{\partial\Theta}= -\frac{\partial U(\Theta)}{\partial\Theta} = \nabla_\Theta \log p(\Theta) \\
+\frac{d\Theta}{dt} &= \frac{\partial H(\Theta, \pmb{p})}{\partial\pmb{p}} = \frac{\partial K(\pmb{p})}{\partial\pmb{p}} = M^{-1}\pmb{p}
+\end{aligned}
+$$
+
+
+The derivation of these equations fundamentally depends on calculus of variations [@strang2007computational] to determine the shortest trajectories between two points in $(\pmb{p}, \Theta)$.  The shape of these trajectories depends on the contour of the log posterior, with the mathematical information of the contour provided by its gradient.  HMC uses this information to form proposals in a Markov chain more efficient than RWM [@betancourt_conceptual_2017].  
+
+By the chain rule, we can demonstrate the invariance of the Hamiltonian function with respect to time.
+
+$$
+\begin{aligned}
+\frac{dH(\Theta, \pmb{p})}{dt} &= \frac{\partial H}{\partial\Theta}\frac{\partial\Theta}{\partial t} + \frac{\partial H}{\partial \pmb{p}}\frac{\partial \pmb{p}}{\partial t} \\
+&= -\frac{\partial \pmb{p}}{\partial t}\frac{\partial\Theta}{\partial t} + \frac{\partial\Theta}{\partial t}\frac{\partial \pmb{p}}{\partial t} \\
+&= 0
+\end{aligned}
+$$
+
+This conservation implies an acceptance probability of unity in the continuous case [@neal_handbook_2011].  For computational purposes, we will need to provide a discrete approximation of these differential equations in our HMC implementation.  This approximation will require a correction to the acceptance probability in the form of Metropolis-Hastings accept/reject criteria [@betancourt_conceptual_2017].  
+
+Although many discrete approximate solutions to the differential equations are available, the approximation most commonly used is called the \textit{leapfrog} method.  This method has a rich history in the field of Physics, with origins as far back as Isaac Newton [@feynman2017character][@newton1833philosophiae].  The continuous path dictated by the Hamiltonian equations is approximated by three discrete steps.  
+
+The parameter $\epsilon$ is called the step size.  Since the Hamiltonian function $H(\Theta, \pmb{p})$ has two independent components $K(\pmb{p})$ and $U(\Theta)$, the discrete steps can be split between $\pmb{p}$ and $\Theta$ individually.  The momentum $\pmb{p}$ moves one-half step $\epsilon/2$, followed by a full step update of $\Theta$, and finally the remaining one-half step for $\pmb{p}$.     
+
+$$
+\begin{aligned}
+\pmb{p}(t + \epsilon/2) &= \pmb{p}(t) + (\epsilon/2)\nabla_\Theta\log\pi(\Theta(t)) \\
+\Theta(t + \epsilon) &= \Theta(t) + \epsilon M^{-1}\pmb{p}(t + \epsilon/2) \\
+\pmb{p}(t + \epsilon) &= \pmb{p}(t + \epsilon/2) + (\epsilon/2)\nabla_\Theta \log\pi(\Theta(t + \epsilon))
+\end{aligned}
+$$
+Note that the leapfrog makes $L$ deterministic steps along the trajectory.  As such, one may re-write the proposal for $\Theta(t + L\epsilon)$ in a single formula [@livingstone_geometric_2016].
+
+$$
+\Theta(t_0 + L\epsilon) = \Theta(t_0) + \frac{L\epsilon^2}{2}\nabla_\Theta \log\pi(\Theta(t_0)) + \epsilon^2 \sum_{j=1}^{L-1} (L-j)\nabla_\Theta\log\pi(\Theta_{j\epsilon}) + L\epsilon M^{-1} p_0
+$$
+
+For Hamiltonian Monte Carlo, the leapfrog is preferred for its computational simplicity and geometric properties, namely, reversibility, symplecticity, and volume preservation [@hairer2003geometric].    The reversibility of the leapfrog can be easily demonstrated by replacing $\epsilon$ with $-\epsilon$.  Reversibility is an essential property of a valid MCMC transition kernel, assuring  
+that the simulated distribution of $\Theta$ is invariant with respect to time [@tierney_markov_1994][@chib_understanding_1995].  
+
+The symplectic property of the leapfrog ensures that the discrete approximation error remains small, even over long trajectories [@betancourt_conceptual_2017].   Finally, the volume preservation property signifies that no special transformations are required in the accept/reject step of the algorithm[@neal_handbook_2011].   
+
+
+
+
+One way Hamiltonian Monte Carlo efficiently simulates from the log posterior is by traversing long trajectories between each proposal.  A long trajectory reduces the autocorrelation in the chain, thereby increasing the effective sample size (ESS) of the simulation [@kass1998markov].  Here, $\rho(l)$ is the autocorrelation of the chain at lag $l$.  
+
+$$
+\text{ESS} = \frac{N}{1 + 2\sum_{t=1}^N \rho(l)}
+$$
+
+The length of the trajectory is determined by the step size $\epsilon$ as well as the number of leapfrog steps between proposals $L$ [@hoffman_no-u-turn_2014].  A higher value of $L$ can reduce the autocorrelation in the chain, but at the expense of longer computational time.  
+
+For most applications Hamiltonian Monte Carlo will satisfy the requirements of an ergodic Markov chain.  Provided the log posterior is twice continuously differentiable, Hamiltonian Monte Carlo can be shown to be irreducible [@durmus_convergence_2017].  The log posterior must be at least differentiable to apply HMC since the target is based on the gradient.  The twice differentiable condition will be satisfied for  exponential family based models provided the link function is twice differentiable [@fahrmeir_consistency_1985].  In addition, [@livingstone_geometric_2016] show that Hamiltonian Monte Carlo is ergodic for a wide variety of models where the gradient of the log posterior is well-behaved.  
+
+Aeriodicity may be violated if the combination of parameters stepsize $\epsilon$, number of leapfrog steps $L$, and momentum covariance matrix $M$ combine to produce a proposals that are exactly periodic [@neal_handbook_2011].  Incorporating some random component in $\epsilon$ and $L$ may be helpful in preventing periodic transitions [@mackenze_improved_1989].  Popular software implementations of Hamiltonian Monte Carlo automatically apply some randomness in either or both the stepsize and number of leapfrog steps, thereby rendering periodic chains unlikely in practical applications. 
+
+\section{HMC Implementation}
+
+The efficiency of Hamiltonian Monte Carlo applications depends on its tuning parameters parameters step size $\epsilon$, number of leapfrog steps $L$, and mass matrix $M$.  The substantial number of parameters compared to MH and Gibbs provides flexibility in tuning HMC, but can present challenges to analysts faced with understanding numerous tuning options.  
+
+\subsection{Tuning HMC}
+
+Similar to RWM, multiple preliminary trace runs should be evaluated while tuning HMC.  Ideally, the autocorrelation of the trace plots should be low and the acceptance rate should be high.  While the optimal RWM acceptance rate for high-dimensions is approximately 0.23 [@roberts_weak_1997], an optimally-tuned HMC tends to have an acceptance rate of approximately 0.65 [@neal_handbook_2011][@beskos_acceptance_2010].  
+
+One approach for tuning HMC begins with considering the appropriate step size $\epsilon$ with a low number of leapfrog steps $L$ (e.g. $L = 10$) and a unit diagonal mass matrix $M$.  Some randomization should be introduced to both $\epsilon$ and $L$ for each proposal to mitigate the possibility of a periodic Markov chain.  A starting value of $\epsilon = 1e-2$ can serve as a starting point.  Adjustments to $\epsilon$ by a factor of 10 can be evaluated until the acceptance rate reaches a range of approximately $0.60 - 0.90$.  Fine tuning of $\epsilon$ may be necessary depending on the dataset and model.  Although one step size is often utilized for all parameters, one may also elect to use different values of $\epsilon$ for each parameter[@neal_handbook_2011].  
+
+Once $\epsilon$ is set, additional tuning may be performed by adjusting the diagonal of $M$.  Ideally, $M^{-1}$ should be close to the covariance of the distribution of the target $\Theta$ [@pakman2014exact].  The sample covariance of preliminary traces can be used as guidance to setting $M$.  Non-diagonal representations of $M$ can also be used in HMC, but at a potential cost in computation time.   
+
+Finally, the number of leapfrog steps $L$ can be adjusted to increase or decrease the length of the trajectory.  Increasing $L$ can improve the efficiency of HMC by reducing the autocorrelation in the samples.  However, setting $L$ too high can also have the adverse effect of wasted computation time since the trajectory may reverse direction [@neal_handbook_2011].  This potential for the reversal of the trajectory serves as one motivation in the popular No U-Turn Sampler algorithm for automatically selecting $L$ [@hoffman_no-u-turn_2014].  
+
+Steps for tuning HMC:
+
+\begin{enumerate}
+\item Set the stepsize to an initial value such as $\epsilon = 1e-2$ with $L=10$ and $M$ unit diagonal
+\item Run a preliminary HMC chain and compute the acceptance rate.  Adjust $\epsilon$ until the acceptance is between 0.6 and 0.9.  
+\item Check the autocorrelation for each parameter either visually or via direct calculation.  For parameters with high autocorrelation, reduce the relevant value in the diagonal of $M$.  This adjustment may decrease the acceptance rate.  
+\item If necessary, increase $L$ to further reduce autocorrelation in the simulation
+\end{enumerate}
+
+This approach provides general guidelines that work well for many standard parametric models.  Additional adjustments may be required depending on the model and data.  For example, specifying a non-diagonal mass matrix $M$ may facilitate sampling highly correlated parameters.  
+
+\subsection{Constrained Parameters}
+
+The standard HMC algorithm assumes that all parameters are unconstrained over the entire real number line.  Since statistical models often include one or more constrained variables, some adjustment must be made either to the constrained variables or to the HMC algorithm.   
+
+The most common constraint is a variable that is strictly positive (e.g. standard deviation or variance).  A log transformation of the constrained variable will be unconstrained.  One must account for the Jacobian in this transformation.  In the one-dimensional case, this transformation amounts to simply adding the transformed term to the log posterior.
+
+$$
+\begin{aligned}
+y &= \log x \\
+p_y(y) &= p_x(g^{-1}(x))\left\lvert \frac{dx}{dy}\right\rvert \\
+&= p_x(e^y)\left\lvert e^y  \right\rvert \\
+\log p_y(y) &= \log p_x(e^y) + y \\
+&= \log p_x(x) + \log x
+\end{aligned}
+$$
+
+An alternate approach to handling constrained parameters requires an adjustment of the leapfrog for constrained parameters.   For a constrained parameter $\theta_i \in (0, \infty)$, an additional check is employed on the leapfrog step updating $\Theta$.  If the proposal violates the contraints of $\theta_i$, then adjustments are made to the proposal and its corresponding momentum.  [@neal_handbook_2011] describes this adjustment of the leapfrog in detail.  
+
+Here we consider a leapfrog adjustment for a constrained parameter $\theta_i \in (0, \infty)$:
+
+\begin{enumerate}
+\item $p_i'(t + \epsilon/2) = p_i(t) + (\epsilon/2)\nabla_\Theta\log\pi(\theta_i(t))$
+\item $\theta_i'(t + \epsilon) = \theta_i(t) + \epsilon M_{ii}^{-1}p(t + \epsilon/2)$
+\item If $\theta_i'(t + \epsilon) < 0$, then
+\begin{enumerate}
+\item $\theta_i(t + \epsilon) = -\theta_i'(t+\epsilon)$
+\item $p_i(t + \epsilon/2) = -p_i'(t + \epsilon/2)$
+\end{enumerate}
+Otherwise
+\begin{enumerate}
+\item $\theta_i(t + \epsilon) = \theta_i'(t+\epsilon)$
+\item $p_i(t + \epsilon/2) = p_i'(t + \epsilon/2)$
+\end{enumerate}
+\end{enumerate}
+
+If the proposals do not violate the constraints, the leapfrog is unchanged.  In practice, this approach is most useful for parameters with posterior values that are close to the boundary.  For example, in hierarchical models the posterior standard deviation or variance parameters may be close to zero.  This adjustment to the leapfrog can be helpful if log tranformations fail to converge.  
+
+\subsection{QR Decomposition}
+
+We consider a generalized linear model
+
+$$
+\begin{aligned}
+E(Y) &= g^{-1}(\pmb{X}\beta) \\
+\eta &= \pmb{X}\beta
+\end{aligned}
+$$
+
+Here, $\eta$ is a linear function of $\pmb{X}$ with parameters $\beta$. In most applications, the design matrix $\pmb{X}$ will not be orthogonal.  Correlated parameters can present problems since HMC proposals of $\Theta$ rely on a linear mapping $M^{-1}p$, where a diagonal $M$ may not efficiently explore the log posterior[@girolami_riemann_2011].  Specifying a full covariance matrix $M$ is possible in HMC, but this can be difficult since covariance of the posterior of $(\theta_1, ..., \theta_k \in \Theta)$ is unknown.
+
+One strategy in sampling correlated parameters is to use QR decomposition to transform the parameters to an orthogonal basis [@stan2018stan].  For example, we apply thin QR to the design matrix $\pmb{X}$, with dimensions $n \times p$ for a generalized linear model.  The transformed parameters $\gamma = R_x\beta$.
+
+$$
+\begin{aligned}
+\eta &= \pmb{X}\beta \\
+&= Q_x R_x\beta \\
+&= Q_x \gamma
+\end{aligned}
+$$
+The new design matrix $Q_x$ is orthogonal, facilitating HMC sampling in practical applications.  In addition, $Q_x$ can be scaled to facilitate numerical computation.  
+
+For example, a scaling factor of $\sqrt{n-1}$ for continuous variables will produce an orthonormal matrix $\widetilde Q_x$ [@stan2018stan].
+
+$$
+\begin{aligned}
+\pmb{X} &= Q_x R_x \\
+&= Q_x \sqrt{n-1} \cdot R_x / \sqrt{n-1} \\
+&= \widetilde Q_x \widetilde R_x
+\end{aligned}
+$$
+
+Samples for original parameters can be obtained from the inverse of $\widetilde R_x$
+
+$$
+\beta = \widetilde R_x^{-1} \gamma
+$$
+
+This approach is most appropriate when there is little prior information on $\beta$.  Sampling from the transformed parameter $\gamma$ corresponds to providing correlation information on the prior for $\beta$.  For example, we illustrate a Normal prior on $\gamma$.
+
+$$
+\begin{aligned}
+p(\gamma) &\sim N_p(0, 10^6 I_p) \\
+\beta &= \widetilde R_x^{-1}\gamma \\
+p(\beta) &\sim N_p(0, \widetilde R_x^{-1} 10^6 I_p (\widetilde R_x^{-1})^T) \\
+&\sim N_p(0, 10^6\widetilde R_x^{-1}(\widetilde R_x^{-1})^T) \\
+&\sim N(0, 10^6 (n-1)(X^T X)^{-1})
+\end{aligned}
+$$
+Using QR decomposition in this manner translates to an empirical Bayes formulation, since the data is used directly in the prior of $\beta$ [@betancourt2017qr].  
+
+\section{Applications}
+
+Hamiltonian Monte Carlo is a flexible algorithm with potential applications to many fields.  While the first application, originally called hybrid Monte Carlo [@duane_hybrid_1987], pertained to molecular dynamics, here we will introduce example applications to parametric statistical models.  In particular, we will demonstrate how HMC can be applied to fit traditional Generalized Linear Models as well as more complex Hierarchical models.  
+
+\subsection{Generalized Linear Models}
+
+A Poisson regression serves as our first example application of HMC.  
+
+We recall the Poisson distribution. 
+
+$$
+p(y; \mu) = \frac{e^{-\mu}\mu^y}{y!}
+$$
+
+A generalized linear model describes the mean response through a link function called $\mu$.  These link functions are specific to the particular distribution in the exponential family.  Here we introduce the link function for a Poisson regression.    
+
+$$
+\begin{aligned}
+E(Y | X) &= \mu \\
+\mu &= g^{-1}(X\beta) \\
+&= e^{X\beta}\\
+\log \mu &= X\beta
+\end{aligned}
+$$
+
+The log posterior is composed from the likelihood and the prior.  First, we specify the likelihood function for our model
+
+$$
+\begin{aligned}
+L(\mu; y) &= \prod_{i=1}^n \frac{e^{-\mu_i}\mu_i^{y_i}}{y_i!} \\
+L(\beta; y, X) &= \prod_{i=1}^n \frac{e^{-e^{X_i\beta}}e^{y_iX_i\beta}}{y_i!} \\
+\end{aligned}
+$$
+
+Applying a log transformation to the likelihood forms the log likelihood.
+
+$$
+\begin{aligned}
+l(\beta; y, X) &= \sum_{i=1}^n -e^{X_i\beta} + y_i X_i \beta - \log y_i! \\
+&\propto \sum_{i=1}^n -e^{X_i\beta} + y_i X_i \beta
+\end{aligned}
+$$
+
+With the log likelihood specified, we now select a multivariate Noraml prior for $\beta$ with hyperparameter $\Sigma_\beta$. 
+
+$$
+\begin{aligned}
+\beta &\sim N(0, \Sigma_\beta) \\
+p(\beta) &= \frac{1}{\sqrt{\lvert 2\pi \Sigma_\beta \rvert }}e^{-\frac{1}{2}\beta^T \Sigma_\beta^{-1}\beta} \\
+\log p(\beta) &= -\frac{1}{2}\log(2\pi \lvert \Sigma_\beta \rvert) - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta \\
+&\propto -\frac{1}{2}\log \lvert\Sigma_\beta\rvert - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta
+\end{aligned}
+$$
+
+Let $B = 1e3$ for example, as a relatively uniformative prior.
+
+With the log likelihood and log priors defined, we can now state the log posterior.
+
+$$
+\begin{aligned}
+p(\beta | X, y) &\propto p(y | X, \beta)  p(\beta) \\
+\log p(\beta | X, y) & \propto \log p(y | X, \beta) + \log p(\beta) \\
+&\propto \sum_{i=1}^n \left( -e^{X_i\beta} + y_i X_i \beta\right) -\frac{1}{2}\log \lvert\Sigma_\beta\rvert - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta \\
+&\propto \sum_{i=1}^n \left( -e^{X_i\beta} + y_i X_i \beta\right) - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta
+\end{aligned}
+$$
+
+The log posterior is sufficient for model fitting using the traditional Metropolis-Hastings algorithm.  To fit this model using Hamiltonian Monte Carlo, we must also derive the gradient of the log posterior.
+
+$$
+\begin{aligned}
+\log p(\beta | X, y) & \propto \log p(y | X, \beta) + \log p(\beta) \\
+&\propto \sum_{i=1}^n \left( -e^{X_i\beta} + y_i X_i \beta\right) - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta \\
+\frac{\partial}{\partial \beta}\log p(\beta|X, y) &\propto \sum_{i=1}^n\left( -e^{X_i\beta}X_i + y_iX_i\right) - \Sigma_\beta^{-1} \beta
+\end{aligned}
+$$
+
+The mathematical steps for this application are now complete.  
+
+\textbf{TODO:  example data with R code?}
+
+\subsection{Hierarchical or Mixed Effect Models}
+
+\textbf{TODO:  mixed effect model instead}
+
+\section{HMC Implementation}
+
+A variety of software implementations of Hamiltonian Monte Carlo are now readily available.  We briefly describe some of the more popular offerings available today.  
+
+\subsection{Available Software}
+
+The Stan platform for Bayesian statistical inference provides a flexible implementation of Hamiltonian Monte Carlo, among other capabilities [@carpenter_stan:_2017].  The format of the model programming language is similar in appearance to WinBugs [@lunn_winbugs_2000].  While Stan can be run directly from the command line, interfaces are provided to a number of analysis platforms including R, Python, MATLAB, and Julia.  The gradient computations are performed automatically by a math library designed specifically for Stan [@carpenter_stan_2015].  Stan includes automated parameter tuning of the mass matrix $M$, step size $\epsilon$, and the number of leapfrog steps $L$.  The No U-turn Sampler [@hoffman_no-u-turn_2014] algorithm is used as a default option in Stan to automatically select the trajectory length.   
+
+The R package \textit{rstanarm} provides a variety number of pre-compiled Stan implementations of standard regression models without the need to program directly in Stan [@rstanarm2016], including ANOVA, generalized linear models, and longitudinal models.  Another R package utilizing Stan is called \textit{brms} [@brms2017].  This package fits a variety of multilevel models, also without the need to program directly in Stan.  
+
+Python implementations of Hamiltonian Monte Carlo include PyMC3 [@salvatier_probabilistic_2016] and Edward [@tran2016edward].  PyMC3 uses Theano [@al-rfou_theano:_2016] for automated differention, while Edward uses Tensorflow [@tensorflow2015-whitepaper].  With the discontinuation of Theano support by the original developers, a new HMC implementation called PyMC4 is in development as of the time of this writing.  Like Stan, PyMC3 includes support for the No U-Turn sampler for HMC model fitting.  
+
+One common characteristic of each of these software implementations is the use of a math library to perform automatic differentiation.  While this automation is convenient for practical applications, such algorithms are inevitably slower than a custom function with the gradient programmed directly.  Users with sufficient techical expertise may be able to add their own functionality since the software implementations mentioned here are open-source.  
+
+\subsection{Future Development}
+
+An extension of the standard Hamiltonian Monte Carlo algorithm called Riemannian Manifold Hamiltonian Monte Carlo (RMHMC) [@girolami_riemann_2011] uses second-order information of the log posterior guide simulations.    RMHMC replaces the mass matrix $M$ with a Riemannian metric based on this second-order information.  Multiple metrics may be used, including the Fisher-Rao metric [@rao_information_1945] and the SoftAbs metric [@betancourt_general_2013].  The more informative Riemannian metric 
+directly captures complex correlations among the parameters without the need for manually tuning $M$ or incorporating parameter transformations such as $QR$ decompositions.  
+
+The computational demands of RMHMC can be a barrier to implementation.  Current software provides multiple options for first-order gradient calculations, but may not have the second-order computational accuracy needed to effectively implement RMHMC.  In addition, the separable leapfrog of HMC must be replaced by a more generalized formulation.  This form requires implicit numerical methods [@girolami_riemann_2011], increasing the computational burden of the leapfrog step.  Given the substantial number of leapfrog computations, the computational overhead can be substantial.  Some initial software development for RMHMC has begun, but there is no readily-available implementation as of this writing.  
+
+\section{Summary}
+
+Hamiltonian Monte Carlo is a powerful general-purpose algorithm for the estimation of statistical models.  In comparison to traditional MCMC methods, HMC has a number of advantages.  Compared to traditional MCMC algorithms, HMC retains the flexibility of random-walk Metropolis but with improved efficiency.  Gibbs Sampling remains a viable Bayesian estimation method when the full conditional posterior distributions are avaiable, particularly for datasets of moderate size with relatively few parameters.  For such applications, Gibbs Sampling is likely to simulate the posterior at least as efficiently as HMC, and without the need for selecting HMC's tuning parameters.  
+
+Alterative approaches for statistical estimation include classical frequentist methods such as maximum likelihood estimation as well as Variational Bayes estimation.  While the computational efficiency of MCMC algorithms has improved with better computational hardware and more efficient programming, maximum likelihood estimation is still likely to converge more quickly for many standard models.  When prior information on parameters is vague and the dimensionality is low, MCMC approaches to fitting standard models offer little benefit compared to maximum likelihood.  
+
+Variational Bayes optimizes an approximate distribution to the target density through an algorithm similar to expectation-maximization [@jordan1999introduction].  An advantage of Variational Bayes is that the computational time can be significantly shorter than MCMC simulation [@blei2017variational].  However, Variational Bayes provides no guarantee on the quality of the density approximation, whlie MCMC guarantees that samples converge to the exact posterior density [@robert_monte_2005].   
+
+Applications which benefit most signifcantly from HMC are large, high-dimensional datasets for which Gibbs Sampling would be difficult or impossible.  The trajectories of HMC proposals can quickly guide the Markov chain to region of highest density [@betancourt_conceptual_2017], even for models with many parameters.   With transformations such as QR decomposition or a well-tuned mass matrix $M$, HMC also works well when parameters are highly correlated.  
+
+For practical data analysis, selecting the many tuning parameters of HMC can be a daunting task.  The readily-available implementation of automated tuning algorithms such as NUTS [@hoffman_no-u-turn_2014] substantially reduces the burden.  The power of these automated routines is evident in the number and variety of applications of HMC in practical use.  When automated tuning works well, HMC can function as a general purpose Bayesian estimation method for many statistical models.  
+
+
+\section{References}
+
+
