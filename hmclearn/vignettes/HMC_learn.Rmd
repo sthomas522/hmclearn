@@ -215,7 +215,7 @@ Developing an intuition and appreciation for how HMC works can be challenging wi
 
 We introduce several functions for implementing HMC in the R language.  First is the main \textit{hmc} function itself.  
 
-```{r, echo=TRUE}
+```{r, echo=TRUE, eval=FALSE}
 # M:  number of times to repeat
 # theta.init:  initial values of theta
 # epsilon:  step size
@@ -345,14 +345,111 @@ Each proposal requires a simulated value of $\pmb{p}$.  The standard \textit{map
 
 This step assumes a diagonal mass matrix $M$, which will remain the assumption for the purposes of this introduction.  Alternatively, one could use the \textit{mvrnorm} function in the \textit{MASS} package to simulate from a general covariance matrix.  This function is commented out in the \textit{hmc} function. 
 
-```{r, echo=TRUE}
+```{r, echo=TRUE, eval=FALSE}
     # r0 <- MASS::mvrnorm(1, mu.p, diag(p))
     r0 <- mapply(rnorm, mean=mu.p, sd=Mdiag, MoreArgs=list(n=1))
 ```
 
+The initial sampled value of $p_t$ is stored in the momentum list \textit{r[[m]]}.  This value will be replaced if the proposal is accepted later in the loop.
 
+```{r, echo=TRUE, eval=FALSE}
+    r.new <- r[[m]] <- r0
+```
 
+With the previous value $\Theta^{(t-1)}$ and simulated momentum, the leapfrog can be evaluted $L$ consecutive times.  The proposal will be the joint value of $(\pmb{\tilde{p}}^{t}, \tilde\Theta^{(t)})$ after progressing through the $L$ leapfrog steps.  
 
+The simulated values for each leapfrog step are stored in \textit{theta.new} and \textit{r.new}.  After $L$ steps, these variables store the proposal. 
+
+```{r, echo=TRUE, eval=FALSE}
+    for (i in 1:L) {
+      lf <- leapfrog(theta.new, r.new, epsilon, logPOSTERIOR, glogPOSTERIOR, y, X, ...)
+      theta.new <- lf$theta.new
+      r.new <- lf$r.new
+    }
+```
+
+Next is an optional counter to print the count in the \textit{for} loop.
+
+```{r, echo=TRUE, eval=FALSE}
+    if (verbose) print(m)
+```
+
+The proposal is then evaluated in a Metropolis-Hastings style acceptance step.  First, a standard uniform random value is simulated and stored in \textit{u}.  The proposal will be accepted if the acceptance ratio is less than this value.
+
+```{r, echo=TRUE, eval=FALSE}
+    u <- runif(1)
+```
+
+A log transformation is used to calculate the acceptance ratio.  This transformation is used for numerical stability, since the simulated values of the log posterior can be very high. The log ratio is set to a maximum of 0 since $\log(1) = 0$ is the maximum value in the range $u \in [0, 1]$.  
+
+```{r, echo=TRUE, eval=FALSE}
+    log.alpha <- pmin(0, logPOSTERIOR(theta.new, y=y, X=X, ...) - 0.5*(r.new %*% r.new) -
+                        logPOSTERIOR(theta[[m-1]], y=y, X=X, ...) - 0.5*(r0 %*% r0))
+```
+
+Finally, a check is performed on the acceptance ratio.  If $\alpha < u$ (or $\log\alpha < \log u$), then the proposal is accepted.  Otherwise, the previous value in the MCMC chain is retained.
+
+If the proposal is accepted, the negative value of momentum is stored in \textit{r[[m]]}.  This is a technicality to assure that the MCMC chain follows detailed balance (cite here), but this value is not used for inference.  Also, the \textit{accept} variable is incremented by one when the proposal is accepted.  
+
+```{r, echo=TRUE, eval=FALSE}
+    if (log.alpha < log(u)) {
+      theta[[m]] <- theta.new
+      r[[m]] <- -r.new
+      accept <- accept + 1
+    } else {
+      theta[[m]] <- theta[[m-1]]
+      r[[m]] <- r[[m-1]]
+    }
+```
+
+After \textit{N} simulations, a list of results is exported from \textit{hmc}:  
+
+\begin{enumerate}
+\item theta:  list of simulated values of $\Theta$
+\item r:  list of simulated values of the momentum $\pmb{p}$
+\item accept:  the number of accepted proposals in \textit{N} simulations
+\end{enumerate}
+
+```{r, echo=TRUE, eval=FALSE}
+  list(theta=theta,
+       r=r,
+       accept = accept)
+```
+
+Next, we review the leapfrog function in more detail. 
+
+```{r, echo=TRUE, eval=FALSE}
+leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, y, X, Z, Minv, constrain,
+                     lastSTEP=FALSE, ...) {
+
+  # gradient of log posterior for old theta
+  g.ld <- glogPOSTERIOR(theta_lf, y=y, X=X, Z=Z, ...)
+
+  # first momentum update
+  r.new <- r + epsilon/2*g.ld
+
+  # theta update
+  # note diagonal matrix update
+  # theta.new <- theta_lf + as.numeric(epsilon*r.new/ diag(M_mx))
+  theta.new <- theta_lf + as.numeric(epsilon* Minv %*% r.new)
+
+  # check positive
+  switch_sign <- constrain & theta.new < 0
+  r.new[switch_sign] <- -r.new[switch_sign]
+  theta.new[switch_sign] <- -theta.new[switch_sign]
+
+  # gradient of log posterior for new theta
+  g.ld.new <- glogPOSTERIOR(theta.new, y=y, X=X, Z=Z, ...)
+
+  # if not on last step, second momentum update
+  if (!lastSTEP) {
+    r.new <- r.new + epsilon/2*g.ld.new
+  }
+  list(theta.new=theta.new,
+       r.new=as.numeric(r.new))
+}
+
+```
 
 
 
