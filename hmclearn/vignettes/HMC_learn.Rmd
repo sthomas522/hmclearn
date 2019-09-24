@@ -295,5 +295,35 @@ The arguments of \textit{hmc} are as follows:
 \item ...:  additional parameters for logPOSTERIOR and glogPOSTERIOR
 \end{itemize}
 
+Next, we review the functionality of the \textit{hmc} line-by-line.  
+
+HMC assigns a single latent parameter $p_i$ for each parameter $\theta_i \; \forall i \in 1:k$.  Therefore, \textit{p} is assigned the number of parameters in $\Theta$.   
+
+```{r, echo=TRUE, eval=FALSE}
+  p <- length(theta.init)
+```
+
+The distribution of the latent variables $\pmb{p}$ is multivariate Normal with mean 0.  The mean of $\pmb{p}$ is assigned a vector 0 for each $p_i$.    
+
+```{r, echo=TRUE, eval=FALSE}
+  mu.p <- rep(0, p)
+```
+
+Recall that our objective is to simulate values of $\Theta$ from the posterior.  In this function, the simulated values will be stored in a list \textit{theta}.  The first element of the list \textit{theta[[1]]} is assigned to the initial value provided in the function.  
+
+```{r, echo=TRUE, eval=FALSE}
+  theta <- list()
+  theta[[1]] <- theta.init
+```
+
+A second list is created to store simulated values of the momentum $\pmb{p}$.  These simulated values are typically not of interest in analysis, but can be useful in debugging.  The first value of $\pmb{p}$ is assigned \textit{NA} for the initial value of $\Theta$ only.
+
+```{r, echo=TRUE, eval=FALSE}
+  r <- list()
+  r[[1]] <- NA
+```
+
+
+
 
 
