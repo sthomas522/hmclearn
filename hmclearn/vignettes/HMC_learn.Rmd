@@ -323,6 +323,36 @@ A second list is created to store simulated values of the momentum $\pmb{p}$.  T
   r[[1]] <- NA
 ```
 
+The acceptance rate of HMC (and MH) is an important measure in assessing the efficiency of the MCMC simulation.  An internal variable \textit{accept} is initialized to zero and is used to count the number of accepted proposals.  
+
+```{r, echo=TRUE, eval=FALSE}
+  accept <- 0
+```
+
+With the initialization complete, we begin the loop to perform the HMC simulations.  The loop starts at 2 since 1 is reserved for the initial value $\Theta^{(0)}$. 
+
+```{r, echo=TRUE, eval=FALSE}
+  for (m in 2:N) {
+```
+
+The default proposed value of $\Theta^{(t)}$ is the previous value in the chain, $\Theta^{(t-1)}$.  This value may be replaced with the proposal depending on the acceptance ratio calculation later in the loop.  
+
+```{r, echo=TRUE, eval=FALSE}
+    theta[[m]] <- theta.new <- theta[[m-1]]
+```
+
+Each proposal requires a simulated value of $\pmb{p}$.  The standard \textit{mapply} function passes the mean vector \textit{mu.p} and standard deviation vector \textit{Mdiag} to the \textit{rnorm} function.  The additional argument \textit{n = 1} is passed to \textit{rnorm} to simulate one value of $p_i$ for each combination of mean and standard deviation in the corresponding vectors.  
+
+This step assumes a diagonal mass matrix $M$, which will remain the assumption for the purposes of this introduction.  Alternatively, one could use the \textit{mvrnorm} function in the \textit{MASS} package to simulate from a general covariance matrix.  This function is commented out in the \textit{hmc} function. 
+
+```{r, echo=TRUE}
+    # r0 <- MASS::mvrnorm(1, mu.p, diag(p))
+    r0 <- mapply(rnorm, mean=mu.p, sd=Mdiag, MoreArgs=list(n=1))
+```
+
+
+
+
 
 
 
