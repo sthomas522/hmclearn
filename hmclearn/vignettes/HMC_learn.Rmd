@@ -419,11 +419,10 @@ After \textit{N} simulations, a list of results is exported from \textit{hmc}:
 Next, we review the leapfrog function in more detail. 
 
 ```{r, echo=TRUE, eval=FALSE}
-leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, y, X, Z, Minv, constrain,
-                     lastSTEP=FALSE, ...) {
+leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, y, X, Minv, constrain, lastSTEP=FALSE, ...) {
 
   # gradient of log posterior for old theta
-  g.ld <- glogPOSTERIOR(theta_lf, y=y, X=X, Z=Z, ...)
+  g.ld <- glogPOSTERIOR(theta_lf, y=y, X=X, ...)
 
   # first momentum update
   r.new <- r + epsilon/2*g.ld
@@ -439,7 +438,7 @@ leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, y, X, Z,
   theta.new[switch_sign] <- -theta.new[switch_sign]
 
   # gradient of log posterior for new theta
-  g.ld.new <- glogPOSTERIOR(theta.new, y=y, X=X, Z=Z, ...)
+  g.ld.new <- glogPOSTERIOR(theta.new, y=y, X=X, ...)
 
   # if not on last step, second momentum update
   if (!lastSTEP) {
@@ -451,6 +450,19 @@ leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, y, X, Z,
 
 ```
 
+The arguments of \textit{leapfrog} are as follows: 
+
+
+\begin{itemize}
+\item theta\_lf:  Starting position of $\Theta^{(t)}$
+\item r:  Starting momentum $p$
+\item epsilon:  step size $\epsilon$.  Can be a single value or vector length $k$
+\item logPOSTERIOR:  name of function to return the log posterior
+\item glogPOSTERIOR:  name of function to return the gradient of the log posterior
+\item y:  vector of the dependent variable
+\item X:  design matrix of independent variables
+\item ...:  additional parameters for logPOSTERIOR and glogPOSTERIOR
+\end{itemize}
 
 
 
