@@ -76,8 +76,8 @@ qfun_all <- function(theta1, theta2, nu) {
 # logDENS:  log of joint density of parameter of interest
 #   (log likelihood)
 # ... additional parameters to pass to logDENS
-leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, y, X, Mdiag, constrain,
-                     lastSTEP=FALSE, Z=NULL, ...) {
+leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, y, X, Z, Minv, constrain,
+                     lastSTEP=FALSE, ...) {
 
   # gradient of log posterior for old theta
   g.ld <- glogPOSTERIOR(theta_lf, y=y, X=X, Z=Z, ...)
@@ -86,9 +86,7 @@ leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, y, X, Md
   r.new <- r + epsilon/2*g.ld
 
   # theta update
-  # note diagonal matrix update
-  # theta.new <- theta_lf + as.numeric(epsilon*r.new/ diag(M_mx))
-  theta.new <- theta_lf + as.numeric(epsilon* Mdiag %*% r.new)
+  theta.new <- theta_lf + as.numeric(epsilon* Minv %*% r.new)
 
   # check positive
   switch_sign <- constrain & theta.new < 0

@@ -213,7 +213,11 @@ Developing an intuition and appreciation for how HMC works can be challenging wi
 
 # HMC Implementation
 
-We introduce several functions for implementing HMC in the R language.  First is the main \textit{hmc} function itself.  
+We introduce several functions for implementing HMC in the R language.  The function \textit{hmc} runs the main HMC algorithm.  This function calls a separate function for the leapfrog algorithm and random value generation.  Also, the user must specify functions to calculate both the log posterior as well as the gradient of the log posterior.  These functions are used by both the main HMC function as well as the leapfrog function.
+
+## hmc function
+
+First we describe the main \textit{hmc} function itself.  
 
 ```{r, echo=TRUE, eval=FALSE}
 # Main hmc function
@@ -485,42 +489,44 @@ After \textit{N} simulations, a list of results is exported from \textit{hmc}:
        M=M_mx)
 ```
 
+## Leapfrog function
+
 Next, we review the leapfrog function in more detail. 
 
 ```{r, echo=TRUE, eval=FALSE}
-leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, y, X, Mdiag, constrain, lastSTEP=FALSE, ...) {
-
+leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, y, X, Z, 
+                     Minv, constrain, lastSTEP=FALSE, ...) {
+  
   # gradient of log posterior for old theta
-  g.ld <- glogPOSTERIOR(theta_lf, y=y, X=X, ...)
-
+  g.ld <- glogPOSTERIOR(theta_lf, y=y, X=X, Z=Z, ...)
+  
   # first momentum update
   r.new <- r + epsilon/2*g.ld
-
+  
   # theta update
   # note diagonal matrix update
   # theta.new <- theta_lf + as.numeric(epsilon*r.new/ diag(M_mx))
   theta.new <- theta_lf + as.numeric(epsilon* Minv %*% r.new)
-
+  
   # check positive
   switch_sign <- constrain & theta.new < 0
   r.new[switch_sign] <- -r.new[switch_sign]
   theta.new[switch_sign] <- -theta.new[switch_sign]
-
+  
   # gradient of log posterior for new theta
-  g.ld.new <- glogPOSTERIOR(theta.new, y=y, X=X, ...)
-
+  g.ld.new <- glogPOSTERIOR(theta.new, y=y, X=X, Z=Z, ...)
+  
   # if not on last step, second momentum update
   if (!lastSTEP) {
     r.new <- r.new + epsilon/2*g.ld.new
   }
-  list(theta.new=theta.new,
+  list(theta.new=theta.new, 
        r.new=as.numeric(r.new))
 }
 
 ```
 
 The arguments of \textit{leapfrog} are as follows: 
-
 
 \begin{itemize}
 \item theta\_lf:  Starting position of $\Theta^{(t)}$
@@ -530,8 +536,68 @@ The arguments of \textit{leapfrog} are as follows:
 \item glogPOSTERIOR:  name of function to return the gradient of the log posterior
 \item y:  vector of the dependent variable
 \item X:  design matrix of independent variables
+\item Z:  optional design matrix for random effects
+\item constrain:  logical indicator of whether the support of $\Theta$ is positive only (TRUE) or all real numbers (FALSE)
+\item lastSTEP: logical indicator of whether this is the last step of the leapfrog loop.  If it is, then the last half step evaluation for the momentum is not evaluated.
 \item ...:  additional parameters for logPOSTERIOR and glogPOSTERIOR
 \end{itemize}
 
+Next, we review the functionality of the \textit{leapfrog} line-by-line.  
 
+First, the gradient of the log posterior is evaluated at the initial value provided for $\Theta^{(t)}$.  If \textit{Z} is not provided, a NULL value will be passed to this parameter.  Hyperparameters are passed to the \textit{glogPOSTERIOR} function via \textit{...}.
+
+```{r, echo=TRUE, eval=FALSE}
+  # gradient of log posterior for old theta
+  g.ld <- glogPOSTERIOR(theta_lf, y=y, X=X, Z=Z, ...)
+```
+
+Once the gradient is calculated, the first update of the momentum is performed.  The step size for this first update is half of the step size $\epsilon$.
+
+```{r, echo=TRUE, eval=FALSE}
+  # first momentum update
+  r.new <- r + epsilon/2*g.ld
+```
+
+After the momentum half-step update, $\Theta$ is updated by the full step size $\epsilon$.  
+
+```{r, echo=TRUE, eval=FALSE}
+  # theta update
+  theta.new <- theta_lf + as.numeric(epsilon* Minv %*% r.new)
+```
+
+The next few steps are optionally performed to change the sign of the momentum and $\Theta$ if the support of $\Theta$ is strictly positive (cite Neil).  These steps are only relevant if \textit{constrain} is set to TRUE.  Otherwise, the momentum and $\Theta$ are unchanged.
+
+```{r, echo=TRUE, eval=FALSE}
+  # check positive
+  switch_sign <- constrain & theta.new < 0
+  r.new[switch_sign] <- -r.new[switch_sign]
+  theta.new[switch_sign] <- -theta.new[switch_sign]
+```
+
+Once $\Theta$ is updated, the gradient of the log posterior is re-calculated at the new set of values.
+
+```{r, echo=TRUE, eval=FALSE}
+  # gradient of log posterior for new theta
+  g.ld.new <- glogPOSTERIOR(theta.new, y=y, X=X, Z=Z, ...)
+```
+
+Finally, unless this the final leapfrog step, the momentum is updated by its second half-step.  
+
+```{r, echo=TRUE, eval=FALSE}
+  # if not on last step, second momentum update
+  if (!lastSTEP) {
+    r.new <- r.new + epsilon/2*g.ld.new
+  }
+```
+
+The \textit{leapfrog} function then returns the new values of $\Theta$ and momentum in a list.  
+
+```{r, echo=TRUE, eval=FALSE}
+  list(theta.new=theta.new,
+       r.new=as.numeric(r.new))
+```
+
+## Simple example
+
+To illustrate the functionality of the HMC software, we begin with a simple example fitting a Gamma distribution with two parameters $\alpha$ and $\beta$.  
 
