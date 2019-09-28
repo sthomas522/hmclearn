@@ -76,7 +76,7 @@ qfun_all <- function(theta1, theta2, nu) {
 # logDENS:  log of joint density of parameter of interest
 #   (log likelihood)
 # ... additional parameters to pass to logDENS
-leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, y, X, Minv, constrain,
+leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, y, X, Mdiag, constrain,
                      lastSTEP=FALSE, Z=NULL, ...) {
 
   # gradient of log posterior for old theta
@@ -88,7 +88,7 @@ leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, y, X, Mi
   # theta update
   # note diagonal matrix update
   # theta.new <- theta_lf + as.numeric(epsilon*r.new/ diag(M_mx))
-  theta.new <- theta_lf + as.numeric(epsilon* Minv %*% r.new)
+  theta.new <- theta_lf + as.numeric(epsilon* Mdiag %*% r.new)
 
   # check positive
   switch_sign <- constrain & theta.new < 0
@@ -114,53 +114,81 @@ leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, y, X, Mi
 # epsilon:  step size
 # logPOSTERIOR:  log of joint density of parameter of interest
 # ...:  additional parameters to pass to logPOSTERIOR
-hmc <- function(N, theta.init, epsilon, L, logPOSTERIOR, glogPOSTERIOR, y, X, Mdiag=NULL,
-                verbose=FALSE, ...) {
-  p <- length(theta.init)
+hmc <- function(N, theta.init, epsilon, L, logPOSTERIOR, glogPOSTERIOR, y, X, Z=NULL,
+                randlength=FALSE, Mdiag=NULL, verbose=FALSE, ...) {
+
+  p <- length(theta.init) # number of parameters
+
+  # mass matrix
   mu.p <- rep(0, p)
 
-  if (is.null(Mdiag)) {
-    Mdiag <- rep(1, length(theta.init))
+  # epsilon values
+  eps_orig <- epsilon
+  if (length(epsilon) == 1) {
+    eps_orig <- rep(epsilon, p)
   }
+
+  # epsilon matrix
+  eps_vals <- matrix(rep(eps_orig, N), ncol=N, byrow=F)
+
+  # number of steps
+  L_vals <- rep(L, N)
+
+  # randomize epsilon and L
+  if (randlength) {
+    randvals <- replicate(N, runif(p, -0.1*eps_orig, 0.1*eps_orig), simplify=T)
+    eps_vals <- eps_vals + randvals
+    L_vals <- round(runif(N, 0.5*L, 2.0*L))
+  }
+
+  # invert covariance M for leapfrog
+  Minv <- qr.solve(M_mx)
+  # print(diag(Minv))
 
   # store theta and momentum (usually not of interest)
   theta <- list()
-  theta[[1]] <- theta.init
+  theta[[1]] <- thetaInit
   r <- list()
   r[[1]] <- NA
   accept <- 0
-  for (m in 2:N) {
-    theta[[m]] <- theta.new <- theta[[m-1]]
-    # r0 <- MASS::mvrnorm(1, mu.p, diag(p))
-    r0 <- mapply(rnorm, mean=mu.p, sd=Mdiag, MoreArgs=list(n=1))
-    r.new <- r[[m]] <- r0
-    for (i in 1:L) {
-      lf <- leapfrog(theta.new, r.new, epsilon, logPOSTERIOR, glogPOSTERIOR, y, X, ...)
+  for (jj in 2:N) {
+    theta[[jj]] <- theta.new <- theta[[jj-1]]
+    r0 <- MASS::mvrnorm(1, mu.p, M_mx)
+    r.new <- r[[jj]] <- r0
+    for (i in 1:L_vals) {
+      lstp <- i == L_vals
+      lf <- leapfrog(theta_lf = theta.new, r = r.new, epsilon = eps_vals[, i], logPOSTERIOR = logPOSTERIOR,
+                     glogPOSTERIOR = glogPOSTERIOR, y = y, X = X, Z = Z,
+                     Minv=Minv, constrain=constrain, lastSTEP=lstp, ...)
+
       theta.new <- lf$theta.new
       r.new <- lf$r.new
     }
 
-    if (verbose) print(m)
+    if (verbose) print(jj)
 
     # standard metropolis-hastings update
     u <- runif(1)
 
     # use log transform for ratio due to low numbers
-    log.alpha <- pmin(0, logPOSTERIOR(theta.new, y=y, X=X, ...) - 0.5*(r.new %*% r.new) -
-                        logPOSTERIOR(theta[[m-1]], y=y, X=X, ...) - 0.5*(r0 %*% r0))
+    num <- logPOSTERIOR(theta.new, y=y, X=X, Z=Z, ...) - 0.5*(r.new %*% r.new)
+    den <- logPOSTERIOR(theta[[jj-1]], y=y, X=X, Z=Z, ...) - 0.5*(r0 %*% r0)
 
-    if (log.alpha < log(u)) {
-      theta[[m]] <- theta.new
-      r[[m]] <- -r.new
+    log.alpha <- pmin(0, num - den)
+
+    if (log(u) < log.alpha) {
+      theta[[jj]] <- theta.new
+      r[[jj]] <- -r.new
       accept <- accept + 1
     } else {
-      theta[[m]] <- theta[[m-1]]
-      r[[m]] <- r[[m-1]]
+      theta[[jj]] <- theta[[jj-1]]
+      r[[jj]] <- r[[jj-1]]
     }
 
   }
   list(theta=theta,
        r=r,
-       accept = accept)
+       accept=accept,
+       M=M_mx)
 }
 
