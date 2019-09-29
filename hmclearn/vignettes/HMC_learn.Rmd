@@ -599,5 +599,95 @@ The \textit{leapfrog} function then returns the new values of $\Theta$ and momen
 
 ## Simple example
 
-To illustrate the functionality of the HMC software, we begin with a simple example fitting a Gamma distribution with two parameters $\alpha$ and $\beta$.  
+To illustrate the functionality of the HMC software, we begin with a simple example fitting a Gamma distribution with two parameters $\alpha$ and $\beta$.  The pdf is specified
+
+$$
+f(x) = \frac{1}{\beta^\alpha \Gamma(\alpha)} x^{\alpha-1}e^{-x/\beta}I_x(0, \infty)
+$$
+
+with likelihood and log likelihood
+
+$$
+\begin{aligned}
+L(\alpha, \beta; x) &= \prod_{i=1}^n \frac{1}{\beta^\alpha \Gamma(\alpha)} x_i^{\alpha-1}e^{-x_i/\beta} \\
+l(\alpha, \beta;x) &= \sum_{i=1}^n -\alpha\log\beta -\log\Gamma(\alpha) + (\alpha-1)\log x_i - x_i/\beta \\
+&= -n\alpha\log\beta -n\log\Gamma(\alpha) + (\alpha-1)\sum_{i=1}^n\log x_i - \frac{1}{\beta}\sum_{i=1}^n x_i.
+\end{aligned}
+$$
+
+Now that the log likelihood has been specified, we can specify our priors.  Both parameters $\alpha$ and $\beta$ are strictly positive.  As such, we can specify half-Normal priors for each of the parameters, with hyperpriors $\eta_1$ and $\eta_2$.
+
+$$
+\begin{aligned}
+p(\alpha|\eta_1) &= \frac{2\eta_1}{\pi}\exp\left(-\frac{\alpha^2\eta_1^2}{\pi} \right) \\
+p(\beta|\eta_2) &= \frac{2\eta_2}{\pi}\exp\left(-\frac{\beta^2\eta_2^2}{\pi} \right)
+\end{aligned}
+$$
+
+The log posterior is the sum of the log likelihood and the log prior.   
+
+$$
+\begin{aligned}
+\log p(\alpha, \beta|x) &\propto l(\alpha, \beta; x) + \log p(\alpha,\beta) \\
+&\propto  -n\alpha\log\beta -n\log\Gamma(\alpha) + (\alpha-1)\sum_{i=1}^n\log x_i - \frac{1}{\beta}\sum_{i=1}^n x_i - \frac{\alpha^2\eta_1^2}{\pi} - \frac{\beta^2\eta_2^2}{\pi} 
+\end{aligned}
+$$
+
+Note that we disregard any terms that are not dependent on our parameters of interest $\alpha$ and $\beta$.  These terms are absorbed into the normalizing constant and do not impact the gradient calculation.  
+
+The R functions for the log likelihood and log posterior are provided here.  For our application, our parameter of interest is defined $\Theta := (\alpha, \beta)$.  
+
+```{r, echo=TRUE, eval=TRUE}
+# log likelihood of gamma
+llgamma <- function(theta, X) {
+  alpha <- theta[1]
+  beta <- theta[2]
+  n <- length(X)
+  -n*alpha*log(beta) - n*log(gamma(alpha)) + (alpha-1)*sum(log(X)) - sum(X)/beta
+}
+
+# log posterior of gamma
+gamma.lposterior <- function(theta, X, eta1, eta2) {
+  alpha <- theta[1]
+  beta <- theta[2]
+  llgamma(theta, X) - beta^2 * eta1^2/pi - alpha^2 * eta2^2/pi
+}
+```
+
+
+Since our model has two parameters, the partial derivatives must be calculated with respect to $\alpha$ and $\beta$.  
+
+$$
+\begin{aligned}
+\nabla_\alpha \log p(\alpha, \beta|x) &= -n\log\beta -n\psi(\alpha) + \sum_{i=1}^n\log x_i -2\alpha\eta_1^2/\pi \\
+\nabla_\beta \log p(\alpha, \beta|x) &= -\frac{n\alpha}{\beta} + \frac{1}{\beta^2}\sum_{i=1}^n x_i - 2\beta\eta_2^2/\pi
+\end{aligned}
+$$
+
+The R function for the gradient of the log posterior is provided here.
+
+```{r, echo=TRUE, eval=TRUE}
+# derivative of posterior
+g.gamma.lposterior <- function(theta, X, eta1, eta2) {
+  alpha <- theta[1]
+  beta <- theta[2]
+  n <- length(X)
+  dalpha <- -n*log(beta) -n*digamma(alpha) + sum(log(X)) - 2*alpha*eta1^2/pi
+  dbeta <- -n*alpha/beta + sum(X)/beta/beta - 2*beta*eta2^2/pi
+  c(dalpha, dbeta)
+}
+```
+
+Now that the log posterior and gradient have been derived and coded in R, we can run the \textit{hmc} function to fit the model. 
+
+First, we simulate data based on a gamma distribution.  Here, we simulate 1000 data points with $\alpha = 2$ and $\beta = 3$. 
+
+```{r, echo=TRUE, eval=TRUE}
+# simulate data
+set.seed(312)
+x <- rgamma(1000, 2, 1/3)
+```
+
+
+
 
