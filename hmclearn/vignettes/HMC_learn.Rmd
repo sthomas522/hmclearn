@@ -710,7 +710,7 @@ N <- 10000
 set.seed(143)
 hmc.results <- hmc(N, theta.init = c(3, 4), epsilon = 2e-2, L = 22, 
                    logPOSTERIOR = gamma.lposterior, 
-                   glogPOSTERIOR = g.gamma.lposterior, X=X,
+                   glogPOSTERIOR = g.gamma.lposterior, X=X, 
                    eta1 = 1e-4, eta2 = 1e-4)
 ```
 
