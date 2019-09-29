@@ -247,13 +247,18 @@ hmc <- function(N, theta.init, epsilon, L, logPOSTERIOR, glogPOSTERIOR, y, X, Z=
     eps_vals <- eps_vals + randvals
     nstep_vals <- round(runif(N, 0.5*L, 2.0*L))
   }
+  
+  # default to unit diagonal matrix
+  if (is.null(Mdiag)) {
+    M_mx <- diag(p)
+  }
 
   # invert covariance M for leapfrog
   Minv <- qr.solve(M_mx)
 
   # store theta and momentum (usually not of interest)
   theta <- list()
-  theta[[1]] <- thetaInit
+  theta[[1]] <- theta.init
   r <- list()
   r[[1]] <- NA
   accept <- 0
@@ -366,6 +371,16 @@ The \textit{randlength} is an optional parameter to randomize $\epsilon$ and $L$
     L_vals <- round(runif(N, 0.5*L, 2.0*L))
   }
 ```
+
+If the Mass matrix is not provided, the identity matrix is used as a default. 
+
+```{r, echo=TRUE, eval=FALSE}
+  # default to unit diagonal matrix
+  if (is.null(Mdiag)) {
+    M_mx <- diag(p)
+  }
+```
+
 
 In preparation for the leapfrog algorithm, the Mass matrix is inverted.
 
@@ -639,7 +654,7 @@ The R functions for the log likelihood and log posterior are provided here.  For
 
 ```{r, echo=TRUE, eval=TRUE}
 # log likelihood of gamma
-llgamma <- function(theta, X) {
+llgamma <- function(theta, X, y=NULL, Z=NULL) {
   alpha <- theta[1]
   beta <- theta[2]
   n <- length(X)
@@ -647,7 +662,7 @@ llgamma <- function(theta, X) {
 }
 
 # log posterior of gamma
-gamma.lposterior <- function(theta, X, eta1, eta2) {
+gamma.lposterior <- function(theta, X, eta1, eta2, y=NULL, Z=NULL) {
   alpha <- theta[1]
   beta <- theta[2]
   llgamma(theta, X) - beta^2 * eta1^2/pi - alpha^2 * eta2^2/pi
@@ -685,9 +700,19 @@ First, we simulate data based on a gamma distribution.  Here, we simulate 1000 d
 ```{r, echo=TRUE, eval=TRUE}
 # simulate data
 set.seed(312)
-x <- rgamma(1000, 2, 1/3)
+X <- rgamma(1000, 2, 1/3)
 ```
 
+Next, we run our $\textit{hmc}$ function on our simulated data.
+
+```{r, echo=TRUE, eval=TRUE}
+N <- 10000
+set.seed(143)
+hmc.results <- hmc(N, theta.init = c(3, 4), epsilon = 2e-2, L = 22, 
+                   logPOSTERIOR = gamma.lposterior, 
+                   glogPOSTERIOR = g.gamma.lposterior, X=X,
+                   eta1 = 1e-4, eta2 = 1e-4)
+```
 
 
 

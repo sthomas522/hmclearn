@@ -76,11 +76,11 @@ qfun_all <- function(theta1, theta2, nu) {
 # logDENS:  log of joint density of parameter of interest
 #   (log likelihood)
 # ... additional parameters to pass to logDENS
-leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, y, X, Z, Minv, constrain,
+leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, Minv, constrain,
                      lastSTEP=FALSE, ...) {
 
   # gradient of log posterior for old theta
-  g.ld <- glogPOSTERIOR(theta_lf, y=y, X=X, Z=Z, ...)
+  g.ld <- glogPOSTERIOR(theta_lf,  ...)
 
   # first momentum update
   r.new <- r + epsilon/2*g.ld
@@ -94,7 +94,7 @@ leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, y, X, Z,
   theta.new[switch_sign] <- -theta.new[switch_sign]
 
   # gradient of log posterior for new theta
-  g.ld.new <- glogPOSTERIOR(theta.new, y=y, X=X, Z=Z, ...)
+  g.ld.new <- glogPOSTERIOR(theta.new, ...)
 
   # if not on last step, second momentum update
   if (!lastSTEP) {
@@ -112,8 +112,8 @@ leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, y, X, Z,
 # epsilon:  step size
 # logPOSTERIOR:  log of joint density of parameter of interest
 # ...:  additional parameters to pass to logPOSTERIOR
-hmc <- function(N, theta.init, epsilon, L, logPOSTERIOR, glogPOSTERIOR, y, X, Z=NULL,
-                randlength=FALSE, Mdiag=NULL, verbose=FALSE, ...) {
+hmc <- function(N, theta.init, epsilon, L, logPOSTERIOR, glogPOSTERIOR,
+                randlength=FALSE, Mdiag=NULL, constrain=FALSE, verbose=FALSE, ...) {
 
   p <- length(theta.init) # number of parameters
 
@@ -140,12 +140,15 @@ hmc <- function(N, theta.init, epsilon, L, logPOSTERIOR, glogPOSTERIOR, y, X, Z=
   }
 
   # invert covariance M for leapfrog
+  if (is.null(Mdiag)) {
+    M_mx <- diag(p)
+  }
   Minv <- qr.solve(M_mx)
   # print(diag(Minv))
 
   # store theta and momentum (usually not of interest)
   theta <- list()
-  theta[[1]] <- thetaInit
+  theta[[1]] <- theta.init
   r <- list()
   r[[1]] <- NA
   accept <- 0
@@ -153,24 +156,24 @@ hmc <- function(N, theta.init, epsilon, L, logPOSTERIOR, glogPOSTERIOR, y, X, Z=
     theta[[jj]] <- theta.new <- theta[[jj-1]]
     r0 <- MASS::mvrnorm(1, mu.p, M_mx)
     r.new <- r[[jj]] <- r0
-    for (i in 1:L_vals) {
-      lstp <- i == L_vals
-      lf <- leapfrog(theta_lf = theta.new, r = r.new, epsilon = eps_vals[, i], logPOSTERIOR = logPOSTERIOR,
-                     glogPOSTERIOR = glogPOSTERIOR, y = y, X = X, Z = Z,
+
+    for (i in 1:L_vals[jj]) {
+      lstp <- i == L_vals[jj]
+      lf <- leapfrog(theta_lf = theta.new, r = r.new, epsilon = eps_vals[, jj], logPOSTERIOR = logPOSTERIOR,
+                     glogPOSTERIOR = glogPOSTERIOR,
                      Minv=Minv, constrain=constrain, lastSTEP=lstp, ...)
 
       theta.new <- lf$theta.new
       r.new <- lf$r.new
     }
-
     if (verbose) print(jj)
 
     # standard metropolis-hastings update
     u <- runif(1)
 
     # use log transform for ratio due to low numbers
-    num <- logPOSTERIOR(theta.new, y=y, X=X, Z=Z, ...) - 0.5*(r.new %*% r.new)
-    den <- logPOSTERIOR(theta[[jj-1]], y=y, X=X, Z=Z, ...) - 0.5*(r0 %*% r0)
+    num <- logPOSTERIOR(theta.new,  ...) - 0.5*(r.new %*% r.new)
+    den <- logPOSTERIOR(theta[[jj-1]], ...) - 0.5*(r0 %*% r0)
 
     log.alpha <- pmin(0, num - den)
 
