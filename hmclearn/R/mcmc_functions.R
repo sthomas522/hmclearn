@@ -195,12 +195,15 @@ hmc <- function(N, theta.init, epsilon, L, logPOSTERIOR, glogPOSTERIOR, varnames
     colnames(thetaDF) <- varnames
   }
 
-  list(N=N,
+  obj <- list(N=N,
        theta=theta,
        thetaDF = thetaDF,
        r=r,
        accept=accept,
        M=M_mx)
+
+  class(obj) <- c("hmclearn", "list")
+  return(obj)
 }
 
 
@@ -247,4 +250,15 @@ diagplots <- function(result, actual.mu=NULL, burnin=100) {
   list(p1, p2)
 }
 
+
+summary.hmclearn <- function(x, probs=c(0.05, 0.25, 0.5, 0.75, 0.95), ...) {
+  cat("Summary of HMC simulation\n\n")
+
+  thetaDF <- x$thetaDF
+  t(apply(thetaDF, 2, quantile, probs=probs, ...))
+}
+
+plot.hmclearn <- function(x, ...) {
+  diagplots(x, ...)
+}
 
