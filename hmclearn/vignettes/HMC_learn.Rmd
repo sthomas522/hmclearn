@@ -21,7 +21,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-# library(hmclearn)
+library(hmclearn)
 ```
 
 # Introduction
@@ -708,11 +708,18 @@ Next, we run our $\textit{hmc}$ function on our simulated data.
 ```{r, echo=TRUE, eval=TRUE}
 N <- 10000
 set.seed(143)
-hmc.results <- hmc(N, theta.init = c(3, 4), epsilon = 2e-2, L = 22, 
+ex1 <- hmc(N, theta.init = c(3, 4), epsilon = 2e-2, L = 22, 
                    logPOSTERIOR = gamma.lposterior, 
                    glogPOSTERIOR = g.gamma.lposterior, X=X, 
+                   varnames = c("alpha", "beta"),
                    eta1 = 1e-4, eta2 = 1e-4)
 ```
 
+Diagnostic plots
+
+```{r, echo=TRUE}
+diagplots(ex1, actual.mu = c(2, 3))
+
+```
 
 

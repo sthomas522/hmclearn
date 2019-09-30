@@ -112,7 +112,7 @@ leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, Minv, co
 # epsilon:  step size
 # logPOSTERIOR:  log of joint density of parameter of interest
 # ...:  additional parameters to pass to logPOSTERIOR
-hmc <- function(N, theta.init, epsilon, L, logPOSTERIOR, glogPOSTERIOR,
+hmc <- function(N, theta.init, epsilon, L, logPOSTERIOR, glogPOSTERIOR, varnames=NULL,
                 randlength=FALSE, Mdiag=NULL, constrain=FALSE, verbose=FALSE, ...) {
 
   p <- length(theta.init) # number of parameters
@@ -187,9 +187,64 @@ hmc <- function(N, theta.init, epsilon, L, logPOSTERIOR, glogPOSTERIOR,
     }
 
   }
-  list(theta=theta,
+
+  # create dataframe from simulation
+  thetaDF <- as.data.frame(do.call(rbind, theta))
+
+  if (!is.null(varnames)) {
+    colnames(thetaDF) <- varnames
+  }
+
+  list(N=N,
+       theta=theta,
+       thetaDF = thetaDF,
        r=r,
        accept=accept,
        M=M_mx)
 }
+
+
+diagplots <- function(result, actual.mu=NULL, burnin=100) {
+
+  thetaDFsubs <- result$thetaDF[-c(1:burnin), ]
+  pdata <- thetaDFsubs
+  pdata$t <- 1:nrow(pdata)
+  pdata <- reshape(pdata,
+                   varying = list(1:(ncol(pdata)-1)),
+                   v.names = "value",
+                   idvar = "t",
+                   timevar = "coefficient",
+                   times = colnames(pdata)[-ncol(pdata)],
+                   direction = "long")
+  pdata$true.mu <- rep(actual.mu, each=nrow(thetaDFsubs))
+
+  k <- ncol(result$thetaDF)
+
+  # return list
+
+  # line plots of simulation
+  p1 <- ggplot2::ggplot(pdata, ggplot2::aes(t, value, colour=factor(coefficient))) + ggplot2::geom_line()
+  p1 <- p1 + ggplot2::facet_wrap(~ coefficient, ncol=trunc(sqrt(k)), scales="free_y")
+  p1 <- p1 + ggplot2::theme_bw()
+  p1
+
+  # histograms
+  p2 <- ggplot2::ggplot(pdata, ggplot2::aes(x=value, y=..density.., fill=factor(coefficient),
+                                            colour=factor(coefficient))) +
+    ggplot2::geom_histogram(bins=40)
+
+  if (!is.null(actual.mu)) {
+    p2 <- p2 + ggplot2::geom_vline(data=aggregate(pdata[4], pdata[2], mean),
+                                   mapping=ggplot2::aes(xintercept = true.mu), colour="red")
+  }
+
+  p2 <- p2 + ggplot2::facet_wrap(~ coefficient, ncol=trunc(sqrt(k)), scales="free")
+
+  p2 <- p2 + ggplot2::theme_bw()
+  p2
+
+
+  list(p1, p2)
+}
+
 
