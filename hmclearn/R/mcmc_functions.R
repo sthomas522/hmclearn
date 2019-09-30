@@ -113,7 +113,7 @@ leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, Minv, co
 # logPOSTERIOR:  log of joint density of parameter of interest
 # ...:  additional parameters to pass to logPOSTERIOR
 hmc <- function(N, theta.init, epsilon, L, logPOSTERIOR, glogPOSTERIOR, varnames=NULL,
-                randlength=FALSE, Mdiag=NULL, constrain=FALSE, verbose=FALSE, ...) {
+                randlength=FALSE, Mdiag=NULL, constrain=NULL, verbose=FALSE, ...) {
 
   p <- length(theta.init) # number of parameters
 
@@ -251,10 +251,10 @@ diagplots <- function(result, actual.mu=NULL, burnin=100) {
 }
 
 
-summary.hmclearn <- function(x, probs=c(0.05, 0.25, 0.5, 0.75, 0.95), ...) {
+summary.hmclearn <- function(x, burnin=100, probs=c(0.05, 0.25, 0.5, 0.75, 0.95), ...) {
   cat("Summary of HMC simulation\n\n")
 
-  thetaDF <- x$thetaDF
+  thetaDF <- x$thetaDF[-c(1:burnin), ]
   t(apply(thetaDF, 2, quantile, probs=probs, ...))
 }
 
