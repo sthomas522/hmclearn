@@ -731,7 +731,114 @@ A \textit{summary} confirms that the actual parameter values of $\Theta$ fall we
 summary(ex1)
 ```
 
+In the next section, we will discuss some of the main practical considerations in fitting models using HMC, focusing on parameterization and tuning.  
+
+# HMC Practical Considerations
+
+Parameters for some statistical models are bounded.  When parameters are bounded, the MCMC chain is restricted on simulated values.  Since the HMC algorithm approximates the trajectories through the joint space of the momentum and $\Theta$, it is possible that the chain may move to a location outside of the support of $\Theta$.  
+
+## Constrained Parameters
+
+Parameters for many statistical models are limited to strictly positive numbers.  This was true for the first example using HMC to fit $\alpha$ and $\beta$ from a Gamma distribution.  
+
+We continue our previous example by implementing log transformations for each of these parameters. 
+
+$$
+\begin{aligned}
+a &= \log\alpha \\
+p_a(a) &= p_\alpha(g^{-1}(a))\left|\frac{d\alpha}{da}\right| \\
+&= p_\alpha(e^a)e^a \\
+\log p_a(a) &= \log p_\alpha(e^a) + a \\
+&= \log p_\alpha(\alpha) + \log\alpha
+\end{aligned}
+$$
+
+The Jacobian term $\log\alpha$ must be included with the prior when employing the log transformation of the original parameter.  A similar transformation is necessary for $\beta$.  
+
+$$
+\begin{aligned}
+b &= \log\beta \\
+\log p_b(b) &= \log p_\beta(\beta) + \log\beta
+\end{aligned}
+$$
+
+The log posterior can be re-written with the new parameterization.
 
 
+$$
+\begin{aligned}
+\log p(a, b|x) &\propto l(\alpha, \beta; x) + \log p(\alpha,\beta) \\
+&\propto l(\alpha, \beta; x) + \log p(\alpha) + \log\alpha + \log p(\beta) + \log\beta \\
+&\propto  -n\alpha\log\beta -n\log\Gamma(\alpha) + (\alpha-1)\sum_{i=1}^n\log x_i - \frac{1}{\beta}\sum_{i=1}^n x_i - \frac{\alpha^2\eta_1^2}{\pi} - \frac{\beta^2\eta_2^2}{\pi} + \log\alpha + \log\beta
+\end{aligned}
+$$
+
+The gradient includes the partial derivatives of the Jacobian terms as well.
+
+$$
+\begin{aligned}
+\nabla_\alpha \log p(a, b|x) &= -n\log\beta -n\psi(\alpha) + \sum_{i=1}^n\log x_i -2\alpha\eta_1^2/\pi + \frac{1}{\alpha}\\
+\nabla_\beta \log p(a, b|x) &= -\frac{n\alpha}{\beta} + \frac{1}{\beta^2}\sum_{i=1}^n x_i - 2\beta\eta_2^2/\pi + \frac{1}{\beta}
+\end{aligned}
+$$
+
+Revised R functions are required for the log posterior and gradient. 
+
+```{r, echo=TRUE, eval=TRUE}
+
+# log likelihood of gamma with log-transformed parameters
+llgamma2 <- function(theta, X, y=NULL, Z=NULL) {
+  a <- theta[1]
+  b <- theta[2]
+  alpha <- exp(a)
+  beta <- exp(b)
+  n <- length(X)
+  -n*alpha*log(beta) - n*log(gamma(alpha)) + (alpha-1)*sum(log(X)) - sum(X)/beta
+}
+
+# log posterior of gamma with log-transformed parameters
+gamma.lposterior2 <- function(theta, X, eta1, eta2, y=NULL, Z=NULL) {
+  a <- theta[1]
+  b <- theta[2]
+  alpha <- exp(a)
+  beta <- exp(b)
+  llgamma2(theta, X) - beta^2 * eta1^2/pi - alpha^2 * eta2^2/pi + log(alpha) + log(beta)
+}
+
+# derivative of posterior with log-transformed parameters
+g.gamma.lposterior2 <- function(theta, X, eta1, eta2) {
+  a <- theta[1]
+  b <- theta[2]
+  alpha <- exp(a)
+  beta <- exp(b)
+  n <- length(X)
+  dalpha <- -n*log(beta) -n*digamma(alpha) + sum(log(X)) - 2*alpha*eta1^2/pi + 1/alpha
+  dbeta <- -n*alpha/beta + sum(X)/beta/beta - 2*beta*eta2^2/pi + 1/beta
+  c(dalpha, dbeta)
+}
+```
+
+Now, we can safely re-fit the model with parameters that span the full real number line.  Note that we are re-defining $\tilde\Theta := (a, b) = (\log\alpha, \log\beta)$ with initial values at zero.  
+
+```{r, echo=TRUE, eval=TRUE}
+N <- 10000
+set.seed(143)
+ex1b <- hmc(N, theta.init = c(0, 0), epsilon = 1e-3, L = 30, 
+                   logPOSTERIOR = gamma.lposterior2, 
+                   glogPOSTERIOR = g.gamma.lposterior2, X=X, 
+                   varnames = c("a", "b"),
+                   eta1 = 1e-4, eta2 = 1e-4)
+```
+
+HMC accurately fits the model using the log-transformed parameters, as we can see through the diagnostic plots and summary results.
+
+```{r, echo=TRUE}
+plot(ex1b, actual.mu = c(log(2), log(3)))
+
+```
+
+```{r, echo=TRUE}
+summary(ex1b)
+```
 
 
