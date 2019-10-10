@@ -841,4 +841,12 @@ plot(ex1b, actual.mu = c(log(2), log(3)))
 summary(ex1b)
 ```
 
+The exponential of the results confirms that the HMC converges to the correct parameters.  
+
+```{r, echo=TRUE}
+exp(summary(ex1b))
+```
+
+
+
 
