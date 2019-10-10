@@ -11,6 +11,7 @@ header-includes:
   - \usepackage{amsmath}
   - \usepackage{algorithm}
   - \usepackage{algpseudocode}
+  - \usepackage{enumitem}
 ---
 
 ```{r, include = FALSE}
@@ -847,6 +848,15 @@ The exponential of the results confirms that the HMC converges to the correct pa
 exp(summary(ex1b))
 ```
 
+Parameter transformation such as the $log$ transform shown here is the most common method of ensuring that the MCMC simulation is remains in the support of $\Theta$.  An alternate approach to constrained variables was proposed by Neil (cite).  This approach modifies the \textit{leapfrog} function to ensure the proposed $\Theta$ remains within the appropriate support.  A simplifed version of this method is provided in the \textit{hmc} function for strictly positive parameters (i.e. with support $(0, \infty)$).  
 
+\begin{itemize}
+\item[] Initial momentum half-step:  $\pmb{p}'(t + \epsilon/2) = \pmb{p}(t) + (\epsilon/2)\nabla_\Theta\log\pi(\Theta(t))$ 
+\item[] Initial full-step of $\Theta$:  $\Theta'(t + \epsilon) = \Theta(t) + \epsilon M^{-1}\pmb{p}'(t + \epsilon/2)$
+\item[] Check lower constraint of $0$:
+\begin{itemize}
+\item[] If $\Theta'(t + \epsilon) < 0$ then $p(t + \epsilon/2) = -p'(t + \epsilon/2)$ and  $\Theta(t + \epsilon) = -\Theta'(t + \epsilon)$.  Otherwise, keep the proposed momentum and $\Theta$ as simulated
+\end{itemize}
+\end{itemize}
 
 
