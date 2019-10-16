@@ -888,5 +888,35 @@ Finally, we note that the popular No-U-Turn Sampler (NUTS) algorithm (cite paper
 
 ## QR Decomposition
 
-The efficiency of sampling in the standard HMC algorithm can be improved significantly in multivariate models when the parameters $(\theta_1, ..., \theta_k) \in \Theta$ have an orthogonal basis.  One common method of ensuring an orthogonal basis involves applying QR decomposition to the design matrix prior to applying HMC.  
+The efficiency of sampling in the standard HMC algorithm can be improved significantly for multivariate models when the parameters $(\theta_1, ..., \theta_k) \in \Theta$ have an orthogonal basis.  One common method of ensuring an orthogonal basis involves applying QR decomposition to the design matrix prior to applying HMC.  
+
+For example, Stan scales QR decomposition with a factor of $\sqrt{n-1}$ to ensure unit variance for continuous parameters (cite stan manual).  Here $X$ represents the design matrix for the model
+
+$$
+\begin{aligned}
+X &= QR = Q^*R^* \\
+Q^* &= \sqrt{n-1} Q \\
+R^* &= \frac{1}{\sqrt{n-1}}R \\
+X\Theta &= Q^*R^*\Theta \\
+&= Q^* \widetilde{\Theta}
+\end{aligned}
+$$
+
+The scaled $Q$ matrix is used in the HMC simulation in place of the raw design matrix $X$.  The simulated parameters will then be from $\widetilde{\Theta}$.  To transform back to the original scale, we multiply by the inverse of $R^*$
+
+$$
+\begin{aligned}
+R^*\Theta &= \widetilde{\Theta}\\
+\Theta &= R^{*-1}\widetilde{\Theta}
+\end{aligned}
+$$
+
+In R software, the base functions \textit{qr} can be used to perform QR decomposition.  The $Q$ and $R$ matrices can be obtained from the R methods \textit{qr.Q} and \textit{qr.R}, respectively, applied to the resulting object. 
+
+
+
+
+
+
+
 
