@@ -867,10 +867,26 @@ Tuning for random-walk Metropolis (RWM) typically involves adjusting the varianc
 
 HMC can be significantly more complex than RWM due to the number and variety of tuning parameters in the HMC algorithm.  Like RWM with a multivariate Normal proposal, HMC uses a multviariate Normal parameterization for the latent momentum variable $p$.  While HMC may use an identity covariance matrix for $M$, tuning the diagonal and even off-diagonal parameters can improve the efficiency of sampling.  
 
-In addition to the covariance matrix $M$, HMC requires parameter selections for the step size $\epsilon$ and number of leapfrog steps $L$.  Setting $\epsilon$ and $L$ to low values, relative to the particular application, typically result in a high acceptance rate (e.g. greater than 95\%).  On the surface, accepting the vast majority of proposals may appear to be desirable.  However, the combination of a small step size with few leapfrog steps can create a MCMC chain that traverses the support of $\Theta$ very slow.  The evidence of inappropriately small values for these tuning parameters is a trace plot that exhibits a high degree of autocorrelation.  
+In addition to the covariance matrix $M$, HMC requires parameter selections for the step size $\epsilon$ and number of leapfrog steps $L$.  Setting $\epsilon$ and $L$ to low values, relative to the particular application, typically result in a high acceptance rate (e.g. greater than 95\%).  On the surface, accepting the vast majority of proposals may appear to be desirable.  However, the combination of a small step size with few leapfrog steps can create a MCMC chain that traverses the support of $\Theta$ very slow.  The evidence of inappropriately small values for these tuning parameters is a trace plot that exhibits a high degree of autocorrelation. 
 
+Generally, the step size should be set as high as possible to balance the acceptance rate and minimize autocorrelation.  An acceptance rate of approximately 60 - 90\% often produces MCMC chains that converge sufficiently quickly.  While $\epsilon$ and $L$ may be tuning jointly, the step size is often selected first, followed by fine-tuning with the number of steps per leapfrog $L$.  
 
+A general approach to tuning HMC is provided here:
 
+\begin{enumerate}
+\item Set the stepsize to an initial value such as $\epsilon = 1e-2$ with $L = 10$ and $M$ unit diagonal 
+\item Run a preliminary HMC chain and compute the acceptance rate. Adjust $\epsilon$ until the acceptance is between 0.6 and 0.9. 
+\item Check the autocorrelation for each parameter either visually or via direct calculation. For parameters with high autocorrelation, reduce the relevant value in the diagonal of $M$. This adjustment may decrease the acceptance rate. 
+\item If necessary, increase $L$ to further reduce autocorrelation in the simulation 
+\end{enumerate}
 
+Additional adjustments may be made to the tuning parameters beyond these steps.  The value of $\epsilon$ may be constant for each parameter in $(\theta_1, ..., \theta_k)$ in $\Theta$, but does not need to be.  The analyst may instead provide a vector $\epsilon:= \epsilon_1, ..., \epsilon_k$ with a different value for each $\epsilon_i \forall\; i \in 1...k$.  In the \textit{hmclearn} package, the \textit{hmc} function accepts single values and vectors for the parameter \textit{epsilon}.  
 
+The parameter for the number of steps $L$ must be a natural number.  However, the number of steps may be randomized in each simulation $1...N$ to ensure against a periodic Markov chain (which would violate the regularity conditions for ergodicity).  Further, some randomness may be applied to $\epsilon$ in each simulation step $1...N$ for additioanl assurance of an aperiodic chain.  Randomness can be automatically applied for $\epsilon$ and $L$ with logical parameter \textit{randlength} in the \textit{hmc} function.  
+
+Finally, we note that the popular No-U-Turn Sampler (NUTS) algorithm (cite paper) is a popular automated option for selecting $L$.  We avoid using NUTS in this paper as the emphasis here is more pedagogical.  The intent is to provide interested readers with tools to experiment with the core HMC algorithm to gain intuition on the particulars of the algorithm.  
+
+## QR Decomposition
+
+The efficiency of sampling in the standard HMC algorithm can be improved significantly in multivariate models when the parameters $(\theta_1, ..., \theta_k) \in \Theta$ have an orthogonal basis.  One common method of ensuring an orthogonal basis involves applying QR decomposition to the design matrix prior to applying HMC.  
 
