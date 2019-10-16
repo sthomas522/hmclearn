@@ -859,4 +859,18 @@ Parameter transformation such as the $log$ transform shown here is the most comm
 \end{itemize}
 \end{itemize}
 
+## Tuning
+
+Metropolis-Hastings and HMC each utilize parameters that must be tuned to efficiently simulate from the posterior distribution.  This is a matter of more practical importance than theoretical necessity.  In the limit, both MCMC algorithms will converge to the true posterior given infinite samples.  However, the converge rate of these algorithms varies substantially depending on how well the tuning parameters fit the application.
+
+Tuning for random-walk Metropolis (RWM) typically involves adjusting the variance parameterization of the proposal density.  Standardizing the design matrix to a common mean and variance can significantly simplify the tuning exercise.  For example, a multivariate Normal proposal may simply involve adjusting a scaler for the identity covariance matrix.  The analyst typically examines preliminary trace plots along with acceptance rate calculations to assess tuning effectiveness.
+
+HMC can be significantly more complex than RWM due to the number and variety of tuning parameters in the HMC algorithm.  Like RWM with a multivariate Normal proposal, HMC uses a multviariate Normal parameterization for the latent momentum variable $p$.  While HMC may use an identity covariance matrix for $M$, tuning the diagonal and even off-diagonal parameters can improve the efficiency of sampling.  
+
+In addition to the covariance matrix $M$, HMC requires parameter selections for the step size $\epsilon$ and number of leapfrog steps $L$.  Setting $\epsilon$ and $L$ to low values, relative to the particular application, typically result in a high acceptance rate (e.g. greater than 95\%).  On the surface, accepting the vast majority of proposals may appear to be desirable.  However, the combination of a small step size with few leapfrog steps can create a MCMC chain that traverses the support of $\Theta$ very slow.  The evidence of inappropriately small values for these tuning parameters is a trace plot that exhibits a high degree of autocorrelation.  
+
+
+
+
+
 
