@@ -913,6 +913,10 @@ $$
 
 In R software, the base functions \textit{qr} can be used to perform QR decomposition.  The $Q$ and $R$ matrices can be obtained from the R methods \textit{qr.Q} and \textit{qr.R}, respectively, applied to the resulting object. 
 
+# HMC in Statistical Models
+
+With a background of the HMC algorithm and its application to simple examples complete, we turn to more practical, real-world examples.  Generalized Linear Models (GLM) are a broad class of statistical models that use a linear function to relate the mean response to a set of independent variables.  Nonlinear functions of the mean can be accommodated through a specified link function.  
+
 
 
 
