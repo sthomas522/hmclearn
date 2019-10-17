@@ -12,6 +12,7 @@ header-includes:
   - \usepackage{algorithm}
   - \usepackage{algpseudocode}
   - \usepackage{enumitem}
+  - \usepackage{bm}
 ---
 
 ```{r, include = FALSE}
@@ -915,7 +916,43 @@ In R software, the base functions \textit{qr} can be used to perform QR decompos
 
 # HMC in Statistical Models
 
-With a background of the HMC algorithm and its application to simple examples complete, we turn to more practical, real-world examples.  Generalized Linear Models (GLM) are a broad class of statistical models that use a linear function to relate the mean response to a set of independent variables.  Nonlinear functions of the mean can be accommodated through a specified link function.  
+With a background of the HMC algorithm and its application to simple examples complete, we turn to more practical, real-world examples.  Generalized Linear Models (GLM) are a broad class of statistical models that use a linear function to relate the mean response to a set of independent variables.  Nonlinear functions of the mean can be accommodated through a specified link function.  While there are the number and types of models to which HMC can be applied are limitless, we will focus on GLM's in this introductory article.  
+
+The major steps required to fit a statistical model are summarized below.  We will elaborate on what is required for each step in this process.  
+
+\begin{enumerate}
+\item Specify model
+\item Derive log posterior
+\item Re-parameterize parameters as needed (i.e. log transforms)
+\item Derive gradient of the log posterior
+\item Code functions for log posterior and gradient
+\item Tune HMC parameters with trial runs
+\item Run HMC
+\item Statistical inference
+\end{enumerate}
+
+## Step 1:  Specify model
+
+The general form of a GLM can be specified (cite Agresti GLM book)
+
+$$
+g[E(y)] = \pmb{X}\bm{\beta}
+$$
+
+Here, we consider $\bm{\beta}$ our parameter of interest, such that $\Theta := \bm{\beta}$.  The linear predictor of the GLM is the product of the design matrix $(\pmb{x}_1, ..., \pmb{x}_k) \in \pmb{X}$ for $i = 1, .., n$ observations, and the parameter vector $(\beta_1, ..., \beta_k) \in \bm{\beta}$.  A link function $g(\cdot)$ relates the linear predictor to the mean response.  For a linear regression model, $g(\cdot)$ is the identity function, such that $E(y) = \pmb{X}\bm{\beta}$.  
+
+## Step 2:  Derive log posterior
+
+The log posterior is comprised of the sum of the log likelihood of the model and the log prior.    In general, the likelihood can be written based on the inverse of the selected link function.  
+$$
+f(y; \bm{\beta}) = g^{-1}(\pmb{X}\bm{\beta}) = p(y | \pmb{X}\bm{\beta})
+$$
+
+The likelihood functions for standard GLM's are readily available from statistical texts on the subject.  
+
+Once the likelihood is defined, the prior must be selected for the parameter of interest.  Unlike more restrictive algorithms such as Gibbs, the analyst has a substantial degree of flexibility in prior selection for HMC.  Depending on the application, the form of the prior may be defined as restricted within a certain range when known in advance.  
+
+Alternatively, the prior is defined as vague over the support of $\bm{\beta}$.  For example, when $\bm{\beta}$ may be any real number, a vague prior may be a multivariate Normal with high variance.  The resulting prior density would be flat over all practical values of the parameter of interest.
 
 
 
@@ -924,3 +961,8 @@ With a background of the HMC algorithm and its application to simple examples co
 
 
 
+
+
+
+
+  
