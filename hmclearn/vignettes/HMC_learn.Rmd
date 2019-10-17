@@ -985,6 +985,17 @@ One approach to testing the accuracy of a custom gradient function is to use a p
 
 While finite differencing is appropriate for checking the accuracy of coding the gradient, such approximations are typically not sufficiently accurate for use in an HMC simulation.  Further, gradient approximation is typically slower than a direct gradient function.  Since the gradient must be calculated for each iteration of the leapfrog algorithm, a slower approximation function can substantially increase the computation time for HMC.  
 
+## Step 6:  Tune HMC parameters with trial runs
+
+Tuning HMC involves adjusting $M$, $\epsilon$, and $L$ for the particular application.  The tuning process detailed in the previous section can be used as a guide to set the parameters.  
+
+Trial runs will have fewer samples than the full simulation, but should have sufficient number of samples to assess the acceptance rate and stationarity of the simulation.  Note that the acceptance rate in trial runs may be higher than the rate during the full simulation.  This can occur when the initial values are distant from the region of high posterior density. 
+
+One common approach in any MCMC is to allow a certain burn-in period before assessing the stationarity of the simulation.  This period can typically be determined with trial trace plots.  The required number of simulations in the burn-in period will typically be inversely related to the combined length defined by the tuning parameters.  Higher values of $\epsilon$ and $L$ will move the chain quickly to the highest posterior region, while lower values will approach more slowly. 
+
+
+
+
 
 
 
