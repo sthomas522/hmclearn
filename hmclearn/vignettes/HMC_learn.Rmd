@@ -928,7 +928,6 @@ The major steps required to fit a statistical model are summarized below.  We wi
 \item Code functions for log posterior and gradient
 \item Tune HMC parameters with trial runs
 \item Run HMC
-\item Statistical inference
 \end{enumerate}
 
 ## Step 1:  Specify model
@@ -993,8 +992,22 @@ Trial runs will have fewer samples than the full simulation, but should have suf
 
 One common approach in any MCMC is to allow a certain burn-in period before assessing the stationarity of the simulation.  This period can typically be determined with trial trace plots.  The required number of simulations in the burn-in period will typically be inversely related to the combined length defined by the tuning parameters.  Higher values of $\epsilon$ and $L$ will move the chain quickly to the highest posterior region, while lower values will approach more slowly. 
 
+## Step 7:  Run HMC
 
+After the parameters have been tuned, a full HMC simulation can be run.  Analysts often run multiple chains with different initial values.  Most production software packages allow these chains to be run in parallel.   For \textit{hmclearn}, parallelization can be accomplished using contributed R packages for the user's particular platform (e.g. Windows, mac OS, linux).
 
+Once the simulation is complete, readily available diagonstics can be used to assess the convergence of the Markov chain.  In R, the \textit{coda} package provides a number of standard diagnostics, such as the Geweke (1992) and Gelman and Rubin (1992) diagnostics.  The \textit{bayesplot} package also provides graphical functions to assess convergence. 
+
+After the HMC simulation is complete and convergence has been assessed, the simulations can be used for statistical inference.  
+
+# HMC example
+
+```{r, echo=TRUE}
+head(warpbreaks)
+
+summary(warpbreaks)
+
+```
 
 
 
