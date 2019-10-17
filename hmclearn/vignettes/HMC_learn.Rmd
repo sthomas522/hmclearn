@@ -954,7 +954,36 @@ Once the likelihood is defined, the prior must be selected for the parameter of 
 
 Alternatively, the prior is defined as vague over the support of $\bm{\beta}$.  For example, when $\bm{\beta}$ may be any real number, a vague prior may be a multivariate Normal with high variance.  The resulting prior density would be flat over all practical values of the parameter of interest.
 
+Once the log likelihood is defined and the prior is selected, the log posterior may be written
 
+$$
+\log p(\bm\beta | y, \pmb{X}) = \log p(y | \pmb{X}\bm{\beta}) + \log p(\bm{\beta})
+$$
+
+
+## Step 3:  Re-parameterize parameters as needed (i.e. log transforms)
+
+This step should always be considered, but may not be necessary depending on the particular model.  Typically, any standard deviation or variance parameters would be restricted to positive real numbers.  These would need to either be re-parameterized or the constrained HMC leapfrog would need to be used.  
+
+A logistic regression model, for example, would only have the parameter vector for $\bm{\beta}$, for which the support can be the entirely real number line.  A linear regression model has an error term $\sigma^2$ which is strictly positive.  Fitting an HMC without considering the support of $\sigma^2$ could result in the MCMC chain selecting a negative sample.  In such a case, the samples would no longer be valid for the parameter of interest and the algorithm would likely produce an error.  
+
+When re-parameterization is necessary, it is important to include the Jacobian adjustment for new parameter.  Detailed explanation of a change of variables can be found in standard statistical texts.  
+
+## Step 4:  Derive gradient of the log posterior
+
+Since the gradient is a linear operator, the gradient of the log posterior is equivalent to the sum of the gradient of the log likelihood and the gradient of the log prior.  One may derive the gradient of the log likelihood and log prior each individually, in preparation for coding functions for these elements individually.  
+
+Note that if testing multiple prior distributions is desired, the gradient must be derived for each prior distribution to be tested.  
+
+## Step 5:  Code functions for the log posterior and gradient
+
+Once the log posterior and gradient are formed, they must be coded into separate R functions.  This process often requires some iteration and debugging, particularly for complex likelihood functions.  
+
+While the forms of the log likelihood and log prior can often be found from standard sources, the gradient may not be as readily available.  As such, the analyst should test the gradient function at several values to ensure that it is returning the correct result.  
+
+One approach to testing the accuracy of a custom gradient function is to use a package that uses finite differencing or some variant to approximate the gradient given a general function.  The R package \textit{pracma} contains functions that can be useful in this regard.  
+
+While finite differencing is appropriate for checking the accuracy of coding the gradient, such approximations are typically not sufficiently accurate for use in an HMC simulation.  Further, gradient approximation is typically slower than a direct gradient function.  Since the gradient must be calculated for each iteration of the leapfrog algorithm, a slower approximation function can substantially increase the computation time for HMC.  
 
 
 
