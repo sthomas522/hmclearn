@@ -1010,9 +1010,120 @@ summary(warpbreaks)
 ```
 
 
+Frequentist version of lm model with warpbreaks
+
+```{r, echo=TRUE, eval=TRUE}
+fm1 <- lm(breaks ~ wool*tension, data=warpbreaks)
+summary(fm1)
+
+```
+
+Use HMC to fit the same model
+
+Likelihood function for linear regression
+
+$$
+p(y | X, \beta; \sigma^2) = \frac{1}{(2\pi\sigma^2)^{n/2}}\exp{\left(-\frac{1}{2\sigma^2} (y - X\beta)^T(y-X\beta) \right)}
+$$
+
+The posterior for $\beta$ and $\sigma^2$
+
+$$
+\begin{aligned}
+p(\beta, \sigma^2|y; X) &\propto p(y|X, \beta, \sigma^2) p(\beta, \sigma^2) \\
+&\propto p(y|X, \beta, \sigma^2)p(\beta)p(\sigma^2)
+\end{aligned}
+$$
+
+Flat prior for $\beta$ and Inverse Gamma for $\sigma^2$
+
+$$
+\begin{aligned}
+p(\beta) &\propto const \\
+p(\sigma^2) &\sim IG(a, b)
+\end{aligned}
+$$
+
+pdf for $\sigma^2$ prior
+
+$$
+p(\sigma^2) = \frac{b^a}{\Gamma(a)} (\sigma^2)^{-a-1} \exp\left(-\frac{b}{\sigma^2} \right)
+$$
+
+Log-transform $\sigma^2$ to allow proposals across entire real number line
+
+$$
+\begin{aligned}
+\gamma &= \log \sigma^2 \\
+\sigma^2 &= g^{-1}(\gamma) = e^\gamma \\
+p_\gamma(\gamma) &= p_{\sigma^2}(g^{-1}(\gamma))\left\lvert \frac{d\sigma^2}{d\gamma} \right\rvert \\
+&= \frac{b^a}{\Gamma(a)}(e^\gamma)^{-a-1} \exp\left(-\frac{b}{\sigma^2} \right) \left\lvert e^\gamma  \right\rvert \\
+&= \frac{b^a}{\Gamma(a)}e^{-a\gamma}\exp\left(-\frac{b}{e^\gamma} \right) \\
+&\propto e^{-a\gamma}\exp\left(-\frac{b}{e
+^\gamma} \right) \\
+\log p(\gamma) &\propto -a\gamma - be^{-\gamma}
+\end{aligned}
+$$
+
+The posterior for $\beta$ and $\gamma$
+
+$$
+\begin{aligned}
+p(\beta, \gamma|y, X) &\propto p(y|X, \beta, \gamma) p(\beta, \gamma) \\
+&\propto p(y|X, \beta, \gamma)p(\beta)p(\gamma) \\
+&\propto \frac{1}{(2\pi e^\gamma)^{n/2}}\exp{\left(-\frac{1}{2 e^\gamma} (y - X\beta)^T(y-X\beta) \right)} e^{-a\gamma}\exp\left(-\frac{b}{e^\gamma} \right) \\
+&\propto \frac{e^{-\gamma n/2}}{(2\pi)^{n/2}}\exp{\left(-\frac{e^{-\gamma}}{2} (y - X\beta)^T(y-X\beta) \right)} e^{-a\gamma} e^{-b e^{-\gamma}} \\
+\log p(\beta, \gamma | y, X) &\propto -\frac{\gamma n}{2} -\frac{e^{-\gamma}}{2} (y - X\beta)^T(y-X\beta) - a\gamma - b e^{-\gamma}  \\
+&\propto -\left(\frac{n}{2} + a \right)\gamma  -\frac{e^{-\gamma}}{2} (y - X\beta)^T(y-X\beta)- b e^{-\gamma}
+\end{aligned}
+$$
+
+Prepare data for analysis
+
+```{r, echo=TRUE, eval=TRUE}
+X <- model.matrix(breaks ~ wool*tension, data=warpbreaks)
+y <- warpbreaks$breaks
+
+```
+
+There are 6 $\beta$ parameters in this model and one $\epsilon$ parameter.
+
+```{r, echo=TRUE, eval=TRUE}
+dim(X)
+
+```
+
+```{r, echo=TRUE, eval=TRUE}
+N <- 10000
+set.seed(143)
+
+eps_vals <- c(rep(2e-1, 6), 2e-2)
+
+fm1_hmc <- hmc(N, theta.init = c(rep(0, 6), 1), epsilon = eps_vals, L = 10, 
+                   logPOSTERIOR = linear_posterior, 
+                   glogPOSTERIOR = g_linear_posterior, y=y, X=X, 
+                   varnames = c(colnames(X), "log_sigma_sq"))
+
+```
+
+Summarize fit
+
+```{r, echo=TRUE, eval=TRUE}
+fm1_hmc$accept
+
+summary(fm1_hmc)
 
 
+```
 
+Plot fit
+
+```{r, echo=TRUE, eval=TRUE}
+beta_freq <- coef(fm1)
+eps_freq <- 2*log(sigma(fm1))
+plot(fm1_hmc, actual.mu = c(beta_freq, eps_freq))
+
+```
 
 
 
