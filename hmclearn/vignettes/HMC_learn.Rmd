@@ -1265,3 +1265,203 @@ Diagnostic plots
 plot(fm2_hmc, actual.mu=coef(fm2))
 
 ```
+
+## Mixed effects model
+
+Sophisticated Mixed Effects are also possible using the HMCinR package (may rename).  
+
+Poisson distribution
+
+$$
+p(y; \mu) = \frac{e^{-\mu}\mu^y}{y!}
+$$
+
+Log link function.  We have $i = 1...n$ observations and $j = 1...m$ groups.
+
+$$
+\begin{aligned}
+\mu &:= E(Y | X, Z) = e^{X\beta + Zu} \\
+\log \mu &= X\beta + Zu
+\end{aligned}
+$$
+
+Develop the likelihood
+
+$$
+\begin{aligned}
+L(\mu; y) &= \prod_{i=1}^n \prod_{j=1}^m \frac{e^{-\mu_{ij}}\mu_i^{y_{ij}}}{y_{ij}!} \\
+L(\beta; y, X) &= \prod_{i=1}^n \prod_{j=1}^m \frac{e^{-e^{X_i\beta + Z_{ij}u_{ij}}}e^{y_i(X_i\beta + Z_{ij}u_{ij})}}{y_i!} \\
+\end{aligned}
+$$
+
+with log-likelihood
+
+$$
+\begin{aligned}
+l(\beta; y, X) &=  -e^{\sum_{i=1}^n \sum_{j=1}^m X_{i}\beta + Z_{ij}u_{ij]}} + y_{ij} (X_i \beta + Z_{ij}u_{ij}) - \log y_{ij}! \\
+&\propto -e^{\sum_{i=1}^n \sum_{j=1}^m X_{i}\beta + Z_{ij}u_{ij]}} + y_{ij} (X_i \beta + Z_{ij}u_{ij}) \\
+&\propto -e^{\sum_{ij} X\beta + Zu} + y^T(X\beta + Zu)
+\end{aligned}
+$$
+
+We set a multivariate Normal prior for $\beta$
+
+$$
+\begin{aligned}
+\beta &\sim N(0, \Sigma_\beta) \\
+&\sim N(0, BI)
+\end{aligned}
+$$
+
+
+With pdf
+
+$$
+\begin{aligned}
+p(\beta) &= \frac{1}{\sqrt{\lvert 2\pi \Sigma_\beta \rvert }}e^{-\frac{1}{2}\beta^T \Sigma_\beta^{-1}\beta} \\
+\log p(\beta) &= -\frac{1}{2}\log(2\pi \lvert \Sigma_\beta \rvert) - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta \\
+&\propto -\frac{1}{2}\log \lvert\Sigma_\beta\rvert - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta
+\end{aligned}
+$$
+
+Let $B = 1e3$ for instance, as a relatively uniformative prior.
+
+Gopher tortoise data source 
+
+The data are from Ozgul et al. 2009 “Upper respiratory tract disease, force of infection, and effects on survival of gopher tortoises” Ecological Applications 19(3), 786-798.
+
+https://ms.mcmaster.ca/~bolker/R/misc/foxchapter/bolker_chap.html
+
+
+```{r, echo=TRUE}
+library(lme4)
+
+# Gopher data
+data(gopherdat2)
+
+# omit area offset
+fm3 <- glmer(shells~prev+factor(year)+(1|Site),
+      family=poisson,data=Gdat,
+      control=glmerControl(optimizer="bobyqa",
+                           check.conv.grad=.makeCC("warning",0.05)))
+
+
+summary(fm3)
+
+```
+
+Setup data for HMC
+
+```{r, echo=TRUE, eval=TRUE}
+library(Matrix)
+
+##########
+# block diagonal
+Zi.lst <- split(rep(1, nrow(Gdat)), Gdat$Site)
+Zi.lst <- lapply(Zi.lst, as.matrix)
+Z <- bdiag(Zi.lst)
+Z <- as.matrix(Z)
+X <- model.matrix(~ factor(year), data=Gdat)
+X <- cbind(X, Gdat$prev)
+colnames(X)[ncol(X)] <- "prev"
+colnames(X) <- make.names(colnames(X))
+colnames(X)[1] <- "intercept"
+y <- Gdat$shells
+p <- ncol(X)
+
+```
+
+
+
+Test gradient
+
+```{r, echo=TRUE, eval=T}
+library(pracma)
+library(numDeriv)
+set.seed(143)
+thetaInit <- c(rnorm(4), 
+                rnorm(10, mean=0, sd=1e-3), 
+                -2)
+
+test1 <- g_glmm_poisson_posterior(thetaInit, y=y, X=X, Z=Z, m=10, q=1, nuxi=4, Axi=1)
+
+test2 <- numDeriv::grad(func=glmm_poisson_posterior, x=thetaInit, 
+                        side=NULL, method.args=list(), y=y, X=X, Z=Z, nuxi=4, Axi=1)
+
+cbind(test1, test2)
+all.equal(test1,test2)
+
+```
+
+QR decomposition of design matrix
+
+STAN manual section 9.2 The QR Reparameterization
+
+Let $\theta = R^*\beta$ (below).  The HMC estimates $\theta$, from which we can use the deterministic formula to determine $\beta$
+
+$$
+\begin{aligned}
+X &= Q^* R^* \\
+Q^* &= Q \cdot \sqrt{n-1} \\
+R^* &= \frac{1}{\sqrt{n-1}}R \\
+X\beta &= Q^* R^* \beta \\
+\beta &= R^{*^{-1}}\theta
+\end{aligned}
+$$
+
+```{r, echo=TRUE}
+xqr <- qr(X)
+Q <- qr.Q(xqr)
+R <- qr.R(xqr)
+
+n <- nrow(X)
+X2 <- Q * sqrt(n-1)
+Rstar <- R / sqrt(n-1)
+Rstar_inv <- solve(Rstar)
+colnames(X2) <- colnames(X)
+
+# new intercept from QR decomposition
+diagval <- X2[1,1]
+
+
+##########
+# block diagonal
+Zi.lst <- split(rep(diagval, nrow(Gdat)), Gdat$Site)
+Zi.lst <- lapply(Zi.lst, as.matrix)
+Z2 <- bdiag(Zi.lst)
+Z2 <- as.matrix(Z2)
+
+```
+
+Run HMC for poisson regression model
+
+Small data set.  We use a more informative prior on the random effects variance.  Per STAN's recommendation, we use a half-t prior with 4 degrees of freedom and scale parameter of 1.  
+
+https://github.com/stan-dev/stan/wiki/Prior-Choice-Recommendations
+
+
+```{r, echo=TRUE}
+Mruns <- 5e5
+
+set.seed(412)
+initvals <- c(rep(0, 4), 
+                rnorm(10, mean=0, sd=1e-3), 
+                0)
+
+
+M_vals <- c(1e-3, 1e-3, 1e-3, 1, 
+            rep(1e-3, 10), 
+            1e-3)
+
+t1.hmc <- Sys.time()
+
+res <- hmc(N = Mruns, theta.init = initvals, epsilon = 1e-4, L = 10, 
+                    logPOSTERIOR  = glmm_poisson_posterior, 
+                    Mdiag = M_vals, 
+                    glogPOSTERIOR  = g_glmm_poisson_posterior, 
+                    y = y, X=X, Z=Z, m=10, q=1, nuxi=1, Axi=25) 
+
+t2.hmc <- Sys.time()
+t2.hmc - t1.hmc
+res$accept/Mruns
+```
