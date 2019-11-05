@@ -83,10 +83,10 @@ leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, Minv, co
   g.ld <- glogPOSTERIOR(theta_lf,  ...)
 
   # first momentum update
-  r.new <- r + epsilon/2*g.ld
+  r.new <- as.numeric(r) + epsilon/2*g.ld
 
   # theta update
-  theta.new <- theta_lf + as.numeric(epsilon* Minv %*% r.new)
+  theta.new <- theta_lf + as.numeric(epsilon* Minv %*% t(r.new))
 
   # check positive
   switch_sign <- constrain & theta.new < 0
