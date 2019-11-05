@@ -1000,7 +1000,11 @@ Once the simulation is complete, readily available diagonstics can be used to as
 
 After the HMC simulation is complete and convergence has been assessed, the simulations can be used for statistical inference.  
 
-# HMC example
+# HMC examples
+
+We demonstrate fitting HMC models in R with three examples of increasing complexity.  
+
+## Linear Regression
 
 ```{r, echo=TRUE}
 head(warpbreaks)
@@ -1124,6 +1128,11 @@ eps_freq <- 2*log(sigma(fm1))
 plot(fm1_hmc, actual.mu = c(beta_freq, eps_freq))
 
 ```
+
+
+## Logistic Regression
+
+Next, we consider an example from Collett (1991, p.75) Modeling Binary Data.  First, we fit a logistic regression using the frequentist \textit{glm} function in R.  Next, we fit the same model using HMC, and then compare results.  
 
 
 
