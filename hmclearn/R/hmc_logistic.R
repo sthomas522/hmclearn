@@ -7,9 +7,10 @@ pfun_logistic <- function(PARAM, ...) {
 }
 
 # prior for beta is mean 0 with diagonal covariance B^-1
+#' @export
 logistic_posterior <- function(theta, y, X, B=0.01) {
   k <- length(theta)
-  beta_param <- theta
+  beta_param <- as.numeric(theta)
 
   nu <- diag(1/B, k, k)
   inv.nu <- diag(B, k, k)
@@ -33,9 +34,11 @@ log_lik_bin <- function(beta_param, y, X) {
 
 
 # gradient of the log posterior for hmc
+#' @export
 g_logistic_posterior <- function(beta, y, X, B=0.01) {
   n <- length(y)
   k <- length(beta)
+  beta <- as.numeric(beta)
 
   nu <- diag(1/B, k, k)
   inv.nu <- diag(B, k, k)

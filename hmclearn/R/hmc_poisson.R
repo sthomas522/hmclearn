@@ -7,6 +7,7 @@ pfun_poisson <- function(PARAM, ...) {
 }
 
 # prior for beta is mean 0 with diagonal covariance B^-1
+#' @export
 poisson_posterior <- function(theta, y, X, B=0.01) {
   k <- length(theta)
   beta_param <- theta
@@ -30,6 +31,7 @@ log_lik_poisson <- function(beta_param, y, X) {
 }
 
 # gradient of the log posterior for hmc
+#' @export
 g_poisson_posterior <- function(beta_param, y, X, B=0.01) {
   n <- length(y)
   k <- length(beta_param)

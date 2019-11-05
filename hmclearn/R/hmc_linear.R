@@ -1,6 +1,7 @@
+#' @export
 linear_posterior <- function(theta, y, X, a=1e-4, b=1e-4) {
   k <- length(theta)
-  beta_param <- theta[1:(k-1)]
+  beta_param <- as.numeric(theta[1:(k-1)])
   gamma_param <- theta[k]
 
   n <- nrow(X)
@@ -8,10 +9,11 @@ linear_posterior <- function(theta, y, X, a=1e-4, b=1e-4) {
     (y - X%*%beta_param) - b*exp(-gamma_param)
 }
 
+#' @export
 g_linear_posterior <- function(theta, y, X, a=1e-4, b=1e-4) {
   # parameters
   k <- length(theta)
-  beta_param <- theta[1:(k-1)]
+  beta_param <- as.numeric(theta[1:(k-1)])
   gamma_param <- theta[k]
   n <- nrow(X)
 

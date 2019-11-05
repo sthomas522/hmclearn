@@ -11,6 +11,7 @@
 #    first argument is where to evaluate, and second argument is the conditional parameter
 # pFUN:  function to calculate probabilities of proposals (e.g. log likelihood)
 # ... additional parameters for pFUN
+#' @export
 mh <- function(N, paramInit, qPROP, qFUN, pdFUN, nu, ...) {
   paramSim <- list()
   paramSim[[1]] <- paramInit
@@ -83,10 +84,10 @@ leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, Minv, co
   g.ld <- glogPOSTERIOR(theta_lf,  ...)
 
   # first momentum update
-  r.new <- as.numeric(r) + epsilon/2*g.ld
+  r.new <- as.numeric(r + epsilon/2*g.ld)
 
   # theta update
-  theta.new <- theta_lf + as.numeric(epsilon* Minv %*% t(r.new))
+  theta.new <- theta_lf + as.numeric(epsilon* Minv %*% r.new)
 
   # check positive
   switch_sign <- constrain & theta.new < 0
@@ -112,6 +113,7 @@ leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, Minv, co
 # epsilon:  step size
 # logPOSTERIOR:  log of joint density of parameter of interest
 # ...:  additional parameters to pass to logPOSTERIOR
+#' @export
 hmc <- function(N, theta.init, epsilon, L, logPOSTERIOR, glogPOSTERIOR, varnames=NULL,
                 randlength=FALSE, Mdiag=NULL, constrain=NULL, verbose=FALSE, ...) {
 
@@ -206,7 +208,7 @@ hmc <- function(N, theta.init, epsilon, L, logPOSTERIOR, glogPOSTERIOR, varnames
   return(obj)
 }
 
-
+#' @export
 diagplots <- function(result, actual.mu=NULL, burnin=100) {
 
   thetaDFsubs <- result$thetaDF[-c(1:burnin), ]
@@ -250,7 +252,7 @@ diagplots <- function(result, actual.mu=NULL, burnin=100) {
   list(p1, p2)
 }
 
-
+#' @export
 summary.hmclearn <- function(x, burnin=100, probs=c(0.05, 0.25, 0.5, 0.75, 0.95), ...) {
   cat("Summary of HMC simulation\n\n")
 
@@ -258,6 +260,7 @@ summary.hmclearn <- function(x, burnin=100, probs=c(0.05, 0.25, 0.5, 0.75, 0.95)
   t(apply(thetaDF, 2, quantile, probs=probs, ...))
 }
 
+#' @export
 plot.hmclearn <- function(x, ...) {
   diagplots(x, ...)
 }

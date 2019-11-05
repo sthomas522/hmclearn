@@ -24,6 +24,7 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(hmclearn)
+library(MASS)
 ```
 
 # Introduction
@@ -1206,6 +1207,21 @@ X <- model.matrix(low ~ age + lwt + race2 + smoke + ptd + ht + ui + ftv2,
                   data = birthwt2)
 y <- birthwt2$low
 ```
+
+Variables of interest in this dataset are:
+
+\begin{itemize}
+\item low:  birth weight less than 2.5kg (0/1)
+\item age:  age of mother (yrs)
+\item lwt:  weight of mother (lbs)
+\item race2:  factor white/black/other
+\item smoke:  smoking indicator (0/1)
+\item ptd:  premature labor indicator (0/1)
+\item ht:  history of hypertension indicator (0/1)
+\item ui:  uterine irritability indicator (0/1)
+\item ftv2:  number of physician visits factor (0, 1, 2 or more)
+\end{itemize}
+
 
 Next, fit the logistic regression using the frequentist \textit{glm} function in R.
 
