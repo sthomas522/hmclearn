@@ -1534,7 +1534,7 @@ Small data set.  We use a more informative prior on the random effects variance,
 
 
 ```{r, echo=TRUE, eval=TRUE}
-N <- 5e3
+N <- 1e5
 
 set.seed(412)
 initvals <- c(rep(0, 4), 
@@ -1546,12 +1546,16 @@ M_vals <- c(1e-3, 1e-3, 1e-3, 1,
             rep(1e-3, 10), 
             1e-3)
 
+
+
 t1.hmc <- Sys.time()
 
-res <- hmc(N = N, theta.init = initvals, epsilon = 1e-4, L = 10, 
+eps_vals <- c(rep(1e-3, 3), 1e-4, rep(2e-4, 11))
+
+res <- hmc(N = N, theta.init = initvals, epsilon = eps_vals, L = 10, 
                     logPOSTERIOR  = glmm_poisson_posterior, 
                     Mdiag = M_vals, 
-                    varnames=c(colnames(X), paste0("u", 1:ncol(Z))),
+                    varnames=c(colnames(X), paste0("u", 1:ncol(Z)), "lambda"),
                     glogPOSTERIOR  = g_glmm_poisson_posterior, 
                     y = y, X=X, Z=Z, m=10, nuxi=1, Axi=25) 
 
@@ -1564,7 +1568,7 @@ res$accept/N
 ```
 
 ```{r, echo=TRUE, eval=TRUE}
-N <- 5e5
+N <- 1e5
 mypath <- '/Users/samthomas/biostat'
 res <- readRDS(paste(mypath, 'example3.RData', sep='/'))
 
@@ -1589,7 +1593,9 @@ calc_beta <- function(theta_param, Rstarinv) {
 
 
 ```{r,echo=TRUE}
-plot(res, burnin=round(0.3*N), actual.mu=truevals_fixed, cols=1:ncol(X))
+# plot(res, burnin=round(0.3*N), actual.mu=truevals_fixed, cols=1:ncol(X))
 
+# plot(res, actual.mu = truevals_fixed, cols=1:4)
+plot(res)
 ```
 
