@@ -211,7 +211,11 @@ hmc <- function(N, theta.init, epsilon, L, logPOSTERIOR, glogPOSTERIOR, varnames
 }
 
 #' @export
-diagplots <- function(result, actual.mu=NULL, burnin=100) {
+diagplots <- function(result, actual.mu=NULL, burnin=100, cols=NULL) {
+
+  if (is.null(cols)) {
+    cols <- 1:ncol(result$thetaDF)
+  }
 
   thetaDFsubs <- result$thetaDF[-c(1:burnin), ]
   pdata <- thetaDFsubs

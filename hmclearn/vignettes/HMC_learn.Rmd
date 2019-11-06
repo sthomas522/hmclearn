@@ -1474,6 +1474,19 @@ summary(fm3)
 
 ```
 
+Store Frequentist estimates
+
+```{r, echo=TRUE, eval=TRUE}
+truevals_fixed <- c(fixef(fm3))
+truevals_fixed <- truevals_fixed[c(1, 3, 4, 2)]
+truevals_random <- as.numeric(ranef(fm3)$Site[, 1])
+truevals <- c(truevals_fixed, truevals_random, 
+              log(sqrt(as.numeric(VarCorr(fm3)$Site[, 1]))))
+  # sqrt(as.numeric(VarCorr(fm3)$Site[, 1])))
+nvar <- length(truevals)
+
+```
+
 Setup data for HMC
 
 ```{r, echo=TRUE, eval=TRUE}
@@ -1564,7 +1577,7 @@ Small data set.  We use a more informative prior on the random effects variance.
 https://github.com/stan-dev/stan/wiki/Prior-Choice-Recommendations
 
 
-```{r, echo=TRUE}
+```{r, echo=TRUE, eval=FALSE}
 Mruns <- 5e5
 
 set.seed(412)
@@ -1585,7 +1598,53 @@ res <- hmc(N = Mruns, theta.init = initvals, epsilon = 1e-4, L = 10,
                     glogPOSTERIOR  = g_glmm_poisson_posterior, 
                     y = y, X=X, Z=Z, m=10, q=1, nuxi=1, Axi=25) 
 
+mypath <- '/Users/samthomas/biostat/hmclearn/hmclearn'
+saveRDS(res, file = paste(mypath, "example3.RData", sep="/"))
+
 t2.hmc <- Sys.time()
 t2.hmc - t1.hmc
 res$accept/Mruns
 ```
+
+```{r, echo=TRUE, eval=TRUE}
+N <- 5e5
+mypath <- '/Users/samthomas/biostat'
+res <- readRDS(paste(mypath, 'example3.RData', sep='/'))
+
+```
+
+
+Original $\beta$ parameter
+
+$$
+\beta = R^{*^{-1}}\theta
+$$
+Obtain $\beta$ from QR decomposition
+
+```{r, echo=TRUE, eval=TRUE}
+# restore beta from Rstar in QR decomposition
+calc_beta <- function(theta_param, Rstarinv) {
+  as.numeric(Rstarinv %*% theta_param)
+}
+```
+
+```{r, echo=TRUE}
+res2 <- res
+
+p <- ncol(X)
+res2$thetaDF[, 1:p] <- t(apply(res2$thetaDF[, 1:p], 1, calc_beta, Rstarinv=Rstar_inv))
+
+
+```
+
+```{r, echo=TRUE}
+summary(res2)
+
+```
+
+
+```{r,echo=TRUE}
+plot(res, burnin=round(0.3*N), actual.mu=truevals)
+
+```
+
