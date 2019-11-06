@@ -1520,7 +1520,7 @@ thetaInit <- c(rnorm(4),
                 rnorm(10, mean=0, sd=1e-3), 
                 -2)
 
-test1 <- g_glmm_poisson_posterior(thetaInit, y=y, X=X, Z=Z, m=10, q=1, nuxi=4, Axi=1)
+test1 <- g_glmm_poisson_posterior(thetaInit, y=y, X=X, Z=Z, m=10, nuxi=4, Axi=1)
 
 test2 <- numDeriv::grad(func=glmm_poisson_posterior, x=thetaInit, 
                         side=NULL, method.args=list(), y=y, X=X, Z=Z, nuxi=4, Axi=1)
@@ -1595,6 +1595,7 @@ t1.hmc <- Sys.time()
 res <- hmc(N = Mruns, theta.init = initvals, epsilon = 1e-4, L = 10, 
                     logPOSTERIOR  = glmm_poisson_posterior, 
                     Mdiag = M_vals, 
+                    varnames=c(colnames(X), paste0("u", 1:ncol(Z))),
                     glogPOSTERIOR  = g_glmm_poisson_posterior, 
                     y = y, X=X, Z=Z, m=10, q=1, nuxi=1, Axi=25) 
 
@@ -1613,12 +1614,14 @@ res <- readRDS(paste(mypath, 'example3.RData', sep='/'))
 
 ```
 
-
+DELETE
 Original $\beta$ parameter
 
 $$
 \beta = R^{*^{-1}}\theta
 $$
+
+DELETE
 Obtain $\beta$ from QR decomposition
 
 ```{r, echo=TRUE, eval=TRUE}
@@ -1628,23 +1631,9 @@ calc_beta <- function(theta_param, Rstarinv) {
 }
 ```
 
-```{r, echo=TRUE}
-res2 <- res
-
-p <- ncol(X)
-res2$thetaDF[, 1:p] <- t(apply(res2$thetaDF[, 1:p], 1, calc_beta, Rstarinv=Rstar_inv))
-
-
-```
-
-```{r, echo=TRUE}
-summary(res2)
-
-```
-
 
 ```{r,echo=TRUE}
-plot(res, burnin=round(0.3*N), actual.mu=truevals)
+plot(res, burnin=round(0.3*N), actual.mu=truevals_fixed, cols=1:ncol(X))
 
 ```
 

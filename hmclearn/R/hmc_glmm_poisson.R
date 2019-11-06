@@ -63,6 +63,7 @@ g_glmm_poisson_posterior <- function(theta, y, X, Z, m=10, A = 1e4, B=1e4,
   Z <- as.matrix(Z)
   p <- ncol(X)
   n <- nrow(X)
+  q <- 1
 
   # prior covariance for beta
   Sig_beta <- diag(B, p, p)
@@ -139,6 +140,10 @@ g_glmm_poisson_posterior <- function(theta, y, X, Z, m=10, A = 1e4, B=1e4,
   #              as.numeric(g_tau),
   #              g_xi)
   # }
+
+  g_all <- c(as.numeric(g_beta),
+             as.numeric(g_tau),
+             g_xi)
 
   return(g_all)
 

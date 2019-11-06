@@ -217,7 +217,7 @@ diagplots <- function(result, actual.mu=NULL, burnin=100, cols=NULL) {
     cols <- 1:ncol(result$thetaDF)
   }
 
-  thetaDFsubs <- result$thetaDF[-c(1:burnin), ]
+  thetaDFsubs <- result$thetaDF[-c(1:burnin), cols]
   pdata <- thetaDFsubs
   pdata$t <- 1:nrow(pdata)
   pdata <- reshape(pdata,
