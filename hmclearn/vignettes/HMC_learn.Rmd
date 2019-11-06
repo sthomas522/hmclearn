@@ -1555,7 +1555,7 @@ res <- hmc(N = N, theta.init = initvals, epsilon = 1e-4, L = 10,
                     glogPOSTERIOR  = g_glmm_poisson_posterior, 
                     y = y, X=X, Z=Z, m=10, nuxi=1, Axi=25) 
 
-mypath <- '/Users/samthomas/biostat/hmclearn/hmclearn'
+mypath <- '/Users/samthomas/biostat'
 saveRDS(res, file = paste(mypath, "example3.RData", sep="/"))
 
 t2.hmc <- Sys.time()
