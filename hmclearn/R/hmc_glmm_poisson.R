@@ -58,7 +58,7 @@ glmm_poisson_posterior <- function(theta, y, X, Z, m=10, q=1, A = 1e4, B=1e4,
 }
 
 #' @export
-g_glmm_poisson_posterior <- function(theta, y, X, Z, m=10, q=1, A = 1e4, B=1e4,
+g_glmm_poisson_posterior <- function(theta, y, X, Z, m=10, A = 1e4, B=1e4,
                                      nuxi=1, Axi=25) {
   Z <- as.matrix(Z)
   p <- ncol(X)
@@ -122,23 +122,23 @@ g_glmm_poisson_posterior <- function(theta, y, X, Z, m=10, q=1, A = 1e4, B=1e4,
   g_xi <- g_xi - (nuxi + 1) / (1 + nuxi*Axi^2 * exp(-2*xi_param))
 
   # TODO:  gradient for a
-  if (q > 1) {
-    u_lst <- split(u_param, ceiling(seq_along(u_param)/q))
-    g_a1 <- sapply(u_lst, function(uvals) {
-      Uj <- create_Uj(uvals)
-      as.numeric(t(Uj) %*% Dinv %*% (uvals - Uj %*% a_param))
-    })
-    g_a <- - Ainv %*% a_param + rowSums(g_a1)
-
-    g_all <- c(as.numeric(g_beta),
-               as.numeric(g_u),
-               g_xi,
-               as.numeric(g_a))
-  } else {
-    g_all <- c(as.numeric(g_beta),
-               as.numeric(g_tau),
-               g_xi)
-  }
+  # if (q > 1) {
+  #   u_lst <- split(u_param, ceiling(seq_along(u_param)/q))
+  #   g_a1 <- sapply(u_lst, function(uvals) {
+  #     Uj <- create_Uj(uvals)
+  #     as.numeric(t(Uj) %*% Dinv %*% (uvals - Uj %*% a_param))
+  #   })
+  #   g_a <- - Ainv %*% a_param + rowSums(g_a1)
+  #
+  #   g_all <- c(as.numeric(g_beta),
+  #              as.numeric(g_u),
+  #              g_xi,
+  #              as.numeric(g_a))
+  # } else {
+  #   g_all <- c(as.numeric(g_beta),
+  #              as.numeric(g_tau),
+  #              g_xi)
+  # }
 
   return(g_all)
 

@@ -1269,7 +1269,6 @@ plot(fm2_hmc, actual.mu=coef(fm2))
 ## Mixed effects model
 
 Sophisticated Mixed Effects are also possible using the HMCinR package (may rename).  
-
 Poisson distribution
 
 $$
@@ -1326,11 +1325,136 @@ $$
 
 Let $B = 1e3$ for instance, as a relatively uniformative prior.
 
-Gopher tortoise data source 
 
-The data are from Ozgul et al. 2009 “Upper respiratory tract disease, force of infection, and effects on survival of gopher tortoises” Ecological Applications 19(3), 786-798.
+## Updated parameterization
 
-https://ms.mcmaster.ca/~bolker/R/misc/foxchapter/bolker_chap.html
+The distribution of the random effects are defined as normal with a mean of zero. 
+
+Note that in this parameterization, we directly decompose $G$ instead of $G^{-1}$ as in Chan and Jelikzhov (2009).
+
+$$
+\begin{aligned}
+u &\sim N(0, G)  \\
+G &= L D L^T \\
+&= L D^{1/2} D^{1/2} L^T \\
+\end{aligned}
+$$
+
+
+Let $\lambda_k$ where $k = 1, ... p$ denote the diagonal entries of $D^{1/2}$ and let $a_{kj}$ where $1 \leq j < k \leq p$ denote free elements of lower unitrangular matrix $L$
+
+$$
+D^{1/2} := 
+\begin{pmatrix}
+\lambda_1 & 0 & ... & 0 \\
+0 & \lambda_2 & 0 ... & 0 \\
+... & ... & ... & ... \\
+0 & 0 & ... & \lambda_p
+\end{pmatrix}, 
+L :=
+\begin{pmatrix}
+1 & 0 & 0 & ... & 0 \\
+a_{21} & 1 & 0 & ... & 0 \\
+a_{31} & a_{32} & 1 & ... & ... \\
+... & ... & ... & ... & ... \\
+a_{p1} & a_{p2} & ... & ... & 1 \\
+\end{pmatrix}
+$$
+
+Also define $\lambda := (\lambda_1, ..., \lambda_p)^T$ and $a_k := (a_{k1}, ..., a_{k, k-1})^T$ and $a := (a_2^T, ..., a_p^T)^T$.  
+
+For simplicity, we define $a_k = 0\;\; \forall k$ in this application.  $L$ then simplifies to the identity matrix.  
+
+Consider priors where $k = 1...p$.  The prior for $\lambda_k$ is half-t per Gelman (2006).  The previous parameterization was inverse gamma, which can be unintentionally informative for hierarchical models.  Another previous parameterization was uniform, which was also recommended by Gelman for more than 3 groups, but has the consequence of a positive bias.  
+
+Prior distributions for variance parameters in hierarchical models.  Andrew Gelman (2006)
+
+We use a half-t prior for standard deviation $\lambda_k$
+
+$$
+\begin{aligned}
+p(\lambda_k) &\sim \left(1 + \frac{1}{\nu}\left(\frac{\lambda_k}{A} \right)^2 \right)^{-(\nu+1)/2} 
+\end{aligned}
+$$
+
+In prior parameterizations, we directly defined the likelihood of the random effects $u$.  Per Betancourt, Girolami (2013), we re-parameterize $u$ using a standard normal parameterization we define as $\tau = (\tau_1, ..., \tau_q)$.  Here, $u$ is a deterministic function of $G$ and $\tau$.
+
+$$
+\begin{aligned}
+\tau &\sim N(0, I_q) \\
+u &:= L D^{1/2} \tau \\
+&\sim N(0, LD^{1/2} I (L D^{1/2})^T) \\
+&\sim N(0, L D^{1/2} D^{1/2} L^T) \\
+&\sim N(0, G)
+\end{aligned}
+$$
+
+The distribution of $u$ therefore does not change with this parameterization.  The intent of our re-parameterization is to allow $G$ and $\tau$ to be largely independent in the MCMC sampling.  
+
+Now derive the log posterior
+
+Bayes rule to derive log posterior
+
+$$
+\begin{aligned}
+p(\beta, u, G | y, X, Z) &\propto p(y | \beta, u, G)  p(\beta, u, G) \\
+&\propto p(y|\beta, u, G) p(\beta) p(u|G) p(G) \\
+\log p(\beta, u, G | y, X, Z) &\propto \log p(y|\beta, u, G) + \log p(\beta) + \log p(u|G) + \log p(G)
+\end{aligned}
+$$
+
+The log posterior is the sum of the log likelihood and the log of the prior for $\beta$.  
+
+We have hyperpriors $\lambda$ for $G$
+
+Use a half-t prior for variance parameters per Gelman (2006) Prior Distributions for Variance Parameters in Hierarchical Models
+
+Recall that we parameterized $\lambda_k$ as uniform
+
+$$
+\begin{aligned}
+p(\lambda_k) &\sim \left(1 + \frac{1}{\nu}\left(\frac{\lambda_k}{A} \right)^2 \right)^{-(\nu+1)/2} \\
+p_{\xi_k}(\xi_k) &= p_{\lambda_k}(g^{-1}(\xi_k)) \left\lvert \frac{d\lambda_k}{d\xi_k}  \right\rvert \\
+&= p_{\lambda_k} (e^{\xi_k})\lvert e^{\xi_k}\rvert \\
+&\propto  \left(1 + \frac{1}{\nu}\left(\frac{e^{\xi_k}}{A} \right)^2 \right)^{-(\nu+1)/2} e^{\xi_k}\\
+&\propto \left(1 + \frac{1}{\nu}\left(\frac{e^{2\xi_k}}{A^2} \right) \right)^{-(\nu+1)/2} e^{\xi_k}\\
+\log p(\xi_k) &\propto -\frac{\nu+1}{2}\log\left(1 + \frac{1}{\nu}\left(\frac{e^{2\xi_k}}{A^2} \right) \right) + \xi_k \\
+\frac{\partial}{\partial\xi_k}\log p(\xi_k) &\propto -\frac{\nu+1}{2}\frac{1}{1 + \frac{1}{\nu}\left( \frac{e^{2\xi_k}}{A^2} \right)}\frac{2e^{2\xi_k}}{\nu A^2} + 1 \\
+&\propto -(\nu+1)\frac{1}{1 + \nu A^2 e^{-2\xi_k}} + 1
+\end{aligned}
+$$
+
+
+Write the full log posterior
+
+
+$$
+\begin{aligned}
+\log p(\beta, u, G | y, X, Z) &\propto \log p(y|\beta, u, G) + \log p(\beta) + \log p(u|G) + \log p(G) \\
+\log p(\beta, \gamma, \tau, \xi_1...\xi_q,a | y, X, Z) &\propto \log p(y | \beta, \tau, \gamma, \xi, a) + \log p(\beta) + \log p(\gamma)+ \log p(\tau) + \log p(\xi) + \log p(a) \\
+&\propto  -e^{\sum_{ij} X\beta + Zu} + y^T(X\beta + Zu) -\frac{1}{2}\log \lvert\Sigma_\beta\rvert - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta \\
+&-\sum_{k=1}^q \left(\frac{\nu_{\lambda_k}+1}{2}\log\left(1 + \frac{1}{\nu_{\lambda_k}} 
+\frac{e^{2\xi_k}}{A_{\lambda_k}^2}\right)+ \xi_k\right) -\frac{1}{2} a^T A^{-1} a -\frac{1}{2} \tau^T \tau\\
+&\propto  -e^{\sum_{ij} X\beta + ZLD^{1/2}\tau} + y^T(X\beta + ZLD^{1/2}\tau) -\frac{1}{2}\log \lvert\Sigma_\beta\rvert - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta \\
+&-\sum_{k=1}^q \left(\frac{\nu_{\lambda_k}+1}{2}\log\left(1 + \frac{1}{\nu_{\lambda_k}} 
+\frac{e^{2\xi_k}}{A_{\lambda_k}^2}\right)+ \xi_k\right) -\frac{1}{2} a^T A^{-1} a -\frac{1}{2} \tau^T \tau\\
+\end{aligned}
+$$
+
+
+We need to derive the gradient of the log posterior for the leapfrog function.  Let $J^{kk}$ be the single element version of the diagonal matrix $D^{1/2}$ retaining only a single $e^{\xi_k}$ and the remainder of the diagonal zero.
+
+$$
+\begin{aligned}
+\log p(\beta, \gamma, \tau, \xi_1...\xi_q,a | y, X, Z) &\propto \log p(y | \beta, \tau, \gamma, \xi, a) + \log p(\beta) + \log p(\gamma)+ \log p(\tau) + \log p(\xi) + \log p(a) \\\\
+&\propto  -e^{\sum_{ij} X\beta + ZLD^{1/2}\tau} + y^T(X\beta + ZLD^{1/2}\tau) -\frac{1}{2}\log \lvert\Sigma_\beta\rvert - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta \\
+&-\sum_{k=1}^q \left(\frac{\nu_{\lambda_k}+1}{2}\log\left(1 + \frac{1}{\nu_{\lambda_k}} 
+\frac{e^{2\xi_k}}{A_{\lambda_k}^2}\right)+ \xi_k\right) -\frac{1}{2} \tau^T \tau\\
+\frac{\partial l}{\partial \beta} &\propto -\left(e^{\sum_{ij}X\beta + ZLD^{1/2}\tau} \right)^T X + y^T X - \Sigma_\beta^{-1} \beta \\
+\frac{\partial l}{\partial \tau} &\propto -\left(e^{\sum_{ij}X\beta + ZLD^{1/2}\tau}  \right) ZLD^{1/2} + y^T ZLD^{1/2} - \tau \\
+\frac{\partial l}{\partial \xi_k} &\propto -\left(e^{\sum_{ij}X\beta + ZLD^{1/2}\tau}  \right) ZLJ^{kk}\tau + y^TZLJ^{kk}\tau - \frac{\nu_{\lambda_k} +1}{1 + \nu_{\lambda_k}A_{\lambda_k}^2 e^{-2\xi_k}} + 1 
+\end{aligned}
+$$
 
 
 ```{r, echo=TRUE}
