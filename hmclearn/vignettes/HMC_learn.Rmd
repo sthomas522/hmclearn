@@ -1325,9 +1325,6 @@ $$
 
 Let $B = 1e3$ for instance, as a relatively uniformative prior.
 
-
-## Updated parameterization
-
 The distribution of the random effects are defined as normal with a mean of zero. 
 
 Note that in this parameterization, we directly decompose $G$ instead of $G^{-1}$ as in Chan and Jelikzhov (2009).
@@ -1530,55 +1527,14 @@ all.equal(test1,test2)
 
 ```
 
-QR decomposition of design matrix
-
-STAN manual section 9.2 The QR Reparameterization
-
-Let $\theta = R^*\beta$ (below).  The HMC estimates $\theta$, from which we can use the deterministic formula to determine $\beta$
-
-$$
-\begin{aligned}
-X &= Q^* R^* \\
-Q^* &= Q \cdot \sqrt{n-1} \\
-R^* &= \frac{1}{\sqrt{n-1}}R \\
-X\beta &= Q^* R^* \beta \\
-\beta &= R^{*^{-1}}\theta
-\end{aligned}
-$$
-
-```{r, echo=TRUE}
-xqr <- qr(X)
-Q <- qr.Q(xqr)
-R <- qr.R(xqr)
-
-n <- nrow(X)
-X2 <- Q * sqrt(n-1)
-Rstar <- R / sqrt(n-1)
-Rstar_inv <- solve(Rstar)
-colnames(X2) <- colnames(X)
-
-# new intercept from QR decomposition
-diagval <- X2[1,1]
-
-
-##########
-# block diagonal
-Zi.lst <- split(rep(diagval, nrow(Gdat)), Gdat$Site)
-Zi.lst <- lapply(Zi.lst, as.matrix)
-Z2 <- bdiag(Zi.lst)
-Z2 <- as.matrix(Z2)
-
-```
 
 Run HMC for poisson regression model
 
-Small data set.  We use a more informative prior on the random effects variance.  Per STAN's recommendation, we use a half-t prior with 4 degrees of freedom and scale parameter of 1.  
-
-https://github.com/stan-dev/stan/wiki/Prior-Choice-Recommendations
+Small data set.  We use a more informative prior on the random effects variance, a half-t prior with 4 degrees of freedom and scale parameter of 1. 
 
 
-```{r, echo=TRUE, eval=FALSE}
-Mruns <- 5e5
+```{r, echo=TRUE, eval=TRUE}
+N <- 5e3
 
 set.seed(412)
 initvals <- c(rep(0, 4), 
@@ -1592,19 +1548,19 @@ M_vals <- c(1e-3, 1e-3, 1e-3, 1,
 
 t1.hmc <- Sys.time()
 
-res <- hmc(N = Mruns, theta.init = initvals, epsilon = 1e-4, L = 10, 
+res <- hmc(N = N, theta.init = initvals, epsilon = 1e-4, L = 10, 
                     logPOSTERIOR  = glmm_poisson_posterior, 
                     Mdiag = M_vals, 
                     varnames=c(colnames(X), paste0("u", 1:ncol(Z))),
                     glogPOSTERIOR  = g_glmm_poisson_posterior, 
-                    y = y, X=X, Z=Z, m=10, q=1, nuxi=1, Axi=25) 
+                    y = y, X=X, Z=Z, m=10, nuxi=1, Axi=25) 
 
 mypath <- '/Users/samthomas/biostat/hmclearn/hmclearn'
 saveRDS(res, file = paste(mypath, "example3.RData", sep="/"))
 
 t2.hmc <- Sys.time()
 t2.hmc - t1.hmc
-res$accept/Mruns
+res$accept/N
 ```
 
 ```{r, echo=TRUE, eval=TRUE}

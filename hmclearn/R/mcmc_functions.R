@@ -144,10 +144,12 @@ hmc <- function(N, theta.init, epsilon, L, logPOSTERIOR, glogPOSTERIOR, varnames
   # invert covariance M for leapfrog
   if (is.null(Mdiag)) {
     M_mx <- diag(p)
+    Minv <- M_mx
   } else {
     M_mx <- diag(Mdiag)
+    Minv <- diag(1 / Mdiag)
   }
-  Minv <- qr.solve(M_mx)
+
   # print(diag(Minv))
 
   # store theta and momentum (usually not of interest)
