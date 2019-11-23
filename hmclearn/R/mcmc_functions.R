@@ -152,6 +152,11 @@ hmc <- function(N, theta.init, epsilon, L, logPOSTERIOR, glogPOSTERIOR, varnames
 
   # print(diag(Minv))
 
+  # store all momentum and theta values
+  iter.all <- 1
+  theta.all <- list()
+  r.all <- list()
+
   # store theta and momentum (usually not of interest)
   theta <- list()
   theta[[1]] <- theta.init
@@ -164,6 +169,10 @@ hmc <- function(N, theta.init, epsilon, L, logPOSTERIOR, glogPOSTERIOR, varnames
     r.new <- r[[jj]] <- r0
 
     for (i in 1:L_vals[jj]) {
+      theta.all[[iter.all]] <- theta.new
+      r.all[[iter.all]] <- r.new
+      iter.all <- iter.all + 1
+
       lstp <- i == L_vals[jj]
       lf <- leapfrog(theta_lf = theta.new, r = r.new, epsilon = eps_vals[, jj], logPOSTERIOR = logPOSTERIOR,
                      glogPOSTERIOR = glogPOSTERIOR,
@@ -171,6 +180,7 @@ hmc <- function(N, theta.init, epsilon, L, logPOSTERIOR, glogPOSTERIOR, varnames
 
       theta.new <- lf$theta.new
       r.new <- lf$r.new
+
     }
     if (verbose) print(jj)
 
@@ -205,6 +215,8 @@ hmc <- function(N, theta.init, epsilon, L, logPOSTERIOR, glogPOSTERIOR, varnames
        theta=theta,
        thetaDF = thetaDF,
        r=r,
+       theta.all = theta.all,
+       r.all = r.all,
        accept=accept,
        M=M_mx)
 
