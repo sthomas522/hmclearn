@@ -27,8 +27,8 @@ if (1 == 0) {
   N <- 10000
   set.seed(143)
 
-  # eps_vals <- c(rep(2e-1, 6), 2e-2)
-  eps_vlas <- c(rep(2e-2, 6), 2e-3)
+  eps_vals <- c(rep(2e-1, 6), 2e-2)
+  # eps_vals <- c(rep(2e-2, 6), 2e-3)
 
   t1 <- Sys.time()
   set.seed(321)
@@ -42,9 +42,23 @@ if (1 == 0) {
   theta.all <- as.data.frame(do.call(rbind, fm1_hmc$theta.all))
   r.all <- as.data.frame(do.call(rbind, fm1_hmc$r.all))
 
-  # animation plot
+  # create a contour plot for V2
+  # get median theta vals
+  theta.median <- apply(fm1_hmc$thetaDF, 2, median)
+
+  cdata <- expand.grid(V1 = theta.median[1],
+                       V2 = seq(-30, -5, by=0.1),
+                       V3 = theta.median[3],
+                       V4 = theta.median[4],
+                       V5 = theta.median[5],
+                       V6 = theta.median[6],
+                       V7 = theta.median[7])
+
+
+  foo <- apply(cdata, MARGIN=1, FUN=linear_posterior, X=X, y=y)
+
   Lval <- 20
-  plot()
+
   for (k in 1:100) {
 
     basenum <- 1000*Lval + Lval*k
@@ -59,6 +73,49 @@ if (1 == 0) {
 
   }
 
+  # animation plot
+  basenum <- 1000*Lval
+  pdata <- NULL
+
+  library(gganimate)
+  for (jj in 1:50) {
+    tempDF <- data.frame(p = r.all$V2[basenum:(basenum+jj*Lval)],
+                         theta = theta.all$V2[basenum:(basenum+jj*Lval)],
+                         timevar =  jj)
+    pdata <- rbind(pdata, tempDF)
+  }
+
+
+  # pdata <- data.frame(p = r.all$V2[basenum:(basenum+1000)],
+  #                     theta = theta.all$V2[basenum:(basenum+1000)])
+  # pdata$timevar <- 1:nrow(pdata)
+  #
+  # pdata$selected <- pmin(pdata$timevar %% 10, 1)
+
+  p <- ggplot(pdata, aes(x=p, y=theta))
+  p <- p + geom_point()
+  p <- p + transition_time(timevar)
+  # animate(p, renderer = file_renderer(dir='~/animation/',
+  #                                     overwrite = T))
+  animate(p, renderer = av_renderer())
+
+  library(gapminder)
+  p <- ggplot(
+    subset(gapminder, year==2007),
+    aes(x = gdpPercap, y=lifeExp, size = pop, colour = country)
+  ) +
+    geom_point(show.legend = FALSE, alpha = 0.7) +
+    scale_color_viridis_d() +
+    scale_size(range = c(2, 12)) +
+    scale_x_log10() +
+    labs(x = "GDP per capita", y = "Life expectancy")
+
+  p
+
+  p <- p + transition_time(year) +
+    labs(title = "Year: {frame_time}")
+
+  animate(p, renderer = av_renderer())
 
 
 }
