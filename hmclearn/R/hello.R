@@ -52,21 +52,22 @@ if (1 == 0) {
                        V4 = theta.median[4],
                        V5 = theta.median[5],
                        V6 = theta.median[6],
-                       V7 = theta.median[7])
+                       V7 = theta.median[7],
+                       p = seq(-4.2, 4.2, by=0.1))
 
-  linpost <- function(theta, y, x, ...) {
-    res <- linear_posterior(theta=theta, y=y, X=x, ...)
+  linpost <- function(theta_p, y, x, ...) {
+    k <- length(theta_p)
+    theta <- theta_p[1:(k-1)]
+    p <- theta_p[k]
+    res <- linear_posterior(theta=theta, y=y, X=x, ...) - p^2/2
     res
   }
 
   cdata$zval <- apply(X=cdata, MARGIN=1, FUN=linpost, x=X, y=y)
 
-  cdata <- merge(x=cdata, y=seq(-4.2, 4.2, by=0.1))
-  colnames(cdata)[which(colnames(cdata) == "y")] <- "p"
-
   v <- ggplot(cdata, aes(x=theta, y=p, z=zval))
   v <- v + geom_contour()
-  # v
+  v
 
   Lval <- 20
 
