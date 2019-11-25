@@ -19,6 +19,8 @@ hello <- function() {
 
 # hmc example
 if (1 == 0) {
+  library(ggplot2)
+  library(gganimate)
   fm1 <- lm(breaks ~ wool*tension, data=warpbreaks)
   summary(fm1)
   X <- model.matrix(breaks ~ wool*tension, data=warpbreaks)
@@ -65,37 +67,111 @@ if (1 == 0) {
 
   cdata$zval <- apply(X=cdata, MARGIN=1, FUN=linpost, x=X, y=y)
 
-  v <- ggplot(cdata, aes(x=theta, y=p, z=zval))
+  v <- ggplot(cdata, aes(x=p, y=theta, z=zval))
   v <- v + geom_contour()
   v
 
   Lval <- 20
 
-  for (k in 1:100) {
+  # dataframe of accepted proposals
+  thetaDF <- fm1_hmc$thetaDF
+  accept_v <- fm1_hmc$accept_v
 
-    basenum <- 1000*Lval + Lval*k
-    y1 <- theta.all$V2[(basenum+1):(basenum+Lval)]
-    x1 <- r.all$V2[(basenum+1):(basenum+Lval)]
-    if (k == 1) {
-      plot(x1, y1, type='o', xlim = c(-2.5, 2.5),
-           ylim = c(-40, 0))
-    } else {
-      lines(x1, y1, type='o')
+  # vector of woolB (V2) proposals
+  V2accept <- thetaDF$woolB
+  V2accept_all <- rep(V2accept, each=Lval)
+  V2accept_all <- V2accept_all[1:(length(V2accept_all) - Lval)]
+
+  # V2all[Lval*i + 1]
+  V2all <- theta.all$V2
+  pV2all <- r.all$V2
+
+  burnin_start <- 1000
+  basenum <- burnin_start * Lval
+
+  pdata <- NULL
+  tempDF2 <- NULL
+  kk <- 0
+
+  for (jj in 1:10) {
+
+    if (jj > 1) {
+      tempDF2 <- pdata[pdata$keepval, ]
+      tempDF2$timeval <- max(tempDF2$timeval)
+      tempDF2 <- tempDF2[!duplicated(tempDF2), ]
+      tempDF2$col <- 1
     }
 
+    tempDF <- data.frame(p = pV2all[(basenum + (jj-1)*Lval+1):(basenum + jj*Lval+1)],
+                         theta = V2all[(basenum + (jj-1)*Lval+1):(basenum + jj*Lval+1)],
+                         theta_accept = V2accept_all[(basenum + (jj-1)*Lval+1):(basenum + jj*Lval+1)],
+                         timeval = 1:(Lval+1),
+                         keepval = 1:(Lval+1) %% 21 == 0)
+
+    # adjust momentum for visual
+    tempDF$p[Lval+1] <- 2*tempDF$p[Lval] - tempDF$p[Lval-1]
+
+    tempDF$col <- as.integer(tempDF$keepval)
+
+    # inner loop expand pdata
+    temp3 <- NULL
+    for (kk in 1:nrow(tempDF)) {
+      xx1 <- tempDF[1:kk, ]
+      xx1$timeval <- kk + (Lval+1)*(jj-1)
+
+      xx2 <- tempDF2
+      if (!is.null(tempDF2)) {
+        xx2$timeval <- kk + (Lval+1)*(jj-1)
+      }
+      temp3 <- rbind(temp3, xx2, xx1)
+    }
+
+    # tempDF$keepval <- tempDF$keepval + (jj-1)*Lval
+
+    pdata <- rbind(pdata, temp3)
+    print(jj)
+
   }
 
-  # animation plot
-  basenum <- 1000*Lval
-  pdata <- NULL
+  row.names(pdata) <- 1:nrow(pdata)
+  pdata$col[pdata$keepval] <- 1
+  pdata$col <- factor(pdata$col)
 
-  library(gganimate)
-  for (jj in 1:50) {
-    tempDF <- data.frame(p = r.all$V2[basenum:(basenum+jj*Lval)],
-                         theta = theta.all$V2[basenum:(basenum+jj*Lval)],
-                         timevar =  jj)
-    pdata <- rbind(pdata, tempDF)
-  }
+  color.codes<-as.character(c("#3399FF", "#FF0000"))
+  color.names<-c("blue", "red")
+
+  p <- ggplot(pdata, aes(x=p, y=theta, colour=col, shape=col))
+  p <- p + geom_point(size=2) + theme_bw()
+  p <- p + scale_colour_manual(values=setNames(color.codes, c("0", "1")))
+  p <- p + transition_time(timeval)
+  animate(p, renderer = av_renderer('~/webmfiles/test.webm'), width = 1280,
+                                    height = 720, res = 104, duration = 120)
+
+  # # animation plot
+  # basenum <- 1000*Lval
+  # pdata <- NULL
+  #
+  # library(gganimate)
+  # for (jj in 1:50) {
+  #   tempDF <- data.frame(p = r.all$V2[basenum:(basenum+jj*Lval)],
+  #                        theta = theta.all$V2[basenum:(basenum+jj*Lval)],
+  #                        timevar =  jj)
+  #   pdata <- rbind(pdata, tempDF)
+  # }
+  #
+  #
+  # for (k in 1:50) {
+  #
+  #   x1 <- theta.all$V2[(basenum+1):(basenum+Lval)]
+  #   y1 <- r.all$V2[(basenum+1):(basenum+Lval)]
+  #   if (k == 1) {
+  #     plot(x1, y1, type='o', ylim = c(-2.5, 2.5),
+  #          xlim = c(-40, 0))
+  #   } else {
+  #     lines(x1, y1, type='o')
+  #   }
+  #
+  # }
 
 
   # pdata <- data.frame(p = r.all$V2[basenum:(basenum+1000)],

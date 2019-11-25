@@ -163,6 +163,8 @@ hmc <- function(N, theta.init, epsilon, L, logPOSTERIOR, glogPOSTERIOR, varnames
   r <- list()
   r[[1]] <- NA
   accept <- 0
+  accept_v <- vector()
+  accept_v[1] <- 1
   for (jj in 2:N) {
     theta[[jj]] <- theta.new <- theta[[jj-1]]
     r0 <- MASS::mvrnorm(1, mu.p, M_mx)
@@ -197,9 +199,11 @@ hmc <- function(N, theta.init, epsilon, L, logPOSTERIOR, glogPOSTERIOR, varnames
       theta[[jj]] <- theta.new
       r[[jj]] <- -r.new
       accept <- accept + 1
+      accept_v <- c(accept_v, 1)
     } else {
       theta[[jj]] <- theta[[jj-1]]
       r[[jj]] <- r[[jj-1]]
+      accept_v <- c(accept_v, 0)
     }
 
   }
@@ -218,6 +222,7 @@ hmc <- function(N, theta.init, epsilon, L, logPOSTERIOR, glogPOSTERIOR, varnames
        theta.all = theta.all,
        r.all = r.all,
        accept=accept,
+       accept_v = accept_v,
        M=M_mx)
 
   class(obj) <- c("hmclearn", "list")
