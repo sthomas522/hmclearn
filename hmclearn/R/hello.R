@@ -93,13 +93,13 @@ if (1 == 0) {
   tempDF2 <- NULL
   kk <- 0
 
-  for (jj in 1:10) {
+  for (jj in 1:200) {
 
     if (jj > 1) {
       tempDF2 <- pdata[pdata$keepval, ]
       tempDF2$timeval <- max(tempDF2$timeval)
       tempDF2 <- tempDF2[!duplicated(tempDF2), ]
-      tempDF2$col <- 1
+      tempDF2$accept <- 1
     }
 
     tempDF <- data.frame(p = pV2all[(basenum + (jj-1)*Lval+1):(basenum + jj*Lval+1)],
@@ -111,7 +111,7 @@ if (1 == 0) {
     # adjust momentum for visual
     tempDF$p[Lval+1] <- 2*tempDF$p[Lval] - tempDF$p[Lval-1]
 
-    tempDF$col <- as.integer(tempDF$keepval)
+    tempDF$accept <- as.integer(tempDF$keepval)
 
     # inner loop expand pdata
     temp3 <- NULL
@@ -134,18 +134,31 @@ if (1 == 0) {
   }
 
   row.names(pdata) <- 1:nrow(pdata)
-  pdata$col[pdata$keepval] <- 1
-  pdata$col <- factor(pdata$col)
+  pdata$accept[pdata$keepval] <- 1
+  pdata$accept <- factor(pdata$accept)
 
-  color.codes<-as.character(c("#3399FF", "#FF0000"))
+  color.codes<-as.character(c("#b2c3a3", "#6f0022"))
   color.names<-c("blue", "red")
+#
+#   p <- ggplot(pdata, aes(x=p, y=theta, colour=accept, shape=accept))
+#   p <- p + geom_point(size=2) + theme_bw()
+#   p <- p + scale_colour_manual(values=setNames(color.codes, c("0", "1")))
+#   p <- p + stat_contour(data=cdata, aes(x=p, y=theta, z=zval))
+#   p <- p + transition_time(timeval)
+#   animate(p, renderer = av_renderer('~/webmfiles/test.webm'), width = 1280,
+#                                     height = 720, res = 104, duration = 120)
 
-  p <- ggplot(pdata, aes(x=p, y=theta, colour=col, shape=col))
-  p <- p + geom_point(size=2) + theme_bw()
-  p <- p + scale_colour_manual(values=setNames(color.codes, c("0", "1")))
-  p <- p + transition_time(timeval)
-  animate(p, renderer = av_renderer('~/webmfiles/test.webm'), width = 1280,
-                                    height = 720, res = 104, duration = 120)
+  # plot with contour
+  v <- ggplot(cdata, aes(x=p, y=theta, z=zval))
+  v <- v + geom_contour()
+  v <- v + geom_point(data = pdata, size=2, inherit.aes=FALSE,
+                      aes(x=p, y=theta, colour=accept, shape=accept))
+  v <- v + theme_bw()
+  v <- v + scale_colour_manual(values=setNames(color.codes, c("0", "1")))
+  v <- v + transition_time(timeval)
+  animate(v, renderer = av_renderer('~/webmfiles/test2.webm'), width = 1280,
+          height = 720, res = 104, duration = 120)
+
 
   # # animation plot
   # basenum <- 1000*Lval
