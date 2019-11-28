@@ -218,7 +218,135 @@ if (1 == 0) {
 
   animate(p, renderer = av_renderer())
 
+  ##############################################
+  # Trace plot
+  ##############################################
+
+  eps_vals <- c(rep(2e-1, 6), 2e-2)
+  # eps_vals <- c(rep(2e-2, 6), 2e-3)
+
+  t1 <- Sys.time()
+  set.seed(321)
+  fm2_hmc <- hmc(N, theta.init = c(rep(0, 6), 1), epsilon = eps_vals, L = 20,
+                 logPOSTERIOR = linear_posterior,
+                 glogPOSTERIOR = g_linear_posterior, y=y, X=X,
+                 varnames = c(colnames(X), "log_sigma_sq"))
+  t2 <- Sys.time()
+  t2 - t1
+
+
+  savepath <- '/Users/samuelthomas/Documents/anim'
+  savename <- 'testanim.webm'
+
+  pdata2 <- fm2_hmc$thetaDF
+  pdata2$index <- 1:nrow(pdata2)
+  n1 <- nrow(pdata2)
+
+  # use thetaDF
+  p2 <- ggplot(pdata2[1:2000, ], aes(x=index, y=woolB))
+  p2 <- p2 + geom_line() + theme_bw()
+  p2 <- p2 + ggtitle('Trace Plot') + xlab('Simulation')
+  p2 <- p2 + transition_reveal(index)
+  animate(p2, duration=60, width=1280, height=780,
+          renderer = av_renderer(paste(savepath, savename, sep='/')))
+
+  ##############################################
+  # Histogram
+  ##############################################
+
+  pdata3 <- NULL
+  for (jj in 1:2000) {
+    tempDF <- pdata2[1:jj, ]
+    tempDF$timeval <- jj
+    pdata3 <- rbind(pdata3, tempDF)
+  }
+  savename2 <- 'testanim2.webm'
+
+  p3 <- ggplot(pdata3, aes(x=woolB))
+  p3 <- p3 + geom_histogram(binwidth=2) + theme_bw()
+  p3 <- p3 + transition_time(timeval)
+  animate(p3, duration=60, width=1280, height=780,
+          renderer = av_renderer(paste(savepath, savename2, sep='/')))
+
+
+
 
 }
 
 
+if (1 == 0) {
+  library(dplyr)
+  library(ggplot2)
+  library(magick)
+  library(gganimate)
+
+
+  A<-rnorm(100,50,10)
+  B<-rnorm(100,50,10)
+  DV <- c(A,B)
+  IV <- rep(c("A","B"),each=100)
+  sims <- rep(rep(1:10,each=10),2)
+  df<-data.frame(sims,IV,DV)
+
+  means_df <- df %>%
+    group_by(sims,IV) %>%
+    summarize(means=mean(DV),
+              sem = sd(DV)/sqrt(length(DV)))
+
+  stats_df <- df %>%
+    group_by(sims) %>%
+    summarize(ts = t.test(DV~IV,var.equal=TRUE)$statistic)
+
+  a<-ggplot(means_df, aes(x=IV,y=means, fill=IV))+
+    geom_bar(stat="identity")+
+    geom_point(data=df,aes(x=IV, y=DV), alpha=.25)+
+    geom_errorbar(aes(ymin=means-sem, ymax=means+sem),width=.2)+
+    theme_classic()+
+    transition_states(
+      states=sims,
+      transition_length = 2,
+      state_length = 1
+    )+enter_fade() +
+    exit_shrink() +
+    ease_aes('sine-in-out')
+
+  a_gif<-animate(a, width = 240, height = 240)
+
+  b<-ggplot(stats_df,aes(x=ts))+
+    geom_vline(aes(xintercept=ts, frame=sims))+
+    geom_line(data=data.frame(x=seq(-5,5,.1),
+                              y=dt(seq(-5,5,.1),df=18)),
+              aes(x=x,y=y))+
+    theme_classic()+
+    ylab("density")+
+    xlab("t value")+
+    transition_states(
+      states=sims,
+      transition_length = 2,
+      state_length = 1
+    )+enter_fade() +
+    exit_shrink() +
+    ease_aes('sine-in-out')
+
+  b_gif<-animate(b, width = 240, height = 240)
+
+
+  d<-image_blank(240*2,240)
+
+  the_frame<-d
+  for(i in 2:100){
+    the_frame<-c(the_frame,d)
+  }
+
+  a_mgif<-image_read(a_gif)
+  b_mgif<-image_read(b_gif)
+
+  new_gif<-image_append(c(a_mgif[1], b_mgif[1]))
+  for(i in 2:100){
+    combined <- image_append(c(a_mgif[i], b_mgif[i]))
+    new_gif<-c(new_gif,combined)
+  }
+
+  new_gif
+
+}
