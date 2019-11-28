@@ -244,109 +244,60 @@ if (1 == 0) {
 
   # use thetaDF
   p2 <- ggplot(pdata2[1:2000, ], aes(x=index, y=woolB))
-  p2 <- p2 + geom_line() + theme_bw()
+  p2 <- p2 + geom_line(color='steelblue') + theme_bw() + theme(text=element_text(size=18))
   p2 <- p2 + ggtitle('Trace Plot') + xlab('Simulation')
   p2 <- p2 + transition_reveal(index)
-  animate(p2, duration=60, width=1280, height=780,
-          renderer = av_renderer(paste(savepath, savename, sep='/')))
+
+  savename_gif <- 'testanim.gif'
+
+  a_anim <- animate(p2, duration=60, width=600, height=400,
+            renderer = gifski_renderer(paste(savepath, savename_gif, sep='/')))
+          # renderer = av_renderer(paste(savepath, savename, sep='/')))
 
   ##############################################
   # Histogram
   ##############################################
 
-  pdata3 <- NULL
-  for (jj in 1:2000) {
-    tempDF <- pdata2[1:jj, ]
-    tempDF$timeval <- jj
-    pdata3 <- rbind(pdata3, tempDF)
-  }
+  # t1b <- Sys.time()
+  # pdata3 <- NULL
+  # for (jj in 1:2000) {
+  #   tempDF <- pdata2[1:jj, ]
+  #   tempDF$timeval <- jj
+  #   pdata3 <- rbind(pdata3, tempDF)
+  # }
+  # t2b <- Sys.time()
+  # t2b - t1b
   savename2 <- 'testanim2.webm'
 
+  savename2_gif <- 'testanim2.gif'
   p3 <- ggplot(pdata3, aes(x=woolB))
-  p3 <- p3 + geom_histogram(binwidth=2) + theme_bw()
+  p3 <- p3 + geom_histogram(colour="#B47846", fill="#B47846", binwidth=2) + theme_bw()
+  p3 <- p3 + ggtitle('Histogram') + theme(text=element_text(size=18))
   p3 <- p3 + transition_time(timeval)
-  animate(p3, duration=60, width=1280, height=780,
-          renderer = av_renderer(paste(savepath, savename2, sep='/')))
+  b_anim <- animate(p3, duration=60, width=600, height=400,
+          # renderer = av_renderer(paste(savepath, savename2, sep='/')))
+          renderer = gifski_renderer(paste(savepath, savename2_gif, sep='/')))
 
 
+  ##############################################
+  # Combine gifs
+  ##############################################
+
+  a_mgif <- image_read(a_anim)
+  b_mgif <- image_read(b_anim)
 
 
-}
-
-
-if (1 == 0) {
-  library(dplyr)
-  library(ggplot2)
-  library(magick)
-  library(gganimate)
-
-
-  A<-rnorm(100,50,10)
-  B<-rnorm(100,50,10)
-  DV <- c(A,B)
-  IV <- rep(c("A","B"),each=100)
-  sims <- rep(rep(1:10,each=10),2)
-  df<-data.frame(sims,IV,DV)
-
-  means_df <- df %>%
-    group_by(sims,IV) %>%
-    summarize(means=mean(DV),
-              sem = sd(DV)/sqrt(length(DV)))
-
-  stats_df <- df %>%
-    group_by(sims) %>%
-    summarize(ts = t.test(DV~IV,var.equal=TRUE)$statistic)
-
-  a<-ggplot(means_df, aes(x=IV,y=means, fill=IV))+
-    geom_bar(stat="identity")+
-    geom_point(data=df,aes(x=IV, y=DV), alpha=.25)+
-    geom_errorbar(aes(ymin=means-sem, ymax=means+sem),width=.2)+
-    theme_classic()+
-    transition_states(
-      states=sims,
-      transition_length = 2,
-      state_length = 1
-    )+enter_fade() +
-    exit_shrink() +
-    ease_aes('sine-in-out')
-
-  a_gif<-animate(a, width = 240, height = 240)
-
-  b<-ggplot(stats_df,aes(x=ts))+
-    geom_vline(aes(xintercept=ts, frame=sims))+
-    geom_line(data=data.frame(x=seq(-5,5,.1),
-                              y=dt(seq(-5,5,.1),df=18)),
-              aes(x=x,y=y))+
-    theme_classic()+
-    ylab("density")+
-    xlab("t value")+
-    transition_states(
-      states=sims,
-      transition_length = 2,
-      state_length = 1
-    )+enter_fade() +
-    exit_shrink() +
-    ease_aes('sine-in-out')
-
-  b_gif<-animate(b, width = 240, height = 240)
-
-
-  d<-image_blank(240*2,240)
-
-  the_frame<-d
-  for(i in 2:100){
-    the_frame<-c(the_frame,d)
-  }
-
-  a_mgif<-image_read(a_gif)
-  b_mgif<-image_read(b_gif)
-
-  new_gif<-image_append(c(a_mgif[1], b_mgif[1]))
+  new_gif <- image_append(c(a_mgif[1], b_mgif[1]))
   for(i in 2:100){
     combined <- image_append(c(a_mgif[i], b_mgif[i]))
-    new_gif<-c(new_gif,combined)
+    new_gif <- c(new_gif, combined)
   }
 
-  new_gif
+  # save video
+  savename3 <- 'hmc_animation.webm'
+  savename3_gif <- 'hmc_animation.gif'
+  image_write_video(new_gif, path=paste(savepath, savename3, sep='/'), framerate=1)
+  image_write_gif(new_gif, path=paste(savepath, savename3_gif, sep='/'))
 
 }
+
