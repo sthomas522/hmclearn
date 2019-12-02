@@ -21,6 +21,9 @@ hello <- function() {
 if (1 == 0) {
   library(ggplot2)
   library(gganimate)
+  library(hmclearn)
+  library(magick)
+
   fm1 <- lm(breaks ~ wool*tension, data=warpbreaks)
   summary(fm1)
   X <- model.matrix(breaks ~ wool*tension, data=warpbreaks)
@@ -29,8 +32,9 @@ if (1 == 0) {
   N <- 10000
   set.seed(143)
 
-  eps_vals <- c(rep(2e-1, 6), 2e-2)
+  # eps_vals <- c(rep(2e-1, 6), 2e-2)
   # eps_vals <- c(rep(2e-2, 6), 2e-3)
+  eps_vals <- c(rep(2.8e-1, 6), 2e-2)
 
   t1 <- Sys.time()
   set.seed(321)
@@ -40,6 +44,8 @@ if (1 == 0) {
                  varnames = c(colnames(X), "log_sigma_sq"))
   t2 <- Sys.time()
   t2 - t1
+
+  fm1_hmc$accept / N
 
   theta.all <- as.data.frame(do.call(rbind, fm1_hmc$theta.all))
   r.all <- as.data.frame(do.call(rbind, fm1_hmc$r.all))
@@ -139,14 +145,14 @@ if (1 == 0) {
 
   color.codes<-as.character(c("#b2c3a3", "#6f0022"))
   color.names<-c("blue", "red")
-#
-#   p <- ggplot(pdata, aes(x=p, y=theta, colour=accept, shape=accept))
-#   p <- p + geom_point(size=2) + theme_bw()
-#   p <- p + scale_colour_manual(values=setNames(color.codes, c("0", "1")))
-#   p <- p + stat_contour(data=cdata, aes(x=p, y=theta, z=zval))
-#   p <- p + transition_time(timeval)
-#   animate(p, renderer = av_renderer('~/webmfiles/test.webm'), width = 1280,
-#                                     height = 720, res = 104, duration = 120)
+  #
+  #   p <- ggplot(pdata, aes(x=p, y=theta, colour=accept, shape=accept))
+  #   p <- p + geom_point(size=2) + theme_bw()
+  #   p <- p + scale_colour_manual(values=setNames(color.codes, c("0", "1")))
+  #   p <- p + stat_contour(data=cdata, aes(x=p, y=theta, z=zval))
+  #   p <- p + transition_time(timeval)
+  #   animate(p, renderer = av_renderer('~/webmfiles/test.webm'), width = 1280,
+  #                                     height = 720, res = 104, duration = 120)
 
   # plot with contour
   v <- ggplot(cdata, aes(x=p, y=theta, z=zval))
@@ -222,7 +228,7 @@ if (1 == 0) {
   # Trace plot
   ##############################################
 
-  eps_vals <- c(rep(2e-1, 6), 2e-2)
+  eps_vals <- c(rep(2.8e-1, 6), 2e-2)
   # eps_vals <- c(rep(2e-2, 6), 2e-3)
 
   t1 <- Sys.time()
@@ -243,40 +249,46 @@ if (1 == 0) {
   n1 <- nrow(pdata2)
 
   # use thetaDF
-  p2 <- ggplot(pdata2[1:2000, ], aes(x=index, y=woolB))
+  p2 <- ggplot(pdata2[1:4000, ], aes(x=index, y=woolB))
   p2 <- p2 + geom_line(color='steelblue') + theme_bw() + theme(text=element_text(size=18))
-  p2 <- p2 + ggtitle('Trace Plot') + xlab('Simulation')
+  p2 <- p2 + ggtitle('Trace Plot - HMC') + xlab('Simulation')
+  p2 <- p2 + ylim(-40, 40) + geom_hline(yintercept=-16.3, color='red')
   p2 <- p2 + transition_reveal(index)
 
   savename_gif <- 'testanim.gif'
 
   a_anim <- animate(p2, duration=60, width=600, height=400,
-            renderer = gifski_renderer(paste(savepath, savename_gif, sep='/')))
-          # renderer = av_renderer(paste(savepath, savename, sep='/')))
+                    renderer = gifski_renderer(paste(savepath, savename_gif, sep='/')))
+  # renderer = av_renderer(paste(savepath, savename, sep='/')))
 
   ##############################################
   # Histogram
   ##############################################
 
-  # t1b <- Sys.time()
-  # pdata3 <- NULL
-  # for (jj in 1:2000) {
-  #   tempDF <- pdata2[1:jj, ]
-  #   tempDF$timeval <- jj
-  #   pdata3 <- rbind(pdata3, tempDF)
-  # }
-  # t2b <- Sys.time()
-  # t2b - t1b
-  savename2 <- 'testanim2.webm'
+  t1b <- Sys.time()
+  pdata3 <- NULL
+  iter <- c(1:1000, seq(1200, 10000, by=200))
+  for (jj in 1:4000) {
+    tempDF <- pdata2[1:jj, ]
+    tempDF$timeval <- jj
+    pdata3 <- rbind(pdata3, tempDF)
+    print(jj)
+  }
+  t2b <- Sys.time()
+  t2b - t1b
 
-  savename2_gif <- 'testanim2.gif'
+  savename2 <- 'testanim3.webm'
+
+  savename2_gif <- 'testanim3.gif'
   p3 <- ggplot(pdata3, aes(x=woolB))
   p3 <- p3 + geom_histogram(colour="#B47846", fill="#B47846", binwidth=2) + theme_bw()
-  p3 <- p3 + ggtitle('Histogram') + theme(text=element_text(size=18))
+  p3 <- p3 + ggtitle('Histogram - HMC') + theme(text=element_text(size=18)) + xlim(-40, 40)
+  p3 <- p3 + coord_flip()
   p3 <- p3 + transition_time(timeval)
   b_anim <- animate(p3, duration=60, width=600, height=400,
-          # renderer = av_renderer(paste(savepath, savename2, sep='/')))
-          renderer = gifski_renderer(paste(savepath, savename2_gif, sep='/')))
+                    # renderer = av_renderer(paste(savepath, savename2, sep='/')))
+                    renderer = gifski_renderer(paste(savepath, savename2_gif, sep='/')))
+
 
 
   ##############################################
@@ -294,10 +306,99 @@ if (1 == 0) {
   }
 
   # save video
-  savename3 <- 'hmc_animation.webm'
-  savename3_gif <- 'hmc_animation.gif'
+  savename3 <- 'hmc_animation2.webm'
+  savename3_gif <- 'hmc_animation2.gif'
   image_write_video(new_gif, path=paste(savepath, savename3, sep='/'), framerate=1)
   image_write_gif(new_gif, path=paste(savepath, savename3_gif, sep='/'))
 
-}
+
+
+
+  # MH version
+  N2 <- 1e5
+  t1 <- Sys.time()
+  set.seed(321)
+  fm2_mh <- mh(N2, paramInit=rep(0, 7), qPROP = qprop_all,
+               qFUN = qfun, pdFUN = linear_posterior,
+               nu=c(rep(5.0, 6), 0.1),
+               y =y, X = X)
+  t2 <- Sys.time()
+  t2 - t1
+
+  fm2_mh$accept/N2
+
+  plot(fm2_mh, burnin=2e4)
+
+  # use thetaDF
+  pdata4 <- fm2_mh$thetaDF
+  pdata4$index <- 1:nrow(pdata4)
+  colnames(pdata4)[2] <- "woolB"
+  n1 <- nrow(pdata4)
+
+  p4 <- ggplot(pdata4[1:4000, ], aes(x=index, y=woolB))
+  p4 <- p4 + geom_line(color='steelblue') + theme_bw() + theme(text=element_text(size=18))
+  p4 <- p4 + ggtitle('Trace Plot - Metropolis Hastings') + xlab('Simulation')
+  p4 <- p4 + ylim(-40, 40)
+  p4 <- p4 + geom_hline(yintercept=-16.3, color='red')
+  p4 <- p4 + transition_reveal(index)
+
+  c_anim <- animate(p4, duration=60, width=600, height=400,
+                    renderer = gifski_renderer(paste(savepath, "mh1.gif", sep='/')))
+  # renderer = av_renderer(paste(savepath, savename, sep='/')))
+
+  ##############################################
+  # Histogram
+  ##############################################
+
+  t1b <- Sys.time()
+  pdata5 <- NULL
+  for (jj in 1:4000) {
+    tempDF <- pdata4[1:jj, ]
+    tempDF$timeval <- jj
+    pdata5 <- rbind(pdata5, tempDF)
+    print(jj)
+  }
+  t2b <- Sys.time()
+  t2b - t1b
+
+
+  p5 <- ggplot(pdata5, aes(x=woolB))
+  p5 <- p5 + geom_histogram(colour="#B47846", fill="#B47846", binwidth=2) + theme_bw()
+  p5 <- p5 + ggtitle('Histogram - Metropolis Hastings') + theme(text=element_text(size=18))
+  p5 <- p5 + xlim(-40, 40)
+  p5 <- p5 + coord_flip()
+  p5 <- p5 + transition_time(timeval)
+
+  d_anim <- animate(p5, duration=60, width=600, height=400,
+                    # renderer = av_renderer(paste(savepath, savename2, sep='/')))
+                    renderer = gifski_renderer(paste(savepath, "mh2.gif", sep='/')))
+
+  ##############################################
+  # Combine gifs
+  ##############################################
+
+  c_mgif <- image_read(c_anim)
+  d_mgif <- image_read(d_anim)
+
+  mh_gif <- image_append(c(c_mgif[1], d_mgif[1]))
+  for(i in 2:100){
+    combined <- image_append(c(c_mgif[i], d_mgif[i]))
+    mh_gif <- c(mh_gif, combined)
+  }
+
+  save(pdata, pdata2, pdata3, pdata3, pdata4, pdata5,
+       a_anim, a_mgif, b_anim, b_mgif, c_anim, c_mgif, d_anim, d_mgif, new_gif, mh_gif,
+       file = "animfiles.RData")
+
+  # stack vertically
+  hmc_mh_gif <- image_append(c(new_gif[1], mh_gif[1]), stack = T)
+  for(i in 2:100){
+    combined <- image_append(c(new_gif[i], mh_gif[i]), stack=T)
+    hmc_mh_gif <- c(hmc_mh_gif, combined)
+  }
+
+  hmc_mh_gif
+
+
+  }
 

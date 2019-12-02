@@ -29,12 +29,21 @@ mh <- function(N, paramInit, qPROP, qFUN, pdFUN, nu, ...) {
       paramSim[[j]] <- paramSim[[j-1]]
     }
   }
-  list(paramSim = paramSim,
+
+  # create dataframe from simulation
+  thetaDF <- as.data.frame(do.call(rbind, paramSim))
+
+  obj <- list(paramSim = paramSim,
+       thetaDF = thetaDF,
        accept = accept)
+
+  class(obj) <- c("hmclearn", "list")
+  return(obj)
 }
 
 
 # q(theta1 | theta2, nu) where nu is a kxk positive definite matrix
+#' @export
 qfun <- function(theta1, theta2, nu) {
   k <- length(theta1)
   nu <- diag(nu, k, k)
@@ -42,6 +51,7 @@ qfun <- function(theta1, theta2, nu) {
 }
 
 # sample from proposal density
+#' @export
 qprop <- function(theta1, nu) {
   k <- length(theta1)
   require(MASS)
@@ -50,11 +60,13 @@ qprop <- function(theta1, nu) {
 }
 
 # nu is a vector
+#' @export
 qprop_all <- function(theta1, nu) {
   nu <- diag(nu)
   MASS::mvrnorm(1, theta1, nu)
 }
 
+#' @export
 qfun_all <- function(theta1, theta2, nu) {
   nu <- diag(nu)
   mvtnorm::dmvnorm(theta1, theta2, nu, log=TRUE)
@@ -77,6 +89,7 @@ qfun_all <- function(theta1, theta2, nu) {
 # logDENS:  log of joint density of parameter of interest
 #   (log likelihood)
 # ... additional parameters to pass to logDENS
+#' @export
 leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, Minv, constrain,
                      lastSTEP=FALSE, ...) {
 
