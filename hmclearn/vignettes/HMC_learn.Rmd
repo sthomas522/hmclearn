@@ -751,6 +751,137 @@ plot(fm1_hmc, actual.mu = c(beta_freq, eps_freq))
 ```
 
 
+## Logistic Regression
+
+Our next example is a slightly more complicated generalized linear model with binary response.  The model is specified
+
+$$
+Pr(Y = 1 | X) = [1 + e^{-X\beta}]^{-1}
+$$
+
+As in the previous example, the dependent variable is $(y_1, ..., y_n) \in \pmb{y}$ with an $N \times p$ design matrix $(x_1, ..., x_p) \in \pmb{X}$.  
+
+The log-likelihood for a logistic regression model is
+
+$$
+\begin{aligned}
+l(\beta;X,y) &= \sum_{i=1}^n X_i\beta(y_i - 1) - \log(1 + e^{-X_i\beta})
+\end{aligned}
+$$
+
+In our prior example, we assigned a uniform prior to $\beta$.  To demonstrate the flexibility of the software, we specify a multivariate Normal prior with hyperparameter $B$.
+
+$$
+\begin{aligned}
+\beta &\sim N(0, \Sigma_\beta) \\
+&\sim N(0, BI)
+\end{aligned}
+$$
+
+With pdf
+
+$$
+\begin{aligned}
+p(\beta) &= \frac{1}{\sqrt{\lvert 2\pi \Sigma_\beta \rvert }}e^{-\frac{1}{2}\beta^T \Sigma_\beta^{-1}\beta} \\
+\log p(\beta) &= -\frac{1}{2}\log(2\pi \lvert \Sigma_\beta \rvert) - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta \\
+&\propto -\frac{1}{2}\log \lvert\Sigma_\beta\rvert - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta
+\end{aligned}
+$$
+
+
+Let $B = 1e3$ for instance, as a relatively uniformative prior.
+
+Now derive the log posterior
+
+$$
+\begin{aligned}
+p(\beta | X, y) &\propto p(y | X, \beta)  p(\beta) \\
+\log p(\beta | X, y) & \propto \log p(y | X, \beta) + \log p(\beta) \\
+&\propto \sum_{i=1}^n X_i\beta(y_i - 1) - \log(1 + e^{-X_i\beta}) -\frac{1}{2}\log \lvert\Sigma_\beta\rvert - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta 
+\end{aligned}
+$$
+
+The log posterior is the sum of the log likelihood and the log of the prior for $\beta$.  
+
+We consider an example from Hosmer and Lemeshow (1989) on a dataset of 189 births at a U.S. hospital.  The dependent variable is an indicator of low birth weight.  Data is available from the MASS package (Modern Applied Statistics with S by Venables and Ripley).  We prepare the data for analysis as noted in the text. 
+
+```{r, echo=TRUE, eval=FALSE}
+birthwt2 <- birthwt
+
+# label race variable
+birthwt2$race2 <- factor(birthwt2$race, labels = c("white", "black", "other"))
+
+# reduce to indicator variable for positive number of premature labors
+birthwt2$ptd <- ifelse(birthwt2$ptl > 0, 1, 0)
+
+# reduce to three levels
+birthwt2$ftv2 <- factor(ifelse(birthwt2$ftv > 2, 2, birthwt2$ftv), 
+                        labels = c("0", "1", "2+"))
+
+# create design matrix
+X <- model.matrix(low ~ age + lwt + race2 + smoke + ptd + ht + ui + ftv2, 
+                  data = birthwt2)
+y <- birthwt2$low
+```
+
+Variables of interest in this dataset are:
+
+\begin{itemize}
+\item low:  birth weight less than 2.5kg (0/1)
+\item age:  age of mother (yrs)
+\item lwt:  weight of mother (lbs)
+\item race2:  factor white/black/other
+\item smoke:  smoking indicator (0/1)
+\item ptd:  premature labor indicator (0/1)
+\item ht:  history of hypertension indicator (0/1)
+\item ui:  uterine irritability indicator (0/1)
+\item ftv2:  number of physician visits factor (0, 1, 2 or more)
+\end{itemize}
+
+
+Next, fit the logistic regression using the frequentist \textit{glm} function in R.
+
+```{r, echo=TRUE, eval=FALSE}
+fm2 <- glm(low ~ age + lwt + race2 + smoke + ptd + ht + ui + ftv2, data=birthwt2, 
+           family = binomial)
+summary(fm2)
+
+```
+
+Now, fit the same model using HMC.
+
+
+```{r, echo=TRUE, eval=FALSE}
+N <- 10000
+set.seed(143)
+
+# use different epsilon values for continuous and dichotomous variables
+continuous_ind <- c(FALSE, TRUE, TRUE, rep(FALSE, 8))
+eps_vals <- ifelse(continuous_ind, 1e-3, 5e-2)
+
+fm2_hmc <- hmc(N, theta.init = rep(0, 11), epsilon = eps_vals, L = 10, 
+                   logPOSTERIOR = logistic_posterior, 
+                   glogPOSTERIOR = g_logistic_posterior, y=y, X=X, 
+                   varnames = colnames(X))
+
+```
+
+Summarize the results
+
+```{r, echo=TRUE, eval=FALSE}
+fm2_hmc$accept/N
+
+summary(fm2_hmc)
+
+```
+
+Diagnostic plots
+
+```{r, echo=TRUE, eval=FALSE}
+plot(fm2_hmc, actual.mu=coef(fm2))
+
+```
+
 
 
 # Appendix:  HMC R package
