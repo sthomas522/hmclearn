@@ -688,85 +688,64 @@ $$
 &\propto -\left(\frac{n}{2} + a \right)\gamma  -\frac{e^{-\gamma}}{2} (y - X\beta)^T(y-X\beta)- b e^{-\gamma}
 \end{aligned}
 $$
-
-
-
-```{r, echo=TRUE, eval=FALSE}
-head(warpbreaks)
-
-summary(warpbreaks)
-
-```
-
-
-Frequentist version of lm model with warpbreaks
-
-```{r, echo=TRUE, eval=FALSE}
-fm1 <- lm(breaks ~ wool*tension, data=warpbreaks)
-summary(fm1)
-
-```
-
-Use HMC to fit the same model
-
-
-The posterior for $\beta$ and $\sigma^2$
+The gradient of log posterior is needed for the leapfrog function
 
 $$
 \begin{aligned}
-p(\beta, \sigma^2|y; X) &\propto p(y|X, \beta, \sigma^2) p(\beta, \sigma^2) \\
-&\propto p(y|X, \beta, \sigma^2)p(\beta)p(\sigma^2)
+\nabla_\beta \log p(\beta, \gamma | y, X) &\propto e^{-\gamma}X^T(y - X\beta) \\
+\nabla_\gamma \log p(\beta, \gamma | y, X) &\propto -\left(\frac{n}{2} + a \right) 
 \end{aligned}
 $$
+We have now derived everything that is needed to fit a linear regression model.  The dataset \textit{warpbreaks} is available standard with \textit{R}.  
+ 
+```{r, echo=TRUE, eval=TRUE}
+head(warpbreaks)
+summary(warpbreaks)
+```
 
+The dependent variable is stored in $y$.  The design matrix can be constructed using a standard function in \textit{R}.  
 
-
-
-
-
-Prepare data for analysis
-
-```{r, echo=TRUE, eval=FALSE}
-X <- model.matrix(breaks ~ wool*tension, data=warpbreaks)
+```{r, echo=TRUE, eval=TRUE}
 y <- warpbreaks$breaks
+X <- model.matrix(breaks ~ wool*tension, data=warpbreaks)
 
 ```
 
-There are 6 $\beta$ parameters in this model and one $\epsilon$ parameter.
+The vector of parameters of interest is $(\pmb\beta, \gamma) \in \theta$.  The initial values specified in a vector of length 6 for $\beta$ plus 1 for $\gamma$.  The step size is a factor of 10 higher for $\pmb\beta$ than for log transformed variance.  
 
-```{r, echo=TRUE, eval=FALSE}
-dim(X)
-
-```
-
-```{r, echo=TRUE, eval=FALSE}
+```{r, echo=TRUE, eval=TRUE}
 N <- 10000
 set.seed(143)
 
 eps_vals <- c(rep(2e-1, 6), 2e-2)
 
+t1 <- Sys.time()
 fm1_hmc <- hmc(N, theta.init = c(rep(0, 6), 1), epsilon = eps_vals, L = 10, 
                    logPOSTERIOR = linear_posterior, 
                    glogPOSTERIOR = g_linear_posterior, y=y, X=X, 
                    varnames = c(colnames(X), "log_sigma_sq"))
+t2 <- Sys.time()
+t2 - t1
 
 ```
 
-Summarize fit
+This linear regression model takes approximately 10 seconds to fit on a 2015 Macbook Pro with 2.5GHz i7 processor and 16gb of RAM.  The acceptance rate of this model fit is 96\%, which is appropriate for a relatively simple model such as this one.  
 
-```{r, echo=TRUE, eval=FALSE}
-fm1_hmc$accept
 
+```{r, echo=TRUE, eval=TRUE}
+fm1_hmc$accept/N
+```
+
+Finally, we can summarize the results and plot the histograms of the simulated posteriors. 
+
+```{r, echo=TRUE, eval=TRUE}
 summary(fm1_hmc)
-
-
+plot(fm1_hmc)[[1]]
 ```
 
-Plot fit
-
-```{r, echo=TRUE, eval=FALSE}
-beta_freq <- coef(fm1)
-eps_freq <- 2*log(sigma(fm1))
+```{r, echo=FALSE, eval=FALSE}
+# beta_freq <- coef(fm1)
+# eps_freq <- 2*log(sigma(fm1))
 plot(fm1_hmc, actual.mu = c(beta_freq, eps_freq))
 
 ```
