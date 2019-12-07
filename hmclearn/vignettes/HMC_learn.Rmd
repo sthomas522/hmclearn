@@ -237,13 +237,17 @@ The function \textit{hmc} runs the main HMC algorithm.  Many of the parameters h
 \item \textit{...}:  Parameters, including data, passed to \textit{logPOSTERIOR} and \textit{glogPOSTERIOR}
 \end{itemize}
 
+The output of \textit{hmc} is a single list containing the model results.  The most important values provided in the output are the simulated values \textit{thetaDF} and number of accepted proposals \textit{accept}.  
 
 One might notice that none of the above parameters explicitly specify the data or priors.  In this package, the data is passed to the functions indicated with the \textit{logPOSTERIOR} and \textit{glogPOSTERIOR} parameters via the \textit{...} parameter.  Priors should be defined either within the posterior functions or in separate function calls.  The purpose of this design is to maximize flexibility regarding the types of models to fit using this package.  
 
-The default number of simulations is set to 10,000.  However, the user may elect to start with a smaller number during tuning.  Defaults are provided for the stepsize $\epsilon$ and leapfrog steps $L$.  These likely will need to be adjusted depending on the particular application.  
+The default number of simulations is set to 10,000.  However, the user may elect to start with a smaller number during tuning.  Initial values for the parameters must be provided by the user.  Caution should be used to ensure that these initial values are in the support of $\Theta$.  
 
-The output of \textit{hmc} is a single list containing the model results.  The acceptance rate can be calculated from the \textit{hmc} function from the number of accepted proposals.  
+Defaults are provided for the stepsize $\epsilon$ and leapfrog steps $L$.  These likely will need to be adjusted depending on the particular application.  One simple indicator of whether HMC is sampling correctly is the acceptance rate of the MCMC chain.  In general, acceptance rates between 60\% and 95\% are sufficient for this algorithm.  
 
+The acceptance rate can be calculated from the \textit{hmc} function from the number of accepted proposals divided by the number of samples \textit{N}.  Both of these values are included in the output of \textit{hmc}.  
+
+The MCMC simulation values are provided in list and dataframe forms.  In most cases, the dataframe \textit{thetaDF} will be most convenient for exploring posterior simulation values.  The number of columns in the dataframe is equal to the number of parameters defined in the model.  
 
 
 ## Simple example
@@ -313,7 +317,7 @@ $$
 \end{aligned}
 $$
 
-The R function for the gradient of the log posterior is provided here.
+The function for the gradient of the log posterior is provided here.
 
 ```{r, echo=TRUE, eval=TRUE}
 # derivative of posterior
@@ -355,7 +359,7 @@ The \textit{hmclearn} package has a diagnostic plot function to show trace plots
 
 Without performing rigorous diagnostics, the trace plots appear stationary with the given burnin period.  The histograms of the simulations also appear well within the range of highest posterior density.  
 
-```{r, echo=TRUE}
+```{r, echo=TRUE, eval=TRUE}
 plot(ex1, actual.mu = c(2, 3))
 
 ```
@@ -632,6 +636,143 @@ After the parameters have been tuned, a full HMC simulation can be run.  Analyst
 Once the simulation is complete, readily available diagonstics can be used to assess the convergence of the Markov chain.  In R, the \textit{coda} package provides a number of standard diagnostics, such as the Geweke (1992) and Gelman and Rubin (1992) diagnostics.  The \textit{bayesplot} package also provides graphical functions to assess convergence. 
 
 After the HMC simulation is complete and convergence has been assessed, the simulations can be used for statistical inference.  
+
+# HMC Examples
+
+We demonstrate fitting HMC models in R with three examples of increasing complexity.
+
+## Linear Regression
+
+The linear regression model is this example is specified
+
+$$
+y = X\pmb\beta + \sigma
+$$
+
+The dependent variable is the vector $(y_1, ..., y_n) \in y$.  The independent variables are contained in the design matrix $\pmb{x}_1, ..., \pmb{x}_p$, with dimensions $N \times p$.  
+
+The model contains two parameters of interest to be fit via HMC, $(\beta_1, ..., \beta_p) \in \pmb{\beta}$ and $\sigma$.  
+
+Next, we specify the likelihood for a linear regression model.  
+
+$$
+p(y | X, \beta; \sigma^2) = \frac{1}{(2\pi\sigma^2)^{n/2}}\exp{\left(-\frac{1}{2\sigma^2} (y - X\beta)^T(y-X\beta) \right)}
+$$
+
+Priors are needed for $\pmb\beta$ and $\sigma$.  We specify a flat uniform prior for $\pmb\beta$ and Inverse Gamma (IG) for $\sigma^2$.  The IG prior has two hyperpriors $a$ and $b$ that will need to be specified.  
+
+$$
+\begin{aligned}
+p(\beta) &\propto const \\
+p(\sigma^2) &\sim IG(a, b) \\
+&= \frac{b^a}{\Gamma(a)} (\sigma^2)^{-a-1} \exp\left(-\frac{b}{\sigma^2} \right)
+\end{aligned}
+$$
+
+The support of $\sigma^2$ is $(0, \infty)$.  We apply a log transformation to expand the support to all real numbers.  The transformed parameter is $\gamma$ which is derived using a single variable transformation.  
+
+$$
+\begin{aligned}
+\gamma &= \log \sigma^2 \\
+\sigma^2 &= g^{-1}(\gamma) = e^\gamma \\
+p_\gamma(\gamma) 
+&= \frac{b^a}{\Gamma(a)}e^{-a\gamma}\exp\left(-\frac{b}{e^\gamma} \right) \\
+\log p(\gamma) &\propto -a\gamma - be^{-\gamma}
+\end{aligned}
+$$
+The log posterior for $\beta$ and $\gamma$ is proportional to the log likelihood plus the log prior.  
+
+$$
+\begin{aligned}
+\log p(\beta, \gamma | y, X)
+&\propto -\left(\frac{n}{2} + a \right)\gamma  -\frac{e^{-\gamma}}{2} (y - X\beta)^T(y-X\beta)- b e^{-\gamma}
+\end{aligned}
+$$
+
+
+
+```{r, echo=TRUE, eval=FALSE}
+head(warpbreaks)
+
+summary(warpbreaks)
+
+```
+
+
+Frequentist version of lm model with warpbreaks
+
+```{r, echo=TRUE, eval=FALSE}
+fm1 <- lm(breaks ~ wool*tension, data=warpbreaks)
+summary(fm1)
+
+```
+
+Use HMC to fit the same model
+
+
+The posterior for $\beta$ and $\sigma^2$
+
+$$
+\begin{aligned}
+p(\beta, \sigma^2|y; X) &\propto p(y|X, \beta, \sigma^2) p(\beta, \sigma^2) \\
+&\propto p(y|X, \beta, \sigma^2)p(\beta)p(\sigma^2)
+\end{aligned}
+$$
+
+
+
+
+
+
+Prepare data for analysis
+
+```{r, echo=TRUE, eval=FALSE}
+X <- model.matrix(breaks ~ wool*tension, data=warpbreaks)
+y <- warpbreaks$breaks
+
+```
+
+There are 6 $\beta$ parameters in this model and one $\epsilon$ parameter.
+
+```{r, echo=TRUE, eval=FALSE}
+dim(X)
+
+```
+
+```{r, echo=TRUE, eval=FALSE}
+N <- 10000
+set.seed(143)
+
+eps_vals <- c(rep(2e-1, 6), 2e-2)
+
+fm1_hmc <- hmc(N, theta.init = c(rep(0, 6), 1), epsilon = eps_vals, L = 10, 
+                   logPOSTERIOR = linear_posterior, 
+                   glogPOSTERIOR = g_linear_posterior, y=y, X=X, 
+                   varnames = c(colnames(X), "log_sigma_sq"))
+
+```
+
+Summarize fit
+
+```{r, echo=TRUE, eval=FALSE}
+fm1_hmc$accept
+
+summary(fm1_hmc)
+
+
+```
+
+Plot fit
+
+```{r, echo=TRUE, eval=FALSE}
+beta_freq <- coef(fm1)
+eps_freq <- 2*log(sigma(fm1))
+plot(fm1_hmc, actual.mu = c(beta_freq, eps_freq))
+
+```
+
+
+
 
 # Appendix:  HMC R package
 

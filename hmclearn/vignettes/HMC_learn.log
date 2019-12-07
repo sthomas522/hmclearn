@@ -1,9 +1,12 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019) (preloaded format=pdflatex 2019.5.8)  7 DEC 2019 13:18
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019) (preloaded format=pdflatex 2019.5.8)  7 DEC 2019 14:13
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**HMC_learn.tex
-(./HMC_learn.tex
+**/private/var/folders/vv/6crgv9_j0d16412b4762gm440000gn/T/RtmpnAsmK2/preview-9
+2137fd1710a.dir/HMC_learn.tex
+
+(/private/var/folders/vv/6crgv9_j0d16412b4762gm440000gn/T/RtmpnAsmK2/preview-92
+137fd1710a.dir/HMC_learn.tex
 LaTeX2e <2018-12-01>
 (/usr/local/texlive/2019/texmf-dist/tex/latex/base/article.cls
 Document Class: article 2018/09/03 v1.4i Standard LaTeX document class
@@ -725,102 +728,123 @@ put line 240.
 Package microtype Info: Character `029' is missing
 (microtype)             in font `T1/lmr/m/sc/10'.
 (microtype)             Ignoring protrusion settings for this character.
-[2] [3] [4] [5] [6] [7] [8] [9] [10]
-<HMC_learn_files/figure-latex/unnamed-chunk-6-1.pdf, id=203, 453.695pt x 313.17
-pt>
-File: HMC_learn_files/figure-latex/unnamed-chunk-6-1.pdf Graphic file (type pdf
-)
-<use HMC_learn_files/figure-latex/unnamed-chunk-6-1.pdf>
-Package pdftex.def Info: HMC_learn_files/figure-latex/unnamed-chunk-6-1.pdf  us
-ed on input line 694.
+[2] [3] [4] [5] [6] [7]
+LaTeX Font Info:    Try loading font information for TS1+lmr on input line 536.
+
+(/usr/local/texlive/2019/texmf-dist/tex/latex/lm/ts1lmr.fd
+File: ts1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
+) [8] [9] [10] [11]
+</private/var/folders/vv/6crgv9_j0d16412b4762gm440000gn/T/RtmpnAsmK2/preview-92
+137fd1710a.dir/HMC_learn_files/figure-latex/unnamed-chunk-6-1.pdf, id=208, 453.
+695pt x 313.17pt>
+File: /private/var/folders/vv/6crgv9_j0d16412b4762gm440000gn/T/RtmpnAsmK2/previ
+ew-92137fd1710a.dir/HMC_learn_files/figure-latex/unnamed-chunk-6-1.pdf Graphic 
+file (type pdf)
+<use /private/var/folders/vv/6crgv9_j0d16412b4762gm440000gn/T/RtmpnAsmK2/previe
+w-92137fd1710a.dir/HMC_learn_files/figure-latex/unnamed-chunk-6-1.pdf>
+Package pdftex.def Info: /private/var/folders/vv/6crgv9_j0d16412b4762gm440000gn
+/T/RtmpnAsmK2/preview-92137fd1710a.dir/HMC_learn_files/figure-latex/unnamed-chu
+nk-6-1.pdf  used on input line 734.
 (pdftex.def)             Requested size: 453.6939pt x 313.16922pt.
-[11]
-<HMC_learn_files/figure-latex/unnamed-chunk-6-2.pdf, id=208, 453.695pt x 313.17
-pt>
-File: HMC_learn_files/figure-latex/unnamed-chunk-6-2.pdf Graphic file (type pdf
-)
-<use HMC_learn_files/figure-latex/unnamed-chunk-6-2.pdf>
-Package pdftex.def Info: HMC_learn_files/figure-latex/unnamed-chunk-6-2.pdf  us
-ed on input line 701.
+[12]
+</private/var/folders/vv/6crgv9_j0d16412b4762gm440000gn/T/RtmpnAsmK2/preview-92
+137fd1710a.dir/HMC_learn_files/figure-latex/unnamed-chunk-6-2.pdf, id=213, 453.
+695pt x 313.17pt>
+File: /private/var/folders/vv/6crgv9_j0d16412b4762gm440000gn/T/RtmpnAsmK2/previ
+ew-92137fd1710a.dir/HMC_learn_files/figure-latex/unnamed-chunk-6-2.pdf Graphic 
+file (type pdf)
+<use /private/var/folders/vv/6crgv9_j0d16412b4762gm440000gn/T/RtmpnAsmK2/previe
+w-92137fd1710a.dir/HMC_learn_files/figure-latex/unnamed-chunk-6-2.pdf>
+Package pdftex.def Info: /private/var/folders/vv/6crgv9_j0d16412b4762gm440000gn
+/T/RtmpnAsmK2/preview-92137fd1710a.dir/HMC_learn_files/figure-latex/unnamed-chu
+nk-6-2.pdf  used on input line 741.
 (pdftex.def)             Requested size: 453.6939pt x 313.16922pt.
-[12 <./HMC_learn_files/figure-latex/unnamed-chunk-6-1.pdf>] [13 <./HMC_learn_fi
-les/figure-latex/unnamed-chunk-6-2.pdf>] [14] [15]
-<HMC_learn_files/figure-latex/unnamed-chunk-10-1.pdf, id=242, 453.695pt x 313.1
-7pt>
-File: HMC_learn_files/figure-latex/unnamed-chunk-10-1.pdf Graphic file (type pd
-f)
-<use HMC_learn_files/figure-latex/unnamed-chunk-10-1.pdf>
-Package pdftex.def Info: HMC_learn_files/figure-latex/unnamed-chunk-10-1.pdf  u
-sed on input line 846.
+[13 </private/var/folders/vv/6crgv9_j0d16412b4762gm440000gn/T/RtmpnAsmK2/previe
+w-92137fd1710a.dir/HMC_learn_files/figure-latex/unnamed-chunk-6-1.pdf>] [14 </p
+rivate/var/folders/vv/6crgv9_j0d16412b4762gm440000gn/T/RtmpnAsmK2/preview-92137
+fd1710a.dir/HMC_learn_files/figure-latex/unnamed-chunk-6-2.pdf>] [15] [16]
+</private/var/folders/vv/6crgv9_j0d16412b4762gm440000gn/T/RtmpnAsmK2/preview-92
+137fd1710a.dir/HMC_learn_files/figure-latex/unnamed-chunk-10-1.pdf, id=247, 453
+.695pt x 313.17pt>
+File: /private/var/folders/vv/6crgv9_j0d16412b4762gm440000gn/T/RtmpnAsmK2/previ
+ew-92137fd1710a.dir/HMC_learn_files/figure-latex/unnamed-chunk-10-1.pdf Graphic
+ file (type pdf)
+<use /private/var/folders/vv/6crgv9_j0d16412b4762gm440000gn/T/RtmpnAsmK2/previe
+w-92137fd1710a.dir/HMC_learn_files/figure-latex/unnamed-chunk-10-1.pdf>
+Package pdftex.def Info: /private/var/folders/vv/6crgv9_j0d16412b4762gm440000gn
+/T/RtmpnAsmK2/preview-92137fd1710a.dir/HMC_learn_files/figure-latex/unnamed-chu
+nk-10-1.pdf  used on input line 886.
 (pdftex.def)             Requested size: 453.6939pt x 313.16922pt.
-<HMC_learn_files/figure-latex/unnamed-chunk-10-2.pdf, id=243, 453.695pt x 313.1
-7pt>
-File: HMC_learn_files/figure-latex/unnamed-chunk-10-2.pdf Graphic file (type pd
-f)
-<use HMC_learn_files/figure-latex/unnamed-chunk-10-2.pdf>
-Package pdftex.def Info: HMC_learn_files/figure-latex/unnamed-chunk-10-2.pdf  u
-sed on input line 853.
+</private/var/folders/vv/6crgv9_j0d16412b4762gm440000gn/T/RtmpnAsmK2/preview-92
+137fd1710a.dir/HMC_learn_files/figure-latex/unnamed-chunk-10-2.pdf, id=248, 453
+.695pt x 313.17pt>
+File: /private/var/folders/vv/6crgv9_j0d16412b4762gm440000gn/T/RtmpnAsmK2/previ
+ew-92137fd1710a.dir/HMC_learn_files/figure-latex/unnamed-chunk-10-2.pdf Graphic
+ file (type pdf)
+<use /private/var/folders/vv/6crgv9_j0d16412b4762gm440000gn/T/RtmpnAsmK2/previe
+w-92137fd1710a.dir/HMC_learn_files/figure-latex/unnamed-chunk-10-2.pdf>
+Package pdftex.def Info: /private/var/folders/vv/6crgv9_j0d16412b4762gm440000gn
+/T/RtmpnAsmK2/preview-92137fd1710a.dir/HMC_learn_files/figure-latex/unnamed-chu
+nk-10-2.pdf  used on input line 893.
 (pdftex.def)             Requested size: 453.6939pt x 313.16922pt.
-[16 <./HMC_learn_files/figure-latex/unnamed-chunk-10-1.pdf>] [17 <./HMC_learn_f
-iles/figure-latex/unnamed-chunk-10-2.pdf>] [18] [19] [20]
-Underfull \hbox (badness 10000) in paragraph at lines 1062--1065
+[17 </private/var/folders/vv/6crgv9_j0d16412b4762gm440000gn/T/RtmpnAsmK2/previe
+w-92137fd1710a.dir/HMC_learn_files/figure-latex/unnamed-chunk-10-1.pdf>] [18 </
+private/var/folders/vv/6crgv9_j0d16412b4762gm440000gn/T/RtmpnAsmK2/preview-9213
+7fd1710a.dir/HMC_learn_files/figure-latex/unnamed-chunk-10-2.pdf>] [19] [20] [2
+1]
+Underfull \hbox (badness 10000) in paragraph at lines 1102--1105
 
  []
 
-[21] [22] [23]
-Underfull \vbox (badness 10000) detected at line 1290
- []
-
-[24]
-Underfull \vbox (badness 10000) detected at line 1290
- []
-
-
-Underfull \vbox (badness 10000) detected at line 1290
+[22] [23] [24]
+Underfull \vbox (badness 10000) detected at line 1330
  []
 
 [25]
-LaTeX Font Info:    Try loading font information for TS1+lmr on input line 1295
-.
-(/usr/local/texlive/2019/texmf-dist/tex/latex/lm/ts1lmr.fd
-File: ts1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
-) [26] [27] [28] [29] [30] [31] [32] [33] [34] [35] [36] [37] [38] [39] [40] [4
-1] [42] [43]
-LaTeX Font Info:    Try loading font information for TS1+lmtt on input line 225
+Underfull \vbox (badness 10000) detected at line 1330
+ []
+
+
+Underfull \vbox (badness 10000) detected at line 1330
+ []
+
+[26] [27] [28] [29] [30] [31] [32] [33] [34] [35] [36] [37] [38] [39] [40] [41]
+[42] [43] [44]
+LaTeX Font Info:    Try loading font information for TS1+lmtt on input line 229
 3.
 (/usr/local/texlive/2019/texmf-dist/tex/latex/lm/ts1lmtt.fd
 File: ts1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-Underfull \vbox (badness 10000) detected at line 2261
+Underfull \vbox (badness 10000) detected at line 2301
  []
 
-[44]
-Underfull \vbox (badness 10000) detected at line 2275
+[45]
+Underfull \vbox (badness 10000) detected at line 2315
  []
 
-[45] [46]
-Underfull \vbox (badness 3590) detected at line 2360
+[46] [47]
+Underfull \vbox (badness 3590) detected at line 2400
  []
 
-[47]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 2396.
 [48]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 2396.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 2436.
+[49]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 2436.
 (./HMC_learn.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 2396.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 2396.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 2436.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 2436.
 
 Package rerunfilecheck Info: File `HMC_learn.out' has not changed.
 (rerunfilecheck)             Checksum: 8301A5496B2176213529AF099ACFCEED;5380.
  ) 
 Here is how much of TeX's memory you used:
- 14308 strings out of 492616
- 210741 string characters out of 6129482
+ 14312 strings out of 492616
+ 212535 string characters out of 6129482
  328105 words of memory out of 5000000
  17704 multiletter control sequences out of 15000+600000
- 91300 words of font info for 145 fonts, out of 8000000 for 9000
+ 91430 words of font info for 146 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 35i,11n,38p,817b,449s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 35i,11n,38p,910b,449s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2019/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}{/usr/local
 /texlive/2019/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/usr/local/texlive/2
 019/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/usr/local/texlive/2019/texmf-dist
@@ -845,10 +869,10 @@ l/texlive/2019/texmf-dist/fonts/type1/public/lm/lmsy7.pfb></usr/local/texlive/2
 019/texmf-dist/fonts/type1/public/lm/lmtk10.pfb></usr/local/texlive/2019/texmf-
 dist/fonts/type1/public/lm/lmtt10.pfb></usr/local/texlive/2019/texmf-dist/fonts
 /type1/public/lm/lmtti10.pfb>
-Output written on HMC_learn.pdf (48 pages, 677948 bytes).
+Output written on HMC_learn.pdf (49 pages, 681745 bytes).
 PDF statistics:
- 543 PDF objects out of 1000 (max. 8388607)
- 455 compressed objects within 5 object streams
- 129 named destinations out of 1000 (max. 500000)
+ 548 PDF objects out of 1000 (max. 8388607)
+ 459 compressed objects within 5 object streams
+ 130 named destinations out of 1000 (max. 500000)
  14589 words of extra memory for PDF output out of 17280 (max. 10000000)
 
