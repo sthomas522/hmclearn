@@ -222,11 +222,29 @@ We introduce how to use the \textit{hmcR} package in this section.  The software
 
 The function \textit{hmc} runs the main HMC algorithm.  Many of the parameters have defaults to the most frequently used values.  However, any of the defaults can be overriden with a custom specification.  
 
-This function calls a separate function for the leapfrog algorithm and random value generation.  Also, the user must specify functions to calculate both the log posterior as well as the gradient of the log posterior.  These functions are used by both the main HMC function as well as the leapfrog function.
+\begin{itemize}
+\item \textit{N}:  number of MCMC samples.  Default is 10,000
+\item \textit{theta.init}:  initial values for model parameters
+\item \textit{epsilon}:  Default 0.01.  stepsize tuning parameter for HMC
+\item \textit{L}:  Default 10.  number of Leapfrog steps tuning parameter for HMC
+\item \textit{logPOSTERIOR}:  function to return the log posterior depending on $\Theta$, $p$, and data provided in \textit{...}.
+\item \textit{glogPOSTERIOR}:  function to return the gradient of the log posterior depending on $\Theta$, $p$, and data provided in \textit{...}.
+\item \textit{varnames}: optional vector of variable names in the model
+\item \textit{randlength}:  default FALSE.  Boolean value on whether to apply some randomness to the number of Leapfrog steps \textit{L}
+\item \textit{Mdiag}:  optional vector for the diagonal of the Mass matrix $M$
+\item \textit{constrain}:  optional vector of which variables are bounded as positive only.  
+\item \textit{verbose}:  default FALSE.  Boolean on whether to print status updates of \textit{hmc}
+\item \textit{...}:  Parameters, including data, passed to \textit{logPOSTERIOR} and \textit{glogPOSTERIOR}
+\end{itemize}
 
 
+One might notice that none of the above parameters explicitly specify the data or priors.  In this package, the data is passed to the functions indicated with the \textit{logPOSTERIOR} and \textit{glogPOSTERIOR} parameters via the \textit{...} parameter.  Priors should be defined either within the posterior functions or in separate function calls.  The purpose of this design is to maximize flexibility regarding the types of models to fit using this package.  
 
-Here we present the use of these functions with a simple example.  Details on functions are in the Appendix.  
+The default number of simulations is set to 10,000.  However, the user may elect to start with a smaller number during tuning.  Defaults are provided for the stepsize $\epsilon$ and leapfrog steps $L$.  These likely will need to be adjusted depending on the particular application.  
+
+The output of \textit{hmc} is a single list containing the model results.  The acceptance rate can be calculated from the \textit{hmc} function from the number of accepted proposals.  
+
+
 
 ## Simple example
 
