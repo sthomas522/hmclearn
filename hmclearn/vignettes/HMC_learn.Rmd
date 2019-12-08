@@ -1,5 +1,5 @@
 ---
-title: "HMC Learn"
+title: "HMC in R"
 output: pdf_document
 vignette: >
   %\VignetteIndexEntry{HMC_learn}
@@ -869,7 +869,314 @@ plot(fm2_hmc)[[1]]
 ```
 
 
-\pagebreak
+## Mixed effects model
+
+This example demonstrates fitting a more complex higher dimension model using HMC.  The distribution is Poisson with the link functon
+
+$$
+\begin{aligned}
+\mu &:= E(Y | X, Z) = e^{X\beta + Zu} \\
+\log \mu &= X\beta + Zu
+\end{aligned}
+$$
+We have $i = 1...N$ observations and $j = 1...M$ groups.  The fixed effects design matrix is $X$ with dimension $N \times p$.  When modeling a random intercept for each group, the random effects design matrix is $Z$ with dimension $N \times M$.  
+
+Develop the likelihood
+
+$$
+\begin{aligned}
+L(\mu; y) &= \prod_{i=1}^n \prod_{j=1}^m \frac{e^{-\mu_{ij}}\mu_i^{y_{ij}}}{y_{ij}!} \\
+L(\beta; y, X) &= \prod_{i=1}^n \prod_{j=1}^m \frac{e^{-e^{X_i\beta + Z_{ij}u_{ij}}}e^{y_i(X_i\beta + Z_{ij}u_{ij})}}{y_i!} \\
+\end{aligned}
+$$
+
+with log-likelihood
+
+$$
+\begin{aligned}
+l(\beta; y, X) &=  -e^{\sum_{i=1}^n \sum_{j=1}^m X_{i}\beta + Z_{ij}u_{ij]}} + y_{ij} (X_i \beta + Z_{ij}u_{ij}) - \log y_{ij}! \\
+&\propto -e^{\sum_{i=1}^n \sum_{j=1}^m X_{i}\beta + Z_{ij}u_{ij]}} + y_{ij} (X_i \beta + Z_{ij}u_{ij}) \\
+&\propto -e^{\sum_{ij} X\beta + Zu} + y^T(X\beta + Zu)
+\end{aligned}
+$$
+
+We set a multivariate Normal prior for $\beta$
+
+$$
+\begin{aligned}
+\beta &\sim N(0, \Sigma_\beta) \\
+&\sim N(0, BI)
+\end{aligned}
+$$
+
+
+With pdf
+
+$$
+\begin{aligned}
+p(\beta) &= \frac{1}{\sqrt{\lvert 2\pi \Sigma_\beta \rvert }}e^{-\frac{1}{2}\beta^T \Sigma_\beta^{-1}\beta} \\
+\log p(\beta) &= -\frac{1}{2}\log(2\pi \lvert \Sigma_\beta \rvert) - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta \\
+&\propto -\frac{1}{2}\log \lvert\Sigma_\beta\rvert - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta
+\end{aligned}
+$$
+
+Let $B = 1e3$ for instance, as a relatively uniformative prior.
+
+The distribution of the random effects are defined as normal with a mean of zero. 
+
+Note that in this parameterization, we directly decompose $G$ instead of $G^{-1}$ as in Chan and Jelikzhov (2009).
+
+$$
+\begin{aligned}
+u &\sim N(0, G)  \\
+G &= L D L^T \\
+&= L D^{1/2} D^{1/2} L^T \\
+\end{aligned}
+$$
+
+
+Let $\lambda_k$ where $k = 1, ... p$ denote the diagonal entries of $D^{1/2}$ and let $a_{kj}$ where $1 \leq j < k \leq p$ denote free elements of lower unitrangular matrix $L$
+
+$$
+D^{1/2} := 
+\begin{pmatrix}
+\lambda_1 & 0 & ... & 0 \\
+0 & \lambda_2 & 0 ... & 0 \\
+... & ... & ... & ... \\
+0 & 0 & ... & \lambda_p
+\end{pmatrix}, 
+L :=
+\begin{pmatrix}
+1 & 0 & 0 & ... & 0 \\
+a_{21} & 1 & 0 & ... & 0 \\
+a_{31} & a_{32} & 1 & ... & ... \\
+... & ... & ... & ... & ... \\
+a_{p1} & a_{p2} & ... & ... & 1 \\
+\end{pmatrix}
+$$
+
+Also define $\lambda := (\lambda_1, ..., \lambda_p)^T$ and $a_k := (a_{k1}, ..., a_{k, k-1})^T$ and $a := (a_2^T, ..., a_p^T)^T$.  
+
+For simplicity, we define $a_k = 0\;\; \forall k$ in this application.  $L$ then simplifies to the identity matrix.  
+
+Consider priors where $k = 1...p$.  The prior for $\lambda_k$ is half-t per Gelman (2006).  The previous parameterization was inverse gamma, which can be unintentionally informative for hierarchical models.  Another previous parameterization was uniform, which was also recommended by Gelman for more than 3 groups, but has the consequence of a positive bias.  
+
+Prior distributions for variance parameters in hierarchical models.  Andrew Gelman (2006)
+
+We use a half-t prior for standard deviation $\lambda_k$
+
+$$
+\begin{aligned}
+p(\lambda_k) &\sim \left(1 + \frac{1}{\nu}\left(\frac{\lambda_k}{A} \right)^2 \right)^{-(\nu+1)/2} 
+\end{aligned}
+$$
+
+In prior parameterizations, we directly defined the likelihood of the random effects $u$.  Per Betancourt, Girolami (2013), we re-parameterize $u$ using a standard normal parameterization we define as $\tau = (\tau_1, ..., \tau_q)$.  Here, $u$ is a deterministic function of $G$ and $\tau$.
+
+$$
+\begin{aligned}
+\tau &\sim N(0, I_q) \\
+u &:= L D^{1/2} \tau \\
+&\sim N(0, LD^{1/2} I (L D^{1/2})^T) \\
+&\sim N(0, L D^{1/2} D^{1/2} L^T) \\
+&\sim N(0, G)
+\end{aligned}
+$$
+
+The distribution of $u$ therefore does not change with this parameterization.  The intent of our re-parameterization is to allow $G$ and $\tau$ to be largely independent in the MCMC sampling.  
+
+Now derive the log posterior
+
+Bayes rule to derive log posterior
+
+$$
+\begin{aligned}
+p(\beta, u, G | y, X, Z) &\propto p(y | \beta, u, G)  p(\beta, u, G) \\
+&\propto p(y|\beta, u, G) p(\beta) p(u|G) p(G) \\
+\log p(\beta, u, G | y, X, Z) &\propto \log p(y|\beta, u, G) + \log p(\beta) + \log p(u|G) + \log p(G)
+\end{aligned}
+$$
+
+The log posterior is the sum of the log likelihood and the log of the prior for $\beta$.  
+
+We have hyperpriors $\lambda$ for $G$
+
+Use a half-t prior for variance parameters per Gelman (2006) Prior Distributions for Variance Parameters in Hierarchical Models
+
+Recall that we parameterized $\lambda_k$ as uniform
+
+$$
+\begin{aligned}
+p(\lambda_k) &\sim \left(1 + \frac{1}{\nu}\left(\frac{\lambda_k}{A} \right)^2 \right)^{-(\nu+1)/2} \\
+p_{\xi_k}(\xi_k) &= p_{\lambda_k}(g^{-1}(\xi_k)) \left\lvert \frac{d\lambda_k}{d\xi_k}  \right\rvert \\
+&= p_{\lambda_k} (e^{\xi_k})\lvert e^{\xi_k}\rvert \\
+&\propto  \left(1 + \frac{1}{\nu}\left(\frac{e^{\xi_k}}{A} \right)^2 \right)^{-(\nu+1)/2} e^{\xi_k}\\
+&\propto \left(1 + \frac{1}{\nu}\left(\frac{e^{2\xi_k}}{A^2} \right) \right)^{-(\nu+1)/2} e^{\xi_k}\\
+\log p(\xi_k) &\propto -\frac{\nu+1}{2}\log\left(1 + \frac{1}{\nu}\left(\frac{e^{2\xi_k}}{A^2} \right) \right) + \xi_k \\
+\frac{\partial}{\partial\xi_k}\log p(\xi_k) &\propto -\frac{\nu+1}{2}\frac{1}{1 + \frac{1}{\nu}\left( \frac{e^{2\xi_k}}{A^2} \right)}\frac{2e^{2\xi_k}}{\nu A^2} + 1 \\
+&\propto -(\nu+1)\frac{1}{1 + \nu A^2 e^{-2\xi_k}} + 1
+\end{aligned}
+$$
+
+
+Write the full log posterior
+
+
+$$
+\begin{aligned}
+\log p(\beta, u, G | y, X, Z) &\propto \log p(y|\beta, u, G) + \log p(\beta) + \log p(u|G) + \log p(G) \\
+\log p(\beta, \gamma, \tau, \xi_1...\xi_q,a | y, X, Z) &\propto \log p(y | \beta, \tau, \gamma, \xi, a) + \log p(\beta) + \log p(\gamma)+ \log p(\tau) + \log p(\xi) + \log p(a) \\
+&\propto  -e^{\sum_{ij} X\beta + Zu} + y^T(X\beta + Zu) -\frac{1}{2}\log \lvert\Sigma_\beta\rvert - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta \\
+&-\sum_{k=1}^q \left(\frac{\nu_{\lambda_k}+1}{2}\log\left(1 + \frac{1}{\nu_{\lambda_k}} 
+\frac{e^{2\xi_k}}{A_{\lambda_k}^2}\right)+ \xi_k\right) -\frac{1}{2} a^T A^{-1} a -\frac{1}{2} \tau^T \tau\\
+&\propto  -e^{\sum_{ij} X\beta + ZLD^{1/2}\tau} + y^T(X\beta + ZLD^{1/2}\tau) -\frac{1}{2}\log \lvert\Sigma_\beta\rvert - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta \\
+&-\sum_{k=1}^q \left(\frac{\nu_{\lambda_k}+1}{2}\log\left(1 + \frac{1}{\nu_{\lambda_k}} 
+\frac{e^{2\xi_k}}{A_{\lambda_k}^2}\right)+ \xi_k\right) -\frac{1}{2} a^T A^{-1} a -\frac{1}{2} \tau^T \tau\\
+\end{aligned}
+$$
+
+
+We need to derive the gradient of the log posterior for the leapfrog function.  Let $J^{kk}$ be the single element version of the diagonal matrix $D^{1/2}$ retaining only a single $e^{\xi_k}$ and the remainder of the diagonal zero.
+
+$$
+\begin{aligned}
+\log p(\beta, \gamma, \tau, \xi_1...\xi_q,a | y, X, Z) &\propto \log p(y | \beta, \tau, \gamma, \xi, a) + \log p(\beta) + \log p(\gamma)+ \log p(\tau) + \log p(\xi) + \log p(a) \\\\
+&\propto  -e^{\sum_{ij} X\beta + ZLD^{1/2}\tau} + y^T(X\beta + ZLD^{1/2}\tau) -\frac{1}{2}\log \lvert\Sigma_\beta\rvert - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta \\
+&-\sum_{k=1}^q \left(\frac{\nu_{\lambda_k}+1}{2}\log\left(1 + \frac{1}{\nu_{\lambda_k}} 
+\frac{e^{2\xi_k}}{A_{\lambda_k}^2}\right)+ \xi_k\right) -\frac{1}{2} \tau^T \tau\\
+\frac{\partial l}{\partial \beta} &\propto -\left(e^{\sum_{ij}X\beta + ZLD^{1/2}\tau} \right)^T X + y^T X - \Sigma_\beta^{-1} \beta \\
+\frac{\partial l}{\partial \tau} &\propto -\left(e^{\sum_{ij}X\beta + ZLD^{1/2}\tau}  \right) ZLD^{1/2} + y^T ZLD^{1/2} - \tau \\
+\frac{\partial l}{\partial \xi_k} &\propto -\left(e^{\sum_{ij}X\beta + ZLD^{1/2}\tau}  \right) ZLJ^{kk}\tau + y^TZLJ^{kk}\tau - \frac{\nu_{\lambda_k} +1}{1 + \nu_{\lambda_k}A_{\lambda_k}^2 e^{-2\xi_k}} + 1 
+\end{aligned}
+$$
+
+
+```{r, echo=TRUE}
+library(lme4)
+
+# Gopher data
+data(gopherdat2)
+
+# omit area offset
+fm3 <- glmer(shells~prev+factor(year)+(1|Site),
+      family=poisson,data=Gdat,
+      control=glmerControl(optimizer="bobyqa",
+                           check.conv.grad=.makeCC("warning",0.05)))
+
+
+summary(fm3)
+
+```
+
+Store Frequentist estimates
+
+```{r, echo=TRUE, eval=FALSE}
+truevals_fixed <- c(fixef(fm3))
+truevals_fixed <- truevals_fixed[c(1, 3, 4, 2)]
+truevals_random <- as.numeric(ranef(fm3)$Site[, 1])
+truevals <- c(truevals_fixed, truevals_random, 
+              log(sqrt(as.numeric(VarCorr(fm3)$Site[, 1]))))
+  # sqrt(as.numeric(VarCorr(fm3)$Site[, 1])))
+nvar <- length(truevals)
+
+```
+
+Setup data for HMC
+
+```{r, echo=TRUE, eval=FALSE}
+library(Matrix)
+
+##########
+# block diagonal
+Zi.lst <- split(rep(1, nrow(Gdat)), Gdat$Site)
+Zi.lst <- lapply(Zi.lst, as.matrix)
+Z <- bdiag(Zi.lst)
+Z <- as.matrix(Z)
+X <- model.matrix(~ factor(year), data=Gdat)
+X <- cbind(X, Gdat$prev)
+colnames(X)[ncol(X)] <- "prev"
+colnames(X) <- make.names(colnames(X))
+colnames(X)[1] <- "intercept"
+y <- Gdat$shells
+p <- ncol(X)
+
+```
+
+
+
+Test gradient
+
+```{r, echo=TRUE, eval=FALSE}
+library(pracma)
+library(numDeriv)
+set.seed(143)
+thetaInit <- c(rnorm(4), 
+                rnorm(10, mean=0, sd=1e-3), 
+                -2)
+
+test1 <- g_glmm_poisson_posterior(thetaInit, y=y, X=X, Z=Z, m=10, nuxi=4, Axi=1)
+
+test2 <- numDeriv::grad(func=glmm_poisson_posterior, x=thetaInit, 
+                        side=NULL, method.args=list(), y=y, X=X, Z=Z, nuxi=4, Axi=1)
+
+cbind(test1, test2)
+all.equal(test1,test2)
+
+```
+
+
+Run HMC for poisson regression model
+
+Small data set.  We use a more informative prior on the random effects variance, a half-t prior with 4 degrees of freedom and scale parameter of 1. 
+
+
+```{r, echo=TRUE, eval=FALSE}
+N <- 1e5
+
+set.seed(412)
+initvals <- c(rep(0, 4), 
+                rnorm(10, mean=0, sd=1e-3), 
+                0)
+
+
+M_vals <- c(1e-3, 1e-3, 1e-3, 1, 
+            rep(1e-3, 10), 
+            1e-3)
+
+
+
+t1.hmc <- Sys.time()
+
+eps_vals <- c(rep(1e-3, 3), 1e-4, rep(2e-4, 11))
+
+res <- hmc(N = N, theta.init = initvals, epsilon = eps_vals, L = 10, 
+                    logPOSTERIOR  = glmm_poisson_posterior, 
+                    Mdiag = M_vals, 
+                    varnames=c(colnames(X), paste0("u", 1:ncol(Z)), "lambda"),
+                    glogPOSTERIOR  = g_glmm_poisson_posterior, 
+                    y = y, X=X, Z=Z, m=10, nuxi=1, Axi=25) 
+
+mypath <- '/Users/samthomas/biostat'
+saveRDS(res, file = paste(mypath, "example3.RData", sep="/"))
+
+t2.hmc <- Sys.time()
+t2.hmc - t1.hmc
+res$accept/N
+```
+
+```{r, echo=TRUE, eval=FALSE}
+N <- 1e5
+mypath <- '/Users/samthomas/biostat'
+res <- readRDS(paste(mypath, 'example3.RData', sep='/'))
+
+```
+
+```{r,echo=TRUE, eval=FALSE}
+# plot(res, burnin=round(0.3*N), actual.mu=truevals_fixed, cols=1:ncol(X))
+
+# plot(res, actual.mu = truevals_fixed, cols=1:4)
+plot(res)
+```
 
 
 
