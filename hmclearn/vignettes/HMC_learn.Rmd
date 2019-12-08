@@ -750,6 +750,7 @@ plot(fm1_hmc, actual.mu = c(beta_freq, eps_freq))
 
 ```
 
+Note that the Inverse Gamma distribution is not always an optimal prior when the support is strictly positive.  This prior can create problematic results when the true value of the parameter is close to zero.  Half-t distributions can be used as a more stable alternative to Inverse Gamma (Gelman 2006).
 
 ## Logistic Regression
 
@@ -769,7 +770,7 @@ l(\beta;X,y) &= \sum_{i=1}^n X_i\beta(y_i - 1) - \log(1 + e^{-X_i\beta})
 \end{aligned}
 $$
 
-In our prior example, we assigned a uniform prior to $\beta$.  To demonstrate the flexibility of the software, we specify a multivariate Normal prior with hyperparameter $B$.
+In our prior example, we assigned a uniform prior to $\beta$.  To demonstrate the flexibility of the software, we specify a multivariate Normal prior with hyperparameter $B$.  The hyperprior should be set to a high value such as $1e3$ for a relatively uninformative prior.
 
 $$
 \begin{aligned}
@@ -778,34 +779,25 @@ $$
 \end{aligned}
 $$
 
-With pdf
+The log posterior is proportional to the sum of the log likelihood and log prior of $\pmb\beta$.  Note that constants are excluded to simplify the function.  
 
 $$
 \begin{aligned}
-p(\beta) &= \frac{1}{\sqrt{\lvert 2\pi \Sigma_\beta \rvert }}e^{-\frac{1}{2}\beta^T \Sigma_\beta^{-1}\beta} \\
-\log p(\beta) &= -\frac{1}{2}\log(2\pi \lvert \Sigma_\beta \rvert) - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta \\
-&\propto -\frac{1}{2}\log \lvert\Sigma_\beta\rvert - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta
+\log p(\beta | X, y) &\propto \sum_{i=1}^n X_i\beta(y_i - 1) - \log(1 + e^{-X_i\beta}) - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta 
 \end{aligned}
 $$
 
-
-Let $B = 1e3$ for instance, as a relatively uniformative prior.
-
-Now derive the log posterior
+The gradient of the log posterior is required for the leapfrog function.
 
 $$
 \begin{aligned}
-p(\beta | X, y) &\propto p(y | X, \beta)  p(\beta) \\
-\log p(\beta | X, y) & \propto \log p(y | X, \beta) + \log p(\beta) \\
-&\propto \sum_{i=1}^n X_i\beta(y_i - 1) - \log(1 + e^{-X_i\beta}) -\frac{1}{2}\log \lvert\Sigma_\beta\rvert - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta 
+\nabla_\beta \log p(\beta | X, y) &\propto (y-1)^TX + \left(\frac{e^{-X\beta}}{1 + e^{-X\beta}}\right)^TX - \Sigma_\beta^{-1}\beta
 \end{aligned}
 $$
 
-The log posterior is the sum of the log likelihood and the log of the prior for $\beta$.  
+This example is from Hosmer and Lemeshow (1989) on a dataset of 189 births at a U.S. hospital.  The dependent variable is an indicator of low birth weight.  Data is available from the MASS package (Modern Applied Statistics with S by Venables and Ripley).  We prepare the data for analysis as noted in the text. 
 
-We consider an example from Hosmer and Lemeshow (1989) on a dataset of 189 births at a U.S. hospital.  The dependent variable is an indicator of low birth weight.  Data is available from the MASS package (Modern Applied Statistics with S by Venables and Ripley).  We prepare the data for analysis as noted in the text. 
-
-```{r, echo=TRUE, eval=FALSE}
+```{r, echo=TRUE, eval=TRUE}
 birthwt2 <- birthwt
 
 # label race variable
@@ -839,19 +831,9 @@ Variables of interest in this dataset are:
 \end{itemize}
 
 
-Next, fit the logistic regression using the frequentist \textit{glm} function in R.
+Two of the independent variables are continuous with wide ranges of values.  The other nine variables are all dichotomous.  In tuning this model, the step size $\epsilon$ is tuned separately to each of these types of variables.  This example illustrates the need to set the tuning parameters for the specific HMC application.
 
-```{r, echo=TRUE, eval=FALSE}
-fm2 <- glm(low ~ age + lwt + race2 + smoke + ptd + ht + ui + ftv2, data=birthwt2, 
-           family = binomial)
-summary(fm2)
-
-```
-
-Now, fit the same model using HMC.
-
-
-```{r, echo=TRUE, eval=FALSE}
+```{r, echo=TRUE, eval=TRUE}
 N <- 10000
 set.seed(143)
 
@@ -859,30 +841,33 @@ set.seed(143)
 continuous_ind <- c(FALSE, TRUE, TRUE, rep(FALSE, 8))
 eps_vals <- ifelse(continuous_ind, 1e-3, 5e-2)
 
+t1 <- Sys.time()
 fm2_hmc <- hmc(N, theta.init = rep(0, 11), epsilon = eps_vals, L = 10, 
                    logPOSTERIOR = logistic_posterior, 
                    glogPOSTERIOR = g_logistic_posterior, y=y, X=X, 
                    varnames = colnames(X))
+t2 <- Sys.time()
+t2 - t1
 
 ```
 
-Summarize the results
+This example is slightly larger than the linear regression, taking approximately 18 seconds to run.  The acceptance rate for this example is 83\%.  
 
-```{r, echo=TRUE, eval=FALSE}
+
+```{r, echo=TRUE, eval=TRUE}
 fm2_hmc$accept/N
-
 summary(fm2_hmc)
+plot(fm2_hmc)[[1]]
 
 ```
 
-Diagnostic plots
-
-```{r, echo=TRUE, eval=FALSE}
-plot(fm2_hmc, actual.mu=coef(fm2))
+```{r, echo=FALSE, eval=FALSE}
+# plot(fm2_hmc, actual.mu=coef(fm2))
 
 ```
 
 
+\pagebreak
 
 # Appendix:  HMC R package
 
