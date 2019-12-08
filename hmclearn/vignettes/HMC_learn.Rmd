@@ -833,6 +833,8 @@ Variables of interest in this dataset are:
 
 Two of the independent variables are continuous with wide ranges of values.  The other nine variables are all dichotomous.  In tuning this model, the step size $\epsilon$ is tuned separately to each of these types of variables.  This example illustrates the need to set the tuning parameters for the specific HMC application.
 
+The log posterior and gradient functions are based on the likelihood and prior choices in this example.  
+
 ```{r, echo=TRUE, eval=TRUE}
 N <- 10000
 set.seed(143)
