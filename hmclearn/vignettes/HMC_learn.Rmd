@@ -1071,7 +1071,7 @@ res <- hmc(N = N, theta.init = initvals, epsilon = eps_vals, L = 10,
                     y = y, X=X, Z=Z, m=10, nuxi=1, Axi=25) 
 
 mypath <- '/Users/samthomas/biostat'
-saveRDS(res, file = paste(mypath, "example3.RData", sep="/"))
+# saveRDS(res, file = paste(mypath, "example3.RData", sep="/"))
 
 t2.hmc <- Sys.time()
 t2.hmc - t1.hmc
@@ -1079,6 +1079,12 @@ res$accept/N
 ```
 
 ```{r, echo=TRUE, eval=TRUE}
+summary(res)
+
+```
+
+
+```{r, echo=TRUE, eval=FALSE}
 N <- 1e5
 mypath <- '/Users/samthomas/biostat'
 res <- readRDS(paste(mypath, 'example3.RData', sep='/'))
@@ -1088,9 +1094,17 @@ res <- readRDS(paste(mypath, 'example3.RData', sep='/'))
 ```{r,echo=TRUE, eval=TRUE}
 # plot(res, burnin=round(0.3*N), actual.mu=truevals_fixed, cols=1:ncol(X))
 
-# plot(res, actual.mu = truevals_fixed, cols=1:4)
-plot(res)
+plot(res, actual.mu = truevals_fixed, cols=1:4)
+# plot(res)
 ```
+
+# Discussion
+
+Hamiltonian Monte Carlo is a flexible MCMC algorithm that efficiently samples from even complex posterior distributions.  While Gibbs requires at least conditional conjugate priors, HMC may be applied to virtually any model with well-behaved properties such as a twice differentiable continuous distribution.  Analysts are, as a result, able to specify models and priors based entirely on the particular application without artificial mathematical restrictions.  
+
+While there are many algorithms that use the gradient for optimization (e.g. stochastic gradient descent), HMC uniquely applies the gradient to sample from the entire distribution.  The result is an accurate estimate of the full posterior distribution, not merely a single point.  This distribution can be intuitively applied to answer a variety of inference, estimation, and prediction questions.  
+
+
 
 
 
