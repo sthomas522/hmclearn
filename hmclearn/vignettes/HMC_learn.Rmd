@@ -521,8 +521,9 @@ A general approach to tuning HMC is provided here:
 Additional adjustments may be made to the tuning parameters beyond these steps.  The value of $\epsilon$ may be constant for each parameter in $(\theta_1, ..., \theta_k)$ in $\Theta$, but does not need to be.  The analyst may instead provide a vector $\epsilon:= \epsilon_1, ..., \epsilon_k$ with a different value for each $\epsilon_i \forall\; i \in 1...k$.  In the \textit{hmclearn} package, the \textit{hmc} function accepts single values and vectors for the parameter \textit{epsilon}.  
 
 The parameter for the number of steps $L$ must be a natural number.  However, the number of steps may be randomized in each simulation $1...N$ to ensure against a periodic Markov chain (which would violate the regularity conditions for ergodicity).  Further, some randomness may be applied to $\epsilon$ in each simulation step $1...N$ for additioanl assurance of an aperiodic chain.  Randomness can be automatically applied for $\epsilon$ and $L$ with logical parameter \textit{randlength} in the \textit{hmc} function.  
+In high performance HMC software such as STAN, the popular No-U-Turn Sampler (NUTS) algorithm (cite paper) is a popular automated option for selecting $L$.  We avoid using NUTS in this paper as the emphasis here is more pedagogical.  The intent is to provide interested readers with tools to experiment with the core HMC algorithm to gain intuition on the particulars of the algorithm.  
 
-Finally, we note that the popular No-U-Turn Sampler (NUTS) algorithm (cite paper) is a popular automated option for selecting $L$.  We avoid using NUTS in this paper as the emphasis here is more pedagogical.  The intent is to provide interested readers with tools to experiment with the core HMC algorithm to gain intuition on the particulars of the algorithm.  
+Finally, the gradients of the log posterior must be developed in this software.  However, automated differentiation software such as Autodiff is available to accurately and efficiently compute gradients for applications in HMC.  Other automated gradient computation software is provided in deep learning platforms such as Tensorflow.  
 
 ## QR Decomposition
 
@@ -1104,7 +1105,11 @@ Hamiltonian Monte Carlo is a flexible MCMC algorithm that efficiently samples fr
 
 While there are many algorithms that use the gradient for optimization (e.g. stochastic gradient descent), HMC uniquely applies the gradient to sample from the entire distribution.  The result is an accurate estimate of the full posterior distribution, not merely a single point.  This distribution can be intuitively applied to answer a variety of inference, estimation, and prediction questions.  
 
+This software can be used used to fit a wide variety models using HMC provided functions for the log posterior and its gradient can be developed.  Since the software is open source, analysts with a background in R can easily examine the functions to increase their understanding of the details behind HMC.  This intuition can be beneficial when using STAN and other HMC software with high-performance compiled code that may be more difficult to interpret.  
 
+The HMC algorithm as applied in this software represents only the beginning of its potential application for big data analysis.  This algorithm uses only the first derivative in guiding the Markov chain.  A more advanced version called Riemannian HMC (Girolami, Calderhead 2011) incorporates the second derivative along with a more sophisticated leapfrog function.  This algorithm can be used to complex, correlated spaces without the need for transformations such as QR decomposition to produce an orthogonal space.  As of this writing, the STAN team has already developed a substantial amount of development for generalized Riemannian HMC software.   
+
+Finally, on the computational hardware side parallelization for most available software is currently limited to the embarrassingly parallel application of running multiple HMC chains over the available CPU's.  The incorporation of GPU's in improving the efficiency of HMC represents a new frontier in high performance statistical computation.  One study found that GPU's could be used to reduce computation time when evaluating the posterior as well as its gradient (Fast HMC using GPU Computing, Beam Ghosh Doyle).  NVIDIA is sponsoring a grant to support the STAN team in its HMC software development using GPU's.  
 
 
 
