@@ -40,7 +40,7 @@ The purpose of this paper is to introduce HMC to analysts using R software only,
 
 # MCMC Basic Concepts
 
-We consider $n$ observations from a simple random sample $\pmb{X} = (X_1, ..., X_n)$, where each element is independent and identically distributed (iid).  From this sample, we want to fit the distribution of our k-dimensional parameter of interest $\Theta = (\theta_1, ..., \theta_k)$.  The posterior distribution $p(\Theta | \pmb{X})$ can be written as a function of the Likelihood $p(\pmb{X} | \Theta)$ and prior $p(\Theta)$ using Bayes formula.  
+We consider $n$ observations from a simple random sample $\pmb{X} = (X_1, ..., X_n)$, where each element is independent and identically distributed (iid).  From this sample, we want to fit the distribution of our k-dimensional parameter of interest $\Theta = (\theta_1, ..., \theta_k)$.  The posterior distribution $p(\Theta | \pmb{X})$ can be written as a function of the Likelihood $p(\pmb{X} | \Theta)$ and prior $p(\Theta)$ using Bayes formula [@carlin_bayesian_2008].  
 
 $$
 \begin{aligned}
@@ -53,9 +53,10 @@ In many practical data analyses, the integral in the denominator cannot be evalu
 
 ## Metropolis-Hastings
 
-The first widely-used MCMC method capable of simulating directly from $p(\pmb{X} | \Theta)$ is called the Metropolis algorithm, originating in the 1950's from an application to statistical physics.  Nearly two decades later, Hastings generalized the algorithm, which is now called Metropolis-Hastings (MH).  We begin with a brief introduction to MH since HMC builds on many similar concepts.  
+The first widely-used MCMC method capable of simulating directly from $p(\pmb{X} | \Theta)$ is called the Metropolis [@metropolis_equation_1953] algorithm, originating in the 1950's from an application to statistical physics.  Nearly two decades later, Hastings generalized the algorithm, which is now called Metropolis-Hastings (MH) [@metropolis_equation_1953][@hastings_monte_1970].  We begin with a brief introduction to MH since HMC builds on many similar concepts.  
 
 The objective of MH is to simulate values of $\Theta$ that accurately reflect the posterior density $p(\Theta | \pmb{X})$.  For brevity, we will shorten our notation of the posterior as $p(\Theta)$. The Markov chain simulates values from this density in sequence from $t = 1, .., N$, provided some starting point $\Theta^{(0)}$ which is typically provided by the analyst or the computer program.  
+
 MH defines a transition probability that produces a Markov chain that is ergodic and satisfies detailed balance.  Values of $\Theta^{(t)}$ in the chain are defined in part by a proposal density, which we define as $q(\Theta^{\text{PROP}} | \Theta^{t-1})$.  Here, $\Theta^{\text{PROP}}$ is a proposal for the next value in the chain.  This proposal density is conditioned on the previously stored value $\Theta^{(t-1)}$.  A variety of proposal functions can be used, with random walk proposals being a common choice.  We now outline the MH algorithm in full.  
 
 \begin{algorithm}
@@ -95,23 +96,23 @@ Intuition into why MH works can be obtained by examining the acceptance ratio $\
 \item If $p(\Theta^{PROP}) < p(\Theta^{(t-1)})$, then the posterior has a lower density at the proposed value of $\Theta$ than at the previous point in the chain.  When this occurs, we accept the proposal at random based on the ratio $0 < \alpha < 1$.  If the proposal is not accepted, then the proposal is discarded and the Markov chain remains in place $\Theta^{t} := \Theta^{(t-1)}$.  
 \end{enumerate}
 
-As such, MH tends to sample more points in the region of higher posterior values.  However, the tails of the posterior are also sampled based on acceptance ratio.  Given enough samples, the MCMC chain samples $\Theta$ at the proportion of the true posterior density.  The resulting simulated values can then be used for statistical inference.  Much more can be said regarding MH.  Interested readers can refer to the following references ... (list references here)
+As such, MH tends to sample more points in the region of higher posterior values.  However, the tails of the posterior are also sampled based on acceptance ratio.  Given enough samples, the MCMC chain samples $\Theta$ at the proportion of the true posterior density.  The resulting simulated values can then be used for statistical inference.  Much more can be said regarding MH [@carlin_bayesian_2008][@chib_understanding_1995][@gelman_bayesian_2013].
 
 ## Limitations of Metropolis-Hastings
 
-The theoretical requirements for fitting models using MH are minimal, making MH an attractive choice for Bayesian inference even today.  The limits of MH are primarily computational in nature.  Since the proposals of $\Theta$ are randomly selected, many simulations are required to accurately describe the true posterior.  Even efficient MH implementations may accept less than 25\% of the proposals (cite Gelman).  
+The theoretical requirements for fitting models using MH are minimal, making MH an attractive choice for Bayesian inference even today.  The limits of MH are primarily computational in nature.  Since the proposals of $\Theta$ are randomly selected, many simulations are required to accurately describe the true posterior.  Even efficient MH implementations may accept less than 25\% of the proposals [@roberts_weak_1997].  
 
-The limited efficiency of MH can be overcome by high computational power for certain applications.  When the dimensionality of the data is small to moderate, a well-programmed MH algorithm can sample enough points from the posterior density in a reasonable period of time.  The challenge of relying on MH occurs when dealing with high-dimensional data or complex statistical models.  In these situations, MH is known to be inefficient (reference here) and can be impractical for such applications.  
+The limited efficiency of MH can be overcome by high computational power for certain applications.  When the dimensionality of the data is small to moderate, a well-programmed MH algorithm can sample enough points from the posterior density in a reasonable period of time.  The challenge of relying on MH occurs when dealing with high-dimensional data or complex statistical models.  In these situations, MH is known to be inefficient and can be impractical for such applications.  
 
-A popular, often efficient alternative to MH is Gibbs Sampling (footnote that Gibbs is a particular case of MH?).  Gibbs is widely used in many Bayesian software platforms such as WinBUGS and JAGS.  When the conditional posterior densities can be explicitly formulated, Gibbs remains a viable choice for the Bayesian practitioner.  Such restrictions limit the application of Gibbs to particular combinations of models and priors.  Gibbs therefore lacks the flexibility of MH, in addition to having certain other efficiency limitations of its own (cite Robert).  
+A popular, often efficient alternative to MH is Gibbs Sampling [@geman_stochastic_1984].  Gibbs is widely used in many Bayesian software platforms such as WinBUGS [@lunn_winbugs_2000] and JAGS [@plummer_jags:_2003].  When the conditional posterior densities can be explicitly formulated, Gibbs remains a viable choice for the Bayesian practitioner.  Such restrictions limit the application of Gibbs to particular combinations of models and priors.  Gibbs therefore lacks the flexibility of MH, in addition to having certain other efficiency limitations of its own [@robert_bayesian_2001].  
 
 Given the modern computational demands of large dataset and complex models, a more efficient MCMC algorithm is desirable.  Ideally, such an algorithm would retain the theoretical advantages and flexibility of MH, while providing a more computational efficient method of selecting proposals.  Here we transition to the modern HMC algorithm, and why HMC has emerged as a standard inferential tool for many Bayesian practitioners.  
 
 # HMC Background
 
-MH and HMC are equally flexible in their theoretical capabilities to fit a variety of model and prior specifications.  The key advantage of HMC over MH is the use of additional information from the posterior to guide proposals.  HMC uses the gradient of the log posterior to direct the Markov chain to the region the region of highest posterior density, where most of the samples should occur.  In contrast, MH relies entirely on the acceptance ratio to guide the chain.   As a result, a well-tuned HMC chain will accept proposals approximately 3 times the frequency of a similarly well-tuned MH algorithm (footnote?:  based on MH theoretical optimal acceptance rate of 0.234 and HMC acceptance of 0.6-0.9).   
+MH and HMC are equally flexible in their theoretical capabilities to fit a variety of model and prior specifications.  The key advantage of HMC over MH is the use of additional information from the posterior to guide proposals.  HMC uses the gradient of the log posterior to direct the Markov chain to the region the region of highest posterior density, where most of the samples should occur.  In contrast, MH relies entirely on the acceptance ratio to guide the chain.   As a result, a well-tuned HMC chain will accept proposals more frequently than a similarly well-tuned MH algorithm [@roberts_weak_1997][@neal_handbook_2011].  
 
-It should be noted that HMC is a MCMC simulation method, not an optimization method.  While the HMC algorithm guides proposals to regions of high density (sometimes called the typical set  Betancourt), the tails of the density are properly sampled as well.  Both MH and HMC produce ergodic Markov chains, but the mathematics of HMC is substantially more complex than MH.  We provide a brief overview of the theoretical basis of HMC here, and refer to other sources for more detailed expositions (refer to Wiley paper, Betancourt).
+It should be noted that HMC is a MCMC simulation method, not an optimization method.  While the HMC algorithm guides proposals to regions of high density (sometimes called the typical set [@betancourt_conceptual_2017]), the tails of the density are properly sampled as well.  Both MH and HMC produce ergodic Markov chains, but the mathematics of HMC is substantially more complex than MH.  We provide a brief overview of the theoretical basis of HMC here, and refer to other sources for more detailed expositions (Thomas, Tu 2019)[@neal_handbook_2011] [@betancourt_conceptual_2017].
 
 ## Hamiltonian Monte Carlo Concepts and Theory
 
@@ -152,7 +153,7 @@ $$
 $$
 Here we see the explicit formulation of the gradient of the log posterior $\nabla_\Theta \log p(\Theta)$.  The combination of these two equations forms deterministic paths for the MCMC chain to travel through the joint distribution $(\pmb{p}, \Theta)$.  Note that while the MCMC produces simulations of both $\pmb{p}$ and $\Theta$, only the values of $\Theta$ are of interest for statistical inference.  
 
-A solution for these differential equations is necessary to produce a practical MCMC simulation.  Since no exact solution exists, a discrete approximation is needed to form the algorithm.  The most commonly used solution is called the leapfrog method.  The leapfrog defines a discrete step size $\epsilon$ individually for $\pmb{p}$ and $\Theta$.  
+A solution for these differential equations is necessary to produce a practical MCMC simulation.  Since no exact solution exists, a discrete approximation is needed to form the algorithm.  The most commonly used solution is called the leapfrog method [@feynman2017character][@newton1833philosophiae].  The leapfrog defines a discrete step size $\epsilon$ individually for $\pmb{p}$ and $\Theta$.  
 
 $$
 \begin{aligned}
@@ -244,7 +245,7 @@ One might notice that none of the above parameters explicitly specify the data o
 
 The default number of simulations is set to 10,000.  However, the user may elect to start with a smaller number during tuning.  Initial values for the parameters must be provided by the user.  Caution should be used to ensure that these initial values are in the support of $\Theta$.  
 
-Defaults are provided for the stepsize $\epsilon$ and leapfrog steps $L$.  These likely will need to be adjusted depending on the particular application.  One simple indicator of whether HMC is sampling correctly is the acceptance rate of the MCMC chain.  In general, acceptance rates between 60\% and 95\% are sufficient for this algorithm.  
+Defaults are provided for the stepsize $\epsilon$ and leapfrog steps $L$.  These likely will need to be adjusted depending on the particular application.  One simple indicator of whether HMC is sampling correctly is the acceptance rate of the MCMC chain.  In general, acceptance rates between 60\% and 95\% tend to work well for this algorithm [@neal_handbook_2011].  
 
 The acceptance rate can be calculated from the \textit{hmc} function from the number of accepted proposals divided by the number of samples \textit{N}.  Both of these values are included in the output of \textit{hmc}.  
 
@@ -522,15 +523,15 @@ A general approach to tuning HMC is provided here:
 Additional adjustments may be made to the tuning parameters beyond these steps.  The value of $\epsilon$ may be constant for each parameter in $(\theta_1, ..., \theta_k)$ in $\Theta$, but does not need to be.  The analyst may instead provide a vector $\epsilon:= \epsilon_1, ..., \epsilon_k$ with a different value for each $\epsilon_i \forall\; i \in 1...k$.  In the \textit{hmclearn} package, the \textit{hmc} function accepts single values and vectors for the parameter \textit{epsilon}.  
 
 The parameter for the number of steps $L$ must be a natural number.  However, the number of steps may be randomized in each simulation $1...N$ to ensure against a periodic Markov chain (which would violate the regularity conditions for ergodicity).  Further, some randomness may be applied to $\epsilon$ in each simulation step $1...N$ for additioanl assurance of an aperiodic chain.  Randomness can be automatically applied for $\epsilon$ and $L$ with logical parameter \textit{randlength} in the \textit{hmc} function.  
-In high performance HMC software such as STAN, the popular No-U-Turn Sampler (NUTS) algorithm (cite paper) is a popular automated option for selecting $L$.  We avoid using NUTS in this paper as the emphasis here is more pedagogical.  The intent is to provide interested readers with tools to experiment with the core HMC algorithm to gain intuition on the particulars of the algorithm.  
+In high performance HMC software such as STAN, the popular No-U-Turn Sampler (NUTS) algorithm [@hoffman_no-u-turn_2014] is a popular automated option for selecting $L$.  We avoid using NUTS in this paper as the emphasis here is more pedagogical.  The intent is to provide interested readers with tools to experiment with the core HMC algorithm to gain intuition on the particulars of the algorithm.  
 
-Finally, the gradients of the log posterior must be developed in this software.  However, automated differentiation software such as Autodiff is available to accurately and efficiently compute gradients for applications in HMC.  Other automated gradient computation software is provided in deep learning platforms such as Tensorflow.  
+Finally, the gradients of the log posterior must be developed in this software.  However, automated differentiation software such as Autodiff [@carpenter_stan_2015] is available to accurately and efficiently compute gradients for applications in HMC.  Other automated gradient computation software is provided in deep learning platforms such as Tensorflow [@abadi_tensorflow:_2016].  
 
 ## QR Decomposition
 
-The efficiency of sampling in the standard HMC algorithm can be improved significantly for multivariate models when the parameters $(\theta_1, ..., \theta_k) \in \Theta$ have an orthogonal basis.  One common method of ensuring an orthogonal basis involves applying QR decomposition to the design matrix prior to applying HMC.  
+The efficiency of sampling in the standard HMC algorithm can be improved significantly for multivariate models when the parameters $(\theta_1, ..., \theta_k) \in \Theta$ have an orthogonal basis.  One common method of ensuring an orthogonal basis involves applying QR decomposition [@voss_introduction_2013] to the design matrix prior to applying HMC.  
 
-For example, Stan scales QR decomposition with a factor of $\sqrt{n-1}$ to ensure unit variance for continuous parameters (cite stan manual).  Here $X$ represents the design matrix for the model
+For example, Stan [@stan_development_team_stan_2017] scales QR decomposition with a factor of $\sqrt{n-1}$ to ensure unit variance for continuous parameters (cite stan manual).  Here $X$ represents the design matrix for the model
 
 $$
 \begin{aligned}
@@ -635,7 +636,7 @@ One common approach in any MCMC is to allow a certain burn-in period before asse
 
 After the parameters have been tuned, a full HMC simulation can be run.  Analysts often run multiple chains with different initial values.  Most production software packages allow these chains to be run in parallel.   For \textit{hmclearn}, parallelization can be accomplished using contributed R packages for the user's particular platform (e.g. Windows, mac OS, linux).
 
-Once the simulation is complete, readily available diagonstics can be used to assess the convergence of the Markov chain.  In R, the \textit{coda} package provides a number of standard diagnostics, such as the Geweke (1992) and Gelman and Rubin (1992) diagnostics.  The \textit{bayesplot} package also provides graphical functions to assess convergence. 
+Once the simulation is complete, readily available diagonstics can be used to assess the convergence of the Markov chain.  In R, the \textit{coda} package provides a number of standard diagnostics, such as the Geweke [@geweke_evaluating_1991] and Gelman and Rubin [@gelman_inference_1992] diagnostics.  The \textit{bayesplot} package also provides graphical functions to assess convergence. 
 
 After the HMC simulation is complete and convergence has been assessed, the simulations can be used for statistical inference.  
 
@@ -752,7 +753,7 @@ plot(fm1_hmc, actual.mu = c(beta_freq, eps_freq))
 
 ```
 
-Note that the Inverse Gamma distribution is not always an optimal prior when the support is strictly positive.  This prior can create problematic results when the true value of the parameter is close to zero.  Half-t distributions can be used as a more stable alternative to Inverse Gamma (Gelman 2006).
+Note that the Inverse Gamma distribution is not always an optimal prior when the support is strictly positive.  This prior can create problematic results when the true value of the parameter is close to zero.  Half-t distributions can be used as a more stable alternative to Inverse Gamma [@gelman2006prior].
 
 ## Logistic Regression
 
@@ -797,7 +798,7 @@ $$
 \end{aligned}
 $$
 
-This example is from Hosmer and Lemeshow (1989) on a dataset of 189 births at a U.S. hospital.  The dependent variable is an indicator of low birth weight.  Data is available from the MASS package (Modern Applied Statistics with S by Venables and Ripley).  We prepare the data for analysis as noted in the text. 
+This example is from Hosmer and Lemeshow [@hosmer1989multiple] on a dataset of 189 births at a U.S. hospital.  The dependent variable is an indicator of low birth weight.  Data is available from the MASS package [@venables2013modern].  We prepare the data for analysis as noted in the text. 
 
 ```{r, echo=TRUE, eval=TRUE}
 birthwt2 <- birthwt
@@ -929,7 +930,7 @@ G^{1/2} :=
 \end{pmatrix}
 $$
 
-Per Betancourt, Girolami (2013), we re-parameterize $u$ using a standard normal parameterization we define as $\tau = (\tau_1, ..., \tau_M)$.  Here, $u$ is a deterministic function of $D$ and $\tau$.  The intent of our parameterization is to allow $D$ and $\tau$ to be largely independent in the MCMC sampling.  
+We re-parameterize $u$ using a standard normal parameterization we define as $\tau = (\tau_1, ..., \tau_M)$ to improve sampling efficiency [@betancourt_hamiltonian_2013].  Here, $u$ is a deterministic function of $D$ and $\tau$.  The intent of our parameterization is to allow $D$ and $\tau$ to be largely independent in the MCMC sampling.  
 
 $$
 \begin{aligned}
@@ -941,7 +942,7 @@ u &:= D^{1/2} \tau \\
 \end{aligned}
 $$
 
-We assign half-t priors for each of the parameters $\lambda_1, ..., \lambda_M$ (Gelman 2006) with hyperparameters $\nu$ and $A$.  
+We assign half-t priors for each of the parameters $\lambda_1, ..., \lambda_M$ with hyperparameters $\nu$ and $A$.  
 
 $$
 \begin{aligned}
@@ -983,13 +984,9 @@ $$
 \end{aligned}
 $$
 
-Our example comes from a study on gopher tortoises
+Our example comes from a study on gopher tortoises [@ozgul2009upper][@fox2015ecological][@bolkergithub]
 
-Ozgul, A., Oli, M. K., Bolker, B. M., & Perez-Heydrich, C. (2009). Upper respiratory tract disease, force of infection, and effects on survival of gopher tortoises. Ecological Applications, 19(3), 786–798. Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/19425439
-
-https://bbolker.github.io/mixedmodels-misc/ecostats_chap.html#gopher-tortoise
-
-As a comparison, we fit the model using the Frequentist package \textit{lme4}
+As a comparison, we fit the model using the Frequentist package \textit{lme4} [@bates2007lme4]
 
 ```{r, echo=TRUE, eval=TRUE}
 library(lme4)
@@ -1108,9 +1105,9 @@ While there are many algorithms that use the gradient for optimization (e.g. sto
 
 This software can be used used to fit a wide variety models using HMC provided functions for the log posterior and its gradient can be developed.  Since the software is open source, analysts with a background in R can easily examine the functions to increase their understanding of the details behind HMC.  This intuition can be beneficial when using STAN and other HMC software with high-performance compiled code that may be more difficult to interpret.  
 
-The HMC algorithm as applied in this software represents only the beginning of its potential application for big data analysis.  This algorithm uses only the first derivative in guiding the Markov chain.  A more advanced version called Riemannian HMC (Girolami, Calderhead 2011) incorporates the second derivative along with a more sophisticated leapfrog function.  This algorithm can be used to complex, correlated spaces without the need for transformations such as QR decomposition to produce an orthogonal space.  As of this writing, the STAN team has already developed a substantial amount of development for generalized Riemannian HMC software.   
+The HMC algorithm as applied in this software represents only the beginning of its potential application for big data analysis.  This algorithm uses only the first derivative in guiding the Markov chain.  A more advanced version called Riemannian HMC [@girolami_riemann_2011] incorporates the second derivative along with a more sophisticated leapfrog function.  This algorithm can be used to complex, correlated spaces without the need for transformations such as QR decomposition to produce an orthogonal space.  As of this writing, the STAN team has already developed a substantial amount of development for generalized Riemannian HMC software [@gelman_stan:_2015][@betancourt_general_2013].   
 
-Finally, on the computational hardware side parallelization for most available software is currently limited to the embarrassingly parallel application of running multiple HMC chains over the available CPU's.  The incorporation of GPU's in improving the efficiency of HMC represents a new frontier in high performance statistical computation.  One study found that GPU's could be used to reduce computation time when evaluating the posterior as well as its gradient (Fast HMC using GPU Computing, Beam Ghosh Doyle).  NVIDIA is sponsoring a grant to support the STAN team in its HMC software development using GPU's.  
+Finally, on the computational hardware side parallelization for most available software is currently limited to the embarrassingly parallel application of running multiple HMC chains over the available CPU's.  The incorporation of GPU's in improving the efficiency of HMC represents a new frontier in high performance statistical computation.  One study found that GPU's could be used to reduce computation time when evaluating the posterior as well as its gradient [@beam2016fast].  NVIDIA is sponsoring a grant to support the STAN team in its HMC software development using GPU's [@gelmannvidia].  
 
 
 
