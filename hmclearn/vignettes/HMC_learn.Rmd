@@ -1109,5 +1109,6 @@ The HMC algorithm as applied in this software represents only the beginning of i
 
 Finally, on the computational hardware side parallelization for most available software is currently limited to the embarrassingly parallel application of running multiple HMC chains over the available CPU's.  The incorporation of GPU's in improving the efficiency of HMC represents a new frontier in high performance statistical computation.  One study found that GPU's could be used to reduce computation time when evaluating the posterior as well as its gradient [@beam2016fast].  NVIDIA is sponsoring a grant to support the STAN team in its HMC software development using GPU's [@gelmannvidia].  
 
+# References
 
 
