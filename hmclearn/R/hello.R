@@ -33,15 +33,15 @@ if (1 == 0) {
   set.seed(143)
 
   # eps_vals <- c(rep(2e-1, 6), 2e-2)
-  # eps_vals <- c(rep(2e-2, 6), 2e-3)
-  eps_vals <- c(rep(2.8e-1, 6), 2e-2)
+  eps_vals <- c(rep(2e-2, 6), 2e-3)
+  # eps_vals <- c(rep(2.8e-1, 6), 2e-2)
 
   t1 <- Sys.time()
   set.seed(321)
   fm1_hmc <- hmc(N, theta.init = c(rep(0, 6), 1), epsilon = eps_vals, L = 20,
                  logPOSTERIOR = linear_posterior,
-                 glogPOSTERIOR = g_linear_posterior, y=y, X=X,
-                 varnames = c(colnames(X), "log_sigma_sq"))
+                 glogPOSTERIOR = g_linear_posterior,
+                 varnames = c(colnames(X), "log_sigma_sq"), y=y, X=X)
   t2 <- Sys.time()
   t2 - t1
 
