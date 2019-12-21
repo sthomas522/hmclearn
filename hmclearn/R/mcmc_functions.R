@@ -129,7 +129,23 @@ leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, Minv, co
 
 
 #' Fit a generic model using Hamiltonian Monte Carlo (HMC)
-#' @export
+#'
+#' This function runs the HMC algorithm on a generic model provided
+#' the \code{logPOSTERIOR} and gradient \code{glogPOSTERIOR} functions.
+#' All parameters specified in ... are passed to these two functions.
+#' The tuning parameters \code{epsilon} and \code{L} are passed to the
+#' Leapfrog algorithm.
+#'
+#' @param N Number of MCMC samples
+#' @param theta.init Vector of initial values for the parameters
+#' @param epsilon Step-size parameter for \code{leapfrog}
+#' @param L Number of \code{leapfrog} steps parameter
+#' @param logPOSTERIOR Function to calculate and return the log posterior given a vector of values of \code{theta}
+#' @param glogPOSTERIOR Function to calculate and return the gradient of the log posterior given a vector of values of  \code{theta}
+#' @param randlength Logical to determine whether to apply some randomness to the number of leapfrog steps tuning parameter \code{L}
+#' @param Mdiag Optional vector of the diagonal of the mass matrix \code{M}.  Defaults to unit diagonal.
+#' @param constrain Optional vector of which parameters in \code{theta} accept positive values only.  Default is that all parameters accept all real numbers
+#' @param verbose Logical to determine whether to display the progress of the HMC algorithm
 hmc <- function(N=10000, theta.init, epsilon=1e-2, L=10, logPOSTERIOR, glogPOSTERIOR, varnames=NULL,
                 randlength=FALSE, Mdiag=NULL, constrain=NULL, verbose=FALSE, ...) {
 
