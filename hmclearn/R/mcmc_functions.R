@@ -146,8 +146,7 @@ leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, Minv, co
 #' @param Mdiag Optional vector of the diagonal of the mass matrix \code{M}.  Defaults to unit diagonal.
 #' @param constrain Optional vector of which parameters in \code{theta} accept positive values only.  Default is that all parameters accept all real numbers
 #' @param verbose Logical to determine whether to display the progress of the HMC algorithm
-#' @value Object of class \code{hmclearn}
-#' @name stanreg-objects
+#' @return Object of class \code{hmclearn}
 #'
 #' @section Elements for \code{hmclearn} objects:
 #' \describe{
@@ -179,6 +178,34 @@ leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, Minv, co
 #'   Mass matrix used in the HMC algorithm
 #'   }
 #' }
+#'
+#' @section Available \code{logPOSTERIOR} and \code{glogPOSTERIOR} functions:
+#' \describe{
+#'   \item{\code{N}}{
+#'   Number of MCMC samples
+#'   }
+#'   \item{\code{theta}}{
+#'   List of length \code{N} of the sampled values of \code{theta}
+#'   }
+#'   \item{\code{thetaDF}}{
+#'   Sampled values in dataframe form
+#'   }
+#'   \item{\code{r}}{
+#'   List of length \code{N} of the sampled momenta
+#'   }
+#'   \item{\code{theta.all}}{
+#'   List of all parameter values of \code{theta} sampled prior to accept/reject step
+#'   }
+#'   \item{\code{r.all}}{
+#'   List of all values of the momenta \code{r} sampled prior to accept/reject
+#'   }
+#' }
+#'
+#' @author Samuel Thomas \email{samthoma@@iu.edu}, Wanzhu Tu \email{wtu@iu.edu}
+#' @references \emph{HMC in R} paper
+#' @references Thomas, S., Li, X., and Tu, W.  2019.  \emph{Hamiltonian Monte Carlo}.  Wiley
+#' @references Neal, Radford. 2011. \emph{MCMC Using Hamiltonian Dynamics.} In Handbook of Markov Chain Monte Carlo, edited by Steve Brooks, Andrew Gelman, Galin L. Jones, and Xiao-Li Meng, 116–62. Chapman; Hall/CRC.
+#' @keywords hamiltonian monte carlo
 hmc <- function(N=10000, theta.init, epsilon=1e-2, L=10, logPOSTERIOR, glogPOSTERIOR, varnames=NULL,
                 randlength=FALSE, Mdiag=NULL, constrain=NULL, verbose=FALSE, ...) {
 
