@@ -181,23 +181,23 @@ leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, Minv, co
 #'
 #' @section Available \code{logPOSTERIOR} and \code{glogPOSTERIOR} functions:
 #' \describe{
-#'   \item{\code{N}}{
-#'   Number of MCMC samples
+#'   \item{\code{linear_posterior}}{
+#'   Linear regression:  log posterior
 #'   }
-#'   \item{\code{theta}}{
-#'   List of length \code{N} of the sampled values of \code{theta}
+#'   \item{\code{g_linear_posterior}}{
+#'   Linear regression:  gradient of the log posterior
 #'   }
-#'   \item{\code{thetaDF}}{
-#'   Sampled values in dataframe form
+#'   \item{\code{logistic_posterior}}{
+#'   Logistic regression:  log posterior
 #'   }
-#'   \item{\code{r}}{
-#'   List of length \code{N} of the sampled momenta
+#'   \item{\code{g_logistic_posterior}}{
+#'   Logistic regression:  gradient of the log posterior
 #'   }
-#'   \item{\code{theta.all}}{
-#'   List of all parameter values of \code{theta} sampled prior to accept/reject step
+#'   \item{\code{poisson_posterior}}{
+#'   Poisson (count) regression:  log posterior
 #'   }
-#'   \item{\code{r.all}}{
-#'   List of all values of the momenta \code{r} sampled prior to accept/reject
+#'   \item{\code{g_poisson_posterior}}{
+#'   Poisson (count) regression: gradient of the log posterior
 #'   }
 #' }
 #'
