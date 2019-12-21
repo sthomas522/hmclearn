@@ -199,6 +199,12 @@ leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, Minv, co
 #'   \item{\code{g_poisson_posterior}}{
 #'   Poisson (count) regression: gradient of the log posterior
 #'   }
+#'   \item{\code{glmm_poisson_posterior}}{
+#'   Poisson mixed effects model:  log posterior
+#'   }
+#'   \item{\code{g_glmm_poisson_posterior}}{
+#'   Poisson mixed effects model:  gradient of the log posterior
+#'   }
 #' }
 #'
 #' @author Samuel Thomas \email{samthoma@@iu.edu}, Wanzhu Tu \email{wtu@iu.edu}
