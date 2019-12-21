@@ -146,6 +146,39 @@ leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, Minv, co
 #' @param Mdiag Optional vector of the diagonal of the mass matrix \code{M}.  Defaults to unit diagonal.
 #' @param constrain Optional vector of which parameters in \code{theta} accept positive values only.  Default is that all parameters accept all real numbers
 #' @param verbose Logical to determine whether to display the progress of the HMC algorithm
+#' @value Object of class \code{hmclearn}
+#' @name stanreg-objects
+#'
+#' @section Elements for \code{hmclearn} objects:
+#' \describe{
+#'   \item{\code{N}}{
+#'   Number of MCMC samples
+#'   }
+#'   \item{\code{theta}}{
+#'   List of length \code{N} of the sampled values of \code{theta}
+#'   }
+#'   \item{\code{thetaDF}}{
+#'   Sampled values in dataframe form
+#'   }
+#'   \item{\code{r}}{
+#'   List of length \code{N} of the sampled momenta
+#'   }
+#'   \item{\code{theta.all}}{
+#'   List of all parameter values of \code{theta} sampled prior to accept/reject step
+#'   }
+#'   \item{\code{r.all}}{
+#'   List of all values of the momenta \code{r} sampled prior to accept/reject
+#'   }
+#'   \item{\code{accept}}{
+#'   Number of accepted proposals.  The ratio \code{accept} / \code{N} is the acceptance rate
+#'   }
+#'   \item{\code{accept_v}}{
+#'   Vector of length \code{N} indicating which samples were accepted
+#'   }
+#'   \item{\code{M_mx}}{
+#'   Mass matrix used in the HMC algorithm
+#'   }
+#' }
 hmc <- function(N=10000, theta.init, epsilon=1e-2, L=10, logPOSTERIOR, glogPOSTERIOR, varnames=NULL,
                 randlength=FALSE, Mdiag=NULL, constrain=NULL, verbose=FALSE, ...) {
 
