@@ -387,16 +387,3 @@ diagplots <- function(result, actual.mu=NULL, burnin=100, cols=NULL) {
   list(p1, p2)
 }
 
-#' @export
-summary.hmclearn <- function(x, burnin=100, probs=c(0.05, 0.25, 0.5, 0.75, 0.95), ...) {
-  cat("Summary of HMC simulation\n\n")
-
-  thetaDF <- x$thetaDF[-c(1:burnin), ]
-  t(apply(thetaDF, 2, quantile, probs=probs, ...))
-}
-
-#' @export
-plot.hmclearn <- function(x, ...) {
-  diagplots(x, ...)
-}
-

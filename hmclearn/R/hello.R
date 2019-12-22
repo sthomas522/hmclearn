@@ -17,9 +17,11 @@ hello <- function() {
   print("Hello, world!")
 }
 
-# test all hmc
+# test all glm families
 if (1 == 0) {
+  ###################################################################
   # Linear regression
+  ###################################################################
   X <- model.matrix(breaks ~ wool*tension, data=warpbreaks)
   y <- warpbreaks$breaks
 
@@ -42,32 +44,58 @@ if (1 == 0) {
   fm1_hmc$accept / N
   summary(fm1_hmc)
 
+  ###################################################################
   # logistic regression
+  ###################################################################
+
   library(mlbench)
   data(BreastCancer)
 
   bc <- BreastCancer[complete.cases(BreastCancer), ]
 
-  X <- model.matrix(Class ~ Cl.thickness + Cell.size + Cell.shape +
-                      Marg.adhesion + Epith.c.size + Bare.nuclei +
-                      Bl.cromatin + Normal.nucleoli + Mitoses,
+  X <- model.matrix(Class ~ Cl.thickness + Cell.size + Cell.shape,
+                 #     Marg.adhesion + Epith.c.size + Bare.nuclei +
+                #      Bl.cromatin + Normal.nucleoli + Mitoses,
                     data = bc)
   y <- ifelse(bc$Class == "benign", 0, 1)
 
   p <- ncol(X)
 
-  eps_vals <- rep(1e-3, p)
+  N <- 10000
 
   t1 <- Sys.time()
   set.seed(321)
   fm2_hmc <- hmc(N, theta.init = rep(0, p),
-                 epsilon = 1e-3, L=20,
+                 epsilon = 1e-1, L=20,
                  logPOSTERIOR = logistic_posterior,
                  glogPOSTERIOR = g_logistic_posterior,
+                 randlength = TRUE,
                  varnames = colnames(X), y=y, X=X)
   t2 <- Sys.time()
 
+  fm2_hmc$accept / N
 
+  ###################################################################
+  # poisson regression
+  ###################################################################
+
+  library(carData)
+  data(AMSsurvey)
+
+  # design matrix
+  X <- model.matrix(count ~ type + sex + citizen, data=AMSsurvey)
+
+  # independent variable is count data
+  y <- AMSsurvey$count
+  p <- ncol(X)
+
+  N <- 10000
+
+  fm3_hmc <- hmc(N, theta.init = rep(0, p), epsilon = 2e-3, L = 20,
+                     logPOSTERIOR = poisson_posterior,
+                 glogPOSTERIOR=g_poisson_posterior,
+                     y = y, X=X)
+  fm3_hmc$accept / N
 
 }
 
