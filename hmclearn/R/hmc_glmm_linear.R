@@ -7,6 +7,7 @@ pfun_lmm <- function(PARAM, ...) {
 }
 
 # prior for beta is mean 0 with diagonal covariance B^-1
+#' @export
 lmm_posterior <- function(theta, y, X, Z, m=106, q=3, A = 1e4, nueps=1, nulambda=1, Aeps=25, Alambda=25) {
   Z <- as.matrix(Z)
   p <- ncol(X)
@@ -52,6 +53,7 @@ lmm_posterior <- function(theta, y, X, Z, m=106, q=3, A = 1e4, nueps=1, nulambda
   return(as.numeric(result))
 }
 
+#' @export
 g_lmm_posterior <- function(theta, y, X, Z, m=106, q=3, A = 1e4, nueps=1, nulambda=1, Aeps=25, Alambda=25) {
   require(Matrix)
   Z <- as.matrix(Z)

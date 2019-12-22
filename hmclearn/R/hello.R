@@ -17,6 +17,63 @@ hello <- function() {
   print("Hello, world!")
 }
 
+# test all hmc
+if (1 == 0) {
+  # Linear regression
+  X <- model.matrix(breaks ~ wool*tension, data=warpbreaks)
+  y <- warpbreaks$breaks
+
+  N <- 10000
+  set.seed(143)
+
+  # eps_vals <- c(rep(2e-1, 6), 2e-2)
+  eps_vals <- c(rep(2e-2, 6), 2e-3)
+  # eps_vals <- c(rep(2.8e-1, 6), 2e-2)
+
+  t1 <- Sys.time()
+  set.seed(321)
+  fm1_hmc <- hmc(N, theta.init = c(rep(0, 6), 1), epsilon = eps_vals, L = 20,
+                 logPOSTERIOR = linear_posterior,
+                 glogPOSTERIOR = g_linear_posterior,
+                 varnames = c(colnames(X), "log_sigma_sq"), y=y, X=X)
+  t2 <- Sys.time()
+  t2 - t1
+
+  fm1_hmc$accept / N
+  summary(fm1_hmc)
+
+  # logistic regression
+  library(mlbench)
+  data(BreastCancer)
+
+  bc <- BreastCancer[complete.cases(BreastCancer), ]
+
+  X <- model.matrix(Class ~ Cl.thickness + Cell.size + Cell.shape +
+                      Marg.adhesion + Epith.c.size + Bare.nuclei +
+                      Bl.cromatin + Normal.nucleoli + Mitoses,
+                    data = bc)
+  y <- ifelse(bc$Class == "benign", 0, 1)
+
+  p <- ncol(X)
+
+  eps_vals <- rep(1e-3, p)
+
+  t1 <- Sys.time()
+  set.seed(321)
+  fm2_hmc <- hmc(N, theta.init = rep(0, p),
+                 epsilon = 1e-3, L=20,
+                 logPOSTERIOR = logistic_posterior,
+                 glogPOSTERIOR = g_logistic_posterior,
+                 varnames = colnames(X), y=y, X=X)
+  t2 <- Sys.time()
+
+
+
+}
+
+
+
+
 # hmc example
 if (1 == 0) {
   library(ggplot2)

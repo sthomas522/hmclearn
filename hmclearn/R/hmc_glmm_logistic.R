@@ -7,6 +7,7 @@ pfun_glmm_bin <- function(PARAM, ...) {
 }
 
 # prior for beta is mean 0 with diagonal covariance B^-1
+#' @export
 glmm_bin_posterior <- function(theta, y, X, Z, m=60, q=1, A = 1e4, B=1e4,
                                nuxi=1, Axi=25) {
   Z <- as.matrix(Z)
@@ -57,22 +58,7 @@ glmm_bin_posterior <- function(theta, y, X, Z, m=60, q=1, A = 1e4, B=1e4,
   return(as.numeric(result))
 }
 
-create_Uj <- function(uj, neg=TRUE) {
-  q <- length(uj)
-  if (q == 1) return(0)
-  nr <- q
-  nc <- q*(q-1)/2
-  Uj <- matrix(0, nrow = nr, ncol = nc)
-  for (kk in 2:nr)
-  { Uj[kk, ((kk-1)*(kk-2)/2 + 1):(kk*(kk-1)/2)] <- uj[1:(kk-1)] }
-  if (neg) {
-    return(-Uj)
-  } else {
-    return(Uj)
-  }
-}
-
-
+#' @export
 g_glmm_bin_posterior <- function(theta, y, X, Z, m=60, q=1, A = 1e4, B=1e4,
                                  nuxi=1, Axi=25) {
   Z <- as.matrix(Z)
