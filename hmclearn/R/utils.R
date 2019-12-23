@@ -14,3 +14,54 @@ create_Uj <- function(uj, neg=TRUE) {
     return(Uj)
   }
 }
+
+
+#' @export
+diagplots <- function(result, actual.mu=NULL, burnin=100, cols=NULL) {
+
+  if (is.null(cols)) {
+    cols <- 1:ncol(result$thetaDF)
+  }
+
+  thetaDFsubs <- result$thetaDF[-c(1:burnin), cols]
+  pdata <- thetaDFsubs
+  pdata$t <- 1:nrow(pdata)
+  pdata <- reshape(pdata,
+                   varying = list(1:(ncol(pdata)-1)),
+                   v.names = "value",
+                   idvar = "t",
+                   timevar = "coefficient",
+                   times = colnames(pdata)[-ncol(pdata)],
+                   direction = "long")
+  pdata$true.mu <- rep(actual.mu, each=nrow(thetaDFsubs))
+
+  k <- ncol(result$thetaDF)
+
+  # return list
+
+  # line plots of simulation
+  p1 <- ggplot2::ggplot(pdata, ggplot2::aes(t, value, colour=factor(coefficient))) + ggplot2::geom_line()
+  p1 <- p1 + ggplot2::facet_wrap(~ coefficient, ncol=trunc(sqrt(k)), scales="free_y")
+  p1 <- p1 + ggplot2::theme_bw()
+  p1
+
+  # histograms
+  p2 <- ggplot2::ggplot(pdata, ggplot2::aes(x=value, y=..density.., fill=factor(coefficient),
+                                            colour=factor(coefficient))) +
+    ggplot2::geom_histogram(bins=40)
+
+  if (!is.null(actual.mu)) {
+    p2 <- p2 + ggplot2::geom_vline(data=aggregate(pdata[4], pdata[2], mean),
+                                   mapping=ggplot2::aes(xintercept = true.mu), colour="red")
+  }
+
+  p2 <- p2 + ggplot2::facet_wrap(~ coefficient, ncol=trunc(sqrt(k)), scales="free")
+
+  p2 <- p2 + ggplot2::theme_bw()
+  p2
+
+
+  list(p1, p2)
+}
+
+
