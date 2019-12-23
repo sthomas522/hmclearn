@@ -31,6 +31,10 @@ predict.hmclearn <- function(object, X, fam = "linear", burnin=100, nsamp=NULL, 
   index <- 1:nsamp
   sampvals <- sample(index, size=nsamp, replace = FALSE)
 
+  if (!is.matrix(X)) {
+    X <- matrix(X, nrow=1)
+  }
+
   preds <- NULL
   if (fam == "linear") {
     preds <- sapply(sampvals, function(xx, dat=thetaDF, bparam=1:(k-1), sigparam=k) {
