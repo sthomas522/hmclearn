@@ -77,6 +77,8 @@ if (1 == 0) {
 
   fm2_hmc$accept / N
 
+  fm2_pred <- predict(fm2_hmc, X=X, fam="binomial")
+
   ###################################################################
   # poisson regression
   ###################################################################
@@ -98,6 +100,8 @@ if (1 == 0) {
                  glogPOSTERIOR=g_poisson_posterior,
                      y = y, X=X)
   fm3_hmc$accept / N
+
+  fm3_pred <- predict(fm3_hmc, X=X, fam="poisson")
 
   ###################################################################
   # Linear Mixed effects model

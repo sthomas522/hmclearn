@@ -36,7 +36,23 @@ predict.hmclearn <- function(object, X, fam = "linear", burnin=100, nsamp=NULL, 
     preds <- sapply(sampvals, function(xx, dat=thetaDF, bparam=1:(k-1), sigparam=k) {
       betaval <- as.numeric(dat[xx, bparam])
       sigval <- sqrt(exp(dat[xx, sigparam]))
-      z <- rnorm(1, mean=X%*%betaval, sd=sigval)
+      xval <- X[sample(1:nrow(X), size=1), ]
+      z <- rnorm(1, mean=xval%*%betaval, sd=sigval)
+      z
+    })
+  } else if (fam == "binomial") {
+    preds <- sapply(sampvals, function(xx, dat=thetaDF, bparam=1:k) {
+      betaval <- as.numeric(dat[xx, bparam])
+      xval <- X[sample(1:nrow(X), size=1), ]
+      bx <- exp(sum(xval%*%betaval))
+      z <- rbinom(1, 1, bx / (1 + bx))
+      z
+    })
+  } else if (fam == "poisson") {
+    preds <- sapply(sampvals, function(xx, dat=thetaDF, bparam=1:k) {
+      betaval <- as.numeric(dat[xx, bparam])
+      xval <- X[sample(1:nrow(X), size=1), ]
+      z <- exp(sum(xval%*%betaval))
       z
     })
   }
