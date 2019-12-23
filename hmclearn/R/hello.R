@@ -97,6 +97,70 @@ if (1 == 0) {
                      y = y, X=X)
   fm3_hmc$accept / N
 
+  ###################################################################
+  # Linear Mixed effects model
+  ###################################################################
+
+  library(MCMCglmm)
+  data("BTdata")
+
+  # sort BTdata by random effects level
+  BTdata <- BTdata[order(BTdata$dam, BTdata$sex), ]
+
+  # dependent variable
+  y <- BTdata$tarsus
+  n <- length(y)
+
+  yi.lst <- split(BTdata$tarsus, BTdata$dam)
+
+  levels(BTdata$sex) <- c("UNK", "Fem", "Male")
+
+  X <- model.matrix(~ sex, data=BTdata)
+
+  # random effects
+  m <- length(unique(BTdata$dam))
+
+  ##########
+  # block diagonal
+  Zi.lst <- split(data.frame(X), BTdata$dam)
+  Zi.lst <- lapply(Zi.lst, as.matrix)
+  Z <- bdiag(Zi.lst)
+  Z <- as.matrix(Z)
+
+  Mruns <- 4e4
+  # Mruns <- 100
+  set.seed(41121)
+  thetaInit <- initvals <- c(0,0, 0, # beta
+                             rnorm(3*106, sd=0.1), # tau
+                             # rep(0, 3*106),
+                             # rnorm(36, mean=0, sd=sqrt(10)),
+                             0, # gamma (log sigeps)
+                             c(0, 0, 0),
+                             c(0, 0, 0)) # xi and a (log G diagonal and a off-diagonal)
+
+
+  M_vals <- c(1, 1, 0.1,
+              rep(1, 3*106),
+              1,
+              rep(0.1, 3),
+              rep(0.1, 3))
+
+  set.seed(41132)
+  # tuning: get mass matrix
+  t1.hmc <- Sys.time()
+  # profvis({
+  res <- hmc(N = Mruns, theta.init = thetaInit, epsilon = 3e-3, L = 10,
+             logPOSTERIOR = lmm_posterior,
+             glogPOSTERIOR = g_lmm_posterior,
+             init_mass="fixed", fixed_diag = M_vals,
+             y = y, X=X, Z=Z, m=106, q=3, nulambda=4, Alambda=1, A=0.1)
+  # })
+  t2.hmc <- Sys.time()
+  t2.hmc - t1.hmc
+
+  res$accept/Mruns
+
+
 }
 
 
