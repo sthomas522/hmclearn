@@ -145,6 +145,7 @@ leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, Minv, co
 #' @param L Number of \code{leapfrog} steps parameter
 #' @param logPOSTERIOR Function to calculate and return the log posterior given a vector of values of \code{theta}
 #' @param glogPOSTERIOR Function to calculate and return the gradient of the log posterior given a vector of values of  \code{theta}
+#' @param varnames Optional vector of theta parameter names
 #' @param randlength Logical to determine whether to apply some randomness to the number of leapfrog steps tuning parameter \code{L}
 #' @param Mdiag Optional vector of the diagonal of the mass matrix \code{M}.  Defaults to unit diagonal.
 #' @param constrain Optional vector of which parameters in \code{theta} accept positive values only.  Default is that all parameters accept all real numbers

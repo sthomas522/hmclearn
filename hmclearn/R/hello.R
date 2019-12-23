@@ -101,7 +101,7 @@ if (1 == 0) {
   # Linear Mixed effects model
   ###################################################################
 
-  N <- 1e3
+  N <- 1e5
 
   library(lme4)
   # dependent variable
@@ -137,15 +137,20 @@ if (1 == 0) {
              c(2, 2, 0)) # xi and a (log G diagonal and a off-diagonal)
 
 
+  # 2min
   t1 <- Sys.time()
   fm4_hmc <- hmc(N = N, theta.init = thetaInit,
-                 epsilon = 5e-3, L = 20,
+                 epsilon = 3e-3, L = 20,
              logPOSTERIOR = lmm_posterior,
              glogPOSTERIOR = g_lmm_posterior,
+            varnames = c("beta1", "beta2",
+                         paste0("u", 1:36), "gamma", "xi", "a1", "a2"),
              y = y, X=X, Z=Z, m=m, q=q,
              A = 1e4, nueps=1, nulambda=1, Aeps=25, Alambda=25)
   t2 <- Sys.time()
   t2 - t1
+
+  fm4_hmc$accept / N
 
 
 

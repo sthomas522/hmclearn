@@ -32,6 +32,8 @@ hmc(
 
 \item{glogPOSTERIOR}{Function to calculate and return the gradient of the log posterior given a vector of values of  \code{theta}}
 
+\item{varnames}{Optional vector of theta parameter names}
+
 \item{randlength}{Logical to determine whether to apply some randomness to the number of leapfrog steps tuning parameter \code{L}}
 
 \item{Mdiag}{Optional vector of the diagonal of the mass matrix \code{M}.  Defaults to unit diagonal.}
