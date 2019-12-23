@@ -153,69 +153,163 @@ if (1 == 0) {
   fm4_hmc$accept / N
 
 
-
   ###################################################################
-  # Linear Mixed effects model
+  # Logistic Mixed effects model
   ###################################################################
+  library(mlmRev)
 
-  library(MCMCglmm)
-  data("BTdata")
-
-  # sort BTdata by random effects level
-  BTdata <- BTdata[order(BTdata$dam, BTdata$sex), ]
-
-  # dependent variable
-  y <- BTdata$tarsus
-  n <- length(y)
-
-  yi.lst <- split(BTdata$tarsus, BTdata$dam)
-
-  levels(BTdata$sex) <- c("UNK", "Fem", "Male")
-
-  X <- model.matrix(~ sex, data=BTdata)
-
-  # random effects
-  m <- length(unique(BTdata$dam))
+  data(Contraception)
+  Contraception$liv2 <- ifelse(Contraception$livch == "0", 0, 1)
 
   ##########
   # block diagonal
-  Zi.lst <- split(data.frame(X), BTdata$dam)
+  Zi.lst <- split(rep(1, nrow(Contraception)), Contraception$district)
   Zi.lst <- lapply(Zi.lst, as.matrix)
   Z <- bdiag(Zi.lst)
   Z <- as.matrix(Z)
 
-  Mruns <- 4e4
-  # Mruns <- 100
-  set.seed(41121)
-  thetaInit <- initvals <- c(0,0, 0, # beta
-                             rnorm(3*106, sd=0.1), # tau
-                             # rep(0, 3*106),
-                             # rnorm(36, mean=0, sd=sqrt(10)),
-                             0, # gamma (log sigeps)
-                             c(0, 0, 0),
-                             c(0, 0, 0)) # xi and a (log G diagonal and a off-diagonal)
+  urban <- ifelse(Contraception$urban == "Y", 1, 0)
+
+  X <- cbind(1, Contraception$age, Contraception$age^2, urban, Contraception$liv2)
+  colnames(X) <- c("int", "age", "age_sq", "urban", "liv2")
+  y <- ifelse(Contraception$use == "Y", 1, 0)
+
+  # qr decomposition
+  xqr <- qr(X)
+  Q <- qr.Q(xqr)
+  R <- qr.R(xqr)
+
+  n <- nrow(X)
+  X2 <- Q * sqrt(n-1)
+  Rstar <- R / sqrt(n-1)
+  Rstar_inv <- solve(Rstar)
+  colnames(X2) <- c("int", "age", "age_sq", "urban", "liv2")
 
 
-  M_vals <- c(1, 1, 0.1,
-              rep(1, 3*106),
-              1,
-              rep(0.1, 3),
-              rep(0.1, 3))
+  N <- 1e4
 
-  set.seed(41132)
-  # tuning: get mass matrix
+  set.seed(412)
+  thetaInit <- c(rep(0, 5), # fixed effects
+                 rnorm(60, mean=0, sd=0.1), # random intercepts
+                 0) # variance of random intercepts
+
+  fm5_hmc <- hmc(N = N, theta.init = thetaInit,
+             epsilon = 5e-3, L = 10,
+             logPOSTERIOR = glmm_bin_posterior,
+             glogPOSTERIOR = g_glmm_bin_posterior,
+             y = y, X=X2, Z=Z, m=60, q=1, B=5, nuxi=1, Axi=25)
+
+  ###################################################################
+  # Poisson Mixed effects model
+  ###################################################################
+
+  # https://ms.mcmaster.ca/~bolker/R/misc/foxchapter/bolker_chap.html
+
+  data(gopherdat2)
+
+  ##########
+  # block diagonal
+  Zi.lst <- split(rep(1, nrow(Gdat)), Gdat$Site)
+  Zi.lst <- lapply(Zi.lst, as.matrix)
+  Z <- bdiag(Zi.lst)
+  Z <- as.matrix(Z)
+
+  X <- model.matrix(~ factor(year), data=Gdat)
+  X <- cbind(X, Gdat$prev)
+  colnames(X)[ncol(X)] <- "prev"
+  colnames(X) <- make.names(colnames(X))
+  colnames(X)[1] <- "intercept"
+
+  y <- Gdat$shells
+  p <- ncol(X)
+
+  Mruns <- 5e5
+
+  set.seed(412)
+  thetaInit <- c(rep(0, 4),
+                             rnorm(10, mean=0, sd=1e-3),
+                             0)
+
+
+  M_vals <- c(1e-3, 1e-3, 1e-3, 1,
+              rep(1e-3, 10),
+              1e-3)
+
   t1.hmc <- Sys.time()
-  # profvis({
-  res <- hmc(N = Mruns, theta.init = thetaInit, epsilon = 3e-3, L = 10,
-             logPOSTERIOR = lmm_posterior,
-             glogPOSTERIOR = g_lmm_posterior,
-             Mdiag = M_vals,
-             y = y, X=X, Z=Z, m=106, q=3, nulambda=4, Alambda=1, A=0.1)
-  # })
+
+  fm6_hmc <- hmc(N = Mruns, theta.init = thetaInit,
+                 epsilon = 1e-4, L = 10,
+             logPOSTERIOR = glmm_poisson_posterior,
+              Mdiag = M_vals,
+             glPOSTERIOR = g_glmm_poisson_posterior,
+             y = y, X=X, Z=Z, m=10, q=1, nuxi=1, Axi=25)
+
   t2.hmc <- Sys.time()
   t2.hmc - t1.hmc
+  fm6_hmc$accept/Mruns
 
-  res$accept/Mruns
+  ###################################################################
+  # Linear Mixed effects model
+  ###################################################################
+#
+#   library(MCMCglmm)
+#   data("BTdata")
+#
+#   # sort BTdata by random effects level
+#   BTdata <- BTdata[order(BTdata$dam, BTdata$sex), ]
+#
+#   # dependent variable
+#   y <- BTdata$tarsus
+#   n <- length(y)
+#
+#   yi.lst <- split(BTdata$tarsus, BTdata$dam)
+#
+#   levels(BTdata$sex) <- c("UNK", "Fem", "Male")
+#
+#   X <- model.matrix(~ sex, data=BTdata)
+#
+#   # random effects
+#   m <- length(unique(BTdata$dam))
+#
+#   ##########
+#   # block diagonal
+#   Zi.lst <- split(data.frame(X), BTdata$dam)
+#   Zi.lst <- lapply(Zi.lst, as.matrix)
+#   Z <- bdiag(Zi.lst)
+#   Z <- as.matrix(Z)
+#
+#   Mruns <- 4e4
+#   # Mruns <- 100
+#   set.seed(41121)
+#   thetaInit <- initvals <- c(0,0, 0, # beta
+#                              rnorm(3*106, sd=0.1), # tau
+#                              # rep(0, 3*106),
+#                              # rnorm(36, mean=0, sd=sqrt(10)),
+#                              0, # gamma (log sigeps)
+#                              c(0, 0, 0),
+#                              c(0, 0, 0)) # xi and a (log G diagonal and a off-diagonal)
+#
+#
+#   M_vals <- c(1, 1, 0.1,
+#               rep(1, 3*106),
+#               1,
+#               rep(0.1, 3),
+#               rep(0.1, 3))
+#
+#   set.seed(41132)
+#   # tuning: get mass matrix
+#   t1.hmc <- Sys.time()
+#   # profvis({
+#   res <- hmc(N = Mruns, theta.init = thetaInit, epsilon = 3e-3, L = 10,
+#              logPOSTERIOR = lmm_posterior,
+#              glogPOSTERIOR = g_lmm_posterior,
+#              Mdiag = M_vals,
+#              y = y, X=X, Z=Z, m=106, q=3, nulambda=4, Alambda=1, A=0.1)
+#   # })
+#   t2.hmc <- Sys.time()
+#   t2.hmc - t1.hmc
+#
+#   res$accept/Mruns
 
 
 }

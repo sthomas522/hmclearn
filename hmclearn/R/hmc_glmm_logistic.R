@@ -8,7 +8,7 @@ pfun_glmm_bin <- function(PARAM, ...) {
 
 # prior for beta is mean 0 with diagonal covariance B^-1
 #' @export
-glmm_bin_posterior <- function(theta, y, X, Z, m=60, q=1, A = 1e4, B=1e4,
+glmm_bin_posterior <- function(theta, y, X, Z, m, q, A = 1e4, B=1e4,
                                nuxi=1, Axi=25) {
   Z <- as.matrix(Z)
   p <- ncol(X)
@@ -59,7 +59,7 @@ glmm_bin_posterior <- function(theta, y, X, Z, m=60, q=1, A = 1e4, B=1e4,
 }
 
 #' @export
-g_glmm_bin_posterior <- function(theta, y, X, Z, m=60, q=1, A = 1e4, B=1e4,
+g_glmm_bin_posterior <- function(theta, y, X, Z, m, q, A = 1e4, B=1e4,
                                  nuxi=1, Axi=25) {
   Z <- as.matrix(Z)
   p <- ncol(X)
