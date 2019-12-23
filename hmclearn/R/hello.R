@@ -101,7 +101,7 @@ if (1 == 0) {
   # Linear Mixed effects model
   ###################################################################
 
-  N <- 1e4
+  N <- 1e3
 
   library(lme4)
   # dependent variable
