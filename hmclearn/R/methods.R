@@ -19,3 +19,7 @@ coef.hmclearn <- function(x, burnin=100, prob=0.5, ...) {
 }
 
 
+#' @export
+predict.hmclearn <- function(x, ...) {
+  1
+}

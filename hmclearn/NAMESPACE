@@ -2,6 +2,7 @@
 
 S3method(coef,hmclearn)
 S3method(plot,hmclearn)
+S3method(predict,hmclearn)
 S3method(summary,hmclearn)
 export(diagplots)
 export(g_glmm_bin_posterior)
