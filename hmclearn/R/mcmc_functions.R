@@ -97,6 +97,9 @@ leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, Minv, co
   g.ld <- glogPOSTERIOR(theta_lf,  ...)
 
   # first momentum update
+  # info <- paste("r", length(r), "epsilon", length(epsilon), "g.ld", length(g.ld))
+  # print(info)
+
   r.new <- as.numeric(r + epsilon/2*g.ld)
 
   # theta update

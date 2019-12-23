@@ -101,6 +101,58 @@ if (1 == 0) {
   # Linear Mixed effects model
   ###################################################################
 
+  N <- 1e4
+
+  library(lme4)
+  # dependent variable
+  y <- sleepstudy$Reaction
+
+  # fixed effects
+  ss2 <- sleepstudy
+  ss2$int <- 1
+  ss2 <- ss2[, c(4, 1:3)] # rearrange columns to store in list
+  Xi.lst <- split(ss2[, which(colnames(ss2) %in% c("Days", "int"))],
+                  ss2$Subject)
+  Xi.lst <- lapply(Xi.lst, as.matrix)
+
+  X <- as.matrix(do.call(rbind, Xi.lst))
+
+  # random effects
+  m <- length(unique(sleepstudy$Subject))
+  d <- length(unique(sleepstudy$Days))
+
+  ##########
+  # intercept and slope
+  Zi <- cbind(1, sort(unique(sleepstudy$Days)))
+  q <- ncol(Zi)
+  Zi.lst <- replicate(m, cbind(1, sort(unique(sleepstudy$Days))), simplify=FALSE)
+  Z <- bdiag(Zi.lst)
+  Z <- as.matrix(Z)
+
+
+  thetaInit <-c(0,0, # beta
+             rnorm(36), # tau
+             # rnorm(36, mean=0, sd=sqrt(10)),
+             5, # gamma (log sig2eps)
+             c(2, 2, 0)) # xi and a (log G diagonal and a off-diagonal)
+
+
+  t1 <- Sys.time()
+  fm4_hmc <- hmc(N = N, theta.init = thetaInit,
+                 epsilon = 5e-3, L = 20,
+             logPOSTERIOR = lmm_posterior,
+             glogPOSTERIOR = g_lmm_posterior,
+             y = y, X=X, Z=Z, m=m, q=q,
+             A = 1e4, nueps=1, nulambda=1, Aeps=25, Alambda=25)
+  t2 <- Sys.time()
+  t2 - t1
+
+
+
+  ###################################################################
+  # Linear Mixed effects model
+  ###################################################################
+
   library(MCMCglmm)
   data("BTdata")
 
