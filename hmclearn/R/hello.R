@@ -102,6 +102,7 @@ if (1 == 0) {
   fm3_hmc$accept / N
 
   fm3_pred <- predict(fm3_hmc, X=X, fam="poisson")
+  fm3_pred2 <- predict(fm3_hmc, X=X[2, ], fam="poisson")
 
   ###################################################################
   # Linear Mixed effects model

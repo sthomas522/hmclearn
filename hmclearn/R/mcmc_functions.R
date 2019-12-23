@@ -1,41 +1,115 @@
 
-#######################################################################################
-# metropolis hastings functions
-#
+#' Fit a generic model using Metropolis-Hastings (MH)
+#'
+#' This function runs the MH algorithm on a generic model provided
+#' the \code{logPOSTERIOR} function.
+#' All parameters specified in ... are passed to these the posterior function.
+#' The tuning parameters \code{epsilon} and \code{L} are passed to the
+#' Leapfrog algorithm.
+#'
+#' @param N Number of MCMC samples
+#' @param theta.init Vector of initial values for the parameters
+#' @param qPROP Function to generate proposal
+#' @param qFUN Probability for proposal function.  First argument is where to evaluate, and second argument is the conditional parameter
+#' @param logPOSTERIOR Function to calculate and return the log posterior given a vector of values of \code{theta}
+#' @param ... Additional parameters for \code{logPOSTERIOR}
+#' @return Object of class \code{hmclearn}
+#'
+#' @section Elements for \code{hmclearn} objects:
+#' \describe{
+#'   \item{\code{N}}{
+#'   Number of MCMC samples
+#'   }
+#'   \item{\code{theta}}{
+#'   List of length \code{N} of the sampled values of \code{theta}
+#'   }
+#'   \item{\code{thetaDF}}{
+#'   Sampled values in dataframe form
+#'   }
+#'   \item{\code{r}}{
+#'   NULL for Metropolis-Hastings
+#'   }
+#'   \item{\code{theta.all}}{
+#'   List of all parameter values of \code{theta} sampled prior to accept/reject step
+#'   }
+#'   \item{\code{r.all}}{
+#'   NULL for Metropolis-Hastings
+#'   }
+#'   \item{\code{accept}}{
+#'   Number of accepted proposals.  The ratio \code{accept} / \code{N} is the acceptance rate
+#'   }
+#'   \item{\code{accept_v}}{
+#'   Vector of length \code{N} indicating which samples were accepted
+#'   }
+#'   \item{\code{M_mx}}{
+#'   NULL for Metropolis-Hastings
+#'   }
+#' }
+#'
+#' @section Available \code{logPOSTERIOR} functions:
+#' \describe{
+#'   \item{\code{linear_posterior}}{
+#'   Linear regression:  log posterior
+#'   }
+#'   \item{\code{logistic_posterior}}{
+#'   Logistic regression:  log posterior
+#'   }
+#'   \item{\code{poisson_posterior}}{
+#'   Poisson (count) regression:  log posterior
+#'   }
+#'   \item{\code{lmm_posterior}}{
+#'   Linear mixed effects model:  log posterior
+#'   }
+#'   \item{\code{glmm_bin_posterior}}{
+#'   Logistic mixed effects model:  log posterior
+#'   }
+#'   \item{\code{glmm_poisson_posterior}}{
+#'   Poisson mixed effects model:  log posterior
+#'   }
+#' }
+#'
+#' @author Samuel Thomas \email{samthoma@@iu.edu}, Wanzhu Tu \email{wtu@iu.edu}
 
-# metropolis algorithm
-# N:  number of iterations
-# param.init:  initial value in chain
-# qPROP:  function to generate proposal
-# qFUN:  probability for proposal function.
-#    first argument is where to evaluate, and second argument is the conditional parameter
-# pFUN:  function to calculate probabilities of proposals (e.g. log likelihood)
-# ... additional parameters for pFUN
 #' @export
-mh <- function(N, paramInit, qPROP, qFUN, pdFUN, nu, ...) {
+mh <- function(N, theta.init, qPROP, qFUN, logPOSTERIOR, nu, ...) {
   paramSim <- list()
-  paramSim[[1]] <- paramInit
+  paramSim[[1]] <- theta.init
   accept <- 0
+  accept_v <- vector()
+  accept_v[1] <- 1
   for (j in 2:N) {
     u <- runif(1)
     paramProposal <- qPROP(paramSim[[j-1]], nu)
-    lnum <- pdFUN(paramProposal, ...) + qFUN(paramSim[[j-1]], paramProposal, nu)
-    lden <- pdFUN(paramSim[[j-1]], ...) + qFUN(paramProposal, paramSim[[j-1]], nu)
+    lnum <- logPOSTERIOR(paramProposal, ...) + qFUN(paramSim[[j-1]], paramProposal, nu)
+    lden <- logPOSTERIOR(paramSim[[j-1]], ...) + qFUN(paramProposal, paramSim[[j-1]], nu)
     l.alpha <- pmin(0, lnum - lden)
     if (l.alpha > log(u)) {
       paramSim[[j]] <- paramProposal
       accept <- accept + 1
+      accept_v <- c(accept_v, 1)
     } else {
       paramSim[[j]] <- paramSim[[j-1]]
+      accept_v <- c(accept_v, 0)
     }
   }
 
   # create dataframe from simulation
   thetaDF <- as.data.frame(do.call(rbind, paramSim))
 
-  obj <- list(paramSim = paramSim,
-       thetaDF = thetaDF,
-       accept = accept)
+  # obj <- list(paramSim = paramSim,
+  #      thetaDF = thetaDF,
+  #      accept = accept)
+
+  obj <- list(N=N,
+              theta=paramSim,
+              thetaDF = thetaDF,
+              r=NULL,
+              theta.all = paramSim,
+              r.all = NULL,
+              accept=accept,
+              accept_v = accept_v,
+              M=NULL,
+              algorithm="MH")
 
   class(obj) <- c("hmclearn", "list")
   return(obj)
@@ -150,6 +224,7 @@ leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, Minv, co
 #' @param Mdiag Optional vector of the diagonal of the mass matrix \code{M}.  Defaults to unit diagonal.
 #' @param constrain Optional vector of which parameters in \code{theta} accept positive values only.  Default is that all parameters accept all real numbers
 #' @param verbose Logical to determine whether to display the progress of the HMC algorithm
+#' @param ... Additional parameters for \code{logPOSTERIOR} and \code{glogPOSTERIOR}
 #' @return Object of class \code{hmclearn}
 #'
 #' @section Elements for \code{hmclearn} objects:
@@ -337,7 +412,8 @@ hmc <- function(N=10000, theta.init, epsilon=1e-2, L=10, logPOSTERIOR, glogPOSTE
        r.all = r.all,
        accept=accept,
        accept_v = accept_v,
-       M=M_mx)
+       M=M_mx,
+       algorithm="HMC")
 
   class(obj) <- c("hmclearn", "list")
   return(obj)

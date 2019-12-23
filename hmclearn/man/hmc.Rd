@@ -41,6 +41,8 @@ hmc(
 \item{constrain}{Optional vector of which parameters in \code{theta} accept positive values only.  Default is that all parameters accept all real numbers}
 
 \item{verbose}{Logical to determine whether to display the progress of the HMC algorithm}
+
+\item{...}{Additional parameters for \code{logPOSTERIOR} and \code{glogPOSTERIOR}}
 }
 \value{
 Object of class \code{hmclearn}
