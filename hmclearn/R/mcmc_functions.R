@@ -12,6 +12,8 @@
 #' @param qPROP Function to generate proposal
 #' @param qFUN Probability for proposal function.  First argument is where to evaluate, and second argument is the conditional parameter
 #' @param logPOSTERIOR Function to calculate and return the log posterior given a vector of values of \code{theta}
+#' @param nu Single value or vector parameter passed to \code{qPROP} or \code{qFUN} for the proposal density
+#' @param varnames Optional vector of theta parameter names
 #' @param ... Additional parameters for \code{logPOSTERIOR}
 #' @return Object of class \code{hmclearn}
 #'
@@ -71,7 +73,7 @@
 #' @author Samuel Thomas \email{samthoma@@iu.edu}, Wanzhu Tu \email{wtu@iu.edu}
 
 #' @export
-mh <- function(N, theta.init, qPROP, qFUN, logPOSTERIOR, nu, ...) {
+mh <- function(N, theta.init, qPROP, qFUN, logPOSTERIOR, nu=1e-3, varnames=NULL, ...) {
   paramSim <- list()
   paramSim[[1]] <- theta.init
   accept <- 0
@@ -95,6 +97,10 @@ mh <- function(N, theta.init, qPROP, qFUN, logPOSTERIOR, nu, ...) {
 
   # create dataframe from simulation
   thetaDF <- as.data.frame(do.call(rbind, paramSim))
+
+  if (!is.null(varnames)) {
+    colnames(thetaDF) <- varnames
+  }
 
   # obj <- list(paramSim = paramSim,
   #      thetaDF = thetaDF,

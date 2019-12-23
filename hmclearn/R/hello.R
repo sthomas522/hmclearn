@@ -46,6 +46,20 @@ if (1 == 0) {
 
   fm1_pred <- predict(fm1_hmc, X=X)
 
+  # metropolis-hastings fit
+  Nmh <- 5e4
+
+  nuval <- c(rep(4, 6), 1e-1)
+
+  fm1_mh <- mh(Nmh, theta.init = c(rep(0, 6), 1), nu=nuval,
+              qPROP = qprop, qFUN = qfun,
+              logPOSTERIOR = linear_posterior,
+              varnames = c(colnames(X), "log_sigma_sq"),
+              y=y, X=X)
+
+  fm1_mh$accept / Nmh
+
+
   ###################################################################
   # logistic regression
   ###################################################################
@@ -98,11 +112,27 @@ if (1 == 0) {
   fm3_hmc <- hmc(N, theta.init = rep(0, p), epsilon = 2e-3, L = 20,
                      logPOSTERIOR = poisson_posterior,
                  glogPOSTERIOR=g_poisson_posterior,
+                 varnames = colnames(X),
                      y = y, X=X)
   fm3_hmc$accept / N
 
   fm3_pred <- predict(fm3_hmc, X=X, fam="poisson")
   fm3_pred2 <- predict(fm3_hmc, X=X[2, ], fam="poisson")
+
+  # metropolis-hastings fit
+  Nmh <- 5e4
+
+  nuval <- c(rep(1, p-1), 1e-1)
+
+  fm3_mh <- mh(Nmh, theta.init =rep(0, p), nu=1e-3,
+               qPROP = qprop, qFUN = qfun,
+               logPOSTERIOR = poisson_posterior,
+               varnames = colnames(X),
+               y=y, X=X)
+
+  fm3_mh$accept / Nmh
+
+  fm3_pred_mh <- predict(fm3_mh, X=X, fam="poisson")
 
   ###################################################################
   # Linear Mixed effects model
