@@ -152,7 +152,7 @@ if (1 == 0) {
   res <- hmc(N = Mruns, theta.init = thetaInit, epsilon = 3e-3, L = 10,
              logPOSTERIOR = lmm_posterior,
              glogPOSTERIOR = g_lmm_posterior,
-             init_mass="fixed", fixed_diag = M_vals,
+             Mdiag = M_vals,
              y = y, X=X, Z=Z, m=106, q=3, nulambda=4, Alambda=1, A=0.1)
   # })
   t2.hmc <- Sys.time()
