@@ -63,7 +63,7 @@ if (1 == 0) {
                qPROP = qprop, qFUN = qfun,
                logPOSTERIOR = linear_posterior,
                varnames = c(colnames(X), "log_sigma_sq"),
-               y=y, X=X, parallel= TRUE, chains=2)
+               param=list(y=y, X=X), parallel= TRUE, chains=2)
 
   ###################################################################
   # logistic regression
