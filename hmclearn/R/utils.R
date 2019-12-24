@@ -20,11 +20,11 @@ create_Uj <- function(uj, neg=TRUE) {
 diagplots <- function(result, actual.mu=NULL, burnin=100, cols=NULL) {
 
   if (is.null(cols)) {
-    cols <- 1:ncol(result$thetaDF)
+    cols <- 1:ncol(result$thetaCombined)
   }
 
-  thetaDFsubs <- result$thetaDF[-c(1:burnin), cols]
-  pdata <- thetaDFsubs
+  thetaCombinedsubs <- result$thetaCombined[-c(1:burnin), cols]
+  pdata <- thetaCombinedsubs
   pdata$t <- 1:nrow(pdata)
   pdata <- reshape(pdata,
                    varying = list(1:(ncol(pdata)-1)),
@@ -33,9 +33,9 @@ diagplots <- function(result, actual.mu=NULL, burnin=100, cols=NULL) {
                    timevar = "coefficient",
                    times = colnames(pdata)[-ncol(pdata)],
                    direction = "long")
-  pdata$true.mu <- rep(actual.mu, each=nrow(thetaDFsubs))
+  pdata$true.mu <- rep(actual.mu, each=nrow(thetaCombinedsubs))
 
-  k <- ncol(result$thetaDF)
+  k <- ncol(result$thetaCombined)
 
   # return list
 

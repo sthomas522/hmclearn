@@ -25,7 +25,7 @@
 #'   \item{\code{theta}}{
 #'   List of length \code{N} of the sampled values of \code{theta}
 #'   }
-#'   \item{\code{thetaDF}}{
+#'   \item{\code{thetaCombined}}{
 #'   Sampled values in dataframe form
 #'   }
 #'   \item{\code{r}}{
@@ -97,19 +97,19 @@ mh.fit <- function(N, theta.init, qPROP, qFUN, logPOSTERIOR, nu=1e-3,
   }
 
   # create dataframe from simulation
-  thetaDF <- as.data.frame(do.call(rbind, paramSim))
+  thetaCombined <- as.data.frame(do.call(rbind, paramSim))
 
   if (!is.null(varnames)) {
-    colnames(thetaDF) <- varnames
+    colnames(thetaCombined) <- varnames
   }
 
   # obj <- list(paramSim = paramSim,
-  #      thetaDF = thetaDF,
+  #      thetaCombined = thetaCombined,
   #      accept = accept)
 
   obj <- list(N=N,
               theta=paramSim,
-              thetaDF = thetaDF,
+              thetaCombined = thetaCombined,
               r=NULL,
               theta.all = paramSim,
               r.all = NULL,
@@ -154,12 +154,38 @@ mh <- function(N, theta.init, qPROP, qFUN, logPOSTERIOR, nu=1e-3,
     parallel::clusterExport(cl, varlist=c("mhpar", "mh.fit"), envir=environment())
 
     res <- parallel::parLapply(cl=cl, X=allparamParallel, fun="mhpar")
+    parallel::stopCluster(cl)
+
+    # store array
+    thetaCombined <- lapply(res, function(xx) as.matrix(xx$thetaCombined))
+
+
+    obj <- list(N=N,
+                theta = lapply(res, function(xx) xx$theta),
+                # thetaCombined = sapply(thetaCombined, as.matrix, simplify="array"),
+                thetaCombined = thetaCombined,
+                r = NULL,
+                theta.all = lapply(res, function(xx) xx$theta),
+                r.all = NULL,
+                accept = sapply(res, function(xx) xx$accept),
+                accept_v = lapply(res, function(xx) xx$accept_v),
+                M=NULL,
+                algorithm = "MH",
+                varnames = varnames,
+                chains = no_cores)
+    class(obj) <- c("hmclearn", "list")
+    return(obj)
+
   } else {
     # res <- do.call(mh.fit, allparam )
     res <- mhpar(allparam)
+    # res$thetaCombined <- array(res$thetaCombined,
+    #                            dim=c(dim(res$thetaCombined), 1))
+    res$thetaCombined <- list(as.matrix(res$thetaCombined))
+    res$varnames <- varnames
+    res$chains <- 1
+    return(res)
   }
-  return(res)
-
 }
 
 
@@ -282,7 +308,7 @@ leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, Minv, co
 #'   \item{\code{theta}}{
 #'   List of length \code{N} of the sampled values of \code{theta}
 #'   }
-#'   \item{\code{thetaDF}}{
+#'   \item{\code{thetaCombined}}{
 #'   Sampled values in dataframe form
 #'   }
 #'   \item{\code{r}}{
@@ -445,15 +471,15 @@ hmc <- function(N=10000, theta.init, epsilon=1e-2, L=10, logPOSTERIOR, glogPOSTE
   }
 
   # create dataframe from simulation
-  thetaDF <- as.data.frame(do.call(rbind, theta))
+  thetaCombined <- as.data.frame(do.call(rbind, theta))
 
   if (!is.null(varnames)) {
-    colnames(thetaDF) <- varnames
+    colnames(thetaCombined) <- varnames
   }
 
   obj <- list(N=N,
        theta=theta,
-       thetaDF = thetaDF,
+       thetaCombined = thetaCombined,
        r=r,
        theta.all = theta.all,
        r.all = r.all,

@@ -6,10 +6,7 @@ mcmc_intervals <- function(object, ...) {
 
 #' @export
 mcmc_intervals.hmclearn <- function(object, burnin=NULL, ...) {
-  data <- object$thetaDF
-  if (!is.null(burnin)) {
-    data <- data[-c(1:burnin), ]
-  }
+  data <- combMatrix(object$thetaCombined, burnin=burnin)
   bayesplot::mcmc_intervals(data, ...)
 }
 
@@ -20,10 +17,7 @@ mcmc_areas <- function(object, ...) {
 
 #' @export
 mcmc_areas.hmclearn <- function(object, burnin=NULL, ...) {
-  data <- object$thetaDF
-  if (!is.null(burnin)) {
-    data <- data[-c(1:burnin), ]
-  }
+  data <- combMatrix(object$thetaCombined, burnin=burnin)
   bayesplot::mcmc_areas(data, ...)
 }
 
@@ -35,10 +29,7 @@ mcmc_hist <- function(object, ...) {
 
 #' @export
 mcmc_hist.hmclearn <- function(object, burnin=NULL, ...) {
-  data <- object$thetaDF
-  if (!is.null(burnin)) {
-    data <- data[-c(1:burnin), ]
-  }
+  data <- combMatrix(object$thetaCombined, burnin=burnin)
   bayesplot::mcmc_hist(data, ...)
 }
 
@@ -51,10 +42,7 @@ mcmc_dens <- function(object, ...) {
 
 #' @export
 mcmc_dens.hmclearn <- function(object, burnin=NULL, ...) {
-  data <- object$thetaDF
-  if (!is.null(burnin)) {
-    data <- data[-c(1:burnin), ]
-  }
+  data <- combMatrix(object$thetaCombined, burnin=burnin)
   bayesplot::mcmc_dens(data, ...)
 }
 
@@ -66,10 +54,7 @@ mcmc_scatter <- function(object, ...) {
 
 #' @export
 mcmc_scatter.hmclearn <- function(object, burnin=NULL, ...) {
-  data <- object$thetaDF
-  if (!is.null(burnin)) {
-    data <- data[-c(1:burnin), ]
-  }
+  data <- combMatrix(object$thetaCombined, burnin=burnin)
   bayesplot::mcmc_scatter(data, ...)
 }
 
@@ -81,10 +66,7 @@ mcmc_hex <- function(object, ...) {
 
 #' @export
 mcmc_hex.hmclearn <- function(object, burnin=NULL, ...) {
-  data <- object$thetaDF
-  if (!is.null(burnin)) {
-    data <- data[-c(1:burnin), ]
-  }
+  data <- combMatrix(object$thetaCombined, burnin=burnin)
   bayesplot::mcmc_hex(data, ...)
 }
 
@@ -95,10 +77,7 @@ mcmc_pairs <- function(object, ...) {
 
 #' @export
 mcmc_pairs.hmclearn <- function(object, burnin=NULL, ...) {
-  data <- object$thetaDF
-  if (!is.null(burnin)) {
-    data <- data[-c(1:burnin), ]
-  }
+  data <- combMatrix(object$thetaCombined, burnin=burnin)
   bayesplot::mcmc_pairs(data, ...)
 }
 
@@ -110,58 +89,46 @@ mcmc_trace <- function(object, ...) {
 
 #' @export
 mcmc_trace.hmclearn <- function(object, burnin=NULL, ...) {
-  data <- object$thetaDF
-  if (!is.null(burnin)) {
-    data <- data[-c(1:burnin), ]
-  }
+  data <- combMatrix(object$thetaCombined, burnin=burnin)
   bayesplot::mcmc_trace(data, ...)
 }
 
-#' #' @export
-#' mcmc_rhat <- function(object, ...) {
-#'   UseMethod("mcmc_rhat")
-#' }
-#'
-#' #' @export
-#' mcmc_rhat.hmclearn <- function(object, burnin=NULL, ...) {
-#'   data <- object$thetaDF
-#'   if (!is.null(burnin)) {
-#'     data <- data[-c(1:burnin), ]
-#'   }
-#'   bayesplot::mcmc_rhat(data, ...)
-#' }
-#'
-#'
-#' #' @export
-#' mcmc_rhat_hist <- function(object, ...) {
-#'   UseMethod("mcmc_rhat_hist")
-#' }
-#'
-#' #' @export
-#' mcmc_rhat_hist.hmclearn <- function(object, burnin=NULL, ...) {
-#'   data <- object$thetaDF
-#'   if (!is.null(burnin)) {
-#'     data <- data[-c(1:burnin), ]
-#'   }
-#'   bayesplot::mcmc_rhat_hist(data, ...)
-#' }
+#' @export
+mcmc_rhat <- function(object, ...) {
+  UseMethod("mcmc_rhat")
+}
+
+#' @export
+mcmc_rhat.hmclearn <- function(object, burnin=NULL, ...) {
+  data <- combMatrix(object$thetaCombined, burnin=burnin)
+  bayesplot::mcmc_rhat(data, ...)
+}
+
+
+#' @export
+mcmc_rhat_hist <- function(object, ...) {
+  UseMethod("mcmc_rhat_hist")
+}
+
+#' @export
+mcmc_rhat_hist.hmclearn <- function(object, burnin=NULL, ...) {
+  data <- combMatrix(object$thetaCombined, burnin=burnin)
+  bayesplot::mcmc_rhat_hist(data, ...)
+}
 
 
 
 # requires multiple chains
-#' #' @export
-#' mcmc_violin <- function(object, ...) {
-#'   UseMethod("mcmc_violin")
-#' }
-#'
-#' #' @export
-#' mcmc_violin.hmclearn <- function(object, burnin=NULL, ...) {
-#'   data <- object$thetaDF
-#'   if (!is.null(burnin)) {
-#'     data <- data[-c(1:burnin), ]
-#'   }
-#'   bayesplot::mcmc_violin(data, ...)
-#' }
+#' @export
+mcmc_violin <- function(object, ...) {
+  UseMethod("mcmc_violin")
+}
+
+#' @export
+mcmc_violin.hmclearn <- function(object, burnin=NULL, ...) {
+  data <- combMatrix(object$thetaCombined, burnin=burnin)
+  bayesplot::mcmc_violin(data, ...)
+}
 
 
 #' #' @export

@@ -63,7 +63,7 @@ Leapfrog algorithm.
   \item{\code{theta}}{
   List of length \code{N} of the sampled values of \code{theta}
   }
-  \item{\code{thetaDF}}{
+  \item{\code{thetaCombined}}{
   Sampled values in dataframe form
   }
   \item{\code{r}}{
