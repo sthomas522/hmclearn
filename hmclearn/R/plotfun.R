@@ -131,15 +131,15 @@ mcmc_violin.hmclearn <- function(object, burnin=NULL, ...) {
 }
 
 
-#' #' @export
-#' color_scheme_set <- function(...) {
-#'   bayesplot::color_scheme_set(...)
-#' }
-#'
-#' #' @export
-#' color_scheme_get <- function(...) {
-#'   bayesplot::color_scheme_get(...)
-#' }
+#' @export
+color_scheme_set <- function(...) {
+  bayesplot::color_scheme_set(...)
+}
+
+#' @export
+color_scheme_get <- function(...) {
+  bayesplot::color_scheme_get(...)
+}
 
 
 

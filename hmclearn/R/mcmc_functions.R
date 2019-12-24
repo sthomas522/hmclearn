@@ -376,7 +376,7 @@ leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, Minv, co
 #' @references Thomas, S., Li, X., and Tu, W.  2019.  \emph{Hamiltonian Monte Carlo}.  Wiley
 #' @references Neal, Radford. 2011. \emph{MCMC Using Hamiltonian Dynamics.} In Handbook of Markov Chain Monte Carlo, edited by Steve Brooks, Andrew Gelman, Galin L. Jones, and Xiao-Li Meng, 116–62. Chapman; Hall/CRC.
 #' @keywords hamiltonian monte carlo
-hmc <- function(N=10000, theta.init, epsilon=1e-2, L=10, logPOSTERIOR, glogPOSTERIOR, varnames=NULL,
+hmc.fit <- function(N, theta.init, epsilon, L, logPOSTERIOR, glogPOSTERIOR, varnames=NULL,
                 randlength=FALSE, Mdiag=NULL, constrain=NULL, verbose=FALSE, ...) {
 
   p <- length(theta.init) # number of parameters
@@ -492,3 +492,68 @@ hmc <- function(N=10000, theta.init, epsilon=1e-2, L=10, logPOSTERIOR, glogPOSTE
   return(obj)
 }
 
+
+hmcpar <- function(paramlst, ...) {
+  do.call(hmc.fit, paramlst)
+}
+
+#' @export
+hmc <- function(N=10000, theta.init, epsilon=1e-2, L=10, logPOSTERIOR, glogPOSTERIOR,
+                randlength=FALSE, Mdiag=NULL, constrain=NULL, verbose=FALSE, varnames=NULL,
+                param = list(...),
+               chains=1, parallel=FALSE, ...) {
+
+  allparam <- c(list(N=N,
+                     theta.init=theta.init,
+                     epsilon=epsilon,
+                     L=L,
+                     logPOSTERIOR=logPOSTERIOR,
+                     glogPOSTERIOR=glogPOSTERIOR,
+                     randlength=randlength,
+                     Mdiag=Mdiag,
+                     constrain=constrain,
+                     verbose=verbose,
+                     varnames=varnames),
+                param)
+
+  if (parallel) {
+    no_cores <- pmin(parallel::detectCores(), chains)
+    cl <- parallel::makeCluster(no_cores)
+
+    allparamParallel <- replicate(no_cores, allparam, FALSE)
+    parallel::clusterExport(cl, varlist=c("hmcpar", "hmc.fit"), envir=environment())
+
+    res <- parallel::parLapply(cl=cl, X=allparamParallel, fun="hmcpar")
+    parallel::stopCluster(cl)
+
+    # store array
+    thetaCombined <- lapply(res, function(xx) as.matrix(xx$thetaCombined))
+
+
+    obj <- list(N=N,
+                theta = lapply(res, function(xx) xx$theta),
+                # thetaCombined = sapply(thetaCombined, as.matrix, simplify="array"),
+                thetaCombined = thetaCombined,
+                r = lapply(res, function(xx) xx$r),
+                theta.all = lapply(res, function(xx) xx$theta),
+                r.all =lapply(res, function(xx) xx$r.all),
+                accept = sapply(res, function(xx) xx$accept),
+                accept_v = lapply(res, function(xx) xx$accept_v),
+                M=lapply(res, function(xx) xx$M_Mx),
+                algorithm = "HMC",
+                varnames = varnames,
+                chains = no_cores)
+    class(obj) <- c("hmclearn", "list")
+    return(obj)
+
+  } else {
+    # res <- do.call(mh.fit, allparam )
+    res <- hmcpar(allparam)
+    # res$thetaCombined <- array(res$thetaCombined,
+    #                            dim=c(dim(res$thetaCombined), 1))
+    res$thetaCombined <- list(as.matrix(res$thetaCombined))
+    res$varnames <- varnames
+    res$chains <- 1
+    return(res)
+  }
+}

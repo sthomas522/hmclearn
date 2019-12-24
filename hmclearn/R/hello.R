@@ -37,7 +37,19 @@ if (1 == 0) {
   fm1_hmc <- hmc(N, theta.init = c(rep(0, 6), 1), epsilon = eps_vals, L = 20,
                  logPOSTERIOR = linear_posterior,
                  glogPOSTERIOR = g_linear_posterior,
-                 varnames = c(colnames(X), "log_sigma_sq"), y=y, X=X)
+                 varnames = c(colnames(X), "log_sigma_sq"),
+                 param=list(y=y, X=X))
+  t2 <- Sys.time()
+  t2 - t1
+
+
+  t1 <- Sys.time()
+  set.seed(321)
+  fm1_hmc <- hmc(N, theta.init = c(rep(0, 6), 1), epsilon = eps_vals, L = 20,
+                 logPOSTERIOR = linear_posterior,
+                 glogPOSTERIOR = g_linear_posterior,
+                 varnames = c(colnames(X), "log_sigma_sq"),
+                 param=list(y=y, X=X), parallel = TRUE, chains = 2)
   t2 <- Sys.time()
   t2 - t1
 
@@ -55,7 +67,7 @@ if (1 == 0) {
               qPROP = qprop, qFUN = qfun,
               logPOSTERIOR = linear_posterior,
               varnames = c(colnames(X), "log_sigma_sq"),
-              y=y, X=X)
+              param=list(y=y, X=X))
 
   fm1_mh$accept / Nmh
 
