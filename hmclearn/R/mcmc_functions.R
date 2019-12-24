@@ -73,7 +73,8 @@
 #' @author Samuel Thomas \email{samthoma@@iu.edu}, Wanzhu Tu \email{wtu@iu.edu}
 
 #' @export
-mh <- function(N, theta.init, qPROP, qFUN, logPOSTERIOR, nu=1e-3, varnames=NULL, ...) {
+mh.fit <- function(N, theta.init, qPROP, qFUN, logPOSTERIOR, nu=1e-3,
+               varnames=NULL, ...) {
   paramSim <- list()
   paramSim[[1]] <- theta.init
   accept <- 0
@@ -119,6 +120,46 @@ mh <- function(N, theta.init, qPROP, qFUN, logPOSTERIOR, nu=1e-3, varnames=NULL,
 
   class(obj) <- c("hmclearn", "list")
   return(obj)
+}
+
+withGlobals <- function(FUN, lst){
+  environment(FUN) <- list2env(lst)
+  FUN
+}
+
+
+mhpar <- function(paramlst, ...) {
+  do.call(mh.fit, paramlst)
+}
+
+#' @export
+mh <- function(N, theta.init, qPROP, qFUN, logPOSTERIOR, nu=1e-3,
+                   varnames=NULL, param = list(...),
+               chains=1, parallel=FALSE, ...) {
+
+  allparam <- c(list(N=N,
+                     theta.init=theta.init,
+                     qPROP=qPROP,
+                     qFUN=qFUN,
+                     logPOSTERIOR=logPOSTERIOR,
+                     nu=nu,
+                     varnames=varnames),
+                param)
+
+  if (parallel) {
+    no_cores <- pmin(parallel::detectCores(), chains)
+    cl <- parallel::makeCluster(no_cores)
+
+    allparamParallel <- replicate(no_cores, allparam, FALSE)
+    parallel::clusterExport(cl, varlist=c("mhpar", "mh.fit"), envir=environment())
+
+    res <- parallel::parLapply(cl=cl, X=allparamParallel, fun="mhpar")
+  } else {
+    # res <- do.call(mh.fit, allparam )
+    res <- mhpar(allparam)
+  }
+  return(res)
+
 }
 
 

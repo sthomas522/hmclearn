@@ -88,6 +88,65 @@ mcmc_hex.hmclearn <- function(object, burnin=NULL, ...) {
   bayesplot::mcmc_hex(data, ...)
 }
 
+#' @export
+mcmc_pairs <- function(object, ...) {
+  UseMethod("mcmc_pairs")
+}
+
+#' @export
+mcmc_pairs.hmclearn <- function(object, burnin=NULL, ...) {
+  data <- object$thetaDF
+  if (!is.null(burnin)) {
+    data <- data[-c(1:burnin), ]
+  }
+  bayesplot::mcmc_pairs(data, ...)
+}
+
+
+#' @export
+mcmc_trace <- function(object, ...) {
+  UseMethod("mcmc_trace")
+}
+
+#' @export
+mcmc_trace.hmclearn <- function(object, burnin=NULL, ...) {
+  data <- object$thetaDF
+  if (!is.null(burnin)) {
+    data <- data[-c(1:burnin), ]
+  }
+  bayesplot::mcmc_trace(data, ...)
+}
+
+#' #' @export
+#' mcmc_rhat <- function(object, ...) {
+#'   UseMethod("mcmc_rhat")
+#' }
+#'
+#' #' @export
+#' mcmc_rhat.hmclearn <- function(object, burnin=NULL, ...) {
+#'   data <- object$thetaDF
+#'   if (!is.null(burnin)) {
+#'     data <- data[-c(1:burnin), ]
+#'   }
+#'   bayesplot::mcmc_rhat(data, ...)
+#' }
+#'
+#'
+#' #' @export
+#' mcmc_rhat_hist <- function(object, ...) {
+#'   UseMethod("mcmc_rhat_hist")
+#' }
+#'
+#' #' @export
+#' mcmc_rhat_hist.hmclearn <- function(object, burnin=NULL, ...) {
+#'   data <- object$thetaDF
+#'   if (!is.null(burnin)) {
+#'     data <- data[-c(1:burnin), ]
+#'   }
+#'   bayesplot::mcmc_rhat_hist(data, ...)
+#' }
+
+
 
 # requires multiple chains
 #' #' @export

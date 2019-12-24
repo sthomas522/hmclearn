@@ -15,4 +15,5 @@ Suggests:
 VignetteBuilder: knitr
 RoxygenNote: 7.0.1
 Imports: 
-    bayesplot
+    bayesplot,
+    parallel

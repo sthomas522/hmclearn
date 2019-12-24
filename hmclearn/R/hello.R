@@ -59,6 +59,11 @@ if (1 == 0) {
 
   fm1_mh$accept / Nmh
 
+  fm1_mh <- mh(Nmh, theta.init = c(rep(0, 6), 1), nu=nuval,
+               qPROP = qprop, qFUN = qfun,
+               logPOSTERIOR = linear_posterior,
+               varnames = c(colnames(X), "log_sigma_sq"),
+               y=y, X=X, parallel= TRUE, chains=2)
 
   ###################################################################
   # logistic regression
