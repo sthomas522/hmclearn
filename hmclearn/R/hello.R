@@ -177,7 +177,7 @@ if (1 == 0) {
   # 2min
   t1 <- Sys.time()
   fm4_hmc <- hmc(N = N, theta.init = thetaInit,
-                 epsilon = 3e-3, L = 20,
+                 epsilon = 1e-3, L = 20,
              logPOSTERIOR = lmm_posterior,
              glogPOSTERIOR = g_lmm_posterior,
             varnames = c("beta1", "beta2",
