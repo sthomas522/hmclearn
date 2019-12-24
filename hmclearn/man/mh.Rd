@@ -4,7 +4,7 @@
 \alias{mh}
 \title{Fit a generic model using Metropolis-Hastings (MH)}
 \usage{
-mh(N, theta.init, qPROP, qFUN, logPOSTERIOR, nu = 0.001, ...)
+mh(N, theta.init, qPROP, qFUN, logPOSTERIOR, nu = 0.001, varnames = NULL, ...)
 }
 \arguments{
 \item{N}{Number of MCMC samples}
@@ -19,9 +19,9 @@ mh(N, theta.init, qPROP, qFUN, logPOSTERIOR, nu = 0.001, ...)
 
 \item{nu}{Single value or vector parameter passed to \code{qPROP} or \code{qFUN} for the proposal density}
 
-\item{...}{Additional parameters for \code{logPOSTERIOR}}
-
 \item{varnames}{Optional vector of theta parameter names}
+
+\item{...}{Additional parameters for \code{logPOSTERIOR}}
 }
 \value{
 Object of class \code{hmclearn}
