@@ -26,7 +26,7 @@ combMatrix <- function(x, burnin) {
 }
 
 #' @export
-summary.hmclearn <- function(x, burnin=100, probs=c(0.05, 0.25, 0.5, 0.75, 0.95), ...) {
+summary.hmclearn <- function(x, burnin=1, probs=c(0.05, 0.25, 0.5, 0.75, 0.95), ...) {
   cat("Summary of HMC simulation\n\n")
 
   # remove burnin
@@ -48,7 +48,7 @@ plot.hmclearn <- function(x, burnin=1, ...) {
 }
 
 #' @export
-coef.hmclearn <- function(x, burnin=100, prob=0.5, ...) {
+coef.hmclearn <- function(x, burnin=1, prob=0.5, ...) {
   thetaCombined <- combMatrix(x$thetaCombined, burnin=burnin)
   thetaCombined <- do.call(rbind, thetaCombined)
   apply(thetaCombined, 2, quantile, probs=prob, ...)
@@ -56,9 +56,10 @@ coef.hmclearn <- function(x, burnin=100, prob=0.5, ...) {
 
 
 #' @export
-predict.hmclearn <- function(object, X, fam = "linear", burnin=100, nsamp=NULL, ...) {
+predict.hmclearn <- function(object, X, fam = "linear", burnin=1, nsamp=NULL, ...) {
 
-  thetaCombined <- object$thetaCombined[-c(1:burnin), ]
+  thetaCombined <- combMatrix(object$thetaCombined, burnin=burnin)
+  thetaCombined <- do.call(rbind, thetaCombined)
   k <- ncol(thetaCombined)
 
   if (is.null(nsamp)) {
