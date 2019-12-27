@@ -33,10 +33,17 @@ summary.hmclearn <- function(x, burnin=NULL, probs=c(0.05, 0.25, 0.5, 0.75, 0.95
   thetaCombined <- combMatrix(x$thetaCombined, burnin=burnin)
   thetaCombined <- do.call(rbind, thetaCombined)
 
+  # quantiles
   res <- t(apply(thetaCombined, 2, quantile, probs=probs, ...))
   if (!is.null(x$varnames)) {
     row.names(res) <- x$varnames
   }
+
+  # rhat calc
+  rhat <- psrf(x, burnin=burnin)
+
+  res <- cbind(res, rhat)
+  colnames(res)[ncol(res)] <- "rhat"
   res
 }
 
@@ -108,8 +115,13 @@ psrf <- function(object, ...) {
 
 #' @export
 psrf.hmclearn <- function(object, burnin=NULL, ...) {
+
+  data <- combMatrix(object$thetaCombined, burnin=burnin)
+
   if (object$chains == 1) {
-    stop("Multiple chains needed to calculate Potential Scale Reduction Factor")
+    # stop("Multiple chains needed to calculate Potential Scale Reduction Factor")
+    rhat <- rep(NA, ncol(data[[1]]))
+    return(rhat)
   }
 
   data <- combMatrix(object$thetaCombined, burnin=burnin)

@@ -552,9 +552,6 @@ hmc <- function(N=10000, theta.init, epsilon=1e-2, L=10, logPOSTERIOR, glogPOSTE
     parallel::stopCluster(cl)
 
     # store array
-    thetaCombined <- lapply(res, function(xx) as.matrix(xx$thetaCombined))
-
-
     obj <- list(N=N,
                 theta = lapply(res, function(xx) xx$theta),
                 # thetaCombined = sapply(thetaCombined, as.matrix, simplify="array"),

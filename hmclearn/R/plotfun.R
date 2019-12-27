@@ -100,8 +100,9 @@ mcmc_rhat <- function(object, ...) {
 
 #' @export
 mcmc_rhat.hmclearn <- function(object, burnin=NULL, ...) {
-  data <- combMatrix(object$thetaCombined, burnin=burnin)
-  bayesplot::mcmc_rhat(data, ...)
+  rhatvals <- psrf(object, burnin=burnin)
+  names(rhatvals) <- object$varnames
+  bayesplot::mcmc_rhat(rhatvals, ...) #+ bayesplot::yaxis_text(hjust=1)
 }
 
 
@@ -112,8 +113,9 @@ mcmc_rhat_hist <- function(object, ...) {
 
 #' @export
 mcmc_rhat_hist.hmclearn <- function(object, burnin=NULL, ...) {
-  data <- combMatrix(object$thetaCombined, burnin=burnin)
-  bayesplot::mcmc_rhat_hist(data, ...)
+  rhatvals <- psrf(object, burnin=burnin)
+  names(rhatvals) <- object$varnames
+  bayesplot::mcmc_rhat_hist(rhatvals, ...)
 }
 
 
