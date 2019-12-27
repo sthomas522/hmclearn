@@ -26,7 +26,7 @@ combMatrix <- function(x, burnin) {
 }
 
 #' @export
-summary.hmclearn <- function(x, burnin=1, probs=c(0.05, 0.25, 0.5, 0.75, 0.95), ...) {
+summary.hmclearn <- function(x, burnin=NULL, probs=c(0.05, 0.25, 0.5, 0.75, 0.95), ...) {
   cat("Summary of HMC simulation\n\n")
 
   # remove burnin
@@ -99,3 +99,53 @@ predict.hmclearn <- function(object, X, fam = "linear", burnin=1, nsamp=NULL, ..
   }
   return(preds)
 }
+
+
+#' @export
+psrf <- function(object, ...) {
+  UseMethod("psrf")
+}
+
+#' @export
+psrf.hmclearn <- function(object, burnin=NULL, ...) {
+  if (object$chains == 1) {
+    stop("Multiple chains needed to calculate Potential Scale Reduction Factor")
+  }
+
+  data <- combMatrix(object$thetaCombined, burnin=burnin)
+
+  # number of samples after burnin
+  Nraw <- object$N
+  if (!is.null(burnin)) {
+    N <- Nraw - burnin
+  } else {
+    N <- Nraw
+  }
+
+  # number of chains
+  M <- object$chains
+
+  # means for each chain
+  thetaBarm <- lapply(data, colMeans)
+  thetaBarAll <- colMeans(do.call(rbind, thetaBarm))
+
+  # between-chain var
+  diff2 <- lapply(thetaBarm, function(x1, x2=thetaBarAll) {
+    (x1 - x2)^2
+  })
+  B <- N / (M-1) * base::colSums(do.call(rbind, diff2))
+
+  # within-chain var
+  sampvarByChain <- lapply(data, function(xx) {
+    apply(xx, 2, var)
+  })
+  W <- colMeans(do.call(rbind, sampvarByChain))
+
+  # variance estimator
+  varest <- (N-1)/N * W + 1/N*B
+
+  rhat <- sqrt(varest/W)
+  return(rhat)
+
+}
+

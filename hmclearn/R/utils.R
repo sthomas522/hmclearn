@@ -64,4 +64,3 @@ diagplots <- function(result, actual.mu=NULL, burnin=100, cols=NULL) {
   list(p1, p2)
 }
 
-

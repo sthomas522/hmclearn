@@ -177,14 +177,39 @@ mh <- function(N, theta.init, qPROP, qFUN, logPOSTERIOR, nu=1e-3,
     return(obj)
 
   } else {
-    # res <- do.call(mh.fit, allparam )
-    res <- mhpar(allparam)
-    # res$thetaCombined <- array(res$thetaCombined,
-    #                            dim=c(dim(res$thetaCombined), 1))
-    res$thetaCombined <- list(as.matrix(res$thetaCombined))
-    res$varnames <- varnames
-    res$chains <- 1
-    return(res)
+
+    allparamParallel <- replicate(chains, allparam, FALSE)
+
+    res <- lapply(allparamParallel, mhpar)
+
+    # store array
+    thetaCombined <- lapply(res, function(xx) as.matrix(xx$thetaCombined))
+
+
+    obj <- list(N=N,
+                theta = lapply(res, function(xx) xx$theta),
+                # thetaCombined = sapply(thetaCombined, as.matrix, simplify="array"),
+                thetaCombined = thetaCombined,
+                r = NULL,
+                theta.all = lapply(res, function(xx) xx$theta),
+                r.all = NULL,
+                accept = sapply(res, function(xx) xx$accept),
+                accept_v = lapply(res, function(xx) xx$accept_v),
+                M=NULL,
+                algorithm = "MH",
+                varnames = varnames,
+                chains = chains)
+    class(obj) <- c("hmclearn", "list")
+    return(obj)
+
+    # # res <- do.call(mh.fit, allparam )
+    # res <- mhpar(allparam)
+    # # res$thetaCombined <- array(res$thetaCombined,
+    # #                            dim=c(dim(res$thetaCombined), 1))
+    # res$thetaCombined <- list(as.matrix(res$thetaCombined))
+    # res$varnames <- varnames
+    # res$chains <- 1
+    # return(res)
   }
 }
 
@@ -547,13 +572,38 @@ hmc <- function(N=10000, theta.init, epsilon=1e-2, L=10, logPOSTERIOR, glogPOSTE
     return(obj)
 
   } else {
-    # res <- do.call(mh.fit, allparam )
-    res <- hmcpar(allparam)
-    # res$thetaCombined <- array(res$thetaCombined,
-    #                            dim=c(dim(res$thetaCombined), 1))
-    res$thetaCombined <- list(as.matrix(res$thetaCombined))
-    res$varnames <- varnames
-    res$chains <- 1
-    return(res)
+
+    allparamParallel <- replicate(chains, allparam, FALSE)
+
+    res <- lapply(allparamParallel, hmcpar)
+
+    # store array
+    thetaCombined <- lapply(res, function(xx) as.matrix(xx$thetaCombined))
+
+
+    obj <- list(N=N,
+                theta = lapply(res, function(xx) xx$theta),
+                # thetaCombined = sapply(thetaCombined, as.matrix, simplify="array"),
+                thetaCombined = thetaCombined,
+                r = NULL,
+                theta.all = lapply(res, function(xx) xx$theta),
+                r.all = NULL,
+                accept = sapply(res, function(xx) xx$accept),
+                accept_v = lapply(res, function(xx) xx$accept_v),
+                M=NULL,
+                algorithm = "HMC",
+                varnames = varnames,
+                chains = chains)
+    class(obj) <- c("hmclearn", "list")
+    return(obj)
+
+    # # res <- do.call(mh.fit, allparam )
+    # res <- hmcpar(allparam)
+    # # res$thetaCombined <- array(res$thetaCombined,
+    # #                            dim=c(dim(res$thetaCombined), 1))
+    # res$thetaCombined <- list(as.matrix(res$thetaCombined))
+    # res$varnames <- varnames
+    # res$chains <- 1
+    # return(res)
   }
 }

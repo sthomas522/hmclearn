@@ -49,7 +49,7 @@ if (1 == 0) {
                  logPOSTERIOR = linear_posterior,
                  glogPOSTERIOR = g_linear_posterior,
                  varnames = c(colnames(X), "log_sigma_sq"),
-                 param=list(y=y, X=X), parallel = TRUE, chains = 2)
+                 param=list(y=y, X=X), parallel = TRUE, chains = 4)
   t2 <- Sys.time()
   t2 - t1
 
