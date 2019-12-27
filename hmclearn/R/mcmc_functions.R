@@ -151,7 +151,7 @@ mh <- function(N, theta.init, qPROP, qFUN, logPOSTERIOR, nu=1e-3,
     cl <- parallel::makeCluster(no_cores)
 
     allparamParallel <- replicate(no_cores, allparam, FALSE)
-    parallel::clusterExport(cl, varlist=c("mhpar", "mh.fit"), envir=environment())
+    parallel::clusterExport(cl, varlist=c("mhpar", "mh.fit", "leapfrog"), envir=environment())
 
     res <- parallel::parLapply(cl=cl, X=allparamParallel, fun="mhpar")
     parallel::stopCluster(cl)
@@ -546,10 +546,13 @@ hmc <- function(N=10000, theta.init, epsilon=1e-2, L=10, logPOSTERIOR, glogPOSTE
     cl <- parallel::makeCluster(no_cores)
 
     allparamParallel <- replicate(no_cores, allparam, FALSE)
-    parallel::clusterExport(cl, varlist=c("hmcpar", "hmc.fit"), envir=environment())
+    parallel::clusterExport(cl, varlist=c("hmcpar", "hmc.fit", "leapfrog"), envir=environment())
 
     res <- parallel::parLapply(cl=cl, X=allparamParallel, fun="hmcpar")
     parallel::stopCluster(cl)
+
+    thetaCombined <- lapply(res, function(xx) as.matrix(xx$thetaCombined))
+
 
     # store array
     obj <- list(N=N,

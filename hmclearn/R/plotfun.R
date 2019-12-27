@@ -118,7 +118,65 @@ mcmc_rhat_hist.hmclearn <- function(object, burnin=NULL, ...) {
   bayesplot::mcmc_rhat_hist(rhatvals, ...)
 }
 
+#' @export
+mcmc_neff <- function(object, ...) {
+  UseMethod("mcmc_neff")
+}
 
+#' @export
+mcmc_neff.hmclearn <- function(object, burnin=NULL, lagmax=NULL, ...) {
+  neffvals <- neff(object, burnin, lagmax)
+
+  if (!is.null(burnin)) {
+    N <- object$N - burnin
+  } else {
+    N <- object$N
+  }
+
+  ratio <- neffvals / N
+
+  bayesplot::mcmc_neff(ratio, ...)
+}
+
+#' @export
+mcmc_neff_hist <- function(object, ...) {
+  UseMethod("mcmc_neff_hist")
+}
+
+#' @export
+mcmc_neff_hist.hmclearn <- function(object, burnin=NULL, lagmax=NULL, ...) {
+  neffvals <- neff(object, burnin, lagmax)
+
+  if (!is.null(burnin)) {
+    N <- object$N - burnin
+  } else {
+    N <- object$N
+  }
+
+  ratio <- neffvals / N
+
+  bayesplot::mcmc_neff_hist(ratio, ...)
+}
+
+#' @export
+mcmc_neff_data <- function(object, ...) {
+  UseMethod("mcmc_neff_data")
+}
+
+#' @export
+mcmc_neff_data.hmclearn <- function(object, burnin=NULL, lagmax=NULL, ...) {
+  neffvals <- neff(object, burnin, lagmax)
+
+  if (!is.null(burnin)) {
+    N <- object$N - burnin
+  } else {
+    N <- object$N
+  }
+
+  ratio <- neffvals / N
+
+  bayesplot::mcmc_neff_data(ratio, ...)
+}
 
 # requires multiple chains
 #' @export

@@ -123,7 +123,7 @@ neff <- function(object, ...) {
 }
 
 #' @export
-neff.hmclearn <- function(object, burnin=NULL, ...) {
+neff.hmclearn <- function(object, burnin=NULL, lagmax=NULL, ...) {
   data <- combMatrix(object$thetaCombined, burnin=burnin)
   M <- length(data)
 
@@ -138,15 +138,13 @@ neff.hmclearn <- function(object, burnin=NULL, ...) {
   # variance estimator
   vest <- varest(data, N)$varest
 
-  # estimate lagmax
-  lagmax <- ceiling(10 * log(N))
-  # lagmax <- 2000
+  if (is.null(lagmax)) {
+    lagmax <- min(500, N-2)
+  }
 
   # Vt for each chain
   Vtchains <- lapply(data, function(xx) {
-    t(sapply(1:lagmax, function(t) {
-      apply(xx, 2, variog, lagval=t)
-    }))
+    apply(xx, 2, variog, lagmax=lagmax)
   })
 
   # elementwise mean over chains
@@ -155,24 +153,95 @@ neff.hmclearn <- function(object, burnin=NULL, ...) {
   # estimated autocorrelations
   rhat <- 1 -Vt %*% diag(1 / vest / 2)
 
+  # partial sums
+  psum <- apply(rhat, 2, partialsum)
+
+  neff <- M*N / (1 + 2*psum)
+
+  floor(neff)
+
 }
+#
+#   # estimate lagmax
+#   # lagmax <- ceiling(10 * log(N))
+#   # lagmax <- 2000
+#   lagmax <- min(500, N-2)
+#
+#   x <- data[[1]][, 1]
+#   r = vector()
+#   for (k in 0:lagmax){
+#     r[k+1] = cor(x[1:(N-k)],x[(1+k):N])
+#   }
+#
+#   G = r[2:(lagmax+1)] + r[1:lagmax]
+#
+#   # estimate autocorrelation
+#   tauf = -r[1] + 2*G[1]
+#   for (kk in 1:(lagmax-1)){
+#     if (G[kk+1]< G[kk] & G[kk+1]>0){
+#       tauf = tauf + 2*G[kk+1]
+#     } else {
+#       break
+#     }
+#   }
+#
+#   # Vt for each chain
+#   Vtchains <- lapply(data, function(xx) {
+#     t(sapply(1:lagmax, function(t) {
+#       apply(xx, 2, variog, lagval=t)
+#     }))
+#   })
+#
+#   # elementwise mean over chains
+#   Vt <- Reduce("+", Vtchains) / M
+#
+#   # estimated autocorrelations
+#   rhat <- 1 -Vt %*% diag(1 / vest / 2)
+#
+#   M*N / (1 + 2* colSums(rhat))
+
+partialsum <- function(rhat, lagmax=NULL) {
+  if (is.null(lagmax)) {
+    lagmax <- length(rhat)
+  }
+
+  chk <- rhat + c(0, rhat[2:length(rhat)])
+  maxt <- min(lagmax, which(chk < 0))
+  if (maxt %% 2 == 0) {
+    maxt <- maxt + 1
+  }
+
+  sum(rhat[1:maxt], na.rm=T)
+}
+
 
 # Variogram 11.6 partial in BDA3
-variog <- function(x, lagval=1) {
+variog <- function(x, lagmax=NULL) {
   n <- length(x)
-  # startval <- lagval+1
-  # vt <- 0
-  # for (i in startval:n) {
-  #   # print(paste("i", i, (x[i] - x[i-lagval])^2))
-  #   vt <- vt + (x[i] - x[i-lagval])^2
-  # }
-  # vt / (n-lagval)
 
-  sum(diff(x, lag=lagval)^2) / (n - lagval)
+  if (is.null(lagmax)) {
+    lagvals <- seq_len(min(500, n-2))
+  } else {
+    lagvals <- seq_len(lagmax)
+  }
+
+  res <- sapply(lagvals, function(zz) {
+    sum(diff(x, lag=zz)^2) / (n - zz)
+  })
+  res
 
 }
 
 
+ess <- function(x) {
+  N <- length(x)
+  V <- purrr::map_dbl(seq_len(N - 1),
+               function(t) {
+                 mean(diff(x, lag = t) ^ 2, na.rm = TRUE)
+               })
+  rho <- purrr::head_while(1 - V / var(x), ~ . > 0)
+  N / (1 + sum(rho))
+}
 
 
 
