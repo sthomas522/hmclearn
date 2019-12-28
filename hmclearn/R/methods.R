@@ -44,12 +44,6 @@ summary.hmclearn <- function(x, burnin=NULL, probs=c(0.05, 0.25, 0.5, 0.75, 0.95
   res
 }
 
-#' @export
-plot.hmclearn <- function(x, burnin=NULL, ...) {
-  # diagplots(x, ...)
-  thetaCombined <- combMatrix(x$thetaCombined, burnin=burnin)
-  bayesplot::mcmc_hist(thetaCombined, )
-}
 
 #' Extract Model Coefficients
 #'
