@@ -41,9 +41,7 @@ Object of class \code{hmclearn}
 \description{
 This function runs the MH algorithm on a generic model provided
 the \code{logPOSTERIOR} function.
-All parameters specified in ... are passed to these the posterior function.
-The tuning parameters \code{epsilon} and \code{L} are passed to the
-Leapfrog algorithm.
+All parameters specified within the list \code{param} are passed to these the posterior function.
 }
 \section{Elements for \code{hmclearn} objects}{
 
@@ -52,16 +50,16 @@ Leapfrog algorithm.
   Number of MCMC samples
   }
   \item{\code{theta}}{
-  List of length \code{N} of the sampled values of \code{theta}
+  Nested list of length \code{N} of the sampled values of \code{theta} for each chain
   }
   \item{\code{thetaCombined}}{
-  Sampled values in dataframe form
+  List of dataframes containing sampled values, one for each chain
   }
   \item{\code{r}}{
   NULL for Metropolis-Hastings
   }
   \item{\code{theta.all}}{
-  List of all parameter values of \code{theta} sampled prior to accept/reject step
+  Nested list of all parameter values of \code{theta} sampled prior to accept/reject step for each
   }
   \item{\code{r.all}}{
   NULL for Metropolis-Hastings
@@ -72,8 +70,17 @@ Leapfrog algorithm.
   \item{\code{accept_v}}{
   Vector of length \code{N} indicating which samples were accepted
   }
-  \item{\code{M_mx}}{
+  \item{\code{M}}{
   NULL for Metropolis-Hastings
+  }
+  \item{\code{algorithm}}{
+  \code{MH} for Metropolis-Hastings
+  }
+  \item{\code{varnames}}{
+  Optional vector of parameter names
+  }
+  \item{\code{chains}}{
+  Number of MCMC chains
   }
 }
 }

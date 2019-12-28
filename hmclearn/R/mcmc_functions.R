@@ -1,4 +1,17 @@
-
+#' Fitter function for Metropolis-Hastings (MH)
+#'
+#' This is the basic computing function for MH and should not be called directly except by experienced users.
+#'
+#' @param N Number of MCMC samples
+#' @param theta.init Vector of initial values for the parameters
+#' @param qPROP Function to generate proposal
+#' @param qFUN Probability for proposal function.  First argument is where to evaluate, and second argument is the conditional parameter
+#' @param logPOSTERIOR Function to calculate and return the log posterior given a vector of values of \code{theta}
+#' @param nu Single value or vector parameter passed to \code{qPROP} or \code{qFUN} for the proposal density
+#' @param varnames Optional vector of theta parameter names
+#' @param param(...) List of additional parameters for \code{logPOSTERIOR}
+#' @return List for \code{mh}
+#'
 #' @export
 mh.fit <- function(N, theta.init, qPROP, qFUN, logPOSTERIOR, nu=1e-3,
                varnames=NULL, ...) {
@@ -45,7 +58,7 @@ mh.fit <- function(N, theta.init, qPROP, qFUN, logPOSTERIOR, nu=1e-3,
               M=NULL,
               algorithm="MH")
 
-  class(obj) <- c("hmclearn", "list")
+  # class(obj) <- c("hmclearn", "list")
   return(obj)
 }
 
@@ -63,9 +76,7 @@ mhpar <- function(paramlst, ...) {
 #'
 #' This function runs the MH algorithm on a generic model provided
 #' the \code{logPOSTERIOR} function.
-#' All parameters specified in ... are passed to these the posterior function.
-#' The tuning parameters \code{epsilon} and \code{L} are passed to the
-#' Leapfrog algorithm.
+#' All parameters specified within the list \code{param} are passed to these the posterior function.
 #'
 #' @param N Number of MCMC samples
 #' @param theta.init Vector of initial values for the parameters
@@ -83,16 +94,16 @@ mhpar <- function(paramlst, ...) {
 #'   Number of MCMC samples
 #'   }
 #'   \item{\code{theta}}{
-#'   List of length \code{N} of the sampled values of \code{theta}
+#'   Nested list of length \code{N} of the sampled values of \code{theta} for each chain
 #'   }
 #'   \item{\code{thetaCombined}}{
-#'   Sampled values in dataframe form
+#'   List of dataframes containing sampled values, one for each chain
 #'   }
 #'   \item{\code{r}}{
 #'   NULL for Metropolis-Hastings
 #'   }
 #'   \item{\code{theta.all}}{
-#'   List of all parameter values of \code{theta} sampled prior to accept/reject step
+#'   Nested list of all parameter values of \code{theta} sampled prior to accept/reject step for each
 #'   }
 #'   \item{\code{r.all}}{
 #'   NULL for Metropolis-Hastings
@@ -103,8 +114,17 @@ mhpar <- function(paramlst, ...) {
 #'   \item{\code{accept_v}}{
 #'   Vector of length \code{N} indicating which samples were accepted
 #'   }
-#'   \item{\code{M_mx}}{
+#'   \item{\code{M}}{
 #'   NULL for Metropolis-Hastings
+#'   }
+#'   \item{\code{algorithm}}{
+#'   \code{MH} for Metropolis-Hastings
+#'   }
+#'   \item{\code{varnames}}{
+#'   Optional vector of parameter names
+#'   }
+#'   \item{\code{chains}}{
+#'   Number of MCMC chains
 #'   }
 #' }
 #'
@@ -301,7 +321,24 @@ leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, Minv, co
 # logPOSTERIOR:  log of joint density of parameter of interest
 # ...:  additional parameters to pass to logPOSTERIOR
 
-
+#' Fitter function for Hamiltonian Monte Carlo (HMC)
+#'
+#' This is the basic computing function for HMC and should not be called directly except by experienced users.
+#'
+#' @param N Number of MCMC samples
+#' @param theta.init Vector of initial values for the parameters
+#' @param epsilon Step-size parameter for \code{leapfrog}
+#' @param L Number of \code{leapfrog} steps parameter
+#' @param logPOSTERIOR Function to calculate and return the log posterior given a vector of values of \code{theta}
+#' @param glogPOSTERIOR Function to calculate and return the gradient of the log posterior given a vector of values of  \code{theta}
+#' @param varnames Optional vector of theta parameter names
+#' @param randlength Logical to determine whether to apply some randomness to the number of leapfrog steps tuning parameter \code{L}
+#' @param Mdiag Optional vector of the diagonal of the mass matrix \code{M}.  Defaults to unit diagonal.
+#' @param constrain Optional vector of which parameters in \code{theta} accept positive values only.  Default is that all parameters accept all real numbers
+#' @param verbose Logical to determine whether to display the progress of the HMC algorithm
+#' @param ... additional parameters for \code{logPOSTERIOR} and \code{glogPOSTERIOR}
+#' @return List for \code{hmc}
+#'
 #' @export
 hmc.fit <- function(N, theta.init, epsilon, L, logPOSTERIOR, glogPOSTERIOR, varnames=NULL,
                 randlength=FALSE, Mdiag=NULL, constrain=NULL, verbose=FALSE, ...) {
@@ -415,7 +452,7 @@ hmc.fit <- function(N, theta.init, epsilon, L, logPOSTERIOR, glogPOSTERIOR, varn
        M=M_mx,
        algorithm="HMC")
 
-  class(obj) <- c("hmclearn", "list")
+  # class(obj) <- c("hmclearn", "list")
   return(obj)
 }
 
@@ -428,7 +465,7 @@ hmcpar <- function(paramlst, ...) {
 #'
 #' This function runs the HMC algorithm on a generic model provided
 #' the \code{logPOSTERIOR} and gradient \code{glogPOSTERIOR} functions.
-#' All parameters specified in ... are passed to these two functions.
+#' All parameters specified within the list \code{param}are passed to these two functions.
 #' The tuning parameters \code{epsilon} and \code{L} are passed to the
 #' Leapfrog algorithm.
 #'
@@ -443,7 +480,7 @@ hmcpar <- function(paramlst, ...) {
 #' @param Mdiag Optional vector of the diagonal of the mass matrix \code{M}.  Defaults to unit diagonal.
 #' @param constrain Optional vector of which parameters in \code{theta} accept positive values only.  Default is that all parameters accept all real numbers
 #' @param verbose Logical to determine whether to display the progress of the HMC algorithm
-#' @param ... Additional parameters for \code{logPOSTERIOR} and \code{glogPOSTERIOR}
+#' @param param(...) List of additional parameters for \code{logPOSTERIOR} and \code{glogPOSTERIOR}
 #' @return Object of class \code{hmclearn}
 #'
 #' @section Elements for \code{hmclearn} objects:
@@ -452,16 +489,16 @@ hmcpar <- function(paramlst, ...) {
 #'   Number of MCMC samples
 #'   }
 #'   \item{\code{theta}}{
-#'   List of length \code{N} of the sampled values of \code{theta}
+#'   Nested list of length \code{N} of the sampled values of \code{theta} for each chain
 #'   }
 #'   \item{\code{thetaCombined}}{
-#'   Sampled values in dataframe form
+#'   List of dataframes containing sampled values, one for each chain
 #'   }
 #'   \item{\code{r}}{
 #'   List of length \code{N} of the sampled momenta
 #'   }
 #'   \item{\code{theta.all}}{
-#'   List of all parameter values of \code{theta} sampled prior to accept/reject step
+#'   Nested list of all parameter values of \code{theta} sampled prior to accept/reject step for each
 #'   }
 #'   \item{\code{r.all}}{
 #'   List of all values of the momenta \code{r} sampled prior to accept/reject
@@ -472,8 +509,14 @@ hmcpar <- function(paramlst, ...) {
 #'   \item{\code{accept_v}}{
 #'   Vector of length \code{N} indicating which samples were accepted
 #'   }
-#'   \item{\code{M_mx}}{
+#'   \item{\code{M}}{
 #'   Mass matrix used in the HMC algorithm
+#'   }
+#'   \item{\code{varnames}}{
+#'   Optional vector of parameter names
+#'   }
+#'   \item{\code{chains}}{
+#'   Number of MCMC chains
 #'   }
 #' }
 #'

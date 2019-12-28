@@ -45,7 +45,7 @@ hmc(
 
 \item{varnames}{Optional vector of theta parameter names}
 
-\item{...}{Additional parameters for \code{logPOSTERIOR} and \code{glogPOSTERIOR}}
+\item{param(...)}{List of additional parameters for \code{logPOSTERIOR} and \code{glogPOSTERIOR}}
 }
 \value{
 Object of class \code{hmclearn}
@@ -53,7 +53,7 @@ Object of class \code{hmclearn}
 \description{
 This function runs the HMC algorithm on a generic model provided
 the \code{logPOSTERIOR} and gradient \code{glogPOSTERIOR} functions.
-All parameters specified in ... are passed to these two functions.
+All parameters specified within the list \code{param}are passed to these two functions.
 The tuning parameters \code{epsilon} and \code{L} are passed to the
 Leapfrog algorithm.
 }
@@ -64,16 +64,16 @@ Leapfrog algorithm.
   Number of MCMC samples
   }
   \item{\code{theta}}{
-  List of length \code{N} of the sampled values of \code{theta}
+  Nested list of length \code{N} of the sampled values of \code{theta} for each chain
   }
   \item{\code{thetaCombined}}{
-  Sampled values in dataframe form
+  List of dataframes containing sampled values, one for each chain
   }
   \item{\code{r}}{
   List of length \code{N} of the sampled momenta
   }
   \item{\code{theta.all}}{
-  List of all parameter values of \code{theta} sampled prior to accept/reject step
+  Nested list of all parameter values of \code{theta} sampled prior to accept/reject step for each
   }
   \item{\code{r.all}}{
   List of all values of the momenta \code{r} sampled prior to accept/reject
@@ -84,8 +84,14 @@ Leapfrog algorithm.
   \item{\code{accept_v}}{
   Vector of length \code{N} indicating which samples were accepted
   }
-  \item{\code{M_mx}}{
+  \item{\code{M}}{
   Mass matrix used in the HMC algorithm
+  }
+  \item{\code{varnames}}{
+  Optional vector of parameter names
+  }
+  \item{\code{chains}}{
+  Number of MCMC chains
   }
 }
 }
