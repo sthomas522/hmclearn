@@ -48,14 +48,14 @@ summary.hmclearn <- function(x, burnin=NULL, probs=c(0.05, 0.25, 0.5, 0.75, 0.95
 }
 
 #' @export
-plot.hmclearn <- function(x, burnin=1, ...) {
+plot.hmclearn <- function(x, burnin=NULL, ...) {
   # diagplots(x, ...)
   thetaCombined <- combMatrix(x$thetaCombined, burnin=burnin)
   bayesplot::mcmc_hist(thetaCombined, )
 }
 
 #' @export
-coef.hmclearn <- function(x, burnin=1, prob=0.5, ...) {
+coef.hmclearn <- function(x, burnin=NULL, prob=0.5, ...) {
   thetaCombined <- combMatrix(x$thetaCombined, burnin=burnin)
   thetaCombined <- do.call(rbind, thetaCombined)
   apply(thetaCombined, 2, quantile, probs=prob, ...)
@@ -63,7 +63,7 @@ coef.hmclearn <- function(x, burnin=1, prob=0.5, ...) {
 
 
 #' @export
-predict.hmclearn <- function(object, X, fam = "linear", burnin=1, draws=NULL, ...) {
+predict.hmclearn <- function(object, y, X, fam = "linear", burnin=NULL, draws=NULL, ...) {
 
   thetaCombined <- combMatrix(object$thetaCombined, burnin=burnin)
   thetaCombined <- do.call(rbind, thetaCombined)
@@ -86,7 +86,8 @@ predict.hmclearn <- function(object, X, fam = "linear", burnin=1, draws=NULL, ..
     preds <- t(sapply(sampvals, function(xx, dat=thetaCombined, bparam=1:(k-1), sigparam=k) {
       betaval <- as.numeric(dat[xx, bparam])
       sigval <- sqrt(exp(dat[xx, sigparam]))
-      v <- sapply(X %*% betaval, function(zz, sd=sigval, n=1) {
+      bx <- X %*% betaval
+      v <- sapply(bx, function(zz, sd=sigval, n=1) {
         rnorm(n, mean=zz, sd=sd)
       })
       v

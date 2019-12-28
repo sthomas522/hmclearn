@@ -1,4 +1,64 @@
 
+#' @export
+mh.fit <- function(N, theta.init, qPROP, qFUN, logPOSTERIOR, nu=1e-3,
+               varnames=NULL, ...) {
+  paramSim <- list()
+  paramSim[[1]] <- theta.init
+  accept <- 0
+  accept_v <- vector()
+  accept_v[1] <- 1
+  for (j in 2:N) {
+    u <- runif(1)
+    paramProposal <- qPROP(paramSim[[j-1]], nu)
+    lnum <- logPOSTERIOR(paramProposal, ...) + qFUN(paramSim[[j-1]], paramProposal, nu)
+    lden <- logPOSTERIOR(paramSim[[j-1]], ...) + qFUN(paramProposal, paramSim[[j-1]], nu)
+    l.alpha <- pmin(0, lnum - lden)
+    if (l.alpha > log(u)) {
+      paramSim[[j]] <- paramProposal
+      accept <- accept + 1
+      accept_v <- c(accept_v, 1)
+    } else {
+      paramSim[[j]] <- paramSim[[j-1]]
+      accept_v <- c(accept_v, 0)
+    }
+  }
+
+  # create dataframe from simulation
+  thetaCombined <- as.data.frame(do.call(rbind, paramSim))
+
+  if (!is.null(varnames)) {
+    colnames(thetaCombined) <- varnames
+  }
+
+  # obj <- list(paramSim = paramSim,
+  #      thetaCombined = thetaCombined,
+  #      accept = accept)
+
+  obj <- list(N=N,
+              theta=paramSim,
+              thetaCombined = thetaCombined,
+              r=NULL,
+              theta.all = paramSim,
+              r.all = NULL,
+              accept=accept,
+              accept_v = accept_v,
+              M=NULL,
+              algorithm="MH")
+
+  class(obj) <- c("hmclearn", "list")
+  return(obj)
+}
+
+withGlobals <- function(FUN, lst){
+  environment(FUN) <- list2env(lst)
+  FUN
+}
+
+
+mhpar <- function(paramlst, ...) {
+  do.call(mh.fit, paramlst)
+}
+
 #' Fit a generic model using Metropolis-Hastings (MH)
 #'
 #' This function runs the MH algorithm on a generic model provided
@@ -71,67 +131,6 @@
 #' }
 #'
 #' @author Samuel Thomas \email{samthoma@@iu.edu}, Wanzhu Tu \email{wtu@iu.edu}
-
-#' @export
-mh.fit <- function(N, theta.init, qPROP, qFUN, logPOSTERIOR, nu=1e-3,
-               varnames=NULL, ...) {
-  paramSim <- list()
-  paramSim[[1]] <- theta.init
-  accept <- 0
-  accept_v <- vector()
-  accept_v[1] <- 1
-  for (j in 2:N) {
-    u <- runif(1)
-    paramProposal <- qPROP(paramSim[[j-1]], nu)
-    lnum <- logPOSTERIOR(paramProposal, ...) + qFUN(paramSim[[j-1]], paramProposal, nu)
-    lden <- logPOSTERIOR(paramSim[[j-1]], ...) + qFUN(paramProposal, paramSim[[j-1]], nu)
-    l.alpha <- pmin(0, lnum - lden)
-    if (l.alpha > log(u)) {
-      paramSim[[j]] <- paramProposal
-      accept <- accept + 1
-      accept_v <- c(accept_v, 1)
-    } else {
-      paramSim[[j]] <- paramSim[[j-1]]
-      accept_v <- c(accept_v, 0)
-    }
-  }
-
-  # create dataframe from simulation
-  thetaCombined <- as.data.frame(do.call(rbind, paramSim))
-
-  if (!is.null(varnames)) {
-    colnames(thetaCombined) <- varnames
-  }
-
-  # obj <- list(paramSim = paramSim,
-  #      thetaCombined = thetaCombined,
-  #      accept = accept)
-
-  obj <- list(N=N,
-              theta=paramSim,
-              thetaCombined = thetaCombined,
-              r=NULL,
-              theta.all = paramSim,
-              r.all = NULL,
-              accept=accept,
-              accept_v = accept_v,
-              M=NULL,
-              algorithm="MH")
-
-  class(obj) <- c("hmclearn", "list")
-  return(obj)
-}
-
-withGlobals <- function(FUN, lst){
-  environment(FUN) <- list2env(lst)
-  FUN
-}
-
-
-mhpar <- function(paramlst, ...) {
-  do.call(mh.fit, paramlst)
-}
-
 #' @export
 mh <- function(N, theta.init, qPROP, qFUN, logPOSTERIOR, nu=1e-3,
                    varnames=NULL, param = list(...),
@@ -303,104 +302,7 @@ leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, Minv, co
 # ...:  additional parameters to pass to logPOSTERIOR
 
 
-#' Fit a generic model using Hamiltonian Monte Carlo (HMC)
-#'
-#' This function runs the HMC algorithm on a generic model provided
-#' the \code{logPOSTERIOR} and gradient \code{glogPOSTERIOR} functions.
-#' All parameters specified in ... are passed to these two functions.
-#' The tuning parameters \code{epsilon} and \code{L} are passed to the
-#' Leapfrog algorithm.
-#'
-#' @param N Number of MCMC samples
-#' @param theta.init Vector of initial values for the parameters
-#' @param epsilon Step-size parameter for \code{leapfrog}
-#' @param L Number of \code{leapfrog} steps parameter
-#' @param logPOSTERIOR Function to calculate and return the log posterior given a vector of values of \code{theta}
-#' @param glogPOSTERIOR Function to calculate and return the gradient of the log posterior given a vector of values of  \code{theta}
-#' @param varnames Optional vector of theta parameter names
-#' @param randlength Logical to determine whether to apply some randomness to the number of leapfrog steps tuning parameter \code{L}
-#' @param Mdiag Optional vector of the diagonal of the mass matrix \code{M}.  Defaults to unit diagonal.
-#' @param constrain Optional vector of which parameters in \code{theta} accept positive values only.  Default is that all parameters accept all real numbers
-#' @param verbose Logical to determine whether to display the progress of the HMC algorithm
-#' @param ... Additional parameters for \code{logPOSTERIOR} and \code{glogPOSTERIOR}
-#' @return Object of class \code{hmclearn}
-#'
-#' @section Elements for \code{hmclearn} objects:
-#' \describe{
-#'   \item{\code{N}}{
-#'   Number of MCMC samples
-#'   }
-#'   \item{\code{theta}}{
-#'   List of length \code{N} of the sampled values of \code{theta}
-#'   }
-#'   \item{\code{thetaCombined}}{
-#'   Sampled values in dataframe form
-#'   }
-#'   \item{\code{r}}{
-#'   List of length \code{N} of the sampled momenta
-#'   }
-#'   \item{\code{theta.all}}{
-#'   List of all parameter values of \code{theta} sampled prior to accept/reject step
-#'   }
-#'   \item{\code{r.all}}{
-#'   List of all values of the momenta \code{r} sampled prior to accept/reject
-#'   }
-#'   \item{\code{accept}}{
-#'   Number of accepted proposals.  The ratio \code{accept} / \code{N} is the acceptance rate
-#'   }
-#'   \item{\code{accept_v}}{
-#'   Vector of length \code{N} indicating which samples were accepted
-#'   }
-#'   \item{\code{M_mx}}{
-#'   Mass matrix used in the HMC algorithm
-#'   }
-#' }
-#'
-#' @section Available \code{logPOSTERIOR} and \code{glogPOSTERIOR} functions:
-#' \describe{
-#'   \item{\code{linear_posterior}}{
-#'   Linear regression:  log posterior
-#'   }
-#'   \item{\code{g_linear_posterior}}{
-#'   Linear regression:  gradient of the log posterior
-#'   }
-#'   \item{\code{logistic_posterior}}{
-#'   Logistic regression:  log posterior
-#'   }
-#'   \item{\code{g_logistic_posterior}}{
-#'   Logistic regression:  gradient of the log posterior
-#'   }
-#'   \item{\code{poisson_posterior}}{
-#'   Poisson (count) regression:  log posterior
-#'   }
-#'   \item{\code{g_poisson_posterior}}{
-#'   Poisson (count) regression: gradient of the log posterior
-#'   }
-#'   \item{\code{lmm_posterior}}{
-#'   Linear mixed effects model:  log posterior
-#'   }
-#'   \item{\code{g_lmm_posterior}}{
-#'   Linear mixed effects model:  gradient of the log posterior
-#'   }
-#'   \item{\code{glmm_bin_posterior}}{
-#'   Logistic mixed effects model:  log posterior
-#'   }
-#'   \item{\code{g_glmm_bin_posterior}}{
-#'   Logistic mixed effects model:  gradient of the log posterior
-#'   }
-#'   \item{\code{glmm_poisson_posterior}}{
-#'   Poisson mixed effects model:  log posterior
-#'   }
-#'   \item{\code{g_glmm_poisson_posterior}}{
-#'   Poisson mixed effects model:  gradient of the log posterior
-#'   }
-#' }
-#'
-#' @author Samuel Thomas \email{samthoma@@iu.edu}, Wanzhu Tu \email{wtu@iu.edu}
-#' @references \emph{HMC in R} paper
-#' @references Thomas, S., Li, X., and Tu, W.  2019.  \emph{Hamiltonian Monte Carlo}.  Wiley
-#' @references Neal, Radford. 2011. \emph{MCMC Using Hamiltonian Dynamics.} In Handbook of Markov Chain Monte Carlo, edited by Steve Brooks, Andrew Gelman, Galin L. Jones, and Xiao-Li Meng, 116–62. Chapman; Hall/CRC.
-#' @keywords hamiltonian monte carlo
+#' @export
 hmc.fit <- function(N, theta.init, epsilon, L, logPOSTERIOR, glogPOSTERIOR, varnames=NULL,
                 randlength=FALSE, Mdiag=NULL, constrain=NULL, verbose=FALSE, ...) {
 
@@ -522,6 +424,104 @@ hmcpar <- function(paramlst, ...) {
   do.call(hmc.fit, paramlst)
 }
 
+#' Fit a generic model using Hamiltonian Monte Carlo (HMC)
+#'
+#' This function runs the HMC algorithm on a generic model provided
+#' the \code{logPOSTERIOR} and gradient \code{glogPOSTERIOR} functions.
+#' All parameters specified in ... are passed to these two functions.
+#' The tuning parameters \code{epsilon} and \code{L} are passed to the
+#' Leapfrog algorithm.
+#'
+#' @param N Number of MCMC samples
+#' @param theta.init Vector of initial values for the parameters
+#' @param epsilon Step-size parameter for \code{leapfrog}
+#' @param L Number of \code{leapfrog} steps parameter
+#' @param logPOSTERIOR Function to calculate and return the log posterior given a vector of values of \code{theta}
+#' @param glogPOSTERIOR Function to calculate and return the gradient of the log posterior given a vector of values of  \code{theta}
+#' @param varnames Optional vector of theta parameter names
+#' @param randlength Logical to determine whether to apply some randomness to the number of leapfrog steps tuning parameter \code{L}
+#' @param Mdiag Optional vector of the diagonal of the mass matrix \code{M}.  Defaults to unit diagonal.
+#' @param constrain Optional vector of which parameters in \code{theta} accept positive values only.  Default is that all parameters accept all real numbers
+#' @param verbose Logical to determine whether to display the progress of the HMC algorithm
+#' @param ... Additional parameters for \code{logPOSTERIOR} and \code{glogPOSTERIOR}
+#' @return Object of class \code{hmclearn}
+#'
+#' @section Elements for \code{hmclearn} objects:
+#' \describe{
+#'   \item{\code{N}}{
+#'   Number of MCMC samples
+#'   }
+#'   \item{\code{theta}}{
+#'   List of length \code{N} of the sampled values of \code{theta}
+#'   }
+#'   \item{\code{thetaCombined}}{
+#'   Sampled values in dataframe form
+#'   }
+#'   \item{\code{r}}{
+#'   List of length \code{N} of the sampled momenta
+#'   }
+#'   \item{\code{theta.all}}{
+#'   List of all parameter values of \code{theta} sampled prior to accept/reject step
+#'   }
+#'   \item{\code{r.all}}{
+#'   List of all values of the momenta \code{r} sampled prior to accept/reject
+#'   }
+#'   \item{\code{accept}}{
+#'   Number of accepted proposals.  The ratio \code{accept} / \code{N} is the acceptance rate
+#'   }
+#'   \item{\code{accept_v}}{
+#'   Vector of length \code{N} indicating which samples were accepted
+#'   }
+#'   \item{\code{M_mx}}{
+#'   Mass matrix used in the HMC algorithm
+#'   }
+#' }
+#'
+#' @section Available \code{logPOSTERIOR} and \code{glogPOSTERIOR} functions:
+#' \describe{
+#'   \item{\code{linear_posterior}}{
+#'   Linear regression:  log posterior
+#'   }
+#'   \item{\code{g_linear_posterior}}{
+#'   Linear regression:  gradient of the log posterior
+#'   }
+#'   \item{\code{logistic_posterior}}{
+#'   Logistic regression:  log posterior
+#'   }
+#'   \item{\code{g_logistic_posterior}}{
+#'   Logistic regression:  gradient of the log posterior
+#'   }
+#'   \item{\code{poisson_posterior}}{
+#'   Poisson (count) regression:  log posterior
+#'   }
+#'   \item{\code{g_poisson_posterior}}{
+#'   Poisson (count) regression: gradient of the log posterior
+#'   }
+#'   \item{\code{lmm_posterior}}{
+#'   Linear mixed effects model:  log posterior
+#'   }
+#'   \item{\code{g_lmm_posterior}}{
+#'   Linear mixed effects model:  gradient of the log posterior
+#'   }
+#'   \item{\code{glmm_bin_posterior}}{
+#'   Logistic mixed effects model:  log posterior
+#'   }
+#'   \item{\code{g_glmm_bin_posterior}}{
+#'   Logistic mixed effects model:  gradient of the log posterior
+#'   }
+#'   \item{\code{glmm_poisson_posterior}}{
+#'   Poisson mixed effects model:  log posterior
+#'   }
+#'   \item{\code{g_glmm_poisson_posterior}}{
+#'   Poisson mixed effects model:  gradient of the log posterior
+#'   }
+#' }
+#'
+#' @author Samuel Thomas \email{samthoma@@iu.edu}, Wanzhu Tu \email{wtu@iu.edu}
+#' @references \emph{HMC in R} paper
+#' @references Thomas, S., Li, X., and Tu, W.  2019.  \emph{Hamiltonian Monte Carlo}.  Wiley
+#' @references Neal, Radford. 2011. \emph{MCMC Using Hamiltonian Dynamics.} In Handbook of Markov Chain Monte Carlo, edited by Steve Brooks, Andrew Gelman, Galin L. Jones, and Xiao-Li Meng, 116–62. Chapman; Hall/CRC.
+#' @keywords hamiltonian monte carlo
 #' @export
 hmc <- function(N=10000, theta.init, epsilon=1e-2, L=10, logPOSTERIOR, glogPOSTERIOR,
                 randlength=FALSE, Mdiag=NULL, constrain=NULL, verbose=FALSE, varnames=NULL,
