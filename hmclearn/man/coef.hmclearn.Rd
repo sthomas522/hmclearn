@@ -11,7 +11,12 @@
 
 \item{burnin}{optional numeric parameter for the number of initial MCMC samples to omit from the summary}
 
+\item{...}{additional arguments to pass to \code{quantile}}
+
 \item{probs}{quantile to extract coefficients}
+}
+\value{
+numeric vector of parameter point estimates
 }
 \description{
 Method for \code{hmclearn} objects created by \code{mh} and \code{hmc} functions.  Extracts the specified quantile of the posterior.

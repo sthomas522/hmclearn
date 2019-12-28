@@ -79,6 +79,19 @@ coef.hmclearn <- function(x, burnin=NULL, prob=0.5, ...) {
 #' @param burnin optional numeric parameter for the number of initial MCMC samples to omit from the summary
 #' @param draws Number of simulated values from the posterior conditioned on \code{X}
 #' @param ... additional parameters, currently unsupported
+#' @return an object of class \code{hmclearnpred}.  Can be used as an input for \code{pp_check} functions in \code{bayesplot}
+#' @section Elements of \code{hmclearnpred} objects:
+#' \describe{
+#'   \item{\code{y}}{
+#'   Numeric vector of the dependent variable
+#'   }
+#'   \item{\code{ypred}}{
+#'   Matrix of simulated values where each row is a draw from the posterior predictive distribution
+#'   }
+#'   \item{\code{X}}{
+#'   Numeric design matrix
+#'   }
+#' }
 #' @export
 predict.hmclearn <- function(object, y, X, fam = "linear", burnin=NULL, draws=NULL, ...) {
 
