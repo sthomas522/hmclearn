@@ -63,17 +63,19 @@ coef.hmclearn <- function(x, burnin=1, prob=0.5, ...) {
 
 
 #' @export
-predict.hmclearn <- function(object, X, fam = "linear", burnin=1, nsamp=NULL, ...) {
+predict.hmclearn <- function(object, X, fam = "linear", burnin=1, draws=NULL, ...) {
 
   thetaCombined <- combMatrix(object$thetaCombined, burnin=burnin)
   thetaCombined <- do.call(rbind, thetaCombined)
   k <- ncol(thetaCombined)
 
-  if (is.null(nsamp)) {
-    nsamp <- nrow(thetaCombined)
+  if (is.null(draws)) {
+    draws <- min(500, nrow(thetaCombined))
   }
-  index <- 1:nsamp
-  sampvals <- sample(index, size=nsamp, replace = FALSE)
+  index <- 1:nrow(thetaCombined)
+  sampvals <- sample(index, size=draws, replace = FALSE)
+
+  # for each value of theta sample all N values of y
 
   if (!is.matrix(X)) {
     X <- matrix(X, nrow=1)
@@ -81,29 +83,61 @@ predict.hmclearn <- function(object, X, fam = "linear", burnin=1, nsamp=NULL, ..
 
   preds <- NULL
   if (fam == "linear") {
-    preds <- sapply(sampvals, function(xx, dat=thetaCombined, bparam=1:(k-1), sigparam=k) {
+    preds <- t(sapply(sampvals, function(xx, dat=thetaCombined, bparam=1:(k-1), sigparam=k) {
       betaval <- as.numeric(dat[xx, bparam])
       sigval <- sqrt(exp(dat[xx, sigparam]))
-      xval <- X[sample(1:nrow(X), size=1), ]
-      z <- rnorm(1, mean=xval%*%betaval, sd=sigval)
-      z
-    })
+      v <- sapply(X %*% betaval, function(zz, sd=sigval, n=1) {
+        rnorm(n, mean=zz, sd=sd)
+      })
+      v
+    }))
   } else if (fam == "binomial") {
-    preds <- sapply(sampvals, function(xx, dat=thetaCombined, bparam=1:k) {
+    preds <- t(sapply(sampvals, function(xx, dat=thetaCombined, bparam=1:k) {
       betaval <- as.numeric(dat[xx, bparam])
-      xval <- X[sample(1:nrow(X), size=1), ]
-      bx <- exp(sum(xval%*%betaval))
-      z <- rbinom(1, 1, bx / (1 + bx))
-      z
-    })
+      bx <- exp(X%*%betaval)
+      v <- sapply(bx, function(zz, n=1) {
+        rbinom(n, 1, zz / (1 + zz))
+      })
+      v
+    }))
   } else if (fam == "poisson") {
-    preds <- sapply(sampvals, function(xx, dat=thetaCombined, bparam=1:k) {
+    preds <- t(sapply(sampvals, function(xx, dat=thetaCombined, bparam=1:k) {
       betaval <- as.numeric(dat[xx, bparam])
-      xval <- X[sample(1:nrow(X), size=1), ]
-      z <- exp(sum(xval%*%betaval))
-      z
-    })
+      bx <- exp(X%*%betaval)
+      v <- sapply(bx, function(zz, n=1) {
+        rpois(n, bx)
+      })
+      v
+    }))
   }
-  return(preds)
+
+  retval <- list(y = y,
+                 yrep = preds,
+                 X = X)
+  class(retval) <- c("hmclearnpred", "list")
+
+  return(retval)
 }
 
+#' #' @export
+pp_check <- function(object, ...) {
+  UseMethod("pp_check")
+}
+
+#' @export
+pp_check.hmclearnpred <- function(object,
+                                  type=c("overlaid",
+                                         "multiple",
+                                         "bars",
+                                         "stat"), ...) {
+
+  y <- object[["y"]]
+  yrep <- object[["yrep"]]
+  switch(match.arg(type),
+         multiple = bayesplot::ppc_hist(y, yrep[1:min(8, nrow(yrep)),, drop = FALSE]),
+         overlaid = bayesplot::ppc_dens_overlay(y, yrep),
+         bars = bayesplot::ppc_bars(y, yrep, ...),
+         stat = bayesplot::ppc_stat(y, yrep, ...)
+  )
+
+}
