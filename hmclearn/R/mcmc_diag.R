@@ -59,6 +59,9 @@ diagplots <- function(result, actual.mu=NULL, burnin=100, cols=NULL) {
 #' guideline suggests that values less than 1.05 are good, between 1.05 and 1.10 are ok, and above 1.10
 #' have not converged well.
 #'
+#' @param object an object of class \code{hmclearn}, usually a result of a call to \code{mh} or \code{hmc}
+#' @param burnin optional numeric parameter for the number of initial MCMC samples to omit from the summary
+#'
 #' @references Gelman, A. and Rubin, D. (1992) \emph{Inference from Iterative Simulation Using Multiple Sequences}.  Statistical Science 7(4) 457-472.
 #' @references Gelman, A., et. al. (2013) \emph{Bayesian Data Analysis}.  Chapman and Hall/CRC.
 #' @references Gabry, Jonah and Mahr, Tristan (2019).  \emph{bayesplot:  Plotting for Bayesian Models}.  \url{https://mc-stan.org/bayesplot}
@@ -75,6 +78,9 @@ psrf <- function(object, ...) {
 #' values above 1 indicate that additional samples may be necessary to ensure convergence.  A general
 #' guideline suggests that values less than 1.05 are good, between 1.05 and 1.10 are ok, and above 1.10
 #' have not converged well.
+#'
+#' @param object an object of class \code{hmclearn}, usually a result of a call to \code{mh} or \code{hmc}
+#' @param burnin optional numeric parameter for the number of initial MCMC samples to omit from the summary
 #'
 #' @references Gelman, A. and Rubin, D. (1992) \emph{Inference from Iterative Simulation Using Multiple Sequences}.  Statistical Science 7(4) 457-472.
 #' @references Gelman, A., et. al. (2013) \emph{Bayesian Data Analysis}.  Chapman and Hall/CRC.
@@ -140,11 +146,35 @@ varest <- function(data, N) {
 
 }
 
+#' Effective sample size calculation
+#'
+#' Calculates an estimate of the adjusted MCMC sample size per parameter
+#' adjusted for autocorrelation.
+#'
+#' @param object an object of class \code{hmclearn}, usually a result of a call to \code{mh} or \code{hmc}
+#' @param burnin optional numeric parameter for the number of initial MCMC samples to omit from the summary
+#' @param lagmax maximum lag to extract for determining effective sample sizes
+#' @param ... currently unused
+#'
+#' @return numeric vector of effective sample sizes for each parameter
+#' @references Gelman, A., et. al. (2013) \emph{Bayesian Data Analysis}.  Chapman and Hall/CRC.  Section 11.5
 #' @export
-neff <- function(object, ...) {
+neff <- function(object, burnin=NULL, lagmax=NULL, ...) {
   UseMethod("neff")
 }
 
+#' Effective sample size calculation
+#'
+#' Calculates an estimate of the adjusted MCMC sample size per parameter
+#' adjusted for autocorrelation.
+#'
+#' @param object an object of class \code{hmclearn}, usually a result of a call to \code{mh} or \code{hmc}
+#' @param burnin optional numeric parameter for the number of initial MCMC samples to omit from the summary
+#' @param lagmax maximum lag to extract for determining effective sample sizes
+#' @param ... currently unused
+#'
+#' @return numeric vector of effective sample sizes for each parameter
+#' @references Gelman, A., et. al. (2013) \emph{Bayesian Data Analysis}.  Chapman and Hall/CRC.  Section 11.5
 #' @export
 neff.hmclearn <- function(object, burnin=NULL, lagmax=NULL, ...) {
   data <- combMatrix(object$thetaCombined, burnin=burnin)
