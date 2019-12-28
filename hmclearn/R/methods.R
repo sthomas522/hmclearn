@@ -19,6 +19,9 @@ combMatrix <- function(x, burnin) {
 #' @param burnin optional numeric parameter for the number of initial MCMC samples to omit from the summary
 #' @param probs quantiles to summarize the posterior distribution
 #' @param ... additional arguments to pass to \code{quantile}
+#' @returns Returns a matrix with posterior quantiles and the posterior scale reduction factor statistic for each parameter.
+#' @references Gelman, A., et. al. (2013) \emph{Bayesian Data Analysis}.  Chapman and Hall/CRC.
+#' @references Gelman, A. and Rubin, D. (1992) \emph{Inference from Iterative Simulation Using Multiple Sequences}.  Statistical Science 7(4) 457-472.
 #' @export
 summary.hmclearn <- function(x, burnin=NULL, probs=c(0.05, 0.25, 0.5, 0.75, 0.95), ...) {
   cat("Summary of HMC simulation\n\n")
@@ -48,6 +51,15 @@ plot.hmclearn <- function(x, burnin=NULL, ...) {
   bayesplot::mcmc_hist(thetaCombined, )
 }
 
+#' Extract Model Coefficients
+#'
+#' Method for \code{hmclearn} objects created by \code{mh} and \code{hmc} functions.  Extracts the specified quantile of the posterior.
+#'
+#' @param x an object of class \code{hmclearn}, usually a result of a call to \code{mh} or \code{hmc}
+#' @param burnin optional numeric parameter for the number of initial MCMC samples to omit from the summary
+#' @param probs quantile to extract coefficients
+#' @param ... additional arguments to pass to \code{quantile}
+#' @return numeric vector of parameter point estimates
 #' @export
 coef.hmclearn <- function(x, burnin=NULL, prob=0.5, ...) {
   thetaCombined <- combMatrix(x$thetaCombined, burnin=burnin)
@@ -55,7 +67,18 @@ coef.hmclearn <- function(x, burnin=NULL, prob=0.5, ...) {
   apply(thetaCombined, 2, quantile, probs=prob, ...)
 }
 
-
+#' Model Predictions for HMC or MH
+#'
+#' \code{predict} generates simulated data from the posterior predictive distribution.
+#' This simulated data can be used for posterior predictive check diagnostics from the \code{bayesplot} package
+#'
+#' @param object an object of class \code{hmclearn}, usually a result of a call to \code{mh} or \code{hmc}
+#' @param y vector of the dependent variables used to fit the model
+#' @param X design matrix, either from fitting the model or new data
+#' @param fam generalized linear model family.  Currently "linear", "binomial", and "poisson" are supported
+#' @param burnin optional numeric parameter for the number of initial MCMC samples to omit from the summary
+#' @param draws Number of simulated values from the posterior conditioned on \code{X}
+#' @param ... additional parameters, currently unsupported
 #' @export
 predict.hmclearn <- function(object, y, X, fam = "linear", burnin=NULL, draws=NULL, ...) {
 

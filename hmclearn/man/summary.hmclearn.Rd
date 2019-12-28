@@ -15,6 +15,14 @@
 
 \item{...}{additional arguments to pass to \code{quantile}}
 }
+\value{
+Returns a matrix with posterior quantiles and the posterior scale reduction factor statistic for each parameter.
+}
 \description{
 summary method for class \code{hmclearn}
+}
+\references{
+Gelman, A., et. al. (2013) \emph{Bayesian Data Analysis}.  Chapman and Hall/CRC.
+
+Gelman, A. and Rubin, D. (1992) \emph{Inference from Iterative Simulation Using Multiple Sequences}.  Statistical Science 7(4) 457-472.
 }
