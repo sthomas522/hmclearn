@@ -50,12 +50,35 @@ diagplots <- function(result, actual.mu=NULL, burnin=100, cols=NULL) {
 
 
 
-
+#' Calculates Potential Scale Reduction Factor (psrf), also called the Rhat statistic,
+#' from models fit via \code{mh} or \code{hmc}
+#'
+#' Gelman and Rubin's diagnostic assesses the mix of multiple MCMC chain with different initial parameter values
+#' Values close to 1 indicate that the posterior simulation has sufficiently converged, while
+#' values above 1 indicate that additional samples may be necessary to ensure convergence.  A general
+#' guideline suggests that values less than 1.05 are good, between 1.05 and 1.10 are ok, and above 1.10
+#' have not converged well.
+#'
+#' @references Gelman, A. and Rubin, D. (1992) \emph{Inference from Iterative Simulation Using Multiple Sequences}.  Statistical Science 7(4) 457-472.
+#' @references Gelman, A., et. al. (2013) \emph{Bayesian Data Analysis}.  Chapman and Hall/CRC.
+#' @references Gabry, Jonah and Mahr, Tristan (2019).  \emph{bayesplot:  Plotting for Bayesian Models}.  \url{https://mc-stan.org/bayesplot}
 #' @export
 psrf <- function(object, ...) {
   UseMethod("psrf")
 }
 
+#' Calculates Potential Scale Reduction Factor (psrf), also called the Rhat statistic,
+#' from models fit via \code{mh} or \code{hmc}
+#'
+#' Gelman and Rubin's diagnostic assesses the mix of multiple MCMC chain with different initial parameter values
+#' Values close to 1 indicate that the posterior simulation has sufficiently converged, while
+#' values above 1 indicate that additional samples may be necessary to ensure convergence.  A general
+#' guideline suggests that values less than 1.05 are good, between 1.05 and 1.10 are ok, and above 1.10
+#' have not converged well.
+#'
+#' @references Gelman, A. and Rubin, D. (1992) \emph{Inference from Iterative Simulation Using Multiple Sequences}.  Statistical Science 7(4) 457-472.
+#' @references Gelman, A., et. al. (2013) \emph{Bayesian Data Analysis}.  Chapman and Hall/CRC.
+#' @references Gabry, Jonah and Mahr, Tristan (2019).  \emph{bayesplot:  Plotting for Bayesian Models}.  \url{https://mc-stan.org/bayesplot}
 #' @export
 psrf.hmclearn <- function(object, burnin=NULL, ...) {
 

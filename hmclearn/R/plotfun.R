@@ -91,6 +91,8 @@
 #'   function. `mcmc_acf()` is a line plot whereas `mcmc_acf_bar()` is a
 #'   barplot.
 #' }
+#' \item {plot.hmclearn(object, burnin=NULL, ...)} {
+#' default plot \code{mcmc_hist}
 #' }
 #' @references Gabry, Jonah and Mahr, Tristan (2019).  \emph{bayesplot:  Plotting for Bayesian Models}.  \url{https://mc-stan.org/bayesplot}
 #' @references Gabry, J., Simpson, D., Vehtari, A., Betancourt, M., and Gelman, A (2019).  \emph{Visualization in Bayesian Workflow}.  Journal of the Royal Statistical Society: Series A. Vol 182.  Issue 2.  p.389-402.
@@ -351,9 +353,9 @@ mcmc_violin.hmclearn <- function(object, burnin=NULL, ...) {
 
 #' @rdname hmclearn-plots
 #' @export
-plot.hmclearn <- function(x, burnin=NULL, ...) {
+plot.hmclearn <- function(object, burnin=NULL, ...) {
   # diagplots(x, ...)
-  thetaCombined <- combMatrix(x$thetaCombined, burnin=burnin)
+  thetaCombined <- combMatrix(object$thetaCombined, burnin=burnin)
   bayesplot::mcmc_hist(thetaCombined, )
 }
 

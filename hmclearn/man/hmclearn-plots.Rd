@@ -107,7 +107,7 @@ mcmc_violin(object, ...)
 
 \method{mcmc_violin}{hmclearn}(object, burnin = NULL, ...)
 
-\method{plot}{hmclearn}(x, burnin = NULL, ...)
+\method{plot}{hmclearn}(object, burnin = NULL, ...)
 }
 \arguments{
 \item{object}{an object of class \code{hmclearn}, usually a result of a call to \code{mh} or \code{hmc}}
@@ -122,88 +122,8 @@ mcmc_violin(object, ...)
 Plots of Rhat statistics, ratios of effective sample size to total sample
 size, and autocorrelation of MCMC draws.
 }
-\section{Plot Descriptions from \code{bayesplot} package documentation}{
-
-\describe{
-  \item{`mcmc_hist(object, burnin=NULL, ...)`}{
-   Histograms of posterior draws with all chains merged.
-  }
-  \item{`mcmc_dens(object, burnin=NULL, ...)`}{
-   Kernel density plots of posterior draws with all chains merged.
-  }
-  \item{`mcmc_hist_by_chain(object, burnin=NULL, ...)`}{
-   Histograms of posterior draws with chains separated via faceting.
-  }
-  \item{`mcmc_dens_overlay(object, burnin=NULL, ...)`}{
-   Kernel density plots of posterior draws with chains separated but
-   overlaid on a single plot.
-  }
-  \item{`mcmc_violin(object, burnin=NULL, ...)`}{
-   The density estimate of each chain is plotted as a violin with
-   horizontal lines at notable quantiles.
-  }
-  \item{`mcmc_dens_chains(object, burnin=NULL, ...)`}{
-   Ridgeline kernel density plots of posterior draws with chains separated
-   but overlaid on a single plot. In `mcmc_dens_overlay()` parameters
-   appear in separate facets; in `mcmc_dens_chains()` they appear in the
-   same panel and can overlap vertically.
-  }
-  \item{`mcmc_intervals(object, burnin=NULL, ...)`}{
-   Plots of uncertainty intervals computed from posterior draws with all
-   chains merged.
-  }
-  \item{`mcmc_areas(object, burnin=NULL, ...)`}{
-   Density plots computed from posterior draws with all chains merged,
-   with uncertainty intervals shown as shaded areas under the curves.
-  }
-  \item{`mcmc_scatter(object, burnin=NULL, ...)`}{
-   Bivariate scatterplot of posterior draws. If using a very large number of
-   posterior draws then `mcmc_hex()` may be preferable to avoid
-   overplotting. For models fit using [NUTS] the `np`,
-   and `np_style` arguments can be used to add additional information in
-   the plot (in this case the approximate location of divergences).
-   For more on why the scatter plot with divergences is a useful
-   diagnostic tool see [Gabry et al. (2019)](https://github.com/jgabry/bayes-vis-paper#readme).
-  }
-  \item{`mcmc_hex(object, burnin=NULL, ...)`}{
-   Hexagonal heatmap of 2-D bin counts. This plot is useful in cases where
-   the posterior sample size is large enough that `mcmc_scatter()` suffers
-   from overplotting.
-  }
-  \item{`mcmc_pairs(object, burnin=NULL, ...)`}{
-   A square plot matrix with univariate marginal distributions along the
-   diagonal (as histograms or kernel density plots) and bivariate
-   distributions off the diagonal (as scatterplots or hex heatmaps).
-
-   For the off-diagonal plots, the default is to split the chains so that
-   (roughly) half are displayed above the diagonal and half are below (all
-   chains are always merged together for the plots along the diagonal). Other
-   possibilities are available by setting the `condition` argument.
-  }
-\item{`mcmc_rhat(object, burnin=NULL, ...)`, `mcmc_rhat_hist(object, burnin=NULL, ...)`}{
-  Rhat values as either points or a histogram. Values are colored using
-  different shades (lighter is better). The chosen thresholds are somewhat
-  arbitrary, but can be useful guidelines in practice.
-  * _light_: below 1.05 (good)
-  * _mid_: between 1.05 and 1.1 (ok)
-  * _dark_: above 1.1 (too high)
-}
-\item{`mcmc_neff(object, burnin=NULL, ...)`, `mcmc_neff_hist(object, burnin=NULL, ...)`}{
-  Ratios of effective sample size to total sample size as either points or a
-  histogram. Values are colored using different shades (lighter is better).
-  The chosen thresholds are somewhat arbitrary, but can be useful guidelines
-  in practice.
-  * _light_: between 0.5 and 1 (high)
-  * _mid_: between 0.1 and 0.5 (good)
-  * _dark_: below 0.1 (low)
-}
-\item{`mcmc_acf(object, burnin=NULL, ...)`, `mcmc_acf_bar(object, burnin=NULL, ...)`}{
-  Grid of autocorrelation plots by chain and parameter. The `lags` argument
-  gives the maximum number of lags at which to calculate the autocorrelation
-  function. `mcmc_acf()` is a line plot whereas `mcmc_acf_bar()` is a
-  barplot.
-}
-}
+\section{}{
+NA
 }
 
 \references{
