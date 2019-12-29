@@ -54,6 +54,7 @@ print.hmclearn <- function(obj) {
 
   cat(paste(alg, "\n\n"))
   cat(paste(obj$N, "simulations from", obj$chains, "chains.\n\n"))
+  cat(paste("Average acceptance rate of", round(mean(obj$accept/obj$N), 3)), "\n\n")
   cat("Quantiles with no burnin period\n\n")
 
   # remove burnin

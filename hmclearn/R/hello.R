@@ -77,11 +77,13 @@ if (1 == 0) {
 
   fm1_mh$accept / Nmh
 
+  Nmh <- 1e5
+  nuval <- c(rep(4, 6), 1e-1)
   fm1_mh <- mh(Nmh, theta.init = c(rep(0, 6), 1), nu=nuval,
                qPROP = qprop, qFUN = qfun,
                logPOSTERIOR = linear_posterior,
                varnames = c(colnames(X), "log_sigma_sq"),
-               param=list(y=y, X=X), parallel= TRUE, chains=2)
+               param=list(y=y, X=X), parallel= TRUE, chains=4)
 
   ###################################################################
   # logistic regression
