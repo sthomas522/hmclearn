@@ -45,6 +45,30 @@ summary.hmclearn <- function(x, burnin=NULL, probs=c(0.05, 0.25, 0.5, 0.75, 0.95
 }
 
 
+print.hmclearn <- function(obj) {
+  if (obj$algorithm == "MH") {
+    alg <- "Metropolis Hastings"
+  } else if (obj$algorithm == "HMC") {
+    alg <- "Hamiltonian Monte Carlo"
+  }
+
+  cat(paste(alg, "\n\n"))
+  cat(paste(obj$N, "simulations from", obj$chains, "chains.\n\n"))
+  cat("Quantiles with no burnin period\n\n")
+
+  # remove burnin
+  thetaCombined <- combMatrix(obj$thetaCombined, burnin=NULL)
+  thetaCombined <- do.call(rbind, thetaCombined)
+
+  # quantiles
+  res <- t(apply(thetaCombined, 2, quantile, probs=c(0.25, 0.5, 0.75)))
+  if (!is.null(obj$varnames)) {
+    row.names(res) <- obj$varnames
+  }
+  print(res)
+
+}
+
 #' Extract Model Coefficients
 #'
 #' Method for \code{hmclearn} objects created by \code{mh} and \code{hmc} functions.  Extracts the specified quantile of the posterior.

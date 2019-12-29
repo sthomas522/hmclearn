@@ -58,7 +58,11 @@ if (1 == 0) {
   fm1_hmc$accept / N
   summary(fm1_hmc)
 
-  fm1_pred <- predict(fm1_hmc, X=X)
+  mcmc_trace(fm1_hmc, burnin=1000)
+  mcmc_hist(fm1_hmc, burnin=1000)
+
+  fm1_pred <- predict(fm1_hmc, y=y, X=X)
+  pp_check(fm1_pred)
 
   # metropolis-hastings fit
   Nmh <- 5e4
