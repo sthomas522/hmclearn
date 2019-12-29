@@ -142,15 +142,17 @@ if (1 == 0) {
 
   N <- 1e4
 
-  fm3_hmc <- hmc(N, theta.init = rep(0, p), epsilon = 3e-3, L = 20,
+  fm3_hmc <- hmc(N, theta.init = rep(0, p), epsilon = 2e-3, L = 20,
                      logPOSTERIOR = poisson_posterior,
                  glogPOSTERIOR=g_poisson_posterior,
                  varnames = colnames(X),
                      param=list(y = y, X=X), parallel=TRUE, chains=4)
   fm3_hmc$accept / N
 
-  fm3_pred <- predict(fm3_hmc, X=X, fam="poisson")
-  fm3_pred2 <- predict(fm3_hmc, X=X[2, ], fam="poisson")
+  mcmc_trace(fm3_hmc, burnin=1000)
+
+  fm3_pred <- predict(fm3_hmc, X=X, y=y, fam="poisson")
+  pp_check(fm3_pred)
 
   # metropolis-hastings fit
   Nmh <- 5e4
