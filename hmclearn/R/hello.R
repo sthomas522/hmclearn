@@ -85,6 +85,9 @@ if (1 == 0) {
                varnames = c(colnames(X), "log_sigma_sq"),
                param=list(y=y, X=X), parallel= TRUE, chains=4)
 
+  summary(fm1_mh, burnin=1000)
+  mcmc_trace(fm1_mh, burnin=1000)
+
   ###################################################################
   # logistic regression
   ###################################################################
@@ -102,7 +105,7 @@ if (1 == 0) {
 
   p <- ncol(X)
 
-  N <- 10000
+  N <- 1e4
 
   t1 <- Sys.time()
   set.seed(321)
@@ -111,12 +114,17 @@ if (1 == 0) {
                  logPOSTERIOR = logistic_posterior,
                  glogPOSTERIOR = g_logistic_posterior,
                  randlength = TRUE,
-                 varnames = colnames(X), y=y, X=X)
+                 varnames = colnames(X),
+                 param=list(y=y, X=X), parallel = TRUE, chains=4)
   t2 <- Sys.time()
 
   fm2_hmc$accept / N
 
-  fm2_pred <- predict(fm2_hmc, X=X, fam="binomial")
+  mcmc_rhat(fm2_hmc)
+  mcmc_rhat_hist(fm2_hmc)
+
+  fm2_pred <- predict(fm2_hmc, y=y, X=X, fam="binomial")
+  pp_check(fm2_pred)
 
   ###################################################################
   # poisson regression
@@ -132,13 +140,13 @@ if (1 == 0) {
   y <- AMSsurvey$count
   p <- ncol(X)
 
-  N <- 10000
+  N <- 1e4
 
-  fm3_hmc <- hmc(N, theta.init = rep(0, p), epsilon = 2e-3, L = 20,
+  fm3_hmc <- hmc(N, theta.init = rep(0, p), epsilon = 3e-3, L = 20,
                      logPOSTERIOR = poisson_posterior,
                  glogPOSTERIOR=g_poisson_posterior,
                  varnames = colnames(X),
-                     y = y, X=X)
+                     param=list(y = y, X=X), parallel=TRUE, chains=4)
   fm3_hmc$accept / N
 
   fm3_pred <- predict(fm3_hmc, X=X, fam="poisson")
