@@ -233,7 +233,17 @@ mh <- function(N, theta.init, qPROP, qFUN, logPOSTERIOR, nu=1e-3,
 }
 
 
-# q(theta1 | theta2, nu) where nu is a kxk positive definite matrix
+#' Multivariate Normal Density of Theta1 | Theta2
+#'
+#' Provided for Random Walk Metropolis algorithm
+#'
+#' @param theta1 Vector of current quantiles
+#' @param theta2 Vector for mean parameter
+#' @param nu Either a single numeric value for the covariance matrix, or a vector for the diagonal
+#'
+#' @return Multivariate normal density vector
+#' @references Alan Genz, Frank Bretz, Tetsuhisa Miwa, Xuefei
+#' Mi, Friedrich Leisch, Fabian Scheipl and Torsten Hothorn (2019).  \emph{mvtnorm: Multivariate Normal and t Distributions}
 #' @export
 qfun <- function(theta1, theta2, nu) {
   k <- length(theta1)
@@ -241,7 +251,16 @@ qfun <- function(theta1, theta2, nu) {
   mvtnorm::dmvnorm(theta1, theta2, nu, log=TRUE)
 }
 
-# sample from proposal density
+#' Simulate from Multivariate Normal Density for Metropolis Algorithm
+#'
+#' Provided for Random Walk Metropolis algorithm
+#'
+#' @param theta1 Vector of current quantiles
+#' @param nu Either a single numeric value for the covariance matrix, or a vector for the diagonal
+#'
+#' @return Multivariate normal density vector
+#' @references B. D. Ripley (1987) \emph{Stochastic Simulation}. Wiley.  Page 98
+#' @references Venables, W. N. and Ripley, B. D. (2002) \emph{Modern Applied Statistics with S.} Fourth edition. Springer.
 #' @export
 qprop <- function(theta1, nu) {
   k <- length(theta1)
@@ -250,18 +269,18 @@ qprop <- function(theta1, nu) {
   MASS::mvrnorm(1, theta1, nu)
 }
 
-# nu is a vector
-#' @export
-qprop_all <- function(theta1, nu) {
-  nu <- diag(nu)
-  MASS::mvrnorm(1, theta1, nu)
-}
-
-#' @export
-qfun_all <- function(theta1, theta2, nu) {
-  nu <- diag(nu)
-  mvtnorm::dmvnorm(theta1, theta2, nu, log=TRUE)
-}
+#' # nu is a vector
+#' #' @export
+#' qprop_all <- function(theta1, nu) {
+#'   nu <- diag(nu)
+#'   MASS::mvrnorm(1, theta1, nu)
+#' }
+#'
+#' #' @export
+#' qfun_all <- function(theta1, theta2, nu) {
+#'   nu <- diag(nu)
+#'   mvtnorm::dmvnorm(theta1, theta2, nu, log=TRUE)
+#' }
 
 
 
@@ -280,6 +299,21 @@ qfun_all <- function(theta1, theta2, nu) {
 # logDENS:  log of joint density of parameter of interest
 #   (log likelihood)
 # ... additional parameters to pass to logDENS
+
+#' Leapfrog Algorithm for Hamiltonian Monte Carlo
+#'
+#' Runs a single iteration of the leapfrog algorithm.  Typically called directly from \code{hmc}
+#'
+#' @param theta_lf starting parameter vector
+#' @param r starting momentum vector
+#' @param epsilon Step-size parameter for \code{leapfrog}
+#' @param logPOSTERIOR Function to calculate and return the log posterior given a vector of values of \code{theta}
+#' @param glogPOSTERIOR Function to calculate and return the gradient of the log posterior given a vector of values of \code{theta}
+#' @param Minv Inverse Mass matrix
+#' @param constrain Optional vector of which parameters in \code{theta} accept positive values only.  Default is that all parameters accept all real numbers
+#' @param lastSTEP Boolean indicating whether to calculate the last half-step of the momentum update
+#' @references Neal, Radford. 2011. \emph{MCMC Using Hamiltonian Dynamics.} In Handbook of Markov Chain Monte Carlo, edited by Steve Brooks, Andrew Gelman, Galin L. Jones, and Xiao-Li Meng, 116–62. Chapman; Hall/CRC.
+#' @return List containing two elements:  \code{theta.new} the ending value of theta and \code{r.new} the ending value of the momentum
 #' @export
 leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, Minv, constrain,
                      lastSTEP=FALSE, ...) {
@@ -338,7 +372,7 @@ leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, Minv, co
 #' @param verbose Logical to determine whether to display the progress of the HMC algorithm
 #' @param ... additional parameters for \code{logPOSTERIOR} and \code{glogPOSTERIOR}
 #' @return List for \code{hmc}
-#'
+#' @references Neal, Radford. 2011. \emph{MCMC Using Hamiltonian Dynamics.} In Handbook of Markov Chain Monte Carlo, edited by Steve Brooks, Andrew Gelman, Galin L. Jones, and Xiao-Li Meng, 116–62. Chapman; Hall/CRC.
 #' @export
 hmc.fit <- function(N, theta.init, epsilon, L, logPOSTERIOR, glogPOSTERIOR, varnames=NULL,
                 randlength=FALSE, Mdiag=NULL, constrain=NULL, verbose=FALSE, ...) {

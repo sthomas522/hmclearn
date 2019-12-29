@@ -16,4 +16,5 @@ VignetteBuilder: knitr
 RoxygenNote: 7.0.1
 Imports: 
     bayesplot,
-    parallel
+    parallel,
+    mvtnorm

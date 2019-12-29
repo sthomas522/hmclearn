@@ -50,3 +50,6 @@ List for \code{hmc}
 \description{
 This is the basic computing function for HMC and should not be called directly except by experienced users.
 }
+\references{
+Neal, Radford. 2011. \emph{MCMC Using Hamiltonian Dynamics.} In Handbook of Markov Chain Monte Carlo, edited by Steve Brooks, Andrew Gelman, Galin L. Jones, and Xiao-Li Meng, 116–62. Chapman; Hall/CRC.
+}
