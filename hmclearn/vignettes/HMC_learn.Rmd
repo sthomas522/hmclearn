@@ -1037,7 +1037,7 @@ Finally, we run HMC for the Poisson mixed effects model.  Note that we use a sli
 Since this is a more complex example, we increase the number of samples to allow the MCMC chain more time to converge.  
 
 ```{r, echo=TRUE, eval=TRUE}
-N <- 1e3
+N <- 1e5
 
 set.seed(412)
 initvals <- c(rep(0, 4), 
