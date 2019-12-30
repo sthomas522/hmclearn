@@ -60,8 +60,6 @@ with priors \eqn{\beta \sim N(0, BI)}, \eqn{\sigma_\epsilon \sim half-t(A_\epsil
 The vector \eqn{\lambda} is the diagonal of the covariance \code{G} hyperprior where \eqn{u \sim N(0, G}.  The off-diagonal hyperpriors are stored in a vector \eqn{a \sim N(0, A}.  See Chan, Jeliazkov (2009) for details.
 
 The input parameter vector \code{theta} is of length \code{k}.  The first \code{k-1} parameters are for \eqn{\beta}, and the last parameter is \eqn{\gamma}
-
-Note that the Inverse Gamma prior can be problematic for certain applications with low variance.  See Gelman (2006)
 }
 \references{
 Gelman, A. (2006). \emph{Prior distributions for variance parameters in hierarchical models (comment on article by Browne and Draper)}. Bayesian analysis, 1(3), 515-534.

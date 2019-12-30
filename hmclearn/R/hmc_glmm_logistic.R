@@ -6,10 +6,32 @@ pfun_glmm_bin <- function(PARAM, ...) {
   glmm_bin_posterior(theta=theta, ...)
 }
 
-# prior for beta is mean 0 with diagonal covariance B^-1
+#' Logistic Mixed Effects model log posterior
+#'
+#' Compute the log posterior of a logistic mixed effects regression model.
+#' Priors are multivariate Normal for the fixed effects
+#'
+#' @param theta vector of parameters.  Stored as a single vector in order fixed effect, random effect, log-transformed diagonal \eqn{\lambda}, and off-diagonal of \code{G} vector \code{a}
+#' @param y numeric vector for the dependent variable
+#' @param X numeric design matrix of fixed effect parameters
+#' @param Z numeric design matrix of random effect parameters
+#' @param q number of random effect parameters
+#' @param A hyperprior numeric vector for the random effects off-diagonal \code{a}
+#' @param nulambda hyperprior for the half-t prior of the random effects diagonal \eqn{\lambda}
+#' @param Alambda hyperprior for the half-t prior of the random effects diagonal \eqn{A_\lambda}
+#' @param B prior for linear predictors is multivariate Normal with mean 0 with diagonal covariance B^-1
+#' @details The likelihood function for logistic mixed effect regression
+#' @details \deqn{p(y | X, Z, \beta, u) = \prod_{i=1}^n\prod_{j=1}^m \left(\frac{1}{1 + e^{-X_{i}\beta - Z_{ij}u_i}}\right)^{y_{ij}} \left(\frac{e^{-X_i\beta - Z_{ij}u_i}}{1 + e^{-X_{i}\beta - Z_{ij}u_i}}\right)^{1-y_{ij}} }
+#' @details with priors \eqn{\beta \sim N(0, BI)}, \eqn{\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)}, \eqn{\lambda \sim half-t(A_\lambda, nu_\lambda )}.
+#' @details The vector \eqn{\lambda} is the diagonal of the covariance \code{G} hyperprior where \eqn{u \sim N(0, G}.  The off-diagonal hyperpriors are stored in a vector \eqn{a \sim N(0, A}.  See Chan, Jeliazkov (2009) for details.
+#' @details The input parameter vector \code{theta} is of length \code{k}.  The first \code{k-1} parameters are for \eqn{\beta}, and the last parameter is \eqn{\gamma}
+#' @return numeric value for the log posterior
+#' @references Gelman, A. (2006). \emph{Prior distributions for variance parameters in hierarchical models (comment on article by Browne and Draper)}. Bayesian analysis, 1(3), 515-534.
+#' @references Chan, J. C. C., & Jeliazkov, I. (2009). \emph{MCMC estimation of restricted covariance matrices}. Journal of Computational and Graphical Statistics, 18(2), 457-480.
+#' @references Betancourt, M., & Girolami, M. (2015). \emph{Hamiltonian Monte Carlo for hierarchical models}. Current trends in Bayesian methodology with applications, 79, 30.
 #' @export
-glmm_bin_posterior <- function(theta, y, X, Z, m, q, A = 1e4, B=1e4,
-                               nuxi=1, Axi=25) {
+glmm_bin_posterior <- function(theta, y, X, Z, m, q, A = 1e4,
+                               nuxi=1, Axi=25, B=1e4) {
   Z <- as.matrix(Z)
   p <- ncol(X)
   n <- nrow(X)
@@ -58,9 +80,32 @@ glmm_bin_posterior <- function(theta, y, X, Z, m, q, A = 1e4, B=1e4,
   return(as.numeric(result))
 }
 
+#' Gradient of a Logistic Mixed Effects model log posterior
+#'
+#' Compute the gradient of the log posterior of a logistic mixed effects regression model.
+#' Priors are multivariate Normal for the fixed effects
+#'
+#' @param theta vector of parameters.  Stored as a single vector in order fixed effect, random effect, log-transformed diagonal \eqn{\lambda}, and off-diagonal of \code{G} vector \code{a}
+#' @param y numeric vector for the dependent variable
+#' @param X numeric design matrix of fixed effect parameters
+#' @param Z numeric design matrix of random effect parameters
+#' @param q number of random effect parameters
+#' @param A hyperprior numeric vector for the random effects off-diagonal \code{a}
+#' @param nulambda hyperprior for the half-t prior of the random effects diagonal \eqn{\lambda}
+#' @param Alambda hyperprior for the half-t prior of the random effects diagonal \eqn{A_\lambda}
+#' @param B prior for linear predictors is multivariate Normal with mean 0 with diagonal covariance B^-1
+#' @details The likelihood function for logistic mixed effect regression
+#' @details \deqn{p(y | X, Z, \beta, u) = \prod_{i=1}^n\prod_{j=1}^m \left(\frac{1}{1 + e^{-X_{i}\beta - Z_{ij}u_i}}\right)^{y_{ij}} \left(\frac{e^{-X_i\beta - Z_{ij}u_i}}{1 + e^{-X_{i}\beta - Z_{ij}u_i}}\right)^{1-y_{ij}} }
+#' @details with priors \eqn{\beta \sim N(0, BI)}, \eqn{\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)}, \eqn{\lambda \sim half-t(A_\lambda, nu_\lambda )}.
+#' @details The vector \eqn{\lambda} is the diagonal of the covariance \code{G} hyperprior where \eqn{u \sim N(0, G}.  The off-diagonal hyperpriors are stored in a vector \eqn{a \sim N(0, A}.  See Chan, Jeliazkov (2009) for details.
+#' @details The input parameter vector \code{theta} is of length \code{k}.  The first \code{k-1} parameters are for \eqn{\beta}, and the last parameter is \eqn{\gamma}
+#' @return numeric vector for the gradient of the log posterior
+#' @references Gelman, A. (2006). \emph{Prior distributions for variance parameters in hierarchical models (comment on article by Browne and Draper)}. Bayesian analysis, 1(3), 515-534.
+#' @references Chan, J. C. C., & Jeliazkov, I. (2009). \emph{MCMC estimation of restricted covariance matrices}. Journal of Computational and Graphical Statistics, 18(2), 457-480.
+#' @references Betancourt, M., & Girolami, M. (2015). \emph{Hamiltonian Monte Carlo for hierarchical models}. Current trends in Bayesian methodology with applications, 79, 30.
 #' @export
-g_glmm_bin_posterior <- function(theta, y, X, Z, m, q, A = 1e4, B=1e4,
-                                 nuxi=1, Axi=25) {
+g_glmm_bin_posterior <- function(theta, y, X, Z, m, q, A = 1e4,
+                                 nuxi=1, Axi=25, B=1e4) {
   Z <- as.matrix(Z)
   p <- ncol(X)
   n <- nrow(X)
