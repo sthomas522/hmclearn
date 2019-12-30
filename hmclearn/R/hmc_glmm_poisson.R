@@ -5,13 +5,36 @@ pfun_glmm_poisson <- function(PARAM, ...) {
   glmm_poisson_posterior(theta=theta, ...)
 }
 
-# prior for beta is mean 0 with diagonal covariance B^-1
+#' Poisson Mixed Effects model log posterior
+#'
+#' Compute the log posterior of a Poisson mixed effects regression model.
+#' Priors are multivariate Normal for the fixed effects
+#'
+#' @param theta vector of parameters.  Stored as a single vector in order fixed effect, random effect, log-transformed diagonal \eqn{\lambda}, and off-diagonal of \code{G} vector \code{a}
+#' @param y numeric vector for the dependent variable
+#' @param X numeric design matrix of fixed effect parameters
+#' @param Z numeric design matrix of random effect parameters
+#' @param m number of random effect parameters
+#' @param A hyperprior numeric vector for the random effects off-diagonal \code{a}
+#' @param nulambda hyperprior for the half-t prior of the random effects diagonal \eqn{\lambda}
+#' @param Alambda hyperprior for the half-t prior of the random effects diagonal \eqn{A_\lambda}
+#' @param B prior for linear predictors is multivariate Normal with mean 0 with diagonal covariance B^-1
+#' @details The likelihood function for Poisson mixed effect regression
+#' @details \deqn{L(\beta; y, X) = \prod_{i=1}^n \prod_{j=1}^m \frac{e^{-e^{X_i\beta + Z_{ij}u_{ij}}}e^{y_i(X_i\beta + Z_{ij}u_{ij})}}{y_i!} }
+#' @details with priors \eqn{\beta \sim N(0, BI)}, \eqn{\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)}, \eqn{\lambda \sim half-t(A_\lambda, nu_\lambda )}.
+#' @details The vector \eqn{\lambda} is the diagonal of the covariance \code{G} hyperprior where \eqn{u \sim N(0, G}.  The off-diagonal hyperpriors are stored in a vector \eqn{a \sim N(0, A}.  See Chan, Jeliazkov (2009) for details.
+#' @details The input parameter vector \code{theta} is of length \code{k}.  The first \code{k-1} parameters are for \eqn{\beta}, and the last parameter is \eqn{\gamma}
+#' @return numeric value for the log posterior
+#' @references Gelman, A. (2006). \emph{Prior distributions for variance parameters in hierarchical models (comment on article by Browne and Draper)}. Bayesian analysis, 1(3), 515-534.
+#' @references Chan, J. C. C., & Jeliazkov, I. (2009). \emph{MCMC estimation of restricted covariance matrices}. Journal of Computational and Graphical Statistics, 18(2), 457-480.
+#' @references Betancourt, M., & Girolami, M. (2015). \emph{Hamiltonian Monte Carlo for hierarchical models}. Current trends in Bayesian methodology with applications, 79, 30.
 #' @export
-glmm_poisson_posterior <- function(theta, y, X, Z, m=10, q=1, A = 1e4, B=1e4,
-                                   nuxi=1, Axi=25) {
+glmm_poisson_posterior <- function(theta, y, X, Z, m=10, A = 1e4,
+                                   nulambda=1, Alambda=25, B=1e4) {
   Z <- as.matrix(Z)
   p <- ncol(X)
   n <- nrow(X)
+  q <- 1
 
   # prior covariance for beta
   Sig_beta <- diag(B, p, p)
@@ -51,15 +74,38 @@ glmm_poisson_posterior <- function(theta, y, X, Z, m=10, q=1, A = 1e4, B=1e4,
   log_likelihood <- -sum(exp(XZbetau)) + y %*% XZbetau
   log_beta_prior <- -1/2 * p*log(B) - 1/2*t(beta_param) %*% Sig_inv_beta%*% beta_param
   log_tau_prior <- -1/2 * t(tau_param) %*% tau_param
-  log_xi_prior <- -(nuxi + 1)/2 * log(1 + 1/nuxi * exp(2*xi_param) / Axi^2)
+  log_xi_prior <- -(nulambda + 1)/2 * log(1 + 1/nulambda * exp(2*xi_param) / Alambda^2)
 
   result <- log_likelihood + log_beta_prior + log_tau_prior + sum(log_xi_prior) + log_a_prior
   return(as.numeric(result))
 }
 
+#' Gradient of a Poisson Mixed Effects model log posterior
+#'
+#' Compute the gradient of the log posterior of a Poisson mixed effects regression model.
+#' Priors are multivariate Normal for the fixed effects
+#'
+#' @param theta vector of parameters.  Stored as a single vector in order fixed effect, random effect, log-transformed diagonal \eqn{\lambda}, and off-diagonal of \code{G} vector \code{a}
+#' @param y numeric vector for the dependent variable
+#' @param X numeric design matrix of fixed effect parameters
+#' @param Z numeric design matrix of random effect parameters
+#' @param m number of random effect parameters
+#' @param A hyperprior numeric vector for the random effects off-diagonal \code{a}
+#' @param nulambda hyperprior for the half-t prior of the random effects diagonal \eqn{\lambda}
+#' @param Alambda hyperprior for the half-t prior of the random effects diagonal \eqn{A_\lambda}
+#' @param B prior for linear predictors is multivariate Normal with mean 0 with diagonal covariance B^-1
+#' @details The likelihood function for Poisson mixed effect regression
+#' @details \deqn{L(\beta; y, X) = \prod_{i=1}^n \prod_{j=1}^m \frac{e^{-e^{X_i\beta + Z_{ij}u_{ij}}}e^{y_i(X_i\beta + Z_{ij}u_{ij})}}{y_i!} }
+#' @details with priors \eqn{\beta \sim N(0, BI)}, \eqn{\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)}, \eqn{\lambda \sim half-t(A_\lambda, nu_\lambda )}.
+#' @details The vector \eqn{\lambda} is the diagonal of the covariance \code{G} hyperprior where \eqn{u \sim N(0, G}.  The off-diagonal hyperpriors are stored in a vector \eqn{a \sim N(0, A}.  See Chan, Jeliazkov (2009) for details.
+#' @details The input parameter vector \code{theta} is of length \code{k}.  The first \code{k-1} parameters are for \eqn{\beta}, and the last parameter is \eqn{\gamma}
+#' @return numeric vector for the gradient of the log posterior
+#' @references Gelman, A. (2006). \emph{Prior distributions for variance parameters in hierarchical models (comment on article by Browne and Draper)}. Bayesian analysis, 1(3), 515-534.
+#' @references Chan, J. C. C., & Jeliazkov, I. (2009). \emph{MCMC estimation of restricted covariance matrices}. Journal of Computational and Graphical Statistics, 18(2), 457-480.
+#' @references Betancourt, M., & Girolami, M. (2015). \emph{Hamiltonian Monte Carlo for hierarchical models}. Current trends in Bayesian methodology with applications, 79, 30.
 #' @export
-g_glmm_poisson_posterior <- function(theta, y, X, Z, m=10, A = 1e4, B=1e4,
-                                     nuxi=1, Axi=25) {
+g_glmm_poisson_posterior <- function(theta, y, X, Z, m=10, A = 1e4,
+                                     nulambda=1, Alambda=25, B=1e4) {
   Z <- as.matrix(Z)
   p <- ncol(X)
   n <- nrow(X)
@@ -120,7 +166,7 @@ g_glmm_poisson_posterior <- function(theta, y, X, Z, m=10, A = 1e4, B=1e4,
     bd <- kronecker(diag(m), diag(zv, q, q))
     -t(exp(XZbetau) - y) %*% Z %*% L_block %*% bd %*% Dhalf_block %*% tau_param
   })
-  g_xi <- g_xi - (nuxi + 1) / (1 + nuxi*Axi^2 * exp(-2*xi_param))
+  g_xi <- g_xi - (nulambda + 1) / (1 + nulambda*Alambda^2 * exp(-2*xi_param))
 
   # TODO:  gradient for a
   # if (q > 1) {

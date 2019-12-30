@@ -31,7 +31,7 @@ pfun_glmm_bin <- function(PARAM, ...) {
 #' @references Betancourt, M., & Girolami, M. (2015). \emph{Hamiltonian Monte Carlo for hierarchical models}. Current trends in Bayesian methodology with applications, 79, 30.
 #' @export
 glmm_bin_posterior <- function(theta, y, X, Z, m, q, A = 1e4,
-                               nuxi=1, Axi=25, B=1e4) {
+                               nulambda=1, Alambda=25, B=1e4) {
   Z <- as.matrix(Z)
   p <- ncol(X)
   n <- nrow(X)
@@ -74,7 +74,7 @@ glmm_bin_posterior <- function(theta, y, X, Z, m, q, A = 1e4,
   log_likelihood <- sum( -(1-y) * XZbetau - log(1 + exp(-XZbetau)))
   log_beta_prior <- -1/2 * p*log(B) - 1/2*t(beta_param) %*% Sig_inv_beta%*% beta_param
   log_tau_prior <- -1/2 * t(tau_param) %*% tau_param
-  log_xi_prior <- -(nuxi + 1)/2 * log(1 + 1/nuxi * exp(2*xi_param) / Axi^2)
+  log_xi_prior <- -(nulambda + 1)/2 * log(1 + 1/nulambda * exp(2*xi_param) / Alambda^2)
 
   result <- log_likelihood + log_beta_prior + log_tau_prior + sum(log_xi_prior) + log_a_prior
   return(as.numeric(result))
@@ -105,7 +105,7 @@ glmm_bin_posterior <- function(theta, y, X, Z, m, q, A = 1e4,
 #' @references Betancourt, M., & Girolami, M. (2015). \emph{Hamiltonian Monte Carlo for hierarchical models}. Current trends in Bayesian methodology with applications, 79, 30.
 #' @export
 g_glmm_bin_posterior <- function(theta, y, X, Z, m, q, A = 1e4,
-                                 nuxi=1, Axi=25, B=1e4) {
+                                 nulambda=1, Alambda=25, B=1e4) {
   Z <- as.matrix(Z)
   p <- ncol(X)
   n <- nrow(X)
@@ -167,7 +167,7 @@ g_glmm_bin_posterior <- function(theta, y, X, Z, m, q, A = 1e4,
     bd <- kronecker(diag(m), diag(zv, q, q))
     (-t(1-y) + t(gradprop)) %*% Z %*% L_block %*% bd %*% Dhalf_block %*% tau_param
   })
-  g_xi <- g_xi - (nuxi + 1) / (1 + nuxi*Axi^2 * exp(-2*xi_param))
+  g_xi <- g_xi - (nulambda + 1) / (1 + nulambda*Alambda^2 * exp(-2*xi_param))
 
   # gradient for a
   if (q > 1) {

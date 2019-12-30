@@ -12,8 +12,8 @@ g_glmm_bin_posterior(
   m,
   q,
   A = 10000,
-  nuxi = 1,
-  Axi = 25,
+  nulambda = 1,
+  Alambda = 25,
   B = 10000
 )
 }
@@ -30,11 +30,11 @@ g_glmm_bin_posterior(
 
 \item{A}{hyperprior numeric vector for the random effects off-diagonal \code{a}}
 
-\item{B}{prior for linear predictors is multivariate Normal with mean 0 with diagonal covariance B^-1}
-
 \item{nulambda}{hyperprior for the half-t prior of the random effects diagonal \eqn{\lambda}}
 
 \item{Alambda}{hyperprior for the half-t prior of the random effects diagonal \eqn{A_\lambda}}
+
+\item{B}{prior for linear predictors is multivariate Normal with mean 0 with diagonal covariance B^-1}
 }
 \value{
 numeric vector for the gradient of the log posterior
