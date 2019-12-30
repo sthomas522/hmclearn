@@ -138,7 +138,7 @@ Fit model using hmc
 N <- 1e5
 
 # eps_vals <- c(1e-3, 2e-3, rep(2e-6, 2), 2e-4)
-eps_vals <- c(1e-1, 1e-3, 1e-5, 4e-7, 1e-3)
+eps_vals <- c(1e-1, 1e-2, 2e-5, 1e-6, 3e-3)
 
 set.seed(412)
 t1.hmc <- Sys.time()
@@ -159,9 +159,13 @@ res$accept/N
 summary(res, burnin=5000)
 ```
 
+```{r, echo=TRUE}
+mcmc_trace(res, burnin=5000)
+```
+
 
 ```{r, echo=TRUE}
-diagplots(res, actual.mu=truevals, burnin=3000)
+diagplots(res, actual.mu=theta.true, burnin=3000)
 
 
 ```
