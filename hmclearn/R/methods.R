@@ -37,10 +37,13 @@ summary.hmclearn <- function(x, burnin=NULL, probs=c(0.05, 0.25, 0.5, 0.75, 0.95
   }
 
   # rhat calc
-  rhat <- psrf(x, burnin=burnin)
+  if (x$chains > 1) {
+    rhat <- psrf(x, burnin=burnin)
 
-  res <- cbind(res, rhat)
-  colnames(res)[ncol(res)] <- "rhat"
+    res <- cbind(res, rhat)
+    colnames(res)[ncol(res)] <- "rhat"
+  }
+
   res
 }
 

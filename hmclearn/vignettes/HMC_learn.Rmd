@@ -362,7 +362,7 @@ The \textit{hmclearn} package has a diagnostic plot function to show trace plots
 Without performing rigorous diagnostics, the trace plots appear stationary with the given burnin period.  The histograms of the simulations also appear well within the range of highest posterior density.  
 
 ```{r, echo=TRUE, eval=TRUE}
-plot(ex1, actual.mu = c(2, 3))
+diagplots(ex1, burnin=100, actual.mu = c(2, 3))
 
 ```
 
@@ -474,17 +474,17 @@ ex1b <- hmc(N, theta.init = c(0, 0), epsilon = 1e-3, L = 30,
 HMC accurately fits the model using the log-transformed parameters, as we can see through the diagnostic plots and summary results.
 
 ```{r, echo=TRUE}
-plot(ex1b, actual.mu = c(log(2), log(3)))
+diagplots(ex1b, burnin=100, actual.mu = c(log(2), log(3)))
 
 ```
 
-```{r, echo=TRUE}
+```{r, echo=TRUE, eval=TRUE}
 summary(ex1b)
 ```
 
 The exponential of the results confirms that the HMC converges to the correct parameters.  
 
-```{r, echo=TRUE}
+```{r, echo=TRUE, eval=TRUE}
 exp(summary(ex1b))
 ```
 
@@ -717,22 +717,24 @@ X <- model.matrix(breaks ~ wool*tension, data=warpbreaks)
 The vector of parameters of interest is $(\pmb\beta, \gamma) \in \theta$.  The initial values specified in a vector of length 6 for $\beta$ plus 1 for $\gamma$.  The step size is a factor of 10 higher for $\pmb\beta$ than for log transformed variance.  
 
 ```{r, echo=TRUE, eval=TRUE}
-N <- 10000
+N <- 1e4
 set.seed(143)
 
 eps_vals <- c(rep(2e-1, 6), 2e-2)
 
 t1 <- Sys.time()
-fm1_hmc <- hmc(N, theta.init = c(rep(0, 6), 1), epsilon = eps_vals, L = 10, 
-                   logPOSTERIOR = linear_posterior, 
-                   glogPOSTERIOR = g_linear_posterior, y=y, X=X, 
-                   varnames = c(colnames(X), "log_sigma_sq"))
+  fm1_hmc <- hmc(N, theta.init = c(rep(0, 6), 1), 
+                 epsilon = eps_vals, L = 20,
+                 logPOSTERIOR = linear_posterior,
+                 glogPOSTERIOR = g_linear_posterior,
+                 varnames = c(colnames(X), "log_sigma_sq"),
+                 param=list(y=y, X=X))
 t2 <- Sys.time()
 t2 - t1
 
 ```
 
-This linear regression model takes approximately 10 seconds to fit on a 2015 Macbook Pro with 2.5GHz i7 processor and 16gb of RAM.  The acceptance rate of this model fit is 96\%, which is appropriate for a relatively simple model such as this one.  
+This linear regression model takes approximately 19 seconds to fit on a 2015 Macbook Pro with 2.5GHz i7 processor and 16gb of RAM.  The acceptance rate of this model fit is 96\%, which is appropriate for a relatively simple model such as this one.  
 
 
 ```{r, echo=TRUE, eval=TRUE}
@@ -743,15 +745,9 @@ Finally, we can summarize the results and plot the histograms of the simulated p
 
 ```{r, echo=TRUE, eval=TRUE}
 summary(fm1_hmc)
-plot(fm1_hmc)[[1]]
+plot(fm1_hmc, burnin=1000)
 ```
 
-```{r, echo=FALSE, eval=FALSE}
-# beta_freq <- coef(fm1)
-# eps_freq <- 2*log(sigma(fm1))
-plot(fm1_hmc, actual.mu = c(beta_freq, eps_freq))
-
-```
 
 Note that the Inverse Gamma distribution is not always an optimal prior when the support is strictly positive.  This prior can create problematic results when the true value of the parameter is close to zero.  Half-t distributions can be used as a more stable alternative to Inverse Gamma [@gelman2006prior].
 
@@ -839,18 +835,20 @@ Two of the independent variables are continuous with wide ranges of values.  The
 The log posterior and gradient functions are based on the likelihood and prior choices in this example.  
 
 ```{r, echo=TRUE, eval=TRUE}
-N <- 10000
-set.seed(143)
+N <- 1e4
 
 # use different epsilon values for continuous and dichotomous variables
 continuous_ind <- c(FALSE, TRUE, TRUE, rep(FALSE, 8))
 eps_vals <- ifelse(continuous_ind, 1e-3, 5e-2)
 
 t1 <- Sys.time()
-fm2_hmc <- hmc(N, theta.init = rep(0, 11), epsilon = eps_vals, L = 10, 
-                   logPOSTERIOR = logistic_posterior, 
-                   glogPOSTERIOR = g_logistic_posterior, y=y, X=X, 
-                   varnames = colnames(X))
+set.seed(143)
+fm2_hmc <- hmc(N, theta.init = rep(0, 11), 
+               epsilon = eps_vals, L = 10, 
+               logPOSTERIOR = logistic_posterior, 
+               glogPOSTERIOR = g_logistic_posterior, 
+               param=list(y=y, X=X), 
+               varnames = colnames(X))
 t2 <- Sys.time()
 t2 - t1
 
@@ -861,13 +859,8 @@ This example is slightly larger than the linear regression, taking approximately
 
 ```{r, echo=TRUE, eval=TRUE}
 fm2_hmc$accept/N
-summary(fm2_hmc)
-plot(fm2_hmc)[[1]]
-
-```
-
-```{r, echo=FALSE, eval=FALSE}
-# plot(fm2_hmc, actual.mu=coef(fm2))
+summary(fm2_hmc, burnin=1000)
+plot(fm2_hmc, burnin=1000)
 
 ```
 
@@ -1044,34 +1037,27 @@ Finally, we run HMC for the Poisson mixed effects model.  Note that we use a sli
 Since this is a more complex example, we increase the number of samples to allow the MCMC chain more time to converge.  
 
 ```{r, echo=TRUE, eval=TRUE}
-N <- 1e5
+N <- 1e3
 
 set.seed(412)
 initvals <- c(rep(0, 4), 
                 rnorm(10, mean=0, sd=1e-3), 
                 0)
 
-
 M_vals <- c(1e-3, 1e-3, 1e-3, 1, 
             rep(1e-3, 10), 
             1e-3)
 
 
-
-t1.hmc <- Sys.time()
-
 eps_vals <- c(rep(1e-3, 3), 1e-4, rep(2e-4, 11))
 
+t1.hmc <- Sys.time()
 res <- hmc(N = N, theta.init = initvals, epsilon = eps_vals, L = 10, 
                     logPOSTERIOR  = glmm_poisson_posterior, 
                     Mdiag = M_vals, 
                     varnames=c(colnames(X), paste0("u", 1:ncol(Z)), "lambda"),
                     glogPOSTERIOR  = g_glmm_poisson_posterior, 
-                    y = y, X=X, Z=Z, m=10, nuxi=1, Axi=25) 
-
-mypath <- '/Users/samthomas/biostat'
-# saveRDS(res, file = paste(mypath, "example3.RData", sep="/"))
-
+                    y = y, X=X, Z=Z, m=10, nulambda=1, Alambda=25) 
 t2.hmc <- Sys.time()
 t2.hmc - t1.hmc
 res$accept/N
@@ -1083,18 +1069,8 @@ summary(res)
 ```
 
 
-```{r, echo=TRUE, eval=FALSE}
-N <- 1e5
-mypath <- '/Users/samthomas/biostat'
-res <- readRDS(paste(mypath, 'example3.RData', sep='/'))
-
-```
-
 ```{r,echo=TRUE, eval=TRUE}
-# plot(res, burnin=round(0.3*N), actual.mu=truevals_fixed, cols=1:ncol(X))
-
-plot(res, actual.mu = truevals_fixed, cols=1:4)
-# plot(res)
+diagplots(res, burnin=1000, actual.mu = truevals_fixed, cols=1:4)
 ```
 
 # Discussion

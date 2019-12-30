@@ -1,55 +1,5 @@
 
 
-#' @export
-diagplots <- function(result, actual.mu=NULL, burnin=100, cols=NULL) {
-
-  if (is.null(cols)) {
-    cols <- 1:ncol(result$thetaCombined)
-  }
-
-  thetaCombinedsubs <- result$thetaCombined[-c(1:burnin), cols]
-  pdata <- thetaCombinedsubs
-  pdata$t <- 1:nrow(pdata)
-  pdata <- reshape(pdata,
-                   varying = list(1:(ncol(pdata)-1)),
-                   v.names = "value",
-                   idvar = "t",
-                   timevar = "coefficient",
-                   times = colnames(pdata)[-ncol(pdata)],
-                   direction = "long")
-  pdata$true.mu <- rep(actual.mu, each=nrow(thetaCombinedsubs))
-
-  k <- ncol(result$thetaCombined)
-
-  # return list
-
-  # line plots of simulation
-  p1 <- ggplot2::ggplot(pdata, ggplot2::aes(t, value, colour=factor(coefficient))) + ggplot2::geom_line()
-  p1 <- p1 + ggplot2::facet_wrap(~ coefficient, ncol=trunc(sqrt(k)), scales="free_y")
-  p1 <- p1 + ggplot2::theme_bw()
-  p1
-
-  # histograms
-  p2 <- ggplot2::ggplot(pdata, ggplot2::aes(x=value, y=..density.., fill=factor(coefficient),
-                                            colour=factor(coefficient))) +
-    ggplot2::geom_histogram(bins=40)
-
-  if (!is.null(actual.mu)) {
-    p2 <- p2 + ggplot2::geom_vline(data=aggregate(pdata[4], pdata[2], mean),
-                                   mapping=ggplot2::aes(xintercept = true.mu), colour="red")
-  }
-
-  p2 <- p2 + ggplot2::facet_wrap(~ coefficient, ncol=trunc(sqrt(k)), scales="free")
-
-  p2 <- p2 + ggplot2::theme_bw()
-  p2
-
-
-  list(p1, p2)
-}
-
-
-
 #' Calculates Potential Scale Reduction Factor (psrf), also called the Rhat statistic,
 #' from models fit via \code{mh} or \code{hmc}
 #'
@@ -294,6 +244,97 @@ ess <- function(x) {
                })
   rho <- purrr::head_while(1 - V / var(x), ~ . > 0)
   N / (1 + sum(rho))
+}
+
+
+
+#' @export
+diagplots <- function(object, ...) {
+  UseMethod("diagplots")
+}
+
+#' Diagnostic plots for \code{hmclearn}
+#'
+#' Plots histograms of the posterior estimates.  Optionally, displays the 'actual'
+#' values given a simulated dataset.
+#'
+#' @param object an object of class \code{hmclearn}, usually a result of a call to \code{mh} or \code{hmc}
+#' @param burnin optional numeric parameter for the number of initial MCMC samples to omit from the summary
+#' @param plotfun integer 1 or 2 indicating which plots to display.  1 shows trace plots.  2 shows a histogram
+#' @param actual.mu optional numeric vector of true parameter values
+#' @param cols optional integer index indicating which parameters to display
+#' @param ... currently unused
+#' @return
+#' @export
+diagplots.hmclearn <- function(object, burnin=NULL, plotfun=2, actual.mu=NULL, cols=NULL) {
+
+  data <- combMatrix(object$thetaCombined, burnin=burnin)
+  data <- do.call(rbind, data)
+
+  if (is.null(cols)) {
+    cols <- 1:ncol(data)
+  }
+
+  if (!is.null(burnin)) {
+    thetaCombinedsubs <- data[-c(1:burnin), cols]
+  } else {
+    thetaCombinedsubs <- data[, cols]
+  }
+
+  pdata <- as.data.frame(thetaCombinedsubs)
+  pdata$t <- 1:nrow(pdata)
+  pdata <- reshape(pdata,
+                   varying = list(1:(ncol(pdata)-1)),
+                   v.names = "value",
+                   idvar = "t",
+                   timevar = "coefficient",
+                   times = colnames(pdata)[-ncol(pdata)],
+                   direction = "long")
+  pdata$true.mu <- rep(actual.mu, each=nrow(thetaCombinedsubs))
+
+  k <- ncol(data)
+
+  # return list
+
+  # line plots of simulation
+  p1 <- NULL
+  if (1 %in% plotfun) {
+    p1 <- ggplot2::ggplot(pdata, ggplot2::aes(t, value, colour=factor(coefficient))) + ggplot2::geom_line()
+    p1 <- p1 + ggplot2::facet_wrap(~ coefficient, ncol=trunc(sqrt(k)), scales="free_y")
+    p1 <- p1 + ggplot2::theme_bw()
+    p1
+  }
+
+  # histograms
+  p2 <- NULL
+  if (2 %in% plotfun) {
+    p2 <- ggplot2::ggplot(pdata, ggplot2::aes(x=value, y=..density.., fill=factor(coefficient),
+                                              colour=factor(coefficient))) +
+      ggplot2::geom_histogram(bins=40)
+
+    if (!is.null(actual.mu)) {
+      p2 <- p2 + ggplot2::geom_vline(data=aggregate(pdata[4], pdata[2], mean),
+                                     mapping=ggplot2::aes(xintercept = true.mu), colour="red")
+    }
+
+    p2 <- p2 + ggplot2::facet_wrap(~ coefficient, ncol=trunc(sqrt(k)), scales="free")
+
+    p2 <- p2 + ggplot2::theme_bw()
+    p2
+  }
+
+  allplots <- NULL
+  if (1 %in% plotfun) {
+    allplots <- c(allplots, list(trace=p1))
+  }
+  if (2 %in% plotfun) {
+    allplots <- c(allplots, list(histogram=p2))
+  }
+
+  allplots
+
+
+
 }
 
 
