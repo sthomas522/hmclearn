@@ -55,7 +55,7 @@ Next, we store the parameter values from the Frequentist fit
 ```{r, echo=TRUE}
 beta.true <- as.numeric(coefficients(f))
 sigma2.true <- sigma(f)^2
-theta.true <- c(beta.true, sigma2.true)
+theta.true <- c(beta.true, log(sigma2.true))
 
 ```
 
