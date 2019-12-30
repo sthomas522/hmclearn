@@ -248,8 +248,20 @@ ess <- function(x) {
 
 
 
+#' Diagnostic plots for \code{hmclearn}
+#'
+#' Plots histograms of the posterior estimates.  Optionally, displays the 'actual'
+#' values given a simulated dataset.
+#'
+#' @param object an object of class \code{hmclearn}, usually a result of a call to \code{mh} or \code{hmc}
+#' @param burnin optional numeric parameter for the number of initial MCMC samples to omit from the summary
+#' @param plotfun integer 1 or 2 indicating which plots to display.  1 shows trace plots.  2 shows a histogram
+#' @param actual.mu optional numeric vector of true parameter values
+#' @param cols optional integer index indicating which parameters to display
+#' @param ... currently unused
+#' @return
 #' @export
-diagplots <- function(object, ...) {
+diagplots <- function(object, burnin=NULL, plotfun=2, actual.mu=NULL, cols=NULL, ...) {
   UseMethod("diagplots")
 }
 
@@ -266,7 +278,7 @@ diagplots <- function(object, ...) {
 #' @param ... currently unused
 #' @return
 #' @export
-diagplots.hmclearn <- function(object, burnin=NULL, plotfun=2, actual.mu=NULL, cols=NULL) {
+diagplots.hmclearn <- function(object, burnin=NULL, plotfun=2, actual.mu=NULL, cols=NULL, ...) {
 
   data <- combMatrix(object$thetaCombined, burnin=burnin)
   data <- do.call(rbind, data)
