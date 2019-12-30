@@ -109,6 +109,56 @@ All parameters specified within the list \code{param} are passed to these the po
 }
 }
 
+\examples{
+
+# linear regression
+data(warpbreaks)
+
+X <- model.matrix(breaks ~ wool*tension, data=warpbreaks)
+y <- warpbreaks$breaks
+
+Nmh <- 1e5
+nuval <- c(rep(4, 6), 1e-1)
+fm1_mh <- mh(Nmh, theta.init = c(rep(0, 6), 1), nu=nuval,
+             qPROP = qprop, qFUN = qfun,
+             logPOSTERIOR = linear_posterior,
+             varnames = c(colnames(X), "log_sigma_sq"),
+             param=list(y=y, X=X), parallel= TRUE, chains=4)
+
+fm1_mh$accept / Nmh
+
+summary(fm1_mh, burnin=1000)
+mcmc_trace(fm1_mh, burnin=1000)
+mcmc_hist(fm1_mh, burnin=1000)
+
+# poisson regression
+
+library(carData)
+data(AMSsurvey)
+
+# design matrix
+X <- model.matrix(count ~ type + sex + citizen, data=AMSsurvey)
+
+# independent variable is count data
+y <- AMSsurvey$count
+p <- ncol(X)
+
+Nmh <- 5e4
+
+nuval <- c(rep(1, p-1), 1e-1)
+
+fm3_mh <- mh(Nmh, theta.init =rep(0, p), nu=1e-3,
+             qPROP = qprop, qFUN = qfun,
+             logPOSTERIOR = poisson_posterior,
+             varnames = colnames(X),
+             y=y, X=X)
+
+fm3_mh$accept / Nmh
+
+mcmc_trace(fm3_mh, burnin=1000)
+mcmc_dens(fm3_mh, burnin=1000)
+
+}
 \author{
 Samuel Thomas \email{samthoma@iu.edu}, Wanzhu Tu \email{wtu@iu.edu}
 }
