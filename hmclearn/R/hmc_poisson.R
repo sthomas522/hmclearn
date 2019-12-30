@@ -6,7 +6,20 @@ pfun_poisson <- function(PARAM, ...) {
   poisson_posterior(theta=theta, ...)
 }
 
-# prior for beta is mean 0 with diagonal covariance B^-1
+#' Poisson regression log posterior
+#'
+#' Compute the log posterior of a poisson regression model.
+#' Priors are multivariate Normal for the linear predictors
+#'
+#' @param theta vector of linear predictor parameters
+#' @param y numeric vector for the dependent variable
+#' @param X numeric design matrix of independent variables
+#' @param B prior for linear predictors is multivariate Normal with mean 0 with diagonal covariance B^-1
+#' @details The likelihood function for poisson regression
+#' @details \deqn{L(\beta; y, X) = \prod_{i=1}^n \frac{e^{-e^{X_i\beta}}e^{y_iX_i\beta}}{y_i!}}
+#' @details with priors \eqn{\beta \sim N(0, BI)}.
+#' @details The input parameter vector \code{theta} is of length \code{k}, containing parameter values for \eqn{\beta}
+#' @return numeric value for the log posterior
 #' @export
 poisson_posterior <- function(theta, y, X, B=0.01) {
   k <- length(theta)
@@ -30,7 +43,20 @@ log_lik_poisson <- function(beta_param, y, X) {
   y %*% X %*% beta_param - sum(exp( X %*% beta_param)) # - sum(lfactorial(y))
 }
 
-# gradient of the log posterior for hmc
+#' Gradient of Poisson regression log posterior
+#'
+#' Compute the gradient of the log posterior of a poisson regression model.
+#' Priors are multivariate Normal for the linear predictors
+#'
+#' @param theta vector of linear predictor parameters
+#' @param y numeric vector for the dependent variable
+#' @param X numeric design matrix of independent variables
+#' @param B prior for linear predictors is multivariate Normal with mean 0 with diagonal covariance B^-1
+#' @details The likelihood function for poisson regression
+#' @details \deqn{L(\beta; y, X) = \prod_{i=1}^n \frac{e^{-e^{X_i\beta}}e^{y_iX_i\beta}}{y_i!}}
+#' @details with priors \eqn{\beta \sim N(0, BI)}.
+#' @details The input parameter vector \code{theta} is of length \code{k}, containing parameter values for \eqn{\beta}
+#' @return numeric vector for the gradient of the log posterior
 #' @export
 g_poisson_posterior <- function(beta_param, y, X, B=0.01) {
   n <- length(y)
