@@ -6,7 +6,20 @@ pfun_logistic <- function(PARAM, ...) {
   logistic_posterior(theta=theta, ...)
 }
 
-# prior for beta is mean 0 with diagonal covariance B^-1
+#' Logistic regression log posterior
+#'
+#' Compute the log posterior of a logistic regression model.
+#' Priors are multivariate Normal for the linear predictors
+#'
+#' @param theta vector of linear predictor parameters
+#' @param y numeric vector for the dependent variable
+#' @param X numeric design matrix of independent variables
+#' @param B prior for linear predictors is multivariate Normal with mean 0 with diagonal covariance B^-1
+#' @details The likelihood function for logistic regression
+#' @details \deqn{L(\beta; X, y) = \prod_{i=1}^{n} \left(\frac{1}{1+e^{-X_i\beta}}\right)^{y_i} \left(\frac{e^{-X_i\beta}}{1+e^{-X_i\beta}}\right)^{1-y_i}}
+#' @details with priors \eqn{\beta \sim N(0, BI)}.
+#' @details The input parameter vector \code{theta} is of length \code{k}, containing parameter values for \eqn{\beta}
+#' @return numeric value for the log posterior
 #' @export
 logistic_posterior <- function(theta, y, X, B=0.01) {
   k <- length(theta)
@@ -33,7 +46,20 @@ log_lik_bin <- function(beta_param, y, X) {
 }
 
 
-# gradient of the log posterior for hmc
+#' Gradient of logistic regression log posterior
+#'
+#' Compute the gradient of the log posterior of a logistic regression model.
+#' Priors are multivariate Normal for the linear predictors
+#'
+#' @param theta vector of linear predictor parameters
+#' @param y numeric vector for the dependent variable
+#' @param X numeric design matrix of independent variables
+#' @param B prior for linear predictors is multivariate Normal with mean 0 with diagonal covariance B^-1
+#' @details The likelihood function for logistic regression
+#' @details \deqn{L(\beta; X, y) = \prod_{i=1}^{n} \left(\frac{1}{1+e^{-X_i\beta}}\right)^{y_i} \left(\frac{e^{-X_i\beta}}{1+e^{-X_i\beta}}\right)^{1-y_i}}
+#' @details with priors \eqn{\beta \sim N(0, BI)}.
+#' @details The input parameter vector \code{theta} is of length \code{k}, containing parameter values for \eqn{\beta}
+#' @return numeric vector for the gradient of the log posterior
 #' @export
 g_logistic_posterior <- function(beta, y, X, B=0.01) {
   n <- length(y)

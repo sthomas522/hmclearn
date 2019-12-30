@@ -17,7 +17,7 @@ linear_posterior(theta, y, X, a = 1e-04, b = 1e-04, B = 0.001)
 
 \item{b}{hyperprior for the Inverse Gamma scale parameter}
 
-\item{B}{inverse of the diagonal of the Covariance hyperprior for the linear predictors}
+\item{B}{prior for linear predictors is multivariate Normal with mean 0 with diagonal covariance B^-1}
 }
 \value{
 numeric value for the log posterior

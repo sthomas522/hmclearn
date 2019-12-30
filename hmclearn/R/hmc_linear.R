@@ -11,7 +11,7 @@
 #' @param X numeric design matrix of independent variables
 #' @param a hyperprior for the Inverse Gamma shape parameter
 #' @param b hyperprior for the Inverse Gamma scale parameter
-#' @param B inverse of the diagonal of the Covariance hyperprior for the linear predictors
+#' @param B prior for linear predictors is multivariate Normal with mean 0 with diagonal covariance B^-1
 #' @details The likelihood function for linear regression
 #' @details \deqn{p(y | X, \beta; \sigma^2) = \frac{1}{(2\pi\sigma^2)^{n/2}}\exp{\left(-\frac{1}{2\sigma^2} (y - X\beta)^T(y-X\beta) \right)}}
 #' @details with priors \eqn{p(\sigma^2) \sim IG(a, b)} and \eqn{\beta \sim N(0, BI)}.  The variance term is log transformed \eqn{\gamma = \log\sigma^2}
@@ -45,7 +45,7 @@ linear_posterior <- function(theta, y, X, a=1e-4, b=1e-4, B=0.001) {
 #' @param X numeric design matrix of independent variables
 #' @param a hyperprior for the Inverse Gamma shape parameter
 #' @param b hyperprior for the Inverse Gamma scale parameter
-#' @param B inverse of the diagonal of the Covariance hyperprior for the linear predictors
+#' @param B prior for linear predictors is multivariate Normal with mean 0 with diagonal covariance B^-1
 #' @details The likelihood function for linear regression
 #' @details \deqn{p(y | X, \beta; \sigma^2) = \frac{1}{(2\pi\sigma^2)^{n/2}}\exp{\left(-\frac{1}{2\sigma^2} (y - X\beta)^T(y-X\beta) \right)}}
 #' @details with priors \eqn{p(\sigma^2) \sim IG(a, b)} and \eqn{\beta \sim N(0, BI)}.  The variance term is log transformed \eqn{\gamma = \log\sigma^2}
