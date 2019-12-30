@@ -138,6 +138,85 @@ Leapfrog algorithm.
 }
 }
 
+\examples{
+# linear regression
+data(warpbreaks)
+
+X <- model.matrix(breaks ~ wool*tension, data=warpbreaks)
+y <- warpbreaks$breaks
+
+N <- 1e4
+eps_vals <- c(rep(2e-1, 6), 2e-2)
+
+set.seed(143)
+fm1_hmc <- hmc(N, theta.init = c(rep(0, 6), 1),
+               epsilon = eps_vals, L = 20,
+               logPOSTERIOR = linear_posterior,
+               glogPOSTERIOR = g_linear_posterior,
+               varnames = c(colnames(X), "log_sigma_sq"),
+               param=list(y=y, X=X), parallel = TRUE, chains = 4)
+
+fm1_hmc$accept / N
+summary(fm1_hmc)
+
+mcmc_trace(fm1_hmc, burnin=1000)
+mcmc_hist(fm1_hmc, burnin=1000)
+
+fm1_pred <- predict(fm1_hmc, y=y, X=X)
+pp_check(fm1_pred)
+
+# logistic regression
+library(mlbench)
+data(BreastCancer)
+
+bc <- BreastCancer[complete.cases(BreastCancer), ]
+X <- model.matrix(Class ~ Cl.thickness + Cell.size + Cell.shape, data = bc)
+y <- ifelse(bc$Class == "benign", 0, 1)
+p <- ncol(X)
+N <- 1e4
+
+set.seed(321)
+fm2_hmc <- hmc(N, theta.init = rep(0, p),
+               epsilon = 1e-1, L=20,
+               logPOSTERIOR = logistic_posterior,
+               glogPOSTERIOR = g_logistic_posterior,
+               randlength = TRUE,
+               varnames = colnames(X),
+               param=list(y=y, X=X), parallel = TRUE, chains=4)
+
+fm2_hmc$accept / N
+
+summary(fm2_hmc)
+mcmc_rhat(fm2_hmc)
+mcmc_rhat_hist(fm2_hmc)
+
+fm2_pred <- predict(fm2_hmc, y=y, X=X, fam="binomial")
+pp_check(fm2_pred)
+
+# poisson regression
+library(carData)
+data(AMSsurvey)
+
+# design matrix
+X <- model.matrix(count ~ type + sex + citizen, data=AMSsurvey)
+
+# independent variable is count data
+y <- AMSsurvey$count
+p <- ncol(X)
+
+N <- 1e4
+
+fm3_hmc <- hmc(N, theta.init = rep(0, p), epsilon = 2e-3, L = 20,
+               logPOSTERIOR = poisson_posterior,
+               glogPOSTERIOR=g_poisson_posterior,
+               varnames = colnames(X),
+               param=list(y = y, X=X), parallel=TRUE, chains=4)
+fm3_hmc$accept / N
+
+summary(fm3_hmc)
+
+plot(fm3_hmc, burnin=1000)
+}
 \references{
 \emph{HMC in R} paper
 

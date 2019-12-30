@@ -155,6 +155,8 @@ fm3_mh <- mh(Nmh, theta.init =rep(0, p), nu=1e-3,
 
 fm3_mh$accept / Nmh
 
+summary(fm3_mh)
+
 mcmc_trace(fm3_mh, burnin=1000)
 mcmc_dens(fm3_mh, burnin=1000)
 
