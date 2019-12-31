@@ -168,7 +168,7 @@ mhpar <- function(paramlst, ...) {
 #'              qPROP = qprop, qFUN = qfun,
 #'              logPOSTERIOR = linear_posterior,
 #'              varnames = c(colnames(X), "log_sigma_sq"),
-#'              param=list(y=y, X=X), parallel= TRUE, chains=4)
+#'              param=list(y=y, X=X), parallel= TRUE, chains=2)
 #'
 #' fm1_mh$accept / Nmh
 #'
@@ -631,7 +631,7 @@ hmcpar <- function(paramlst, ...) {
 #'                logPOSTERIOR = linear_posterior,
 #'                glogPOSTERIOR = g_linear_posterior,
 #'                varnames = c(colnames(X), "log_sigma_sq"),
-#'                param=list(y=y, X=X), parallel = TRUE, chains = 4)
+#'                param=list(y=y, X=X), parallel = TRUE, chains = 2)
 #'
 #' fm1_hmc$accept / N
 #' summary(fm1_hmc)
@@ -659,7 +659,7 @@ hmcpar <- function(paramlst, ...) {
 #'                glogPOSTERIOR = g_logistic_posterior,
 #'                randlength = TRUE,
 #'                varnames = colnames(X),
-#'                param=list(y=y, X=X), parallel = TRUE, chains=4)
+#'                param=list(y=y, X=X), parallel = TRUE, chains=2)
 #'
 #' fm2_hmc$accept / N
 #'
@@ -687,7 +687,7 @@ hmcpar <- function(paramlst, ...) {
 #'                logPOSTERIOR = poisson_posterior,
 #'                glogPOSTERIOR=g_poisson_posterior,
 #'                varnames = colnames(X),
-#'                param=list(y = y, X=X), parallel=TRUE, chains=4)
+#'                param=list(y = y, X=X), parallel=TRUE, chains=2)
 #' fm3_hmc$accept / N
 #'
 #' summary(fm3_hmc)

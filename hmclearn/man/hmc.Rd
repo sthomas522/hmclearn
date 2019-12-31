@@ -160,7 +160,7 @@ fm1_hmc <- hmc(N, theta.init = c(rep(0, 6), 1),
                logPOSTERIOR = linear_posterior,
                glogPOSTERIOR = g_linear_posterior,
                varnames = c(colnames(X), "log_sigma_sq"),
-               param=list(y=y, X=X), parallel = TRUE, chains = 4)
+               param=list(y=y, X=X), parallel = TRUE, chains = 2)
 
 fm1_hmc$accept / N
 summary(fm1_hmc)
@@ -188,7 +188,7 @@ fm2_hmc <- hmc(N, theta.init = rep(0, p),
                glogPOSTERIOR = g_logistic_posterior,
                randlength = TRUE,
                varnames = colnames(X),
-               param=list(y=y, X=X), parallel = TRUE, chains=4)
+               param=list(y=y, X=X), parallel = TRUE, chains=2)
 
 fm2_hmc$accept / N
 
@@ -216,7 +216,7 @@ fm3_hmc <- hmc(N, theta.init = rep(0, p), epsilon = 2e-3, L = 20,
                logPOSTERIOR = poisson_posterior,
                glogPOSTERIOR=g_poisson_posterior,
                varnames = colnames(X),
-               param=list(y = y, X=X), parallel=TRUE, chains=4)
+               param=list(y = y, X=X), parallel=TRUE, chains=2)
 fm3_hmc$accept / N
 
 summary(fm3_hmc)

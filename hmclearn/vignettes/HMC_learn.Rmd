@@ -353,9 +353,9 @@ N <- 10000
 set.seed(143)
 ex1 <- hmc(N, theta.init = c(4, 4), epsilon = 2e-2, L = 22, 
                    logPOSTERIOR = gamma.lposterior, 
-                   glogPOSTERIOR = g.gamma.lposterior, X=X, 
-                   varnames = c("alpha", "beta"),
-                   eta1 = 1e-4, eta2 = 1e-4)
+                   glogPOSTERIOR = g.gamma.lposterior, 
+                    param=list(X=X, eta1=1e-4, eta2=1e-4), 
+                   varnames = c("alpha", "beta"))
 ```
 
 The \textit{hmclearn} package has a diagnostic plot function to show trace plots and histograms from the simulation.  An optional parameter \textit{actual.mu} can be used to input the true values of the parameters from simulated data.  A default \textit{burnin} period of 100 samples is also selected for these plots.  
@@ -467,9 +467,9 @@ N <- 10000
 set.seed(143)
 ex1b <- hmc(N, theta.init = c(0, 0), epsilon = 1e-3, L = 30, 
                    logPOSTERIOR = gamma.lposterior2, 
-                   glogPOSTERIOR = g.gamma.lposterior2, X=X, 
-                   varnames = c("a", "b"),
-                   eta1 = 1e-4, eta2 = 1e-4)
+                   glogPOSTERIOR = g.gamma.lposterior2, 
+                   param=list(X=X, eta1=1e-4, eta2=1e-4), 
+                   varnames = c("a", "b"))
 ```
 
 HMC accurately fits the model using the log-transformed parameters, as we can see through the diagnostic plots and summary results.
@@ -1058,7 +1058,7 @@ res <- hmc(N = N, theta.init = initvals, epsilon = eps_vals, L = 10,
                     Mdiag = M_vals, 
                     varnames=c(colnames(X), paste0("u", 1:ncol(Z)), "lambda"),
                     glogPOSTERIOR  = g_glmm_poisson_posterior, 
-                    y = y, X=X, Z=Z, m=10, nulambda=1, Alambda=25) 
+                    param=list(y = y, X=X, Z=Z, m=10, nulambda=1, Alambda=25)) 
 t2.hmc <- Sys.time()
 t2.hmc - t1.hmc
 res$accept/N
