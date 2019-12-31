@@ -15,7 +15,7 @@ combMatrix <- function(x, burnin) {
 #'
 #' summary method for class \code{hmclearn}
 #'
-#' @param x an object of class \code{hmclearn}, usually a result of a call to \code{mh} or \code{hmc}
+#' @param object an object of class \code{hmclearn}, usually a result of a call to \code{mh} or \code{hmc}
 #' @param burnin optional numeric parameter for the number of initial MCMC samples to omit from the summary
 #' @param probs quantiles to summarize the posterior distribution
 #' @param ... additional arguments to pass to \code{quantile}
@@ -23,22 +23,22 @@ combMatrix <- function(x, burnin) {
 #' @references Gelman, A., et. al. (2013) \emph{Bayesian Data Analysis}.  Chapman and Hall/CRC.
 #' @references Gelman, A. and Rubin, D. (1992) \emph{Inference from Iterative Simulation Using Multiple Sequences}.  Statistical Science 7(4) 457-472.
 #' @export
-summary.hmclearn <- function(x, burnin=NULL, probs=c(0.05, 0.25, 0.5, 0.75, 0.95), ...) {
+summary.hmclearn <- function(object, burnin=NULL, probs=c(0.05, 0.25, 0.5, 0.75, 0.95), ...) {
   cat("Summary of HMC simulation\n\n")
 
   # remove burnin
-  thetaCombined <- combMatrix(x$thetaCombined, burnin=burnin)
+  thetaCombined <- combMatrix(object$thetaCombined, burnin=burnin)
   thetaCombined <- do.call(rbind, thetaCombined)
 
   # quantiles
   res <- t(apply(thetaCombined, 2, quantile, probs=probs, ...))
-  if (!is.null(x$varnames)) {
-    row.names(res) <- x$varnames
+  if (!is.null(object$varnames)) {
+    row.names(res) <- object$varnames
   }
 
   # rhat calc
-  if (x$chains > 1) {
-    rhat <- psrf(x, burnin=burnin)
+  if (object$chains > 1) {
+    rhat <- psrf(object, burnin=burnin)
 
     res <- cbind(res, rhat)
     colnames(res)[ncol(res)] <- "rhat"
@@ -83,8 +83,8 @@ print.hmclearn <- function(obj) {
 #' @param ... additional arguments to pass to \code{quantile}
 #' @return numeric vector of parameter point estimates
 #' @export
-coef.hmclearn <- function(x, burnin=NULL, prob=0.5, ...) {
-  thetaCombined <- combMatrix(x$thetaCombined, burnin=burnin)
+coef.hmclearn <- function(object, burnin=NULL, prob=0.5, ...) {
+  thetaCombined <- combMatrix(object$thetaCombined, burnin=burnin)
   thetaCombined <- do.call(rbind, thetaCombined)
   apply(thetaCombined, 2, quantile, probs=prob, ...)
 }

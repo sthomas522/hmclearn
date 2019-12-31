@@ -1,4 +1,12 @@
-
+#' @importFrom stats aggregate
+#' @importFrom stats quantile
+#' @importFrom stats rbinom
+#' @importFrom stats reshape
+#' @importFrom stats rnorm
+#' @importFrom stats rpois
+#' @importFrom stats runif
+#' @importFrom stats var
+#' @importFrom utils tail
 
 create_Uj <- function(uj, neg=TRUE) {
   q <- length(uj)

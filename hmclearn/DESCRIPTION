@@ -11,10 +11,15 @@ Encoding: UTF-8
 LazyData: true
 Suggests: 
     knitr,
-    rmarkdown
+    rmarkdown,
+    Matrix,
+    lme4,
+    carData,
+    mlbench
 VignetteBuilder: knitr
 RoxygenNote: 7.0.1
 Imports: 
     bayesplot,
     parallel,
-    mvtnorm
+    mvtnorm,
+    MASS

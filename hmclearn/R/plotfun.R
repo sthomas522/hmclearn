@@ -351,9 +351,9 @@ mcmc_violin.hmclearn <- function(object, burnin=NULL, ...) {
 
 #' @rdname hmclearn-plots
 #' @export
-plot.hmclearn <- function(object, burnin=NULL, ...) {
+plot.hmclearn <- function(x, burnin=NULL, ...) {
   # diagplots(x, ...)
-  thetaCombined <- combMatrix(object$thetaCombined, burnin=burnin)
+  thetaCombined <- combMatrix(x$thetaCombined, burnin=burnin)
   bayesplot::mcmc_hist(thetaCombined, )
 }
 

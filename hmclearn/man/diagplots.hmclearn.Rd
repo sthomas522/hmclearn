@@ -26,9 +26,6 @@
 
 \item{...}{currently unused}
 }
-\value{
-
-}
 \description{
 Plots histograms of the posterior estimates.  Optionally, displays the 'actual'
 values given a simulated dataset.

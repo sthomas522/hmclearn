@@ -236,15 +236,15 @@ variog <- function(x, lagmax=NULL) {
 }
 
 
-ess <- function(x) {
-  N <- length(x)
-  V <- purrr::map_dbl(seq_len(N - 1),
-               function(t) {
-                 mean(diff(x, lag = t) ^ 2, na.rm = TRUE)
-               })
-  rho <- purrr::head_while(1 - V / var(x), ~ . > 0)
-  N / (1 + sum(rho))
-}
+# ess <- function(x) {
+#   N <- length(x)
+#   V <- purrr::map_dbl(seq_len(N - 1),
+#                function(t) {
+#                  mean(diff(x, lag = t) ^ 2, na.rm = TRUE)
+#                })
+#   rho <- purrr::head_while(1 - V / var(x), ~ . > 0)
+#   N / (1 + sum(rho))
+# }
 
 
 
@@ -259,7 +259,6 @@ ess <- function(x) {
 #' @param actual.mu optional numeric vector of true parameter values
 #' @param cols optional integer index indicating which parameters to display
 #' @param ... currently unused
-#' @return
 #' @export
 diagplots <- function(object, burnin=NULL, plotfun=2, actual.mu=NULL, cols=NULL, ...) {
   UseMethod("diagplots")
@@ -276,7 +275,6 @@ diagplots <- function(object, burnin=NULL, plotfun=2, actual.mu=NULL, cols=NULL,
 #' @param actual.mu optional numeric vector of true parameter values
 #' @param cols optional integer index indicating which parameters to display
 #' @param ... currently unused
-#' @return
 #' @export
 diagplots.hmclearn <- function(object, burnin=NULL, plotfun=2, actual.mu=NULL, cols=NULL, ...) {
 

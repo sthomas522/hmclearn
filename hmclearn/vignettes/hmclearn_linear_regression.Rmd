@@ -148,7 +148,7 @@ t1.hmc <- Sys.time()
                     glogPOSTERIOR = g_linear_posterior, 
                     param=list(y = y, X=X), 
                     varnames = c(colnames(X), "log_sigma2"),
-                    parallel=TRUE, chains=4)
+                    parallel=TRUE, chains=2)
 t2.hmc <- Sys.time()
 t2.hmc - t1.hmc
 

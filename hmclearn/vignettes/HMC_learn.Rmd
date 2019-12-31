@@ -1,5 +1,6 @@
 ---
 title: "HMC in R"
+author:  "Samuel Thomas and Wanzhu Tu"
 output: pdf_document
 vignette: >
   %\VignetteIndexEntry{HMC_learn}
