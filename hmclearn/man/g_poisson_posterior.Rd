@@ -4,16 +4,16 @@
 \alias{g_poisson_posterior}
 \title{Gradient of Poisson regression log posterior}
 \usage{
-g_poisson_posterior(beta_param, y, X, B = 0.01)
+g_poisson_posterior(theta, y, X, B = 0.01)
 }
 \arguments{
+\item{theta}{vector of linear predictor parameters}
+
 \item{y}{numeric vector for the dependent variable}
 
 \item{X}{numeric design matrix of independent variables}
 
 \item{B}{prior for linear predictors is multivariate Normal with mean 0 with diagonal covariance B^-1}
-
-\item{theta}{vector of linear predictor parameters}
 }
 \value{
 numeric vector for the gradient of the log posterior

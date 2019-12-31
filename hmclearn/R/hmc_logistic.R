@@ -61,15 +61,15 @@ log_lik_bin <- function(beta_param, y, X) {
 #' @details The input parameter vector \code{theta} is of length \code{k}, containing parameter values for \eqn{\beta}
 #' @return numeric vector for the gradient of the log posterior
 #' @export
-g_logistic_posterior <- function(beta, y, X, B=0.01) {
+g_logistic_posterior <- function(theta, y, X, B=0.01) {
   n <- length(y)
-  k <- length(beta)
-  beta <- as.numeric(beta)
+  k <- length(theta)
+  beta <- as.numeric(theta)
 
   nu <- diag(1/B, k, k)
   inv.nu <- diag(B, k, k)
 
   result <- t(y-1) %*% X %*% diag(1, k, k) +
-    t(exp(-X %*% beta) / (1 + exp(-X %*% beta))) %*% X - t(inv.nu %*% beta)
+    t(exp(-X %*% theta) / (1 + exp(-X %*% theta))) %*% X - t(inv.nu %*% theta)
   return(result)
 }

@@ -86,6 +86,8 @@ mhpar <- function(paramlst, ...) {
 #' @param nu Single value or vector parameter passed to \code{qPROP} or \code{qFUN} for the proposal density
 #' @param varnames Optional vector of theta parameter names
 #' @param ... Additional parameters for \code{logPOSTERIOR}
+#' @param chains Number of MCMC chains to run
+#' @param parallel Logical to set whether MCMC chains should be run in parallel
 #' @return Object of class \code{hmclearn}
 #'
 #' @section Elements for \code{hmclearn} objects:
@@ -363,6 +365,7 @@ qprop <- function(theta1, nu) {
 #' @param Minv Inverse Mass matrix
 #' @param constrain Optional vector of which parameters in \code{theta} accept positive values only.  Default is that all parameters accept all real numbers
 #' @param lastSTEP Boolean indicating whether to calculate the last half-step of the momentum update
+#' @param ... Additional parameters passed to glogPOSTERIOR
 #' @references Neal, Radford. 2011. \emph{MCMC Using Hamiltonian Dynamics.} In Handbook of Markov Chain Monte Carlo, edited by Steve Brooks, Andrew Gelman, Galin L. Jones, and Xiao-Li Meng, 116–62. Chapman; Hall/CRC.
 #' @return List containing two elements:  \code{theta.new} the ending value of theta and \code{r.new} the ending value of the momentum
 #' @export
@@ -566,6 +569,8 @@ hmcpar <- function(paramlst, ...) {
 #' @param constrain Optional vector of which parameters in \code{theta} accept positive values only.  Default is that all parameters accept all real numbers
 #' @param verbose Logical to determine whether to display the progress of the HMC algorithm
 #' @param param(...) List of additional parameters for \code{logPOSTERIOR} and \code{glogPOSTERIOR}
+#' @param chains Number of MCMC chains to run
+#' @param parallel Logical to set whether MCMC chains should be run in parallel
 #' @return Object of class \code{hmclearn}
 #'
 #' @section Elements for \code{hmclearn} objects:

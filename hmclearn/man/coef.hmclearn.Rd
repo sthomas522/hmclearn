@@ -4,16 +4,16 @@
 \alias{coef.hmclearn}
 \title{Extract Model Coefficients}
 \usage{
-\method{coef}{hmclearn}(x, burnin = NULL, prob = 0.5, ...)
+\method{coef}{hmclearn}(object, burnin = NULL, prob = 0.5, ...)
 }
 \arguments{
-\item{x}{an object of class \code{hmclearn}, usually a result of a call to \code{mh} or \code{hmc}}
+\item{object}{an object of class \code{hmclearn}, usually a result of a call to \code{mh} or \code{hmc}}
 
 \item{burnin}{optional numeric parameter for the number of initial MCMC samples to omit from the summary}
 
-\item{...}{additional arguments to pass to \code{quantile}}
+\item{prob}{quantile to extract coefficients}
 
-\item{probs}{quantile to extract coefficients}
+\item{...}{additional arguments to pass to \code{quantile}}
 }
 \value{
 numeric vector of parameter point estimates

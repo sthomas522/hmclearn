@@ -58,14 +58,14 @@ log_lik_poisson <- function(beta_param, y, X) {
 #' @details The input parameter vector \code{theta} is of length \code{k}, containing parameter values for \eqn{\beta}
 #' @return numeric vector for the gradient of the log posterior
 #' @export
-g_poisson_posterior <- function(beta_param, y, X, B=0.01) {
+g_poisson_posterior <- function(theta, y, X, B=0.01) {
   n <- length(y)
-  k <- length(beta_param)
+  k <- length(theta)
 
   nu <- diag(1/B, k, k)
   inv.nu <- diag(B, k, k)
 
   # gradient
-  y %*% X - crossprod(exp(X %*% beta_param), X) - crossprod(beta_param, inv.nu)
+  y %*% X - crossprod(exp(X %*% theta), X) - crossprod(theta, inv.nu)
 }
 

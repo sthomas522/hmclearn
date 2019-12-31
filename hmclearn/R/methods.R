@@ -77,9 +77,9 @@ print.hmclearn <- function(obj) {
 #'
 #' Method for \code{hmclearn} objects created by \code{mh} and \code{hmc} functions.  Extracts the specified quantile of the posterior.
 #'
-#' @param x an object of class \code{hmclearn}, usually a result of a call to \code{mh} or \code{hmc}
+#' @param object an object of class \code{hmclearn}, usually a result of a call to \code{mh} or \code{hmc}
 #' @param burnin optional numeric parameter for the number of initial MCMC samples to omit from the summary
-#' @param probs quantile to extract coefficients
+#' @param prob quantile to extract coefficients
 #' @param ... additional arguments to pass to \code{quantile}
 #' @return numeric vector of parameter point estimates
 #' @export

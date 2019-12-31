@@ -37,6 +37,8 @@ leapfrog(
 \item{constrain}{Optional vector of which parameters in \code{theta} accept positive values only.  Default is that all parameters accept all real numbers}
 
 \item{lastSTEP}{Boolean indicating whether to calculate the last half-step of the momentum update}
+
+\item{...}{Additional parameters passed to glogPOSTERIOR}
 }
 \value{
 List containing two elements:  \code{theta.new} the ending value of theta and \code{r.new} the ending value of the momentum

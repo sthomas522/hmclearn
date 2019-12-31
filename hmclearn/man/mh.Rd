@@ -33,6 +33,10 @@ mh(
 
 \item{varnames}{Optional vector of theta parameter names}
 
+\item{chains}{Number of MCMC chains to run}
+
+\item{parallel}{Logical to set whether MCMC chains should be run in parallel}
+
 \item{...}{Additional parameters for \code{logPOSTERIOR}}
 }
 \value{

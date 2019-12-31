@@ -4,16 +4,16 @@
 \alias{g_logistic_posterior}
 \title{Gradient of logistic regression log posterior}
 \usage{
-g_logistic_posterior(beta, y, X, B = 0.01)
+g_logistic_posterior(theta, y, X, B = 0.01)
 }
 \arguments{
+\item{theta}{vector of linear predictor parameters}
+
 \item{y}{numeric vector for the dependent variable}
 
 \item{X}{numeric design matrix of independent variables}
 
 \item{B}{prior for linear predictors is multivariate Normal with mean 0 with diagonal covariance B^-1}
-
-\item{theta}{vector of linear predictor parameters}
 }
 \value{
 numeric vector for the gradient of the log posterior
