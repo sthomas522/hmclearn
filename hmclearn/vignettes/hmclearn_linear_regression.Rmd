@@ -23,9 +23,7 @@ library(hmclearn)
 Load Scots Race data and display the first few rows of the design matrix $X$.
 
 ```{r, echo=TRUE}
-library(MASS)
-
-ScotsRaces <- hills
+ScotsRaces <- MASS::hills
 
 X <- cbind(1, as.matrix(ScotsRaces[, -which(colnames(ScotsRaces) == "time")]))
 
@@ -159,12 +157,12 @@ res$accept/N
 summary(res, burnin=5000)
 ```
 
-```{r, echo=TRUE}
+```{r, echo=TRUE, fig.width=6, fig.height=4}
 mcmc_trace(res, burnin=5000)
 ```
 
 
-```{r, echo=TRUE}
+```{r, echo=TRUE, fig.width=6, fig.height=4}
 diagplots(res, actual.mu=theta.true, burnin=3000)
 
 
