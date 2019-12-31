@@ -208,7 +208,7 @@ predict.hmclearn <- function(object, y, X, fam = "linear", burnin=NULL, draws=NU
 #' @references Gabry, Jonah and Mahr, Tristan (2019).  \emph{bayesplot:  Plotting for Bayesian Models}.  \url{https://mc-stan.org/bayesplot}
 #' @references Gabry, J., Simpson, D., Vehtari, A., Betancourt, M., and Gelman, A (2019).  \emph{Visualization in Bayesian Workflow}.  Journal of the Royal Statistical Society: Series A. Vol 182.  Issue 2.  p.389-402.
 #' @export
-pp_check <- function(object, ...) {
+pp_check <- function(object, type, ...) {
   UseMethod("pp_check")
 }
 

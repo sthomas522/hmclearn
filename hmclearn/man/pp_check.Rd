@@ -4,14 +4,14 @@
 \alias{pp_check}
 \title{Posterior (or prior) predictive checks based on \code{bayesplot} package}
 \usage{
-pp_check(object, ...)
+pp_check(object, type, ...)
 }
 \arguments{
 \item{object}{an object of class \code{hmclearn}, usually a result of a call to \code{mh} or \code{hmc}}
 
-\item{...}{optional additional argument passed to the \code{bayesplot} functions}
-
 \item{type}{character identification of \code{pp_check} plot.  Available types are "overlaid", "multiple", "bars", and "stat".}
+
+\item{...}{optional additional argument passed to the \code{bayesplot} functions}
 }
 \description{
 Facilitates the display of several predictive checks from \code{bayesplot}

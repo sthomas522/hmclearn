@@ -42,9 +42,7 @@ hmc.fit(
 
 \item{verbose}{Logical to determine whether to display the progress of the HMC algorithm}
 
-\item{...}{Additional parameters for \code{logPOSTERIOR}}
-
-\item{param}{List of additional parameters for \code{logPOSTERIOR} and \code{glogPOSTERIOR}}
+\item{...}{Additional parameters for \code{logPOSTERIOR} and \code{glogPOSTERIOR}}
 }
 \value{
 List for \code{hmc}

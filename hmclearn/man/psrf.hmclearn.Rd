@@ -11,6 +11,8 @@ from models fit via \code{mh} or \code{hmc}}
 \item{object}{an object of class \code{hmclearn}, usually a result of a call to \code{mh} or \code{hmc}}
 
 \item{burnin}{optional numeric parameter for the number of initial MCMC samples to omit from the summary}
+
+\item{...}{currently unused}
 }
 \description{
 Gelman and Rubin's diagnostic assesses the mix of multiple MCMC chain with different initial parameter values

@@ -387,8 +387,7 @@ leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, Minv, co
 #' @param Mdiag Optional vector of the diagonal of the mass matrix \code{M}.  Defaults to unit diagonal.
 #' @param constrain Optional vector of which parameters in \code{theta} accept positive values only.  Default is that all parameters accept all real numbers
 #' @param verbose Logical to determine whether to display the progress of the HMC algorithm
-#' @param param List of additional parameters for \code{logPOSTERIOR} and \code{glogPOSTERIOR}
-#' @param ... Additional parameters for \code{logPOSTERIOR}
+#' @param ... Additional parameters for \code{logPOSTERIOR} and \code{glogPOSTERIOR}
 #' @return List for \code{hmc}
 #' @references Neal, Radford. 2011. \emph{MCMC Using Hamiltonian Dynamics.} In Handbook of Markov Chain Monte Carlo, edited by Steve Brooks, Andrew Gelman, Galin L. Jones, and Xiao-Li Meng, 116–62. Chapman; Hall/CRC.
 #' @export

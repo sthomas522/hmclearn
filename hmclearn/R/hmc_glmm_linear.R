@@ -16,7 +16,7 @@ pfun_lmm <- function(PARAM, ...) {
 #' @param y numeric vector for the dependent variable
 #' @param X numeric design matrix of fixed effect parameters
 #' @param Z numeric design matrix of random effect parameters
-#' @param q number of random effect parameters
+#' @param n number of random effect parameters
 #' @param A hyperprior numeric vector for the random effects off-diagonal \code{a}
 #' @param nueps hyperprior for the half-t prior of the error parameter \eqn{\nu}
 #' @param nulambda hyperprior for the half-t prior of the random effects diagonal \eqn{\lambda}
@@ -33,10 +33,11 @@ pfun_lmm <- function(PARAM, ...) {
 #' @references Chan, J. C. C., & Jeliazkov, I. (2009). \emph{MCMC estimation of restricted covariance matrices}. Journal of Computational and Graphical Statistics, 18(2), 457-480.
 #' @references Betancourt, M., & Girolami, M. (2015). \emph{Hamiltonian Monte Carlo for hierarchical models}. Current trends in Bayesian methodology with applications, 79, 30.
 #' @export
-lmm_posterior <- function(theta, y, X, Z, m, q, A = 1e4, nueps=1, nulambda=1, Aeps=25, Alambda=25, B=0.001) {
+lmm_posterior <- function(theta, y, X, Z, m, A = 1e4, nueps=1, nulambda=1, Aeps=25, Alambda=25, B=0.001) {
   Z <- as.matrix(Z)
   p <- ncol(X)
   n <- nrow(X)
+  q <- 1
 
   # extract parameters from theta vector
   beta_param <- as.numeric(theta[1:p])
@@ -93,7 +94,7 @@ lmm_posterior <- function(theta, y, X, Z, m, q, A = 1e4, nueps=1, nulambda=1, Ae
 #' @param y numeric vector for the dependent variable
 #' @param X numeric design matrix of fixed effect parameters
 #' @param Z numeric design matrix of random effect parameters
-#' @param q number of random effect parameters
+#' @param m number of random effect parameters
 #' @param A hyperprior numeric vector for the random effects off-diagonal \code{a}
 #' @param nueps hyperprior for the half-t prior of the error parameter \eqn{\nu}
 #' @param nulambda hyperprior for the half-t prior of the random effects diagonal \eqn{\lambda}
@@ -110,12 +111,12 @@ lmm_posterior <- function(theta, y, X, Z, m, q, A = 1e4, nueps=1, nulambda=1, Ae
 #' @references Chan, J. C. C., & Jeliazkov, I. (2009). \emph{MCMC estimation of restricted covariance matrices}. Journal of Computational and Graphical Statistics, 18(2), 457-480.
 #' @references Betancourt, M., & Girolami, M. (2015). \emph{Hamiltonian Monte Carlo for hierarchical models}. Current trends in Bayesian methodology with applications, 79, 30.
 #' @export
-g_lmm_posterior <- function(theta, y, X, Z, m, q, A = 1e4, nueps=1, nulambda=1, Aeps=25, Alambda=25, B=0.001) {
+g_lmm_posterior <- function(theta, y, X, Z, m, A = 1e4, nueps=1, nulambda=1, Aeps=25, Alambda=25, B=0.001) {
   require(Matrix)
   Z <- as.matrix(Z)
   p <- ncol(X)
   n <- nrow(X)
-
+  q <- 1
 
   # extract parameters from theta vector
   beta_param <- as.numeric(theta[1:p])
