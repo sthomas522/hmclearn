@@ -36,7 +36,6 @@
 \alias{mcmc_neff_data.hmclearn}
 \alias{mcmc_violin}
 \alias{mcmc_violin.hmclearn}
-\alias{plot.hmclearn}
 \title{Plotting for MCMC visualization and diagnostics provided by \code{bayesplot} package}
 \usage{
 mcmc_intervals(object, ...)
@@ -106,8 +105,6 @@ mcmc_neff_data(object, ...)
 mcmc_violin(object, ...)
 
 \method{mcmc_violin}{hmclearn}(object, burnin = NULL, ...)
-
-\method{plot}{hmclearn}(x, burnin = NULL, ...)
 }
 \arguments{
 \item{object}{an object of class \code{hmclearn}, usually a result of a call to \code{mh} or \code{hmc}}

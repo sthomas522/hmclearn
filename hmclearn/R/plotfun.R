@@ -349,12 +349,21 @@ mcmc_violin.hmclearn <- function(object, burnin=NULL, ...) {
   bayesplot::mcmc_violin(data, ...)
 }
 
-#' @rdname hmclearn-plots
+
+#' Plot Histograms of the Posterior Distribution
+#'
+#' Calls \code{mcmc_hist} from the \code{bayesplot} package to display histograms of the posterior
+#'
+#' @param x an object of class \code{hmclearn}, usually a result of a call to \code{mh} or \code{hmc}
+#' @param burnin optional numeric parameter for the number of initial MCMC samples to omit from the summary
+#' @param ... optional additional arguments to pass to the \code{bayesplot} functions
+#'
+#' @references Gabry, Jonah and Mahr, Tristan (2019).  \emph{bayesplot:  Plotting for Bayesian Models}.  \url{https://mc-stan.org/bayesplot}
 #' @export
 plot.hmclearn <- function(x, burnin=NULL, ...) {
   # diagplots(x, ...)
   thetaCombined <- combMatrix(x$thetaCombined, burnin=burnin)
-  bayesplot::mcmc_hist(thetaCombined, )
+  bayesplot::mcmc_hist(thetaCombined, ...)
 }
 
 

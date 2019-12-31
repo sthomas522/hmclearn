@@ -27,6 +27,8 @@ lmm_posterior(
 
 \item{Z}{numeric design matrix of random effect parameters}
 
+\item{m}{number of random effect parameters}
+
 \item{A}{hyperprior numeric vector for the random effects off-diagonal \code{a}}
 
 \item{nueps}{hyperprior for the half-t prior of the error parameter \eqn{\nu}}
@@ -38,8 +40,6 @@ lmm_posterior(
 \item{Alambda}{hyperprior for the half-t prior of the random effects diagonal \eqn{A_\lambda}}
 
 \item{B}{prior for linear predictors is multivariate Normal with mean 0 with diagonal covariance B^-1}
-
-\item{n}{number of random effect parameters}
 }
 \value{
 numeric value for the log posterior

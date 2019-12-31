@@ -145,6 +145,7 @@ Leapfrog algorithm.
 }
 
 \examples{
+\dontrun{
 # linear regression
 data(warpbreaks)
 
@@ -222,6 +223,7 @@ fm3_hmc$accept / N
 summary(fm3_hmc)
 
 plot(fm3_hmc, burnin=1000)
+}
 }
 \references{
 \emph{HMC in R} paper

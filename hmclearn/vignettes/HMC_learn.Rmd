@@ -26,7 +26,6 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(hmclearn)
-library(MASS)
 ```
 
 # Introduction
@@ -798,7 +797,7 @@ $$
 This example is from Hosmer and Lemeshow [@hosmer1989multiple] on a dataset of 189 births at a U.S. hospital.  The dependent variable is an indicator of low birth weight.  Data is available from the MASS package [@venables2013modern].  We prepare the data for analysis as noted in the text. 
 
 ```{r, echo=TRUE, eval=TRUE}
-birthwt2 <- birthwt
+birthwt2 <- MASS::birthwt
 
 # label race variable
 birthwt2$race2 <- factor(birthwt2$race, labels = c("white", "black", "other"))
@@ -1015,13 +1014,12 @@ nvar <- length(truevals)
 The design matrices $X$ and $Z$ must be setup for \textit{hmc}.  
 
 ```{r, echo=TRUE, eval=TRUE}
-library(Matrix)
 
 ##########
 # block diagonal
 Zi.lst <- split(rep(1, nrow(Gdat)), Gdat$Site)
 Zi.lst <- lapply(Zi.lst, as.matrix)
-Z <- bdiag(Zi.lst)
+Z <- Matrix::bdiag(Zi.lst)
 Z <- as.matrix(Z)
 X <- model.matrix(~ factor(year), data=Gdat)
 X <- cbind(X, Gdat$prev)

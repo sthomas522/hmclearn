@@ -155,7 +155,7 @@ mhpar <- function(paramlst, ...) {
 #' }
 #'
 #' @examples
-#'
+#' \dontrun{
 #' # linear regression
 #' data(warpbreaks)
 #'
@@ -204,7 +204,7 @@ mhpar <- function(paramlst, ...) {
 #'
 #' mcmc_trace(fm3_mh, burnin=1000)
 #' mcmc_dens(fm3_mh, burnin=1000)
-#'
+#' }
 #' @author Samuel Thomas \email{samthoma@@iu.edu}, Wanzhu Tu \email{wtu@iu.edu}
 #' @export
 mh <- function(N, theta.init, qPROP, qFUN, logPOSTERIOR, nu=1e-3,
@@ -311,7 +311,6 @@ qfun <- function(theta1, theta2, nu) {
 #' @export
 qprop <- function(theta1, nu) {
   k <- length(theta1)
-  require(MASS)
   nu <- diag(nu, k, k)
   MASS::mvrnorm(1, theta1, nu)
 }
@@ -615,6 +614,7 @@ hmcpar <- function(paramlst, ...) {
 #' }
 #'
 #' @examples
+#' \dontrun{
 #' # linear regression
 #' data(warpbreaks)
 #'
@@ -692,6 +692,7 @@ hmcpar <- function(paramlst, ...) {
 #' summary(fm3_hmc)
 #'
 #' plot(fm3_hmc, burnin=1000)
+#' }
 #' @author Samuel Thomas \email{samthoma@@iu.edu}, Wanzhu Tu \email{wtu@iu.edu}
 #' @references \emph{HMC in R} paper
 #' @references Thomas, S., Li, X., and Tu, W.  2019.  \emph{Hamiltonian Monte Carlo}.  Wiley

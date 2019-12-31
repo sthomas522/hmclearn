@@ -116,7 +116,7 @@ All parameters specified within the list \code{param} are passed to these the po
 }
 
 \examples{
-
+\dontrun{
 # linear regression
 data(warpbreaks)
 
@@ -165,7 +165,7 @@ summary(fm3_mh)
 
 mcmc_trace(fm3_mh, burnin=1000)
 mcmc_dens(fm3_mh, burnin=1000)
-
+}
 }
 \author{
 Samuel Thomas \email{samthoma@iu.edu}, Wanzhu Tu \email{wtu@iu.edu}
