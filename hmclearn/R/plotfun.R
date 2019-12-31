@@ -357,16 +357,4 @@ plot.hmclearn <- function(x, burnin=NULL, ...) {
   bayesplot::mcmc_hist(thetaCombined, )
 }
 
-#'
-#' #' @export
-#' color_scheme_set <- function(...) {
-#'   bayesplot::color_scheme_set(...)
-#' }
-#'
-#' #' @export
-#' color_scheme_get <- function(...) {
-#'   bayesplot::color_scheme_get(...)
-#' }
-
-
 

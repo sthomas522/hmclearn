@@ -16,7 +16,7 @@ hmc(
   constrain = NULL,
   verbose = FALSE,
   varnames = NULL,
-  param = list(...),
+  param = list(),
   chains = 1,
   parallel = FALSE,
   ...
@@ -45,11 +45,13 @@ hmc(
 
 \item{varnames}{Optional vector of theta parameter names}
 
+\item{param}{List of additional parameters for \code{logPOSTERIOR} and \code{glogPOSTERIOR}}
+
 \item{chains}{Number of MCMC chains to run}
 
 \item{parallel}{Logical to set whether MCMC chains should be run in parallel}
 
-\item{param(...)}{List of additional parameters for \code{logPOSTERIOR} and \code{glogPOSTERIOR}}
+\item{...}{Additional parameters for \code{logPOSTERIOR}}
 }
 \value{
 Object of class \code{hmclearn}

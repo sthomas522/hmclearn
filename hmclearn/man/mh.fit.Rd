@@ -12,6 +12,7 @@ mh.fit(
   logPOSTERIOR,
   nu = 0.001,
   varnames = NULL,
+  param = list(),
   ...
 )
 }
@@ -30,7 +31,9 @@ mh.fit(
 
 \item{varnames}{Optional vector of theta parameter names}
 
-\item{param(...)}{List of additional parameters for \code{logPOSTERIOR}}
+\item{param}{List of additional parameters for \code{logPOSTERIOR}}
+
+\item{...}{Additional parameters for \code{logPOSTERIOR}}
 }
 \value{
 List for \code{mh}

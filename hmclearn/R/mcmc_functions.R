@@ -9,12 +9,13 @@
 #' @param logPOSTERIOR Function to calculate and return the log posterior given a vector of values of \code{theta}
 #' @param nu Single value or vector parameter passed to \code{qPROP} or \code{qFUN} for the proposal density
 #' @param varnames Optional vector of theta parameter names
-#' @param param(...) List of additional parameters for \code{logPOSTERIOR}
+#' @param param List of additional parameters for \code{logPOSTERIOR}
+#' @param ... Additional parameters for \code{logPOSTERIOR}
 #' @return List for \code{mh}
 #'
 #' @export
 mh.fit <- function(N, theta.init, qPROP, qFUN, logPOSTERIOR, nu=1e-3,
-               varnames=NULL, ...) {
+               varnames=NULL, param=list(), ...) {
   paramSim <- list()
   paramSim[[1]] <- theta.init
   accept <- 0
@@ -85,6 +86,7 @@ mhpar <- function(paramlst, ...) {
 #' @param logPOSTERIOR Function to calculate and return the log posterior given a vector of values of \code{theta}
 #' @param nu Single value or vector parameter passed to \code{qPROP} or \code{qFUN} for the proposal density
 #' @param varnames Optional vector of theta parameter names
+#' @param param List of additional parameters for \code{logPOSTERIOR} and \code{glogPOSTERIOR}
 #' @param ... Additional parameters for \code{logPOSTERIOR}
 #' @param chains Number of MCMC chains to run
 #' @param parallel Logical to set whether MCMC chains should be run in parallel
@@ -206,7 +208,7 @@ mhpar <- function(paramlst, ...) {
 #' @author Samuel Thomas \email{samthoma@@iu.edu}, Wanzhu Tu \email{wtu@iu.edu}
 #' @export
 mh <- function(N, theta.init, qPROP, qFUN, logPOSTERIOR, nu=1e-3,
-                   varnames=NULL, param = list(...),
+                   varnames=NULL, param = list(),
                chains=1, parallel=FALSE, ...) {
 
   allparam <- c(list(N=N,
@@ -274,14 +276,6 @@ mh <- function(N, theta.init, qPROP, qFUN, logPOSTERIOR, nu=1e-3,
     class(obj) <- c("hmclearn", "list")
     return(obj)
 
-    # # res <- do.call(mh.fit, allparam )
-    # res <- mhpar(allparam)
-    # # res$thetaCombined <- array(res$thetaCombined,
-    # #                            dim=c(dim(res$thetaCombined), 1))
-    # res$thetaCombined <- list(as.matrix(res$thetaCombined))
-    # res$varnames <- varnames
-    # res$chains <- 1
-    # return(res)
   }
 }
 
@@ -321,37 +315,6 @@ qprop <- function(theta1, nu) {
   nu <- diag(nu, k, k)
   MASS::mvrnorm(1, theta1, nu)
 }
-
-#' # nu is a vector
-#' #' @export
-#' qprop_all <- function(theta1, nu) {
-#'   nu <- diag(nu)
-#'   MASS::mvrnorm(1, theta1, nu)
-#' }
-#'
-#' #' @export
-#' qfun_all <- function(theta1, theta2, nu) {
-#'   nu <- diag(nu)
-#'   mvtnorm::dmvnorm(theta1, theta2, nu, log=TRUE)
-#' }
-
-
-
-
-
-###############################################
-# functions to support
-# Hamiltonian Monte Carlo
-#
-#
-
-# leapfrog integrator from Hamiltonian dynamics
-# theta:  parameter of interest
-# r:  momentum variable
-# epsilon:  step size parameter
-# logDENS:  log of joint density of parameter of interest
-#   (log likelihood)
-# ... additional parameters to pass to logDENS
 
 #' Leapfrog Algorithm for Hamiltonian Monte Carlo
 #'
@@ -424,7 +387,8 @@ leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, Minv, co
 #' @param Mdiag Optional vector of the diagonal of the mass matrix \code{M}.  Defaults to unit diagonal.
 #' @param constrain Optional vector of which parameters in \code{theta} accept positive values only.  Default is that all parameters accept all real numbers
 #' @param verbose Logical to determine whether to display the progress of the HMC algorithm
-#' @param ... additional parameters for \code{logPOSTERIOR} and \code{glogPOSTERIOR}
+#' @param param List of additional parameters for \code{logPOSTERIOR} and \code{glogPOSTERIOR}
+#' @param ... Additional parameters for \code{logPOSTERIOR}
 #' @return List for \code{hmc}
 #' @references Neal, Radford. 2011. \emph{MCMC Using Hamiltonian Dynamics.} In Handbook of Markov Chain Monte Carlo, edited by Steve Brooks, Andrew Gelman, Galin L. Jones, and Xiao-Li Meng, 116–62. Chapman; Hall/CRC.
 #' @export
@@ -568,7 +532,8 @@ hmcpar <- function(paramlst, ...) {
 #' @param Mdiag Optional vector of the diagonal of the mass matrix \code{M}.  Defaults to unit diagonal.
 #' @param constrain Optional vector of which parameters in \code{theta} accept positive values only.  Default is that all parameters accept all real numbers
 #' @param verbose Logical to determine whether to display the progress of the HMC algorithm
-#' @param param(...) List of additional parameters for \code{logPOSTERIOR} and \code{glogPOSTERIOR}
+#' @param param List of additional parameters for \code{logPOSTERIOR} and \code{glogPOSTERIOR}
+#' @param ... Additional parameters for \code{logPOSTERIOR}
 #' @param chains Number of MCMC chains to run
 #' @param parallel Logical to set whether MCMC chains should be run in parallel
 #' @return Object of class \code{hmclearn}
@@ -736,7 +701,7 @@ hmcpar <- function(paramlst, ...) {
 #' @export
 hmc <- function(N=10000, theta.init, epsilon=1e-2, L=10, logPOSTERIOR, glogPOSTERIOR,
                 randlength=FALSE, Mdiag=NULL, constrain=NULL, verbose=FALSE, varnames=NULL,
-                param = list(...),
+                param = list(),
                chains=1, parallel=FALSE, ...) {
 
   allparam <- c(list(N=N,
@@ -808,13 +773,5 @@ hmc <- function(N=10000, theta.init, epsilon=1e-2, L=10, logPOSTERIOR, glogPOSTE
     class(obj) <- c("hmclearn", "list")
     return(obj)
 
-    # # res <- do.call(mh.fit, allparam )
-    # res <- hmcpar(allparam)
-    # # res$thetaCombined <- array(res$thetaCombined,
-    # #                            dim=c(dim(res$thetaCombined), 1))
-    # res$thetaCombined <- list(as.matrix(res$thetaCombined))
-    # res$varnames <- varnames
-    # res$chains <- 1
-    # return(res)
   }
 }

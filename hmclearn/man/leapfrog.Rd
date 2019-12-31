@@ -2,12 +2,7 @@
 % Please edit documentation in R/mcmc_functions.R
 \name{leapfrog}
 \alias{leapfrog}
-\title{# nu is a vector
-#' @export
-qprop_all <- function(theta1, nu) {
-  nu <- diag(nu)
-  MASS::mvrnorm(1, theta1, nu)
-}}
+\title{Leapfrog Algorithm for Hamiltonian Monte Carlo}
 \usage{
 leapfrog(
   theta_lf,
@@ -44,14 +39,6 @@ leapfrog(
 List containing two elements:  \code{theta.new} the ending value of theta and \code{r.new} the ending value of the momentum
 }
 \description{
-#' @export
-qfun_all <- function(theta1, theta2, nu) {
-  nu <- diag(nu)
-  mvtnorm::dmvnorm(theta1, theta2, nu, log=TRUE)
-}
-Leapfrog Algorithm for Hamiltonian Monte Carlo
-}
-\details{
 Runs a single iteration of the leapfrog algorithm.  Typically called directly from \code{hmc}
 }
 \references{

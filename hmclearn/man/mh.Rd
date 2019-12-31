@@ -12,7 +12,7 @@ mh(
   logPOSTERIOR,
   nu = 0.001,
   varnames = NULL,
-  param = list(...),
+  param = list(),
   chains = 1,
   parallel = FALSE,
   ...
@@ -32,6 +32,8 @@ mh(
 \item{nu}{Single value or vector parameter passed to \code{qPROP} or \code{qFUN} for the proposal density}
 
 \item{varnames}{Optional vector of theta parameter names}
+
+\item{param}{List of additional parameters for \code{logPOSTERIOR} and \code{glogPOSTERIOR}}
 
 \item{chains}{Number of MCMC chains to run}
 
