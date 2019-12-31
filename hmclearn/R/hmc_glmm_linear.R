@@ -16,7 +16,7 @@ pfun_lmm <- function(PARAM, ...) {
 #' @param y numeric vector for the dependent variable
 #' @param X numeric design matrix of fixed effect parameters
 #' @param Z numeric design matrix of random effect parameters
-#' @param n number of random effect parameters
+#' @param m number of random effect parameters
 #' @param A hyperprior numeric vector for the random effects off-diagonal \code{a}
 #' @param nueps hyperprior for the half-t prior of the error parameter \eqn{\nu}
 #' @param nulambda hyperprior for the half-t prior of the random effects diagonal \eqn{\lambda}

@@ -169,15 +169,16 @@ g_glmm_poisson_posterior <- function(theta, y, X, Z, m=10, A = 1e4,
   g_xi <- g_xi - (nulambda + 1) / (1 + nulambda*Alambda^2 * exp(-2*xi_param))
 
   if (q > 1) {
-    u_lst <- split(u_param, ceiling(seq_along(u_param)/q))
-    g_a1 <- sapply(u_lst, function(uvals) {
-      Uj <- create_Uj(uvals)
-      as.numeric(t(Uj) %*% Dinv %*% (uvals - Uj %*% a_param))
+    tau_lst <- split(tau_param, ceiling(seq_along(tau_param)/q))
+    Tj <- lapply(tau_lst, function(tauvals) {
+      Tj <- create_Uj(Dhalf %*% tauvals, neg=FALSE)
     })
-    g_a <- - Ainv %*% a_param + rowSums(g_a1)
+    Tj <- do.call(rbind, Tj)
+
+    g_a <- -(t(1-y) + t(gradprop)) %*% Z %*% Tj -Ainv %*% a_param
 
     g_all <- c(as.numeric(g_beta),
-               as.numeric(g_u),
+               as.numeric(g_tau),
                g_xi,
                as.numeric(g_a))
   } else {
