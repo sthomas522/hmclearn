@@ -196,7 +196,7 @@ mhpar <- function(paramlst, ...) {
 #'              qPROP = qprop, qFUN = qfun,
 #'              logPOSTERIOR = poisson_posterior,
 #'              varnames = colnames(X),
-#'              y=y, X=X)
+#'              param=list(y=y, X=X))
 #'
 #' fm3_mh$accept / Nmh
 #'

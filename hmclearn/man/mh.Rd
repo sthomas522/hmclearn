@@ -157,7 +157,7 @@ fm3_mh <- mh(Nmh, theta.init =rep(0, p), nu=1e-3,
              qPROP = qprop, qFUN = qfun,
              logPOSTERIOR = poisson_posterior,
              varnames = colnames(X),
-             y=y, X=X)
+             param=list(y=y, X=X))
 
 fm3_mh$accept / Nmh
 
