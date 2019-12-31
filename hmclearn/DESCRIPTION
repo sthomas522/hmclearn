@@ -17,7 +17,8 @@ Suggests:
     Matrix,
     lme4,
     carData,
-    mlbench
+    mlbench,
+    ggplot2
 VignetteBuilder: knitr
 RoxygenNote: 7.0.1
 Imports: 

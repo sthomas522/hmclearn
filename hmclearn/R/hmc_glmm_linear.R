@@ -112,7 +112,6 @@ lmm_posterior <- function(theta, y, X, Z, m, A = 1e4, nueps=1, nulambda=1, Aeps=
 #' @references Betancourt, M., & Girolami, M. (2015). \emph{Hamiltonian Monte Carlo for hierarchical models}. Current trends in Bayesian methodology with applications, 79, 30.
 #' @export
 g_lmm_posterior <- function(theta, y, X, Z, m, A = 1e4, nueps=1, nulambda=1, Aeps=25, Alambda=25, B=0.001) {
-  require(Matrix)
   Z <- as.matrix(Z)
   p <- ncol(X)
   n <- nrow(X)

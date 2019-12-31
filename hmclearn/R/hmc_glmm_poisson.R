@@ -173,9 +173,10 @@ g_glmm_poisson_posterior <- function(theta, y, X, Z, m=10, A = 1e4,
     Tj <- lapply(tau_lst, function(tauvals) {
       Tj <- create_Uj(Dhalf %*% tauvals, neg=FALSE)
     })
+    # Tja <- as.matrix(bdiag(Tja))
     Tj <- do.call(rbind, Tj)
 
-    g_a <- -(t(1-y) + t(gradprop)) %*% Z %*% Tj -Ainv %*% a_param
+    g_a <- -t(exp(XZbetau)) %*% Z %*% Tj + t(y)%*%Z%*%Tj -Ainv %*% a_param
 
     g_all <- c(as.numeric(g_beta),
                as.numeric(g_tau),
