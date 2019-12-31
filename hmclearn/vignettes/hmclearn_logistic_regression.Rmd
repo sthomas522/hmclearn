@@ -93,9 +93,7 @@ $$
 Load Endometrial data
 
 ```{r, echo=TRUE}
-wk.dir <-  '~/biostat/Dissertation/Summer2018'
-
-Endometrial <- read.table(paste(wk.dir, "endometrial.dat", sep='/'), header=TRUE)
+data(Endometrial)
 
 # data prep
 Endometrial$PI2 <- with(Endometrial, (PI - mean(PI)) / sd(PI))
@@ -105,10 +103,13 @@ Endometrial$NV2 <- Endometrial$NV - 0.5
 X <- cbind(1, as.matrix(Endometrial[, which(colnames(Endometrial) %in% c("PI2", "EH2", "NV2"))]))
 y <- Endometrial$HG
 
+colnames(X) <- c("(Intercept)", "PI2", "EH2", "NV2")
 
 ```
 
 # Frequentist model
+
+As a comparison, fit a Frequentist model first
 
 ```{r, echo=TRUE}
 f <- glm(y ~ X-1, family = binomial())
@@ -116,38 +117,41 @@ summary(f)
 
 ```
 
-# EHMC logistic regression
+# HMC: logistic regression
 
 Run HMC for logistic regression model
 
 ```{r, echo=TRUE}
-library(profvis)
-Mruns <- 20000
+N <- 1e4
 
 set.seed(412)
-
 t1.hmc <- Sys.time()
-#profvis({
- hmc.results <- hmc(M = Mruns, thetaInit = rep(1, 4), epsilon = 1e-2, Nstep = 170, 
-                    logDENS = logistic_posterior, glPOSTERIOR = g_logistic_posterior, y = y, X=X) 
-#})
-
+ res <- hmc(N = N, theta.init = rep(1, 4), 
+            epsilon = 1e-1, L = 20, 
+            logPOSTERIOR = logistic_posterior, 
+            glogPOSTERIOR = g_logistic_posterior, 
+            varnames = colnames(X),
+            param=list(y = y, X=X), 
+            parallel=TRUE, chains=2)
 t2.hmc <- Sys.time()
 t2.hmc - t1.hmc
-hmc.results$accept/Mruns
 
+res$accept/N
 
-hmc.param <- hmc.results$theta
-hmc.param <- as.data.frame(do.call(rbind, hmc.param))
-colnames(hmc.param) <- c("(Intercept)", "PI2", "EH2", "NV2")
-
-diagplots_mcmc(hmc.param, beta.true, burnin=3000)
 ```
-
-EHMC Posterior quantiles
 
 ```{r, echo=TRUE}
-hmc.param.burnin <- hmc.param[-c(1:3000), ]
-hmc.intervals <- apply(hmc.param.burnin, 2, quantile, probs=c(0.025, 0.25, 0.5, 0.75, 0.975))
-t(hmc.intervals)
+summary(res, burnin=3000)
 ```
+
+```{r, echo=TRUE, fig.width=6, fig.height=4}
+mcmc_trace(res, burnin=3000)
+```
+
+Compare the Frequentist estimates to HMC
+
+```{r, echo=TRUE, fig.width=6, fig.height=4}
+beta.true <- coef(f)
+diagplots(res, burnin=3000, actual.mu=beta.true)
+```
+
