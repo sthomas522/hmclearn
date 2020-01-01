@@ -132,35 +132,37 @@ summary(f)
 Run HMC for poisson regression model
 
 ```{r, echo=TRUE}
-N <- 100000
+N <- 1e4
+
+eps_vals <- c(rep(5e-4, 2), 1e-3, 5e-3, 1e-3, 1e-3, 5e-4)
 
 set.seed(412)
-
 t1.hmc <- Sys.time()
  res <- hmc(N = N, theta.init = rep(0, 7), 
-                    epsilon = 1e-4, L = 30, 
+                    epsilon = eps_vals, L = 50, 
                     logPOSTERIOR = poisson_posterior,
                     glogPOSTERIOR = g_poisson_posterior, 
                     varnames = colnames(X), 
-                    param=list(y = y, X=X)) 
+                    parallel=TRUE, chains=2,
+                    param=list(y=y, X=X)) 
 t2.hmc <- Sys.time()
 t2.hmc - t1.hmc
 res$accept/N
 ```
 
 ```{r, echo=TRUE}
-summary(res, burnin=1e4)
+summary(res, burnin=1e3)
 ```
 
 ```{r, echo=TRUE, fig.width=6, fig.height=4}
-mcmc_trace(res, burnin=1e4)
+mcmc_trace(res, burnin=1e3)
 ```
 
 Compare the Frequentist estimates to HMC
 
 ```{r, echo=TRUE, fig.width=6, fig.height=4}
 beta.true <- coef(f)
-diagplots(res, burnin=1e4, actual.mu=beta.true)
+diagplots(res, burnin=1e3, actual.mu=beta.true)
 ```
 
 
