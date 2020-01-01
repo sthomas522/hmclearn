@@ -23,6 +23,8 @@ Data from a study about Endometrial Cancer
 \references{
 Agresti, A. (2015). \emph{Foundations of linear and generalized linear models}. John Wiley & Sons.
 
+Copyright 2015, Alan Agresti, Department of Statistics, University of Florida
+
 Heinze, G., & Schemper, M. (2002). \emph{A solution to the problem of separation in logistic regression}. Statistics in medicine, 21(16), 2409-2419.
 }
 \keyword{datasets}

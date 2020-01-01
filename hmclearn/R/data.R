@@ -17,8 +17,6 @@
 #' @source \url{https://bbolker.github.io/mixedmodels-misc/ecostats_chap.html}
 "Gdat"
 
-
-
 #' Endometrial Cancer Dataset
 #'
 #' Data from a study about Endometrial Cancer
@@ -31,6 +29,27 @@
 #'   \item{HG}{histology of patient (0=Low, 1=High)}
 #' }
 #' @references Agresti, A. (2015). \emph{Foundations of linear and generalized linear models}. John Wiley & Sons.
+#' @references Copyright 2015, Alan Agresti, Department of Statistics, University of Florida
 #' @references Heinze, G., & Schemper, M. (2002). \emph{A solution to the problem of separation in logistic regression}. Statistics in medicine, 21(16), 2409-2419.
 #' @source \url{http://users.stat.ufl.edu/~aa/glm/data/Endometrial.dat}
 "Endometrial"
+
+#' Student Drug Usage Dataset
+#'
+#' Data from a survey of 2276 high school students about drug usage
+#'
+#' @format A data frame with 8 rows and 4 variables:
+#' \describe{
+#'   \item{A}{Alcohol usage (Yes/No)}
+#'   \item{C}{Cigarette usage (Yes/No)}
+#'   \item{M}{Marijuana usage (Yes/No)}
+#'   \item{count}{number of responses}
+#' }
+#' @references Agresti, A. (2015). \emph{Foundations of linear and generalized linear models}. John Wiley & Sons.
+#' @references Copyright 2015, Alan Agresti, Department of Statistics, University of Florida
+#' @references Data originally provided by Harry Khamis, Wright State University
+#' @source \url{http://users.stat.ufl.edu/~aa/glm/data/Drugs.dat}
+"Drugs"
+
+
+
