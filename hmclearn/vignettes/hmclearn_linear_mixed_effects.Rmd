@@ -39,7 +39,6 @@ Where $i = 1, ..., m$ and $j = 1, ..., d$
 
 
 ```{r, echo=TRUE}
-library(semiparMCMC)
 library(lme4)
 library(Matrix)
 data(sleepstudy)
@@ -420,35 +419,10 @@ $$
 
 # Hamiltonian Monte Carlo with unit diagonal
 
-QR decomposition
-
-```{r, echo=TRUE}
-xqr <- qr(X)
-Q <- qr.Q(xqr)
-R <- qr.R(xqr)
-
-n <- nrow(X)
-X2 <- Q * sqrt(n-1)
-Rstar <- R / sqrt(n-1)
-Rstar_inv <- solve(Rstar)
-colnames(X2) <- paste(colnames(X), "qr", sep="_")
-
-# Z qr
-zqr <- qr(Z)
-Qz <- qr.Q(zqr)
-Rz <- qr.R(zqr)
-
-Z2 <- Qz * sqrt(n-1)
-Rstarz <- Rz / sqrt(n-1)
-Rstarz_inv <- solve(Rstarz)
-
-
-```
-
 Initialize the random effects with high variance
 
 ```{r, echo=TRUE, eval=T}
-N <- 1e5
+N <- 5e5
 
 theta.init <- c(0,0, # beta 
                rep(0, 36), # tau
@@ -489,7 +463,7 @@ res$accept/N
 
 Estimated precision matrix 
 
-    beta0     beta1    u_int1  u_slope1    u_int2  u_slope2    u_int3  u_slope3    u_int4  u_slope4    u_int5  u_slope5 
+    beta0     beta1    u_int1  u_slope1    su_int2  u_slope2    u_int3  u_slope3    u_int4  u_slope4    u_int5  u_slope5 
     0.040     0.301     0.012     0.150     0.010     0.205     0.003     0.080     0.004     0.105     0.005     0.157 
    u_int6  u_slope6    u_int7  u_slope7    u_int8  u_slope8    u_int9  u_slope9   u_int10 u_slope10   u_int11 u_slope11 
     0.011     0.181     0.007     0.117     0.006     0.109     0.011     0.133     0.011     0.127     0.014     0.216 
@@ -508,6 +482,19 @@ xi_2_true <- 1/2*log(VarCorr(fm1)$Subject[4] - a_true^2 * exp(2*xi_1_true))
 ```
 
 
+```{r, echo=TRUE}
+summary(res, burnin=1e5)
+```
 
+```{r, echo=TRUE, fig.width=6, fig.height=4}
+mcmc_trace(res, burnin=1e5)
+```
+
+Compare the Frequentist estimates to HMC
+
+```{r, echo=TRUE, fig.width=6, fig.height=4}
+beta.true <- fixef(fm1)
+diagplots(res, burnin=1e5, actual.mu=beta.true, cols=1:2)
+```
 
 
