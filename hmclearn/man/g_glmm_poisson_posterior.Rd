@@ -9,7 +9,8 @@ g_glmm_poisson_posterior(
   y,
   X,
   Z,
-  m = 10,
+  m,
+  q = 1,
   A = 10000,
   nulambda = 1,
   Alambda = 25,
@@ -25,7 +26,9 @@ g_glmm_poisson_posterior(
 
 \item{Z}{numeric design matrix of random effect parameters}
 
-\item{m}{number of random effect parameters}
+\item{m}{number of random effect linear parameters}
+
+\item{q}{number of random effects covariance parameters}
 
 \item{A}{hyperprior numeric vector for the random effects off-diagonal \code{a}}
 

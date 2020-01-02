@@ -4,7 +4,7 @@
 \alias{plot.hmclearn}
 \title{Plot Histograms of the Posterior Distribution}
 \usage{
-plot.hmclearn(x, burnin = NULL, ...)
+\method{plot}{hmclearn}(x, burnin = NULL, ...)
 }
 \arguments{
 \item{x}{an object of class \code{hmclearn}, usually a result of a call to \code{mh} or \code{hmc}}

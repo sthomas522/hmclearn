@@ -14,7 +14,8 @@ pfun_glmm_poisson <- function(PARAM, ...) {
 #' @param y numeric vector for the dependent variable
 #' @param X numeric design matrix of fixed effect parameters
 #' @param Z numeric design matrix of random effect parameters
-#' @param m number of random effect parameters
+#' @param m number of random effect linear parameters
+#' @param q number of random effects covariance parameters
 #' @param A hyperprior numeric vector for the random effects off-diagonal \code{a}
 #' @param nulambda hyperprior for the half-t prior of the random effects diagonal \eqn{\lambda}
 #' @param Alambda hyperprior for the half-t prior of the random effects diagonal \eqn{A_\lambda}
@@ -29,7 +30,7 @@ pfun_glmm_poisson <- function(PARAM, ...) {
 #' @references Chan, J. C. C., & Jeliazkov, I. (2009). \emph{MCMC estimation of restricted covariance matrices}. Journal of Computational and Graphical Statistics, 18(2), 457-480.
 #' @references Betancourt, M., & Girolami, M. (2015). \emph{Hamiltonian Monte Carlo for hierarchical models}. Current trends in Bayesian methodology with applications, 79, 30.
 #' @export
-glmm_poisson_posterior <- function(theta, y, X, Z, m=10, A = 1e4,
+glmm_poisson_posterior <- function(theta, y, X, Z, m, q=1, A = 1e4,
                                    nulambda=1, Alambda=25, B=1e4) {
   Z <- as.matrix(Z)
   p <- ncol(X)
@@ -89,7 +90,8 @@ glmm_poisson_posterior <- function(theta, y, X, Z, m=10, A = 1e4,
 #' @param y numeric vector for the dependent variable
 #' @param X numeric design matrix of fixed effect parameters
 #' @param Z numeric design matrix of random effect parameters
-#' @param m number of random effect parameters
+#' @param m number of random effect linear parameters
+#' @param q number of random effects covariance parameters
 #' @param A hyperprior numeric vector for the random effects off-diagonal \code{a}
 #' @param nulambda hyperprior for the half-t prior of the random effects diagonal \eqn{\lambda}
 #' @param Alambda hyperprior for the half-t prior of the random effects diagonal \eqn{A_\lambda}
@@ -104,7 +106,7 @@ glmm_poisson_posterior <- function(theta, y, X, Z, m=10, A = 1e4,
 #' @references Chan, J. C. C., & Jeliazkov, I. (2009). \emph{MCMC estimation of restricted covariance matrices}. Journal of Computational and Graphical Statistics, 18(2), 457-480.
 #' @references Betancourt, M., & Girolami, M. (2015). \emph{Hamiltonian Monte Carlo for hierarchical models}. Current trends in Bayesian methodology with applications, 79, 30.
 #' @export
-g_glmm_poisson_posterior <- function(theta, y, X, Z, m=10, A = 1e4,
+g_glmm_poisson_posterior <- function(theta, y, X, Z, m, q=1, A = 1e4,
                                      nulambda=1, Alambda=25, B=1e4) {
   Z <- as.matrix(Z)
   p <- ncol(X)
