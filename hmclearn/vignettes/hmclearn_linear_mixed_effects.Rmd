@@ -448,7 +448,7 @@ Rstarz_inv <- solve(Rstarz)
 Initialize the random effects with high variance
 
 ```{r, echo=TRUE, eval=T}
-N <- 1e3
+N <- 1e5
 
 theta.init <- c(0,0, # beta 
                rep(0, 36), # tau
