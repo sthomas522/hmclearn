@@ -390,8 +390,7 @@ Z2 <- as.matrix(Z2)
 Run HMC for logistic regression model using QR decomposed design matrices
 
 ```{r, echo=TRUE}
-library(profvis)
-N <- 1e3
+N <- 1e4
 
 set.seed(412)
 initvals<- c(rep(0, 5), # fixed effects
@@ -403,12 +402,7 @@ vnames <- c(colnames(X),
             paste0("tau_int", 1:60), 
             "xi1")
 
-M_vals <- c(0.01, 0.5, 0.5, 0.5, 0.5, 
-            rep(0.01, 60), 
-            1)
-
 t1.hmc <- Sys.time()
-
 res <- hmc(N = N, theta.init = initvals, 
           epsilon = 5e-3, L = 10, 
           logPOSTERIOR = glmm_bin_posterior, 
@@ -423,32 +417,6 @@ t2.hmc - t1.hmc
 res$accept/N
 ```
 
-```{r, echo=TRUE}
-mcmc_trace(res, pars=colnames(X))
-
-```
-
-
-
-```{r, echo=TRUE}
-hmc.results <- res$theta
-
-hmc.results <- as.data.frame(do.call(rbind, hmc.results))
-
-colnames(hmc.results) <- c(colnames(X), 
-                        paste0("tau_int", 1:60), 
-                        "xi1")
-hmc.results$sig <- exp(hmc.results$xi1)
-
-```
-
-Calculate covaraince
-
-```{r, echo=TRUE, eval=TRUE}
-hmc.covar <- hmc.results[-c(1:round(0.5*Mruns)), ]
-M_cov <- 1/diag(cov(hmc.covar))
-round(M_cov, 1)
-```
 
 Obtain $\beta$ from QR decomposition
 
@@ -457,41 +425,32 @@ Obtain $\beta$ from QR decomposition
 calc_beta <- function(theta_param, Rstarinv) {
   as.numeric(Rstarinv %*% theta_param)
 }
+
+# reverse qr decomposition
+res2 <- res
+res2$thetaCombined <- lapply(res2$thetaCombined, function(xx) {
+  xx1 <- xx[, 1:ncol(X2)] %*% Rstar_inv
+  xx[, 1:5] <- xx1
+  xx
+})
+
 ```
+
 
 ```{r, echo=TRUE}
-res_beta <- t(apply(hmc.results[, 1:5], 1, calc_beta, Rstarinv=Rstar_inv))
+summary(res2, burnin=5000)
+```
 
-hmc.results[, 1:5] <- res_beta
+```{r, echo=TRUE, fig.width=6, fig.height=4}
+mcmc_trace(res2, burnin=5000, pars=colnames(X))
 ```
 
 
+```{r, echo=TRUE, fig.width=6, fig.height=4}
+beta.true <- fixef(f)
+diagplots(res, actual.mu=beta.true, burnin=5000, cols=1:ncol(X))
 
-```{r, echo=TRUE}
-burnin <- round(Mruns*0.3)
-# burnin <- 3e6
-hmc.results.burnin <- hmc.results[-c(1:burnin), ]
-# apply(mh.results.burnin, 2, quantile, probs=c(0.25, 0.50, 0.75))
-apply(hmc.results.burnin, 2, median)
 
 ```
 
 
-
-Plots
-
-```{r, echo=TRUE}
-
-hmc.results.fe <- hmc.results.burnin[, c(1:5, nvar-1, nvar)]
-
-# MCMCglmm
-diagplots_mcmc(hmc.results.fe, truevals[c(1:5, nvar-1, nvar)])
-
-```
-
-HMC Posterior quantiles
-
-```{r, echo=TRUE}
-hmc.intervals <- apply(hmc.results.burnin, 2, quantile, probs=c(0.025, 0.25, 0.5, 0.75, 0.975))
-t(hmc.intervals)
-```
