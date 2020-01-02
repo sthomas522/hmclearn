@@ -10,6 +10,7 @@ lmm_posterior(
   X,
   Z,
   m,
+  q = 1,
   A = 10000,
   nueps = 1,
   nulambda = 1,
@@ -27,7 +28,9 @@ lmm_posterior(
 
 \item{Z}{numeric design matrix of random effect parameters}
 
-\item{m}{number of random effect parameters}
+\item{m}{number of random effect linear parameters}
+
+\item{q}{number of random effects covariance parameters}
 
 \item{A}{hyperprior numeric vector for the random effects off-diagonal \code{a}}
 
