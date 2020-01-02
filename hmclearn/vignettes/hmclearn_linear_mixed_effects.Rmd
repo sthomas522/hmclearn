@@ -448,7 +448,7 @@ Rstarz_inv <- solve(Rstarz)
 Initialize the random effects with high variance
 
 ```{r, echo=TRUE, eval=T}
-N <- 1e4
+N <- 1e3
 
 theta.init <- c(0,0, # beta 
                rep(0, 36), # tau
@@ -464,16 +464,16 @@ vnames <- c(paste0("beta", 0:1),
 #             1, 
 #             1, 1, 1)
 
-eps_vals <- c(1e-3, 1e-3, 
+eps_vals <- c(1e-1, 1e-2, 
               rep(1e-3, 36), 
-              1e-3, 
-              c(1e-9, 1e-9, 1e-9))
+              1e-2, 
+              c(1e-3, 1e-3, 1e-3))
 
 
 set.seed(41132)
 t1.hmc <- Sys.time()
  res <- hmc(N = N, theta.init = theta.init, 
-            epsilon = 1e-3, L = 10, 
+            epsilon = eps_vals, L = 10, 
             logPOSTERIOR = lmm_posterior, 
             glogPOSTERIOR = g_lmm_posterior,  
             varnames = vnames, 
