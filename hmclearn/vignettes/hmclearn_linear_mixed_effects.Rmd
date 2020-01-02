@@ -452,7 +452,7 @@ N <- 1e3
 
 theta.init <- c(0,0, # beta 
                rep(0, 36), # tau
-               1, # gamma (log sig2eps)
+               3, # gamma (log sig2eps)
                c(1, 1, 0)) # xi and a (log G diagonal and a off-diagonal)
 
 vnames <- c(paste0("beta", 0:1), 
@@ -466,7 +466,7 @@ vnames <- c(paste0("beta", 0:1),
 
 eps_vals <- c(1e-1, 1e-2, 
               rep(1e-3, 36), 
-              1e-2, 
+              1e-3, 
               c(1e-3, 1e-3, 1e-3))
 
 
@@ -478,7 +478,8 @@ t1.hmc <- Sys.time()
             glogPOSTERIOR = g_lmm_posterior,  
             varnames = vnames, 
             param=list(y = y, X=X, Z=Z, m=18, q=2, 
-                       nulambda=1, Alambda=1, B=1e-5) )
+                       nulambda=1, Alambda=1, B=1e-5),
+            parallel=TRUE, chains=2)
 t2.hmc <- Sys.time()
 t2.hmc - t1.hmc
 
