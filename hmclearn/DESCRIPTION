@@ -1,13 +1,14 @@
 Package: hmclearn
 Type: Package
 Title: Fit Statistical Models Using Hamiltonian Monte Carlo
-Version: 0.1.0
+Version: 0.0.0.9000
 Authors@R: c(
   person("Samuel", "Thomas", email = "samthoma@iu.edu", role = c("cre", "aut")),
   person("Wanzhu", "Tu", email = "wtu1@iu.edu", role = "ctb"))
 Maintainer: Samuel Thomas <samthoma@iu.edu>
 Description: This package fits statistical models using Hamiltonian Monte Carlo
     as well as Metropolis-Hastings.  All of the code is written in R. 
+Depends: R (>= 3.1.0)
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
