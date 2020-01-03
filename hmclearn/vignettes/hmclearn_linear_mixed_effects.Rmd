@@ -422,7 +422,7 @@ $$
 Initialize the random effects with high variance
 
 ```{r, echo=TRUE, eval=T}
-N <- 5e4
+N <- 1e5
 
 theta.init <- c(0,0, # beta 
                rep(0, 36), # tau
@@ -438,7 +438,7 @@ vnames <- c(paste0("beta", 0:1),
 #             1, 
 #             1, 1, 1)
 
-eps_vals <- c(5e-1, 7e-2, 
+eps_vals <- c(5e-1, 6e-2, 
               rep(1e-2, 36), 
               1e-3, 
               c(1e-3, 1e-3, 1e-3))
