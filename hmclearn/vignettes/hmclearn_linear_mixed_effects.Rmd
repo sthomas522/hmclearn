@@ -422,7 +422,7 @@ $$
 Initialize the random effects with high variance
 
 ```{r, echo=TRUE, eval=T}
-N <- 5e5
+N <- 1e4
 
 theta.init <- c(0,0, # beta 
                rep(0, 36), # tau
@@ -438,8 +438,8 @@ vnames <- c(paste0("beta", 0:1),
 #             1, 
 #             1, 1, 1)
 
-eps_vals <- c(1e-1, 1e-2, 
-              rep(1e-3, 36), 
+eps_vals <- c(5e-1, 5e-2, 
+              rep(1e-2, 36), 
               1e-3, 
               c(1e-3, 1e-3, 1e-3))
 
@@ -483,18 +483,18 @@ xi_2_true <- 1/2*log(VarCorr(fm1)$Subject[4] - a_true^2 * exp(2*xi_1_true))
 
 
 ```{r, echo=TRUE}
-summary(res, burnin=1e5)
+summary(res, burnin=trunc(N*.3))
 ```
 
 ```{r, echo=TRUE, fig.width=6, fig.height=4}
-mcmc_trace(res, burnin=1e5, pars=c("beta0", "beta1"))
+mcmc_trace(res, burnin=trunc(N*.3), pars=c("beta0", "beta1"))
 ```
 
 Compare the Frequentist estimates to HMC
 
 ```{r, echo=TRUE, fig.width=6, fig.height=4}
 beta.true <- fixef(fm1)
-diagplots(res, burnin=1e5, actual.mu=beta.true, cols=1:2)
+diagplots(res, burnin=trunc(N*.3), actual.mu=beta.true, cols=1:2)
 ```
 
 
