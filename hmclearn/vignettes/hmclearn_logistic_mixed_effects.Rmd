@@ -390,7 +390,7 @@ Z2 <- as.matrix(Z2)
 Run HMC for logistic regression model using QR decomposed design matrices
 
 ```{r, echo=TRUE}
-N <- 1e4
+N <- 3e5
 
 set.seed(412)
 initvals<- c(rep(0, 5), # fixed effects
@@ -438,17 +438,17 @@ res2$thetaCombined <- lapply(res2$thetaCombined, function(xx) {
 
 
 ```{r, echo=TRUE}
-summary(res2, burnin=5000)
+summary(3e4)
 ```
 
 ```{r, echo=TRUE, fig.width=6, fig.height=4}
-mcmc_trace(res2, burnin=5000, pars=colnames(X))
+mcmc_trace(res2, burnin=3e4, pars=colnames(X))
 ```
 
 
 ```{r, echo=TRUE, fig.width=6, fig.height=4}
 beta.true <- fixef(f)
-diagplots(res, actual.mu=beta.true, burnin=5000, cols=1:ncol(X))
+diagplots(res2, actual.mu=beta.true, burnin=3e4, cols=1:ncol(X))
 
 
 ```
