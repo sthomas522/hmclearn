@@ -438,7 +438,7 @@ res2$thetaCombined <- lapply(res2$thetaCombined, function(xx) {
 
 
 ```{r, echo=TRUE}
-summary(3e4)
+summary(res2)
 ```
 
 ```{r, echo=TRUE, fig.width=6, fig.height=4}

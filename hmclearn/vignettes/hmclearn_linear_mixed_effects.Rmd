@@ -487,7 +487,7 @@ summary(res, burnin=1e5)
 ```
 
 ```{r, echo=TRUE, fig.width=6, fig.height=4}
-mcmc_trace(res, burnin=1e5)
+mcmc_trace(res, burnin=1e5, pars=c("beta0", "beta1"))
 ```
 
 Compare the Frequentist estimates to HMC
