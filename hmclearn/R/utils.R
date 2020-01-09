@@ -9,6 +9,7 @@
 #' @importFrom stats var
 #' @importFrom utils tail
 
+# random effects covariance
 create_Uj <- function(uj, neg=TRUE) {
   q <- length(uj)
   if (q == 1) return(0)
