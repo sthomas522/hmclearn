@@ -1,7 +1,9 @@
 ---
 title: "HMC in R"
 author:  "Samuel Thomas and Wanzhu Tu"
-output: pdf_document
+output: 
+  pdf_document:
+    keep_tex: true
 vignette: >
   %\VignetteIndexEntry{HMC_learn}
   %\VignetteEngine{knitr::rmarkdown}
