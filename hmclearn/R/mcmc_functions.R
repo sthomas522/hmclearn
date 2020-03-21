@@ -699,7 +699,7 @@ hmcpar <- function(paramlst, ...) {
 #' @references Neal, Radford. 2011. \emph{MCMC Using Hamiltonian Dynamics.} In Handbook of Markov Chain Monte Carlo, edited by Steve Brooks, Andrew Gelman, Galin L. Jones, and Xiao-Li Meng, 116–62. Chapman; Hall/CRC.
 #' @keywords hamiltonian monte carlo
 #' @export
-hmc <- function(N=10000, theta.init, epsilon=1e-2, L=10, logPOSTERIOR, glogPOSTERIOR,
+hmc <- function(N=10000, theta.init, epsilon=1e-1, L=10, logPOSTERIOR, glogPOSTERIOR,
                 randlength=FALSE, Mdiag=NULL, constrain=NULL, verbose=FALSE, varnames=NULL,
                 param = list(),
                chains=1, parallel=FALSE, ...) {
