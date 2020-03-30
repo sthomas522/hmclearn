@@ -55,7 +55,7 @@ and half-t for the error
 \details{
 The likelihood function for linear mixed effect regression
 
-\deqn{p(y | \beta, u, \sigma_\epsilon^2) &\propto (\sigma_\epsilon^2)^{-n/2} e^{-\frac{1}{2\sigma_\epsilon^2}(y - X\beta - Zu)^T (y - X\beta - Zu)}}
+\deqn{p(y | \beta, u, \sigma_\epsilon^2) \propto (\sigma_\epsilon^2)^{-n/2} e^{-\frac{1}{2\sigma_\epsilon^2}(y - X\beta - Zu)^T (y - X\beta - Zu)}}
 
 with priors \eqn{\beta \sim N(0, BI)}, \eqn{\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)}, \eqn{\lambda \sim half-t(A_\lambda, nu_\lambda )}.
 

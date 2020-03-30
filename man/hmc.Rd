@@ -145,6 +145,7 @@ Leapfrog algorithm.
 }
 
 \examples{
+\dontrun{
 # linear regression
 data(warpbreaks)
 
@@ -193,7 +194,6 @@ summary(fm2_hmc)
 mcmc_rhat(fm2_hmc)
 mcmc_rhat_hist(fm2_hmc)
 
-
 # poisson regression
 library(carData)
 data(AMSsurvey)
@@ -217,6 +217,7 @@ fm3_hmc$accept / N
 summary(fm3_hmc)
 
 plot(fm3_hmc, burnin=1000)
+}
 
 }
 \references{

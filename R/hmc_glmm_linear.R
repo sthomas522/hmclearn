@@ -25,7 +25,7 @@ pfun_lmm <- function(PARAM, ...) {
 #' @param Alambda hyperprior for the half-t prior of the random effects diagonal \eqn{A_\lambda}
 #' @param B prior for linear predictors is multivariate Normal with mean 0 with diagonal covariance B^-1
 #' @details The likelihood function for linear mixed effect regression
-#' @details \deqn{p(y | \beta, u, \sigma_\epsilon^2) &\propto (\sigma_\epsilon^2)^{-n/2} e^{-\frac{1}{2\sigma_\epsilon^2}(y - X\beta - Zu)^T (y - X\beta - Zu)}}
+#' @details \deqn{p(y | \beta, u, \sigma_\epsilon^2) \propto (\sigma_\epsilon^2)^{-n/2} e^{-\frac{1}{2\sigma_\epsilon^2}(y - X\beta - Zu)^T (y - X\beta - Zu)}}
 #' @details with priors \eqn{\beta \sim N(0, BI)}, \eqn{\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)}, \eqn{\lambda \sim half-t(A_\lambda, nu_\lambda )}.
 #' @details The vector \eqn{\lambda} is the diagonal of the covariance \code{G} hyperprior where \eqn{u \sim N(0, G}.  The off-diagonal hyperpriors are stored in a vector \eqn{a \sim N(0, A}.  See Chan, Jeliazkov (2009) for details.
 #' @details The input parameter vector \code{theta} is of length \code{k}.  The first \code{k-1} parameters are for \eqn{\beta}, and the last parameter is \eqn{\gamma}
@@ -103,7 +103,7 @@ lmm_posterior <- function(theta, y, X, Z, m, q=1, A = 1e4, nueps=1, nulambda=1, 
 #' @param Alambda hyperprior for the half-t prior of the random effects diagonal \eqn{A_\lambda}
 #' @param B prior for linear predictors is multivariate Normal with mean 0 with diagonal covariance B^-1
 #' @details The likelihood function for linear mixed effect regression
-#' @details \deqn{p(y | \beta, u, \sigma_\epsilon^2) &\propto (\sigma_\epsilon^2)^{-n/2} e^{-\frac{1}{2\sigma_\epsilon^2}(y - X\beta - Zu)^T (y - X\beta - Zu)}}
+#' @details \deqn{p(y | \beta, u, \sigma_\epsilon^2) \propto (\sigma_\epsilon^2)^{-n/2} e^{-\frac{1}{2\sigma_\epsilon^2}(y - X\beta - Zu)^T (y - X\beta - Zu)}}
 #' @details with priors \eqn{\beta \sim N(0, BI)}, \eqn{\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)}, \eqn{\lambda \sim half-t(A_\lambda, nu_\lambda )}.
 #' @details The vector \eqn{\lambda} is the diagonal of the covariance \code{G} hyperprior where \eqn{u \sim N(0, G}.  The off-diagonal hyperpriors are stored in a vector \eqn{a \sim N(0, A}.  See Chan, Jeliazkov (2009) for details.
 #' @details The input parameter vector \code{theta} is of length \code{k}.  The first \code{k-1} parameters are for \eqn{\beta}, and the last parameter is \eqn{\gamma}

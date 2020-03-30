@@ -175,7 +175,6 @@ mhpar <- function(paramlst, ...) {
 #' summary(fm1_mh, burnin=1000)
 #' mcmc_trace(fm1_mh, burnin=1000)
 #' mcmc_hist(fm1_mh, burnin=1000)
-#' }
 #'
 #' # poisson regression
 #'
@@ -205,6 +204,7 @@ mhpar <- function(paramlst, ...) {
 #'
 #' mcmc_trace(fm3_mh, burnin=1000)
 #' mcmc_dens(fm3_mh, burnin=1000)
+#' }
 #'
 #' @author Samuel Thomas \email{samthoma@@iu.edu}, Wanzhu Tu \email{wtu@iu.edu}
 #' @export
@@ -615,6 +615,7 @@ hmcpar <- function(paramlst, ...) {
 #' }
 #'
 #' @examples
+#' \dontrun{
 #' # linear regression
 #' data(warpbreaks)
 #'
@@ -663,7 +664,6 @@ hmcpar <- function(paramlst, ...) {
 #' mcmc_rhat(fm2_hmc)
 #' mcmc_rhat_hist(fm2_hmc)
 #'
-#'
 #' # poisson regression
 #' library(carData)
 #' data(AMSsurvey)
@@ -687,6 +687,7 @@ hmcpar <- function(paramlst, ...) {
 #' summary(fm3_hmc)
 #'
 #' plot(fm3_hmc, burnin=1000)
+#' }
 #'
 #' @author Samuel Thomas \email{samthoma@@iu.edu}, Wanzhu Tu \email{wtu@iu.edu}
 #' @references \emph{HMC in R} paper
