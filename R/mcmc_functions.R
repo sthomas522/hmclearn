@@ -615,7 +615,6 @@ hmcpar <- function(paramlst, ...) {
 #' }
 #'
 #' @examples
-#' \dontrun{
 #' # linear regression
 #' data(warpbreaks)
 #'
@@ -638,9 +637,6 @@ hmcpar <- function(paramlst, ...) {
 #'
 #' mcmc_trace(fm1_hmc, burnin=1000)
 #' mcmc_hist(fm1_hmc, burnin=1000)
-#'
-#' fm1_pred <- predict(fm1_hmc, y=y, X=X)
-#' pp_check(fm1_pred)
 #'
 #' # logistic regression
 #' library(mlbench)
@@ -667,9 +663,6 @@ hmcpar <- function(paramlst, ...) {
 #' mcmc_rhat(fm2_hmc)
 #' mcmc_rhat_hist(fm2_hmc)
 #'
-#' fm2_pred <- predict(fm2_hmc, y=y, X=X, fam="binomial")
-#' pp_check(fm2_pred)
-#' }
 #'
 #' # poisson regression
 #' library(carData)

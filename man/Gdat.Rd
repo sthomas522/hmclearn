@@ -4,7 +4,8 @@
 \name{Gdat}
 \alias{Gdat}
 \title{Count of Fresh Gopher Tortoise Shells}
-\format{A data frame with 30 rows and 7 variables:
+\format{
+A data frame with 30 rows and 7 variables:
 \describe{
   \item{Site}{name of site}
   \item{year}{years 2004, 2005, 2006}
@@ -13,7 +14,8 @@
   \item{Area}{area of the site}
   \item{density}{estimated tortoise density}
   \item{prev}{Seroprevalence}
-}}
+}
+}
 \source{
 \url{https://bbolker.github.io/mixedmodels-misc/ecostats_chap.html}
 }

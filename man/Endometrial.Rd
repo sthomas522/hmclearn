@@ -4,13 +4,15 @@
 \name{Endometrial}
 \alias{Endometrial}
 \title{Endometrial Cancer Dataset}
-\format{A data frame with 79 rows and 4 variables:
+\format{
+A data frame with 79 rows and 4 variables:
 \describe{
   \item{NV}{Neovasculation risk factor indicator (0=Absent, 1=Present)}
   \item{PI}{Pulsatility index of arteria uterina}
   \item{EH}{Endometrium height}
   \item{HG}{histology of patient (0=Low, 1=High)}
-}}
+}
+}
 \source{
 \url{http://users.stat.ufl.edu/~aa/glm/data/Endometrial.dat}
 }

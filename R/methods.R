@@ -174,91 +174,92 @@ predict.hmclearn <- function(object, y, X, fam = "linear", burnin=NULL, draws=NU
   return(retval)
 }
 
-#' Posterior (or prior) predictive checks based on \code{bayesplot} package
 #'
-#' Facilitates the display of several predictive checks from \code{bayesplot}
-#'
-#' @param object an object of class \code{hmclearn}, usually a result of a call to \code{mh} or \code{hmc}
-#' @param type character identification of \code{pp_check} plot.  Available types are "overlaid", "multiple", "bars", and "stat".
-#' @param ... optional additional argument passed to the \code{bayesplot} functions
-#'
-#' @section Plot/Data Descriptions from \code{bayesplot}:
-#' \describe{
-#'   \item{overlaid:  `ppc_dens_overlay()`}{
-#'    Kernel density or empirical CDF estimates of each dataset (row) in
-#'    `yrep` are overlaid, with the distribution of `y` itself on top
-#'    (and in a darker shade).
-#'   }
-#'   \item{multiple: `ppc_hist()`}{
-#'    A separate histogram, shaded frequency polygon, smoothed kernel density
-#'    estimate, or box and whiskers plot is displayed for `y` and each
-#'    dataset (row) in `yrep`. For these plots `yrep` should therefore
-#'    contain only a small number of rows. See the **Examples** section.
-#'   }
-#'   \item{`ppc_bars()`}{
-#'    For discrete distributions.  Bar plot of `y` with `yrep` medians and uncertainty intervals
-#'    superimposed on the bars.
-#'   }
-#'   \item{`ppc_stat()`}{
-#'    A histogram of the distribution of a test statistic computed by applying
-#'    `stat` to each dataset (row) in `yrep`. The value of the statistic in the
-#'    observed data, `stat(y)`, is overlaid as a vertical line.
-#'   }
+#' #' Posterior (or prior) predictive checks based on \code{bayesplot} package
+#' #'
+#' #' Facilitates the display of several predictive checks from \code{bayesplot}
+#' #'
+#' #' @param object an object of class \code{hmclearn}, usually a result of a call to \code{mh} or \code{hmc}
+#' #' @param type character identification of \code{pp_check} plot.  Available types are "overlaid", "multiple", "bars", and "stat".
+#' #' @param ... optional additional argument passed to the \code{bayesplot} functions
+#' #'
+#' #' @section Plot/Data Descriptions from \code{bayesplot}:
+#' #' \describe{
+#' #'   \item{overlaid:  `ppc_dens_overlay()`}{
+#' #'    Kernel density or empirical CDF estimates of each dataset (row) in
+#' #'    `yrep` are overlaid, with the distribution of `y` itself on top
+#' #'    (and in a darker shade).
+#' #'   }
+#' #'   \item{multiple: `ppc_hist()`}{
+#' #'    A separate histogram, shaded frequency polygon, smoothed kernel density
+#' #'    estimate, or box and whiskers plot is displayed for `y` and each
+#' #'    dataset (row) in `yrep`. For these plots `yrep` should therefore
+#' #'    contain only a small number of rows. See the **Examples** section.
+#' #'   }
+#' #'   \item{`ppc_bars()`}{
+#' #'    For discrete distributions.  Bar plot of `y` with `yrep` medians and uncertainty intervals
+#' #'    superimposed on the bars.
+#' #'   }
+#' #'   \item{`ppc_stat()`}{
+#' #'    A histogram of the distribution of a test statistic computed by applying
+#' #'    `stat` to each dataset (row) in `yrep`. The value of the statistic in the
+#' #'    observed data, `stat(y)`, is overlaid as a vertical line.
+#' #'   }
+#' #' }
+#' #' @references Gabry, Jonah and Mahr, Tristan (2019).  \emph{bayesplot:  Plotting for Bayesian Models}.  \url{https://mc-stan.org/bayesplot}
+#' #' @references Gabry, J., Simpson, D., Vehtari, A., Betancourt, M., and Gelman, A (2019).  \emph{Visualization in Bayesian Workflow}.  Journal of the Royal Statistical Society: Series A. Vol 182.  Issue 2.  p.389-402.
+#' #' @export
+#' pp_check <- function(object, type, ...) {
+#'   UseMethod("pp_check")
 #' }
-#' @references Gabry, Jonah and Mahr, Tristan (2019).  \emph{bayesplot:  Plotting for Bayesian Models}.  \url{https://mc-stan.org/bayesplot}
-#' @references Gabry, J., Simpson, D., Vehtari, A., Betancourt, M., and Gelman, A (2019).  \emph{Visualization in Bayesian Workflow}.  Journal of the Royal Statistical Society: Series A. Vol 182.  Issue 2.  p.389-402.
-#' @export
-pp_check <- function(object, type, ...) {
-  UseMethod("pp_check")
-}
-
-#' Posterior (or prior) predictive checks based on \code{bayesplot} package
 #'
-#' Facilitates the display of several predictive checks from \code{bayesplot}
+#' #' Posterior (or prior) predictive checks based on \code{bayesplot} package
+#' #'
+#' #' Facilitates the display of several predictive checks from \code{bayesplot}
+#' #'
+#' #' @param object an object of class \code{hmclearn}, usually a result of a call to \code{mh} or \code{hmc}
+#' #' @param type character identification of \code{pp_check} plot.  Available types are "overlaid", "multiple", "bars", and "stat".
+#' #' @param ... optional additional argument passed to the \code{bayesplot} functions
+#' #'
+#' #' @section Plot/Data Descriptions from \code{bayesplot}:
+#' #' \describe{
+#' #'   \item{overlaid:  `ppc_dens_overlay()`}{
+#' #'    Kernel density or empirical CDF estimates of each dataset (row) in
+#' #'    `yrep` are overlaid, with the distribution of `y` itself on top
+#' #'    (and in a darker shade).
+#' #'   }
+#' #'   \item{multiple: `ppc_hist()`}{
+#' #'    A separate histogram, shaded frequency polygon, smoothed kernel density
+#' #'    estimate, or box and whiskers plot is displayed for `y` and each
+#' #'    dataset (row) in `yrep`. For these plots `yrep` should therefore
+#' #'    contain only a small number of rows. See the **Examples** section.
+#' #'   }
+#' #'   \item{`ppc_bars()`}{
+#' #'    For discrete distributions.  Bar plot of `y` with `yrep` medians and uncertainty intervals
+#' #'    superimposed on the bars.
+#' #'   }
+#' #'   \item{`ppc_stat()`}{
+#' #'    A histogram of the distribution of a test statistic computed by applying
+#' #'    `stat` to each dataset (row) in `yrep`. The value of the statistic in the
+#' #'    observed data, `stat(y)`, is overlaid as a vertical line.
+#' #'   }
+#' #' }
+#' #' @references Gabry, Jonah and Mahr, Tristan (2019).  \emph{bayesplot:  Plotting for Bayesian Models}.  \url{https://mc-stan.org/bayesplot}
+#' #' @references Gabry, J., Simpson, D., Vehtari, A., Betancourt, M., and Gelman, A (2019).  \emph{Visualization in Bayesian Workflow}.  Journal of the Royal Statistical Society: Series A. Vol 182.  Issue 2.  p.389-402.
+#' #' @export
+#' pp_check.hmclearnpred <- function(object,
+#'                                   type=c("overlaid",
+#'                                          "multiple",
+#'                                          "bars",
+#'                                          "stat"), ...) {
 #'
-#' @param object an object of class \code{hmclearn}, usually a result of a call to \code{mh} or \code{hmc}
-#' @param type character identification of \code{pp_check} plot.  Available types are "overlaid", "multiple", "bars", and "stat".
-#' @param ... optional additional argument passed to the \code{bayesplot} functions
+#'   y <- object[["y"]]
+#'   yrep <- object[["yrep"]]
+#'   switch(match.arg(type),
+#'          multiple = bayesplot::ppc_hist(y, yrep[1:min(8, nrow(yrep)),, drop = FALSE]),
+#'          overlaid = bayesplot::ppc_dens_overlay(y, yrep),
+#'          bars = bayesplot::ppc_bars(y, yrep, ...),
+#'          stat = bayesplot::ppc_stat(y, yrep, ...)
+#'   )
 #'
-#' @section Plot/Data Descriptions from \code{bayesplot}:
-#' \describe{
-#'   \item{overlaid:  `ppc_dens_overlay()`}{
-#'    Kernel density or empirical CDF estimates of each dataset (row) in
-#'    `yrep` are overlaid, with the distribution of `y` itself on top
-#'    (and in a darker shade).
-#'   }
-#'   \item{multiple: `ppc_hist()`}{
-#'    A separate histogram, shaded frequency polygon, smoothed kernel density
-#'    estimate, or box and whiskers plot is displayed for `y` and each
-#'    dataset (row) in `yrep`. For these plots `yrep` should therefore
-#'    contain only a small number of rows. See the **Examples** section.
-#'   }
-#'   \item{`ppc_bars()`}{
-#'    For discrete distributions.  Bar plot of `y` with `yrep` medians and uncertainty intervals
-#'    superimposed on the bars.
-#'   }
-#'   \item{`ppc_stat()`}{
-#'    A histogram of the distribution of a test statistic computed by applying
-#'    `stat` to each dataset (row) in `yrep`. The value of the statistic in the
-#'    observed data, `stat(y)`, is overlaid as a vertical line.
-#'   }
 #' }
-#' @references Gabry, Jonah and Mahr, Tristan (2019).  \emph{bayesplot:  Plotting for Bayesian Models}.  \url{https://mc-stan.org/bayesplot}
-#' @references Gabry, J., Simpson, D., Vehtari, A., Betancourt, M., and Gelman, A (2019).  \emph{Visualization in Bayesian Workflow}.  Journal of the Royal Statistical Society: Series A. Vol 182.  Issue 2.  p.389-402.
-#' @export
-pp_check.hmclearnpred <- function(object,
-                                  type=c("overlaid",
-                                         "multiple",
-                                         "bars",
-                                         "stat"), ...) {
-
-  y <- object[["y"]]
-  yrep <- object[["yrep"]]
-  switch(match.arg(type),
-         multiple = bayesplot::ppc_hist(y, yrep[1:min(8, nrow(yrep)),, drop = FALSE]),
-         overlaid = bayesplot::ppc_dens_overlay(y, yrep),
-         bars = bayesplot::ppc_bars(y, yrep, ...),
-         stat = bayesplot::ppc_stat(y, yrep, ...)
-  )
-
-}

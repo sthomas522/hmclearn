@@ -4,13 +4,15 @@
 \name{Drugs}
 \alias{Drugs}
 \title{Student Drug Usage Dataset}
-\format{A data frame with 8 rows and 4 variables:
+\format{
+A data frame with 8 rows and 4 variables:
 \describe{
   \item{A}{Alcohol usage (Yes/No)}
   \item{C}{Cigarette usage (Yes/No)}
   \item{M}{Marijuana usage (Yes/No)}
   \item{count}{number of responses}
-}}
+}
+}
 \source{
 \url{http://users.stat.ufl.edu/~aa/glm/data/Drugs.dat}
 }
