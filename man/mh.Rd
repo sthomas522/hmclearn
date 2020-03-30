@@ -136,6 +136,7 @@ fm1_mh$accept / Nmh
 summary(fm1_mh, burnin=1000)
 mcmc_trace(fm1_mh, burnin=1000)
 mcmc_hist(fm1_mh, burnin=1000)
+}
 
 # poisson regression
 
@@ -165,7 +166,7 @@ summary(fm3_mh)
 
 mcmc_trace(fm3_mh, burnin=1000)
 mcmc_dens(fm3_mh, burnin=1000)
-}
+
 }
 \author{
 Samuel Thomas \email{samthoma@iu.edu}, Wanzhu Tu \email{wtu@iu.edu}

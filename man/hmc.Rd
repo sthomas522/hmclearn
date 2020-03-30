@@ -199,6 +199,7 @@ mcmc_rhat_hist(fm2_hmc)
 
 fm2_pred <- predict(fm2_hmc, y=y, X=X, fam="binomial")
 pp_check(fm2_pred)
+}
 
 # poisson regression
 library(carData)
@@ -223,7 +224,7 @@ fm3_hmc$accept / N
 summary(fm3_hmc)
 
 plot(fm3_hmc, burnin=1000)
-}
+
 }
 \references{
 \emph{HMC in R} paper

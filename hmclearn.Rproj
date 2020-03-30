@@ -18,6 +18,6 @@ StripTrailingWhitespace: Yes
 BuildType: Package
 PackageUseDevtools: Yes
 PackageInstallArgs: --no-multiarch --with-keep.source
-PackageBuildArgs: --no-build-vignettes
-PackageBuildBinaryArgs: --compact-vignettes="both"
-PackageCheckArgs: --ignore-vignettes
+PackageBuildArgs: --compact-vignettes="qpdf"
+PackageBuildBinaryArgs: --compact-vignettes="qpdf"
+PackageCheckArgs: --compact-vignettes="qpdf"

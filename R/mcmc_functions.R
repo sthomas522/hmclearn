@@ -175,6 +175,7 @@ mhpar <- function(paramlst, ...) {
 #' summary(fm1_mh, burnin=1000)
 #' mcmc_trace(fm1_mh, burnin=1000)
 #' mcmc_hist(fm1_mh, burnin=1000)
+#' }
 #'
 #' # poisson regression
 #'
@@ -204,7 +205,7 @@ mhpar <- function(paramlst, ...) {
 #'
 #' mcmc_trace(fm3_mh, burnin=1000)
 #' mcmc_dens(fm3_mh, burnin=1000)
-#' }
+#'
 #' @author Samuel Thomas \email{samthoma@@iu.edu}, Wanzhu Tu \email{wtu@iu.edu}
 #' @export
 mh <- function(N, theta.init, qPROP, qFUN, logPOSTERIOR, nu=1e-3,
@@ -668,6 +669,7 @@ hmcpar <- function(paramlst, ...) {
 #'
 #' fm2_pred <- predict(fm2_hmc, y=y, X=X, fam="binomial")
 #' pp_check(fm2_pred)
+#' }
 #'
 #' # poisson regression
 #' library(carData)
@@ -692,7 +694,7 @@ hmcpar <- function(paramlst, ...) {
 #' summary(fm3_hmc)
 #'
 #' plot(fm3_hmc, burnin=1000)
-#' }
+#'
 #' @author Samuel Thomas \email{samthoma@@iu.edu}, Wanzhu Tu \email{wtu@iu.edu}
 #' @references \emph{HMC in R} paper
 #' @references Thomas, S., Li, X., and Tu, W.  2019.  \emph{Hamiltonian Monte Carlo}.  Wiley
