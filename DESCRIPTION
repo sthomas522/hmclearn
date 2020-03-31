@@ -10,6 +10,7 @@ Description: Provide users with a framework to learn the intricacies of the Hami
 Depends: R (>= 3.1.0)
 License: GPL-3
 Encoding: UTF-8
+Language: en-US
 LazyData: true
 Suggests: 
     knitr,
