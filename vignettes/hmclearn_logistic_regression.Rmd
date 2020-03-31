@@ -63,7 +63,7 @@ p(\beta) &= \frac{1}{\sqrt{\lvert 2\pi \Sigma_\beta \rvert }}e^{-\frac{1}{2}\bet
 $$
 
 
-Let $B = 1e3$ for instance, as a relatively uniformative prior.
+Let $B = 1e3$ for instance, as a relatively uninformative prior.
 
 Now derive the log posterior
 
