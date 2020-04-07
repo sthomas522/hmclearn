@@ -622,7 +622,7 @@ hmcpar <- function(paramlst, ...) {
 #' X <- model.matrix(breaks ~ wool*tension, data=warpbreaks)
 #' y <- warpbreaks$breaks
 #'
-#' N <- 1e4
+#' N <- 1e3
 #' eps_vals <- c(rep(2e-1, 6), 2e-2)
 #'
 #' set.seed(143)
@@ -636,8 +636,8 @@ hmcpar <- function(paramlst, ...) {
 #' fm1_hmc$accept / N
 #' summary(fm1_hmc)
 #'
-#' mcmc_trace(fm1_hmc, burnin=1000)
-#' mcmc_hist(fm1_hmc, burnin=1000)
+#' mcmc_trace(fm1_hmc, burnin=100)
+#' mcmc_hist(fm1_hmc, burnin=100)
 #'
 #' # logistic regression
 #' library(mlbench)
@@ -647,7 +647,7 @@ hmcpar <- function(paramlst, ...) {
 #' X <- model.matrix(Class ~ Cl.thickness + Cell.size + Cell.shape, data = bc)
 #' y <- ifelse(bc$Class == "benign", 0, 1)
 #' p <- ncol(X)
-#' N <- 1e4
+#' N <- 1e3
 #'
 #' set.seed(321)
 #' fm2_hmc <- hmc(N, theta.init = rep(0, p),
@@ -663,6 +663,7 @@ hmcpar <- function(paramlst, ...) {
 #' summary(fm2_hmc)
 #' mcmc_rhat(fm2_hmc)
 #' mcmc_rhat_hist(fm2_hmc)
+#' }
 #'
 #' # poisson regression
 #' library(carData)
@@ -675,7 +676,7 @@ hmcpar <- function(paramlst, ...) {
 #' y <- AMSsurvey$count
 #' p <- ncol(X)
 #'
-#' N <- 1e4
+#' N <- 1e3
 #'
 #' fm3_hmc <- hmc(N, theta.init = rep(0, p), epsilon = 2e-3, L = 20,
 #'                logPOSTERIOR = poisson_posterior,
@@ -686,8 +687,8 @@ hmcpar <- function(paramlst, ...) {
 #'
 #' summary(fm3_hmc)
 #'
-#' plot(fm3_hmc, burnin=1000)
-#' }
+#' plot(fm3_hmc, burnin=100)
+#'
 #'
 #' @author Samuel Thomas \email{samthoma@@iu.edu}, Wanzhu Tu \email{wtu@iu.edu}
 #' @references \emph{HMC in R} paper
