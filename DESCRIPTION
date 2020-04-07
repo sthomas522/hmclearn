@@ -20,7 +20,8 @@ Suggests:
     carData,
     mlbench,
     ggplot2,
-    mlmRev
+    mlmRev,
+    testthat
 RoxygenNote: 7.1.0
 Imports: 
     bayesplot,
