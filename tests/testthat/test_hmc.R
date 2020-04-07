@@ -28,7 +28,12 @@ set.seed(9887)
 X <- cbind(1, seq(1, 10, by=0.25))
 betavals <- c(-0.9, 0.2)
 lodds <- X %*% betavals
-prob <- as.numeric(1 / (1 + exp(-lodds)))
+prob1 <- as.numeric(1 / (1 + exp(-lodds)))
+prob0 <- 1 - prob1
+probs <- cbind(prob0, prob1)
+
+y <- mapply(sample, )
+
 y <- sample(c(0, 1), size = length(prob), prob=prob, replace=T)
 
 y <- sapply(prob, sample, x=c(0, 1), size=1, replace=F)
