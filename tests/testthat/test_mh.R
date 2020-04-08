@@ -12,7 +12,7 @@ test_that("mh testing", {
            qFUN = qfun,
            logPOSTERIOR = linear_posterior,
            varnames = c(paste0("beta", 0:3), "log_sigma_sq"),
-           param=list(y=y, X=X), parallel=F, chains=1)
+           param=list(y=y, X=X), parallel=FALSE, chains=1)
 
   medparam1 <- as.vector(summary(f1)[, 3])
 
@@ -42,7 +42,7 @@ test_that("mh testing", {
             logPOSTERIOR = logistic_posterior,
             varnames = paste0("beta", 0:1),
             param = list(y=y, X=X),
-            parallel=F, chains=1)
+            parallel=FALSE, chains=1)
 
   medparam2 <- as.vector(summary(f2, burnin=500)[, 3])
   medparam2
@@ -57,21 +57,21 @@ test_that("mh testing", {
   lmu <- X %*% betavals
   y <- sapply(exp(lmu), FUN = rpois, n=1)
 
-  f3 <- hmc(N = 500,
+  f3 <- mh(N = 2000,
             theta.init = rep(0, 3),
-            epsilon = 0.01,
-            L = 10,
+            nu = rep(0.01, 3),
+            qPROP = qprop,
+            qFUN = qfun,
             logPOSTERIOR = poisson_posterior,
-            glogPOSTERIOR = g_poisson_posterior,
             varnames = paste0("beta", 0:2),
             param = list(y=y, X=X),
-            parallel=F, chains=1)
+            parallel=FALSE, chains=1)
 
-  medparam3 <- as.vector(summary(f3, burnin=100)[, 3])
+  medparam3 <- as.vector(summary(f3, burnin=500)[, 3])
   medparam3
 
   expect_equal(round(medparam3, 7),
-               c(0.7770322, -0.5192680, 1.2087953))
+               c(0.8487477, -0.5099939, 1.1685409))
 
 })
 

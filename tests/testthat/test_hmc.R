@@ -12,7 +12,7 @@ test_that("hmc testing", {
             logPOSTERIOR = linear_posterior,
             glogPOSTERIOR = g_linear_posterior,
             varnames = c(paste0("beta", 0:3), "log_sigma_sq"),
-            param=list(y=y, X=X), parallel=F, chains=1)
+            param=list(y=y, X=X), parallel=FALSE, chains=1)
 
   medparam1 <- as.vector(summary(f1)[, 3])
 
@@ -43,7 +43,7 @@ test_that("hmc testing", {
             randlength=TRUE,
             varnames = paste0("beta", 0:1),
             param = list(y=y, X=X),
-            parallel=F, chains=1)
+            parallel=FALSE, chains=1)
 
   medparam2 <- as.vector(summary(f2, burnin=100)[, 3])
   medparam2
@@ -66,7 +66,7 @@ test_that("hmc testing", {
             glogPOSTERIOR = g_poisson_posterior,
             varnames = paste0("beta", 0:2),
             param = list(y=y, X=X),
-            parallel=F, chains=1)
+            parallel=FALSE, chains=1)
 
   medparam3 <- as.vector(summary(f3, burnin=100)[, 3])
   medparam3
