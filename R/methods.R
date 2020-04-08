@@ -24,7 +24,7 @@ combMatrix <- function(x, burnin) {
 #' @references Gelman, A. and Rubin, D. (1992) \emph{Inference from Iterative Simulation Using Multiple Sequences}.  Statistical Science 7(4) 457-472.
 #' @export
 summary.hmclearn <- function(object, burnin=NULL, probs=c(0.05, 0.25, 0.5, 0.75, 0.95), ...) {
-  cat("Summary of HMC simulation\n\n")
+  cat("Summary of MCMC simulation\n\n")
 
   # remove burnin
   thetaCombined <- combMatrix(object$thetaCombined, burnin=burnin)

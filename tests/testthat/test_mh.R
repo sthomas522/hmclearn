@@ -1,27 +1,27 @@
-test_that("hmc testing", {
+test_that("mh testing", {
   # Linear regression example
   set.seed(521)
   X <- cbind(1, matrix(rnorm(300), ncol=3))
   betavals <- c(0.5, -1, 2, -3)
   y <- X%*%betavals + rnorm(100, sd=.2)
 
-  f1 <- hmc(N = 500,
-            theta.init = c(rep(0, 4), 1),
-            epsilon = 0.01,
-            L = 10,
-            logPOSTERIOR = linear_posterior,
-            glogPOSTERIOR = g_linear_posterior,
-            varnames = c(paste0("beta", 0:3), "log_sigma_sq"),
-            param=list(y=y, X=X), parallel=F, chains=1)
+  f1 <- mh(N = 2000,
+           theta.init = c(rep(0, 4), 1),
+           nu <- c(rep(0.001, 4), 0.1),
+           qPROP = qprop,
+           qFUN = qfun,
+           logPOSTERIOR = linear_posterior,
+           varnames = c(paste0("beta", 0:3), "log_sigma_sq"),
+           param=list(y=y, X=X), parallel=F, chains=1)
 
   medparam1 <- as.vector(summary(f1)[, 3])
 
-  expect_equal(round(medparam1, 8),
-               c(0.5325537,
-                 -1.0118904,
-                 2.0164956,
-                 -2.9807522,
-                 -3.0392322))
+  expect_equal(round(medparam1, 7),
+               c(0.5262811,
+                 -0.9978062,
+                 2.0070419,
+                 -2.9620583,
+                 -2.9369102))
 
   # Logistic regression example
   X <- cbind(1, seq(-100, 100, by=0.25))
@@ -34,22 +34,21 @@ test_that("hmc testing", {
     sample(c(0, 1), 1, prob=c(1-xx, xx))
   })
 
-  f2 <- hmc(N = 500,
+  f2 <- mh(N = 2000,
             theta.init = rep(0, 2),
-            epsilon = c(0.1, 0.002),
-            L = 10,
+            nu = c(0.03, 0.001),
+            qPROP = qprop,
+            qFUN = qfun,
             logPOSTERIOR = logistic_posterior,
-            glogPOSTERIOR = g_logistic_posterior,
-            randlength=TRUE,
             varnames = paste0("beta", 0:1),
             param = list(y=y, X=X),
             parallel=F, chains=1)
 
-  medparam2 <- as.vector(summary(f2, burnin=100)[, 3])
+  medparam2 <- as.vector(summary(f2, burnin=500)[, 3])
   medparam2
 
   expect_equal(round(medparam2, 7),
-               c(-0.8497155, 0.1892506))
+               c(-0.8716308, 0.1875842))
 
   # poisson regression example
   set.seed(7363)
