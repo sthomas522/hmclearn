@@ -24,29 +24,19 @@ expect_equal(round(medparam1, 8),
                -3.0392322))
 
 # Logistic regression example
-set.seed(9887)
-X <- cbind(1, seq(1, 10, by=0.25))
+X <- cbind(1, seq(-100, 100, by=0.25))
 betavals <- c(-0.9, 0.2)
 lodds <- X %*% betavals
 prob1 <- as.numeric(1 / (1 + exp(-lodds)))
-prob0 <- 1 - prob1
-probs <- cbind(prob0, prob1)
 
-y <- mapply(sample, )
+set.seed(9874)
+y <- sapply(prob1, function(xx) {
+  sample(c(0, 1), 1, prob=c(1-xx, xx))
+})
 
-y <- sample(c(0, 1), size = length(prob), prob=prob, replace=T)
-
-y <- sapply(prob, sample, x=c(0, 1), size=1, replace=F)
-
-
-betavals <- c(-0.2, 0.3)
-lodds <- X%*%betavals
-y <- as.numeric(1*(prob>0.5))
-
-set.seed(521)
 f2 <- hmc(N = 500,
           theta.init = rep(0, 2),
-          epsilon = 0.5,
+          epsilon = c(0.1, 0.002),
           L = 10,
           logPOSTERIOR = logistic_posterior,
           glogPOSTERIOR = g_logistic_posterior,
@@ -56,8 +46,13 @@ f2 <- hmc(N = 500,
           parallel=F, chains=1)
 
 medparam2 <- as.vector(summary(f2, burnin=100)[, 3])
+medparam2
 
-f2$accept / 500
+expect_equal(round(medparam2, 7),
+             c(-0.8497155, 0.1892506))
+
+# poisson regression example
+
 
 
 
