@@ -145,9 +145,6 @@ Leapfrog algorithm.
 }
 
 \examples{
-\dontrun{
-}
-
 # Logistic regression example
 X <- cbind(1, seq(-100, 100, by=0.25))
 betavals <- c(-0.9, 0.2)
@@ -195,7 +192,7 @@ summary(f2, burnin=100)
 mcmc_trace(f2, burnin=100)
 mcmc_hist(f2, burnin=100)
 
-\dontrun{
+\donttest{
 # Linear regression example
 set.seed(521)
 X <- cbind(1, matrix(rnorm(300), ncol=3))

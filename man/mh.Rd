@@ -162,7 +162,7 @@ summary(f3)
 mcmc_trace(f3, burnin=500)
 mcmc_hist(f3, burnin=500)
 
-\dontrun{
+\donttest{
 # Linear regression example
 set.seed(521)
 X <- cbind(1, matrix(rnorm(300), ncol=3))
