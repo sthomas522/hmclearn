@@ -155,8 +155,27 @@ mhpar <- function(paramlst, ...) {
 #' }
 #'
 #' @examples
+#' # Linear regression example
+#' set.seed(521)
+#' X <- cbind(1, matrix(rnorm(300), ncol=3))
+#' betavals <- c(0.5, -1, 2, -3)
+#' y <- X%*%betavals + rnorm(100, sd=.2)
+#'
+#' f1_mh <- mh(N = 2000,
+#'          theta.init = c(rep(0, 4), 1),
+#'          nu <- c(rep(0.001, 4), 0.1),
+#'          qPROP = qprop,
+#'          qFUN = qfun,
+#'          logPOSTERIOR = linear_posterior,
+#'          varnames = c(paste0("beta", 0:3), "log_sigma_sq"),
+#'          param=list(y=y, X=X), parallel=FALSE, chains=1)
+#'
+#' summary(f1_mh)
+#' mcmc_trace(f1_mh, burnin=1000)
+#' mcmc_hist(f1_mh, burnin=1000)
+#'
 #' # Logistic regression example
-#' X <- cbind(1, seq(-100, 100, by=0.25))
+#' X <- cbind(1, seq(-20, 20, by=0.25))
 #' betavals <- c(-0.9, 0.2)
 #' lodds <- X %*% betavals
 #' prob1 <- as.numeric(1 / (1 + exp(-lodds)))
@@ -166,7 +185,7 @@ mhpar <- function(paramlst, ...) {
 #'   sample(c(0, 1), 1, prob=c(1-xx, xx))
 #' })
 #'
-#' f1 <- mh(N = 1000,
+#' f2_mh <- mh(N = 1000,
 #'          theta.init = rep(0, 2),
 #'          nu = c(0.03, 0.001),
 #'          qPROP = qprop,
@@ -176,9 +195,9 @@ mhpar <- function(paramlst, ...) {
 #'          param = list(y=y, X=X),
 #'          parallel=FALSE, chains=1)
 #'
-#' summary(f1, burnin=500)
-#' mcmc_trace(f1, burnin=500)
-#' mcmc_hist(f1, burnin=500)
+#' summary(f2_mh, burnin=500)
+#' mcmc_trace(f2_mh, burnin=500)
+#' mcmc_hist(f2_mh, burnin=500)
 #'
 #' # poisson regression example
 #' set.seed(7363)
@@ -187,7 +206,7 @@ mhpar <- function(paramlst, ...) {
 #' lmu <- X %*% betavals
 #' y <- sapply(exp(lmu), FUN = rpois, n=1)
 #'
-#' f3 <- mh(N = 1000,
+#' f3_mh <- mh(N = 1000,
 #'          theta.init = rep(0, 3),
 #'          nu = rep(0.01, 3),
 #'          qPROP = qprop,
@@ -197,30 +216,11 @@ mhpar <- function(paramlst, ...) {
 #'          param = list(y=y, X=X),
 #'          parallel=FALSE, chains=1)
 #'
-#' summary(f3)
-#' mcmc_trace(f3, burnin=500)
-#' mcmc_hist(f3, burnin=500)
+#' summary(f3_mh)
+#' mcmc_trace(f3_mh, burnin=500)
+#' mcmc_hist(f3_mh, burnin=500)
 #'
 #' \donttest{
-#' # Linear regression example
-#' set.seed(521)
-#' X <- cbind(1, matrix(rnorm(300), ncol=3))
-#' betavals <- c(0.5, -1, 2, -3)
-#' y <- X%*%betavals + rnorm(100, sd=.2)
-#'
-#' f3 <- mh(N = 2000,
-#'          theta.init = c(rep(0, 4), 1),
-#'          nu <- c(rep(0.001, 4), 0.1),
-#'          qPROP = qprop,
-#'          qFUN = qfun,
-#'          logPOSTERIOR = linear_posterior,
-#'          varnames = c(paste0("beta", 0:3), "log_sigma_sq"),
-#'          param=list(y=y, X=X), parallel=FALSE, chains=1)
-#'
-#' summary(f3)
-#' mcmc_trace(f3, burnin=1000)
-#' mcmc_hist(f3, burnin=1000)
-#'
 #' # linear regression
 #' data(warpbreaks)
 #'
@@ -229,20 +229,19 @@ mhpar <- function(paramlst, ...) {
 #'
 #' Nmh <- 1e5
 #' nuval <- c(rep(4, 6), 1e-1)
-#' fm1_mh <- mh(Nmh, theta.init = c(rep(0, 6), 1), nu=nuval,
+#' f4_mh <- mh(Nmh, theta.init = c(rep(0, 6), 1), nu=nuval,
 #'              qPROP = qprop, qFUN = qfun,
 #'              logPOSTERIOR = linear_posterior,
 #'              varnames = c(colnames(X), "log_sigma_sq"),
 #'              param=list(y=y, X=X), parallel= TRUE, chains=2)
 #'
-#' fm1_mh$accept / Nmh
+#' f4_mh$accept / Nmh
 #'
-#' summary(fm1_mh, burnin=1000)
-#' mcmc_trace(fm1_mh, burnin=1000)
-#' mcmc_hist(fm1_mh, burnin=1000)
+#' summary(f4_mh, burnin=1000)
+#' mcmc_trace(f4_mh, burnin=1000)
+#' mcmc_hist(f4_mh, burnin=1000)
 #'
 #' # poisson regression
-#'
 #' library(carData)
 #' data(AMSsurvey)
 #'
@@ -257,18 +256,18 @@ mhpar <- function(paramlst, ...) {
 #'
 #' nuval <- c(rep(1, p-1), 1e-1)
 #'
-#' fm3_mh <- mh(Nmh, theta.init =rep(0, p), nu=1e-3,
+#' f5_mh <- mh(Nmh, theta.init =rep(0, p), nu=1e-3,
 #'              qPROP = qprop, qFUN = qfun,
 #'              logPOSTERIOR = poisson_posterior,
 #'              varnames = colnames(X),
 #'              param=list(y=y, X=X))
 #'
-#' fm3_mh$accept / Nmh
+#' f5_mh$accept / Nmh
 #'
-#' summary(fm3_mh)
+#' summary(f5_mh)
 #'
-#' mcmc_trace(fm3_mh, burnin=1000)
-#' mcmc_dens(fm3_mh, burnin=1000)
+#' mcmc_trace(f5_mh, burnin=1000)
+#' mcmc_dens(f5_mh, burnin=1000)
 #' }
 #'
 #' @author Samuel Thomas \email{samthoma@@iu.edu}, Wanzhu Tu \email{wtu@iu.edu}
@@ -680,8 +679,27 @@ hmcpar <- function(paramlst, ...) {
 #' }
 #'
 #' @examples
+#' # Linear regression example
+#' set.seed(521)
+#' X <- cbind(1, matrix(rnorm(300), ncol=3))
+#' betavals <- c(0.5, -1, 2, -3)
+#' y <- X%*%betavals + rnorm(100, sd=.2)
+#'
+#' f1_hmc <- hmc(N = 500,
+#'           theta.init = c(rep(0, 4), 1),
+#'           epsilon = 0.01,
+#'           L = 10,
+#'           logPOSTERIOR = linear_posterior,
+#'           glogPOSTERIOR = g_linear_posterior,
+#'           varnames = c(paste0("beta", 0:3), "log_sigma_sq"),
+#'           param=list(y=y, X=X), parallel=FALSE, chains=1)
+#'
+#' summary(f1_hmc, burnin=100)
+#' mcmc_trace(f1_hmc, burnin=100)
+#' mcmc_hist(f1_hmc, burnin=100)
+#'
 #' # Logistic regression example
-#' X <- cbind(1, seq(-100, 100, by=0.25))
+#' X <- cbind(1, seq(-20, 20, by=0.25))
 #' betavals <- c(-0.9, 0.2)
 #' lodds <- X %*% betavals
 #' prob1 <- as.numeric(1 / (1 + exp(-lodds)))
@@ -691,7 +709,7 @@ hmcpar <- function(paramlst, ...) {
 #'   sample(c(0, 1), 1, prob=c(1-xx, xx))
 #' })
 #'
-#' f1 <- hmc(N = 500,
+#' f2_hmc <- hmc(N = 500,
 #'           theta.init = rep(0, 2),
 #'           epsilon = c(0.1, 0.002),
 #'           L = 10,
@@ -702,9 +720,9 @@ hmcpar <- function(paramlst, ...) {
 #'           param = list(y=y, X=X),
 #'           parallel=FALSE, chains=1)
 #'
-#' summary(f1, burnin=100)
-#' mcmc_trace(f1, burnin=100)
-#' mcmc_hist(f1, burnin=100)
+#' summary(f2_hmc, burnin=100)
+#' mcmc_trace(f2_hmc, burnin=100)
+#' mcmc_hist(f2_hmc, burnin=100)
 #'
 #' # poisson regression example
 #' set.seed(7363)
@@ -713,7 +731,7 @@ hmcpar <- function(paramlst, ...) {
 #' lmu <- X %*% betavals
 #' y <- sapply(exp(lmu), FUN = rpois, n=1)
 #'
-#' f2 <- hmc(N = 500,
+#' f3_hmc <- hmc(N = 500,
 #'           theta.init = rep(0, 3),
 #'           epsilon = 0.01,
 #'           L = 10,
@@ -723,30 +741,11 @@ hmcpar <- function(paramlst, ...) {
 #'           param = list(y=y, X=X),
 #'           parallel=FALSE, chains=1)
 #'
-#' summary(f2, burnin=100)
-#' mcmc_trace(f2, burnin=100)
-#' mcmc_hist(f2, burnin=100)
+#' summary(f3_hmc, burnin=100)
+#' mcmc_trace(f3_hmc, burnin=100)
+#' mcmc_hist(f3_hmc, burnin=100)
 #'
 #' \donttest{
-#' # Linear regression example
-#' set.seed(521)
-#' X <- cbind(1, matrix(rnorm(300), ncol=3))
-#' betavals <- c(0.5, -1, 2, -3)
-#' y <- X%*%betavals + rnorm(100, sd=.2)
-#'
-#' f3 <- hmc(N = 500,
-#'           theta.init = c(rep(0, 4), 1),
-#'           epsilon = 0.01,
-#'           L = 10,
-#'           logPOSTERIOR = linear_posterior,
-#'           glogPOSTERIOR = g_linear_posterior,
-#'           varnames = c(paste0("beta", 0:3), "log_sigma_sq"),
-#'           param=list(y=y, X=X), parallel=FALSE, chains=1)
-#'
-#' summary(f3, burnin=100)
-#' mcmc_trace(f3, burnin=100)
-#' mcmc_hist(f3, burnin=100)
-#'
 #' # linear regression
 #' data(warpbreaks)
 #'
@@ -757,18 +756,18 @@ hmcpar <- function(paramlst, ...) {
 #' eps_vals <- c(rep(2e-1, 6), 2e-2)
 #'
 #' set.seed(143)
-#' fm1_hmc <- hmc(N, theta.init = c(rep(0, 6), 1),
+#' fm4_hmc <- hmc(N, theta.init = c(rep(0, 6), 1),
 #'                epsilon = eps_vals, L = 20,
 #'                logPOSTERIOR = linear_posterior,
 #'                glogPOSTERIOR = g_linear_posterior,
 #'                varnames = c(colnames(X), "log_sigma_sq"),
 #'                param=list(y=y, X=X), parallel = TRUE, chains = 2)
 #'
-#' fm1_hmc$accept / N
-#' summary(fm1_hmc)
+#' fm4_hmc$accept / N
+#' summary(fm4_hmc)
 #'
-#' mcmc_trace(fm1_hmc, burnin=100)
-#' mcmc_hist(fm1_hmc, burnin=100)
+#' mcmc_trace(fm4_hmc, burnin=100)
+#' mcmc_hist(fm4_hmc, burnin=100)
 #'
 #' # logistic regression
 #' library(mlbench)
@@ -781,7 +780,7 @@ hmcpar <- function(paramlst, ...) {
 #' N <- 1e3
 #'
 #' set.seed(321)
-#' fm2_hmc <- hmc(N, theta.init = rep(0, p),
+#' fm5_hmc <- hmc(N, theta.init = rep(0, p),
 #'                epsilon = 1e-1, L=20,
 #'                logPOSTERIOR = logistic_posterior,
 #'                glogPOSTERIOR = g_logistic_posterior,
@@ -789,12 +788,11 @@ hmcpar <- function(paramlst, ...) {
 #'                varnames = colnames(X),
 #'                param=list(y=y, X=X), parallel = TRUE, chains=2)
 #'
-#' fm2_hmc$accept / N
+#' fm5_hmc$accept / N
 #'
-#' summary(fm2_hmc)
-#' mcmc_rhat(fm2_hmc)
-#' mcmc_rhat_hist(fm2_hmc)
-#' }
+#' summary(fm5_hmc)
+#' mcmc_rhat(fm5_hmc)
+#' mcmc_rhat_hist(fm5_hmc)
 #'
 #' # poisson regression
 #' library(carData)
@@ -809,17 +807,17 @@ hmcpar <- function(paramlst, ...) {
 #'
 #' N <- 1e3
 #'
-#' fm3_hmc <- hmc(N, theta.init = rep(0, p), epsilon = 2e-3, L = 20,
+#' fm6_hmc <- hmc(N, theta.init = rep(0, p), epsilon = 2e-3, L = 20,
 #'                logPOSTERIOR = poisson_posterior,
 #'                glogPOSTERIOR=g_poisson_posterior,
 #'                varnames = colnames(X),
 #'                param=list(y = y, X=X), parallel=TRUE, chains=2)
-#' fm3_hmc$accept / N
+#' fm6_hmc$accept / N
 #'
-#' summary(fm3_hmc)
+#' summary(fm6_hmc)
 #'
-#' plot(fm3_hmc, burnin=100)
-#'
+#' plot(fm6_hmc, burnin=100)
+#' }
 #'
 #' @author Samuel Thomas \email{samthoma@@iu.edu}, Wanzhu Tu \email{wtu@iu.edu}
 #' @references \emph{HMC in R} paper

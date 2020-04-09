@@ -116,8 +116,27 @@ All parameters specified within the list \code{param} are passed to these the po
 }
 
 \examples{
+# Linear regression example
+set.seed(521)
+X <- cbind(1, matrix(rnorm(300), ncol=3))
+betavals <- c(0.5, -1, 2, -3)
+y <- X\%*\%betavals + rnorm(100, sd=.2)
+
+f1_mh <- mh(N = 2000,
+         theta.init = c(rep(0, 4), 1),
+         nu <- c(rep(0.001, 4), 0.1),
+         qPROP = qprop,
+         qFUN = qfun,
+         logPOSTERIOR = linear_posterior,
+         varnames = c(paste0("beta", 0:3), "log_sigma_sq"),
+         param=list(y=y, X=X), parallel=FALSE, chains=1)
+
+summary(f1_mh)
+mcmc_trace(f1_mh, burnin=1000)
+mcmc_hist(f1_mh, burnin=1000)
+
 # Logistic regression example
-X <- cbind(1, seq(-100, 100, by=0.25))
+X <- cbind(1, seq(-20, 20, by=0.25))
 betavals <- c(-0.9, 0.2)
 lodds <- X \%*\% betavals
 prob1 <- as.numeric(1 / (1 + exp(-lodds)))
@@ -127,7 +146,7 @@ y <- sapply(prob1, function(xx) {
   sample(c(0, 1), 1, prob=c(1-xx, xx))
 })
 
-f1 <- mh(N = 1000,
+f2_mh <- mh(N = 1000,
          theta.init = rep(0, 2),
          nu = c(0.03, 0.001),
          qPROP = qprop,
@@ -137,9 +156,9 @@ f1 <- mh(N = 1000,
          param = list(y=y, X=X),
          parallel=FALSE, chains=1)
 
-summary(f1, burnin=500)
-mcmc_trace(f1, burnin=500)
-mcmc_hist(f1, burnin=500)
+summary(f2_mh, burnin=500)
+mcmc_trace(f2_mh, burnin=500)
+mcmc_hist(f2_mh, burnin=500)
 
 # poisson regression example
 set.seed(7363)
@@ -148,7 +167,7 @@ betavals <- c(0.8, -0.5, 1.1)
 lmu <- X \%*\% betavals
 y <- sapply(exp(lmu), FUN = rpois, n=1)
 
-f3 <- mh(N = 1000,
+f3_mh <- mh(N = 1000,
          theta.init = rep(0, 3),
          nu = rep(0.01, 3),
          qPROP = qprop,
@@ -158,30 +177,11 @@ f3 <- mh(N = 1000,
          param = list(y=y, X=X),
          parallel=FALSE, chains=1)
 
-summary(f3)
-mcmc_trace(f3, burnin=500)
-mcmc_hist(f3, burnin=500)
+summary(f3_mh)
+mcmc_trace(f3_mh, burnin=500)
+mcmc_hist(f3_mh, burnin=500)
 
 \donttest{
-# Linear regression example
-set.seed(521)
-X <- cbind(1, matrix(rnorm(300), ncol=3))
-betavals <- c(0.5, -1, 2, -3)
-y <- X\%*\%betavals + rnorm(100, sd=.2)
-
-f3 <- mh(N = 2000,
-         theta.init = c(rep(0, 4), 1),
-         nu <- c(rep(0.001, 4), 0.1),
-         qPROP = qprop,
-         qFUN = qfun,
-         logPOSTERIOR = linear_posterior,
-         varnames = c(paste0("beta", 0:3), "log_sigma_sq"),
-         param=list(y=y, X=X), parallel=FALSE, chains=1)
-
-summary(f3)
-mcmc_trace(f3, burnin=1000)
-mcmc_hist(f3, burnin=1000)
-
 # linear regression
 data(warpbreaks)
 
@@ -190,20 +190,19 @@ y <- warpbreaks$breaks
 
 Nmh <- 1e5
 nuval <- c(rep(4, 6), 1e-1)
-fm1_mh <- mh(Nmh, theta.init = c(rep(0, 6), 1), nu=nuval,
+f4_mh <- mh(Nmh, theta.init = c(rep(0, 6), 1), nu=nuval,
              qPROP = qprop, qFUN = qfun,
              logPOSTERIOR = linear_posterior,
              varnames = c(colnames(X), "log_sigma_sq"),
              param=list(y=y, X=X), parallel= TRUE, chains=2)
 
-fm1_mh$accept / Nmh
+f4_mh$accept / Nmh
 
-summary(fm1_mh, burnin=1000)
-mcmc_trace(fm1_mh, burnin=1000)
-mcmc_hist(fm1_mh, burnin=1000)
+summary(f4_mh, burnin=1000)
+mcmc_trace(f4_mh, burnin=1000)
+mcmc_hist(f4_mh, burnin=1000)
 
 # poisson regression
-
 library(carData)
 data(AMSsurvey)
 
@@ -218,18 +217,18 @@ Nmh <- 5e4
 
 nuval <- c(rep(1, p-1), 1e-1)
 
-fm3_mh <- mh(Nmh, theta.init =rep(0, p), nu=1e-3,
+f5_mh <- mh(Nmh, theta.init =rep(0, p), nu=1e-3,
              qPROP = qprop, qFUN = qfun,
              logPOSTERIOR = poisson_posterior,
              varnames = colnames(X),
              param=list(y=y, X=X))
 
-fm3_mh$accept / Nmh
+f5_mh$accept / Nmh
 
-summary(fm3_mh)
+summary(f5_mh)
 
-mcmc_trace(fm3_mh, burnin=1000)
-mcmc_dens(fm3_mh, burnin=1000)
+mcmc_trace(f5_mh, burnin=1000)
+mcmc_dens(f5_mh, burnin=1000)
 }
 
 }
