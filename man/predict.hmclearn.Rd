@@ -65,8 +65,6 @@ X2 <- cbind(1, matrix(rnorm(30), ncol=3))
 p2 <- predict(f1, X2)
 p2$y
 
-
-
 }
 \references{
 Gabry, Jonah and Mahr, Tristan (2019).  \emph{bayesplot:  Plotting for Bayesian Models}.  \url{https://mc-stan.org/bayesplot}

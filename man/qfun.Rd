@@ -14,10 +14,15 @@ qfun(theta1, theta2, nu)
 \item{nu}{Either a single numeric value for the covariance matrix, or a vector for the diagonal}
 }
 \value{
-Multivariate normal density vector
+Multivariate normal density vector log-transformed
 }
 \description{
 Provided for Random Walk Metropolis algorithm
+}
+\examples{
+qfun(0, 0, 1)
+log(1/sqrt(2*pi))
+
 }
 \references{
 Alan Genz, Frank Bretz, Tetsuhisa Miwa, Xuefei

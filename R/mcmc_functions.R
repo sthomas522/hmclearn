@@ -350,10 +350,15 @@ mh <- function(N, theta.init, qPROP, qFUN, logPOSTERIOR, nu=1e-3,
 #' @param theta2 Vector for mean parameter
 #' @param nu Either a single numeric value for the covariance matrix, or a vector for the diagonal
 #'
-#' @return Multivariate normal density vector
+#' @return Multivariate normal density vector log-transformed
 #' @references Alan Genz, Frank Bretz, Tetsuhisa Miwa, Xuefei
 #' Mi, Friedrich Leisch, Fabian Scheipl and Torsten Hothorn (2019).  \emph{mvtnorm: Multivariate Normal and t Distributions}
 #' @export
+#'
+#' @examples
+#' qfun(0, 0, 1)
+#' log(1/sqrt(2*pi))
+#'
 qfun <- function(theta1, theta2, nu) {
   k <- length(theta1)
   nu <- diag(nu, k, k)
@@ -371,6 +376,11 @@ qfun <- function(theta1, theta2, nu) {
 #' @references B. D. Ripley (1987) \emph{Stochastic Simulation}. Wiley.  Page 98
 #' @references Venables, W. N. and Ripley, B. D. (2002) \emph{Modern Applied Statistics with S.} Fourth edition. Springer.
 #' @export
+#'
+#' @examples
+#' s <- replicate(1000, qprop(0, 1))
+#' summary(s)
+#' hist(s, col='light blue')
 qprop <- function(theta1, nu) {
   k <- length(theta1)
   nu <- diag(nu, k, k)
@@ -393,6 +403,14 @@ qprop <- function(theta1, nu) {
 #' @references Neal, Radford. 2011. \emph{MCMC Using Hamiltonian Dynamics.} In Handbook of Markov Chain Monte Carlo, edited by Steve Brooks, Andrew Gelman, Galin L. Jones, and Xiao-Li Meng, 116–62. Chapman; Hall/CRC.
 #' @return List containing two elements:  \code{theta.new} the ending value of theta and \code{r.new} the ending value of the momentum
 #' @export
+#'
+#' @examples
+#' set.seed(321)
+#' X <- cbind(1, rnorm(10))
+#' y <- rnorm(10)
+#' p <- runif(3) - 0.5
+#' leapfrog(rep(0,3), p, 0.01, linear_posterior, g_linear_posterior,
+#'          diag(3), FALSE, X=X, y=y)
 leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, Minv, constrain,
                      lastSTEP=FALSE, ...) {
 
@@ -400,9 +418,6 @@ leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, Minv, co
   g.ld <- glogPOSTERIOR(theta_lf,  ...)
 
   # first momentum update
-  # info <- paste("r", length(r), "epsilon", length(epsilon), "g.ld", length(g.ld))
-  # print(info)
-
   r.new <- as.numeric(r + epsilon/2*g.ld)
 
   # theta update

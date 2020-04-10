@@ -178,8 +178,6 @@ coef.hmclearn <- function(object, burnin=NULL, prob=0.5, ...) {
 #' p2 <- predict(f1, X2)
 #' p2$y
 #'
-#'
-#'
 predict.hmclearn <- function(object, X, fam = "linear", burnin=NULL, draws=NULL, ...) {
 
   thetaCombined <- combMatrix(object$thetaCombined, burnin=burnin)
@@ -229,7 +227,7 @@ predict.hmclearn <- function(object, X, fam = "linear", burnin=NULL, draws=NULL,
     }))
   }
 
-  retval <- list(y = apply(preds, 2, median),
+  retval <- list(y = apply(preds, 2, stats::median),
                  yreps = preds,
                  X = X)
   class(retval) <- c("hmclearnpred", "list")
