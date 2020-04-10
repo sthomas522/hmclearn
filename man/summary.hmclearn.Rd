@@ -21,6 +21,24 @@ Returns a matrix with posterior quantiles and the posterior scale reduction fact
 \description{
 summary method for class \code{hmclearn}
 }
+\examples{
+# Linear regression example
+set.seed(521)
+X <- cbind(1, matrix(rnorm(300), ncol=3))
+betavals <- c(0.5, -1, 2, -3)
+y <- X\%*\%betavals + rnorm(100, sd=.2)
+
+f1 <- hmc(N = 500,
+          theta.init = c(rep(0, 4), 1),
+          epsilon = 0.01,
+          L = 10,
+          logPOSTERIOR = linear_posterior,
+          glogPOSTERIOR = g_linear_posterior,
+          varnames = c(paste0("beta", 0:3), "log_sigma_sq"),
+          param=list(y=y, X=X), parallel=FALSE, chains=1)
+
+summary(f1)
+}
 \references{
 Gelman, A., et. al. (2013) \emph{Bayesian Data Analysis}.  Chapman and Hall/CRC.
 

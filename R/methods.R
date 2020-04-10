@@ -23,6 +23,24 @@ combMatrix <- function(x, burnin) {
 #' @references Gelman, A., et. al. (2013) \emph{Bayesian Data Analysis}.  Chapman and Hall/CRC.
 #' @references Gelman, A. and Rubin, D. (1992) \emph{Inference from Iterative Simulation Using Multiple Sequences}.  Statistical Science 7(4) 457-472.
 #' @export
+#'
+#' @examples
+#' # Linear regression example
+#' set.seed(521)
+#' X <- cbind(1, matrix(rnorm(300), ncol=3))
+#' betavals <- c(0.5, -1, 2, -3)
+#' y <- X%*%betavals + rnorm(100, sd=.2)
+#'
+#' f1 <- hmc(N = 500,
+#'           theta.init = c(rep(0, 4), 1),
+#'           epsilon = 0.01,
+#'           L = 10,
+#'           logPOSTERIOR = linear_posterior,
+#'           glogPOSTERIOR = g_linear_posterior,
+#'           varnames = c(paste0("beta", 0:3), "log_sigma_sq"),
+#'           param=list(y=y, X=X), parallel=FALSE, chains=1)
+#'
+#' summary(f1)
 summary.hmclearn <- function(object, burnin=NULL, probs=c(0.05, 0.25, 0.5, 0.75, 0.95), ...) {
   cat("Summary of MCMC simulation\n\n")
 
@@ -83,6 +101,24 @@ print.hmclearn <- function(obj) {
 #' @param ... additional arguments to pass to \code{quantile}
 #' @return numeric vector of parameter point estimates
 #' @export
+#' @examples
+#' # Linear regression example
+#' set.seed(521)
+#' X <- cbind(1, matrix(rnorm(300), ncol=3))
+#' betavals <- c(0.5, -1, 2, -3)
+#' y <- X%*%betavals + rnorm(100, sd=.2)
+#'
+#' f1 <- hmc(N = 500,
+#'           theta.init = c(rep(0, 4), 1),
+#'           epsilon = 0.01,
+#'           L = 10,
+#'           logPOSTERIOR = linear_posterior,
+#'           glogPOSTERIOR = g_linear_posterior,
+#'           varnames = c(paste0("beta", 0:3), "log_sigma_sq"),
+#'           param=list(y=y, X=X), parallel=FALSE, chains=1)
+#'
+#' summary(f1)
+#' coef(f1)
 coef.hmclearn <- function(object, burnin=NULL, prob=0.5, ...) {
   thetaCombined <- combMatrix(object$thetaCombined, burnin=burnin)
   thetaCombined <- do.call(rbind, thetaCombined)
@@ -95,7 +131,6 @@ coef.hmclearn <- function(object, burnin=NULL, prob=0.5, ...) {
 #' This simulated data can be used for posterior predictive check diagnostics from the \code{bayesplot} package
 #'
 #' @param object an object of class \code{hmclearn}, usually a result of a call to \code{mh} or \code{hmc}
-#' @param y vector of the dependent variables used to fit the model
 #' @param X design matrix, either from fitting the model or new data
 #' @param fam generalized linear model family.  Currently "linear", "binomial", and "poisson" are supported
 #' @param burnin optional numeric parameter for the number of initial MCMC samples to omit from the summary
@@ -105,9 +140,9 @@ coef.hmclearn <- function(object, burnin=NULL, prob=0.5, ...) {
 #' @section Elements of \code{hmclearnpred} objects:
 #' \describe{
 #'   \item{\code{y}}{
-#'   Numeric vector of the dependent variable
+#'   Median simulated values for each observation in \code{X}
 #'   }
-#'   \item{\code{ypred}}{
+#'   \item{\code{yrep}}{
 #'   Matrix of simulated values where each row is a draw from the posterior predictive distribution
 #'   }
 #'   \item{\code{X}}{
@@ -117,7 +152,35 @@ coef.hmclearn <- function(object, burnin=NULL, prob=0.5, ...) {
 #' @references Gabry, Jonah and Mahr, Tristan (2019).  \emph{bayesplot:  Plotting for Bayesian Models}.  \url{https://mc-stan.org/bayesplot}
 #' @references Gabry, J., Simpson, D., Vehtari, A., Betancourt, M., and Gelman, A (2019).  \emph{Visualization in Bayesian Workflow}.  Journal of the Royal Statistical Society: Series A. Vol 182.  Issue 2.  p.389-402.
 #' @export
-predict.hmclearn <- function(object, y, X, fam = "linear", burnin=NULL, draws=NULL, ...) {
+#'
+#' @examples
+# Linear regression example
+#' set.seed(521)
+#' X <- cbind(1, matrix(rnorm(300), ncol=3))
+#' betavals <- c(0.5, -1, 2, -3)
+#' y <- X%*%betavals + rnorm(100, sd=.2)
+#'
+#' f1 <- hmc(N = 500,
+#'           theta.init = c(rep(0, 4), 1),
+#'           epsilon = 0.01,
+#'           L = 10,
+#'           logPOSTERIOR = linear_posterior,
+#'           glogPOSTERIOR = g_linear_posterior,
+#'           varnames = c(paste0("beta", 0:3), "log_sigma_sq"),
+#'           param=list(y=y, X=X), parallel=FALSE, chains=1)
+#'
+#' summary(f1)
+#'
+#' p <- predict(f1, X)
+#' plot(p$y, y, xlab="predicted", ylab="actual")
+#'
+#' X2 <- cbind(1, matrix(rnorm(30), ncol=3))
+#' p2 <- predict(f1, X2)
+#' p2$y
+#'
+#'
+#'
+predict.hmclearn <- function(object, X, fam = "linear", burnin=NULL, draws=NULL, ...) {
 
   thetaCombined <- combMatrix(object$thetaCombined, burnin=burnin)
   thetaCombined <- do.call(rbind, thetaCombined)
@@ -166,8 +229,8 @@ predict.hmclearn <- function(object, y, X, fam = "linear", burnin=NULL, draws=NU
     }))
   }
 
-  retval <- list(y = y,
-                 yrep = preds,
+  retval <- list(y = apply(preds, 2, median),
+                 yreps = preds,
                  X = X)
   class(retval) <- c("hmclearnpred", "list")
 
