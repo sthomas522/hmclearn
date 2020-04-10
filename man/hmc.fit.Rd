@@ -50,6 +50,28 @@ List for \code{hmc}
 \description{
 This is the basic computing function for HMC and should not be called directly except by experienced users.
 }
+\examples{
+# Logistic regression example
+X <- cbind(1, seq(-100, 100, by=0.25))
+betavals <- c(-0.9, 0.2)
+lodds <- X \%*\% betavals
+prob1 <- as.numeric(1 / (1 + exp(-lodds)))
+
+set.seed(9874)
+y <- sapply(prob1, function(xx) {
+  sample(c(0, 1), 1, prob=c(1-xx, xx))
+})
+
+f1 <- hmc.fit(N = 500,
+          theta.init = rep(0, 2),
+          epsilon = c(0.1, 0.002),
+          L = 10,
+          logPOSTERIOR = logistic_posterior,
+          glogPOSTERIOR = g_logistic_posterior,
+          y=y, X=X)
+
+f1$accept / f1$N
+}
 \references{
 Neal, Radford. 2011. \emph{MCMC Using Hamiltonian Dynamics.} In Handbook of Markov Chain Monte Carlo, edited by Steve Brooks, Andrew Gelman, Galin L. Jones, and Xiao-Li Meng, 116–62. Chapman; Hall/CRC.
 }
