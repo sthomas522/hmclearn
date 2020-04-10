@@ -21,6 +21,25 @@ values above 1 indicate that additional samples may be necessary to ensure conve
 guideline suggests that values less than 1.05 are good, between 1.05 and 1.10 are ok, and above 1.10
 have not converged well.
 }
+\examples{
+# poisson regression example
+set.seed(7363)
+X <- cbind(1, matrix(rnorm(40), ncol=2))
+betavals <- c(0.8, -0.5, 1.1)
+lmu <- X \%*\% betavals
+y <- sapply(exp(lmu), FUN = rpois, n=1)
+
+f <- hmc(N = 1000,
+          theta.init = rep(0, 3),
+          epsilon = 0.01,
+          L = 10,
+          logPOSTERIOR = poisson_posterior,
+          glogPOSTERIOR = g_poisson_posterior,
+          varnames = paste0("beta", 0:2),
+          param = list(y=y, X=X),
+          parallel=FALSE, chains=2)
+
+}
 \references{
 Gelman, A. and Rubin, D. (1992) \emph{Inference from Iterative Simulation Using Multiple Sequences}.  Statistical Science 7(4) 457-472.
 
