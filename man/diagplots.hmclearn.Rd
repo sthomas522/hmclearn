@@ -30,3 +30,22 @@
 Plots histograms of the posterior estimates.  Optionally, displays the 'actual'
 values given a simulated dataset.
 }
+\examples{
+# Linear regression example
+set.seed(522)
+X <- cbind(1, matrix(rnorm(300), ncol=3))
+betavals <- c(0.5, -1, 2, -3)
+y <- X\%*\%betavals + rnorm(100, sd=.2)
+
+f <- hmc(N = 1000,
+          theta.init = c(rep(0, 4), 1),
+          epsilon = 0.01,
+          L = 10,
+          logPOSTERIOR = linear_posterior,
+          glogPOSTERIOR = g_linear_posterior,
+          varnames = c(paste0("beta", 0:3), "log_sigma_sq"),
+          param=list(y=y, X=X), parallel=FALSE, chains=1)
+
+diagplots(f, burnin=100, actual.mu=c(betavals, 2*log(.2)))
+
+}

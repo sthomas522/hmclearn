@@ -243,6 +243,43 @@ and mixed effect models
  }
 }
 
+\examples{
+# Linear regression example
+set.seed(521)
+X <- cbind(1, matrix(rnorm(300), ncol=3))
+betavals <- c(0.5, -1, 2, -3)
+y <- X\%*\%betavals + rnorm(100, sd=.2)
+
+f1_hmc <- hmc(N = 500,
+          theta.init = c(rep(0, 4), 1),
+          epsilon = 0.01,
+          L = 10,
+          logPOSTERIOR = linear_posterior,
+          glogPOSTERIOR = g_linear_posterior,
+          varnames = c(paste0("beta", 0:3), "log_sigma_sq"),
+          param=list(y=y, X=X), parallel=FALSE, chains=1)
+
+summary(f1_hmc, burnin=100)
+
+
+# poisson regression example
+set.seed(7363)
+X <- cbind(1, matrix(rnorm(40), ncol=2))
+betavals <- c(0.8, -0.5, 1.1)
+lmu <- X \%*\% betavals
+y <- sapply(exp(lmu), FUN = rpois, n=1)
+
+f2_hmc <- hmc(N = 500,
+          theta.init = rep(0, 3),
+          epsilon = 0.01,
+          L = 10,
+          logPOSTERIOR = poisson_posterior,
+          glogPOSTERIOR = g_poisson_posterior,
+          varnames = paste0("beta", 0:2),
+          param = list(y=y, X=X),
+          parallel=FALSE, chains=1)
+
+}
 \references{
 Gelman, A. (2006). \emph{Prior distributions for variance parameters in hierarchical models (comment on article by Browne and Draper)}. Bayesian analysis, 1(3), 515-534.
 
