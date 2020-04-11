@@ -8,7 +8,14 @@
 \alias{g_logistic_posterior}
 \alias{poisson_posterior}
 \alias{g_poisson_posterior}
-\title{Sample log posterior and gradient functions for select generalized linear models}
+\alias{lmm_posterior}
+\alias{g_lmm_posterior}
+\alias{glmm_bin_posterior}
+\alias{g_glmm_bin_posterior}
+\alias{glmm_poisson_posterior}
+\alias{g_glmm_poisson_posterior}
+\title{Sample log posterior and gradient functions for select generalized linear models
+and mixed effect models}
 \usage{
 linear_posterior(theta, y, X, a = 1e-04, b = 1e-04, B = 0.001)
 
@@ -21,6 +28,88 @@ g_logistic_posterior(theta, y, X, B = 0.01)
 poisson_posterior(theta, y, X, B = 0.01)
 
 g_poisson_posterior(theta, y, X, B = 0.01)
+
+lmm_posterior(
+  theta,
+  y,
+  X,
+  Z,
+  m,
+  q = 1,
+  A = 10000,
+  nueps = 1,
+  nulambda = 1,
+  Aeps = 25,
+  Alambda = 25,
+  B = 0.001
+)
+
+g_lmm_posterior(
+  theta,
+  y,
+  X,
+  Z,
+  m,
+  q = 1,
+  A = 10000,
+  nueps = 1,
+  nulambda = 1,
+  Aeps = 25,
+  Alambda = 25,
+  B = 0.001
+)
+
+glmm_bin_posterior(
+  theta,
+  y,
+  X,
+  Z,
+  m,
+  q = 1,
+  A = 10000,
+  nulambda = 1,
+  Alambda = 25,
+  B = 10000
+)
+
+g_glmm_bin_posterior(
+  theta,
+  y,
+  X,
+  Z,
+  m,
+  q = 1,
+  A = 10000,
+  nulambda = 1,
+  Alambda = 25,
+  B = 10000
+)
+
+glmm_poisson_posterior(
+  theta,
+  y,
+  X,
+  Z,
+  m,
+  q = 1,
+  A = 10000,
+  nulambda = 1,
+  Alambda = 25,
+  B = 10000
+)
+
+g_glmm_poisson_posterior(
+  theta,
+  y,
+  X,
+  Z,
+  m,
+  q = 1,
+  A = 10000,
+  nulambda = 1,
+  Alambda = 25,
+  B = 10000
+)
 }
 \arguments{
 \item{theta}{vector of parameters.  Stored as a single vector in order fixed effect, random effect, log-transformed diagonal \eqn{\lambda}, and off-diagonal of \code{G} vector \code{a}}
@@ -34,23 +123,39 @@ g_poisson_posterior(theta, y, X, B = 0.01)
 \item{b}{hyperprior for the Inverse Gamma scale parameter}
 
 \item{B}{prior for linear predictors is multivariate Normal with mean 0 with diagonal covariance B^-1}
+
+\item{Z}{numeric design matrix of random effect parameters}
+
+\item{m}{number of random effect linear parameters}
+
+\item{q}{number of random effects covariance parameters}
+
+\item{A}{hyperprior numeric vector for the random effects off-diagonal \code{a}}
+
+\item{nueps}{hyperprior for the half-t prior of the error parameter \eqn{\nu}}
+
+\item{nulambda}{hyperprior for the half-t prior of the random effects diagonal \eqn{\lambda}}
+
+\item{Aeps}{hyperprior for the half-t prior of the error parameter \eqn{A_\epsilon}}
+
+\item{Alambda}{hyperprior for the half-t prior of the random effects diagonal \eqn{A_\lambda}}
 }
 \value{
 numeric value for the log posterior or gradient of the log posterior
 }
 \description{
 Sample log posterior and gradient functions for select generalized linear models
+and mixed effect models
 }
-\section{Models with available posterior and gradient functions}{
+\section{Generalized Linear Models with available posterior and gradient functions}{
 
 \describe{
   \item{`linear_posterior(theta, y, X, a=1e-4, b=1e-4, B=0.001)`}{
-   The likelihood function for linear regression
+   The log posterior function for linear regression
    \deqn{p(y | X, \beta; \sigma^2) = \frac{1}{(2\pi\sigma^2)^{n/2}}\exp{\left(-\frac{1}{2\sigma^2} (y - X\beta)^T(y-X\beta) \right)}}
    with priors \eqn{p(\sigma^2) \sim IG(a, b)} and \eqn{\beta \sim N(0, BI)}.  The variance term is log transformed \eqn{\gamma = \log\sigma^2}
    The input parameter vector \code{theta} is of length \code{k}.  The first \code{k-1} parameters are for \eqn{\beta}, and the last parameter is \eqn{\gamma}
    Note that the Inverse Gamma prior can be problematic for certain applications with low variance.  See Gelman (2006)
-   @return numeric value for the log posterior
   }
   \item{`g_linear_posterior(theta, y, X, a = 1e-04, b = 1e-04, B = 0.001)`}{
    Gradient of the log posterior for a linear regression model with Normal prior for the linear parameters and Inverse Gamma for the error term.
@@ -73,6 +178,54 @@ Sample log posterior and gradient functions for select generalized linear models
    with priors \eqn{\beta \sim N(0, BI)}.
    The input parameter vector \code{theta} is of length \code{k}, containing parameter values for \eqn{\beta}
   }
+  \item{`glmm_poisson_posterior(theta, y, X, Z, m, q = 1, A = 10000, nulambda = 1, Alambda = 25, B = 10000) `}{
+   Log posterior for a Poisson mixed effect regression
+   \deqn{L(\beta; y, X) = \prod_{i=1}^n \prod_{j=1}^m \frac{e^{-e^{X_i\beta + Z_{ij}u_{ij}}}e^{y_i(X_i\beta + Z_{ij}u_{ij})}}{y_i!} }
+   with priors \eqn{\beta \sim N(0, BI)}, \eqn{\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)}, \eqn{\lambda \sim half-t(A_\lambda, nu_\lambda )}.
+   The vector \eqn{\lambda} is the diagonal of the covariance \code{G} hyperprior where \eqn{u \sim N(0, G}.  The off-diagonal hyperpriors are stored in a vector \eqn{a \sim N(0, A}.  See Chan, Jeliazkov (2009) for details.
+   The input parameter vector \code{theta} is of length \code{k}.  The first \code{k-1} parameters are for \eqn{\beta}, and the last parameter is \eqn{\gamma}
+  }
+  \item{`g_glmm_poisson_posterior(theta, y, X, Z, m, q = 1, A = 10000, nulambda = 1, Alambda = 25, B = 10000) `}{
+   Gradient of the log posterior for a Poisson mixed effect regression
+   \deqn{L(\beta; y, X) = \prod_{i=1}^n \prod_{j=1}^m \frac{e^{-e^{X_i\beta + Z_{ij}u_{ij}}}e^{y_i(X_i\beta + Z_{ij}u_{ij})}}{y_i!} }
+   with priors \eqn{\beta \sim N(0, BI)}, \eqn{\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)}, \eqn{\lambda \sim half-t(A_\lambda, nu_\lambda )}.
+   The vector \eqn{\lambda} is the diagonal of the covariance \code{G} hyperprior where \eqn{u \sim N(0, G}.  The off-diagonal hyperpriors are stored in a vector \eqn{a \sim N(0, A}.  See Chan, Jeliazkov (2009) for details.
+   The input parameter vector \code{theta} is of length \code{k}.  The first \code{k-1} parameters are for \eqn{\beta}, and the last parameter is \eqn{\gamma}
+  }
+ }
+}
+
+\section{Generalized Linear Mixed Effect with available posterior and gradient functions}{
+
+\describe{
+  \item{`lmm_posterior(theta, y, X, Z, m, q = 1, A = 10000, nueps = 1, nulambda = 1, Aeps = 25, Alambda = 25, B = 0.001) `}{
+   The log posterior function for linear mixed effects regression
+   \deqn{p(y | \beta, u, \sigma_\epsilon^2) \propto (\sigma_\epsilon^2)^{-n/2} e^{-\frac{1}{2\sigma_\epsilon^2}(y - X\beta - Zu)^T (y - X\beta - Zu)}}
+   with priors \eqn{\beta \sim N(0, BI)}, \eqn{\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)}, \eqn{\lambda \sim half-t(A_\lambda, nu_\lambda )}.
+   The vector \eqn{\lambda} is the diagonal of the covariance \code{G} hyperprior where \eqn{u \sim N(0, G}.  The off-diagonal hyperpriors are stored in a vector \eqn{a \sim N(0, A}.  See Chan, Jeliazkov (2009) for details.
+   The input parameter vector \code{theta} is of length \code{k}.  The first \code{k-1} parameters are for \eqn{\beta}, and the last parameter is \eqn{\gamma}
+  }
+  \item{`g_lmm_posterior(theta, y, X, Z, m, q = 1, A = 10000, nueps = 1, nulambda = 1, Aeps = 25, Alambda = 25, B = 0.001)`}{
+   Gradient of the log posterior for a linear mixed effects regression model
+   \deqn{p(y | \beta, u, \sigma_\epsilon^2) \propto (\sigma_\epsilon^2)^{-n/2} e^{-\frac{1}{2\sigma_\epsilon^2}(y - X\beta - Zu)^T (y - X\beta - Zu)}}
+   with priors \eqn{\beta \sim N(0, BI)}, \eqn{\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)}, \eqn{\lambda \sim half-t(A_\lambda, nu_\lambda )}.
+   The vector \eqn{\lambda} is the diagonal of the covariance \code{G} hyperprior where \eqn{u \sim N(0, G}.  The off-diagonal hyperpriors are stored in a vector \eqn{a \sim N(0, A}.  See Chan, Jeliazkov (2009) for details.
+   The input parameter vector \code{theta} is of length \code{k}.  The first \code{k-1} parameters are for \eqn{\beta}, and the last parameter is \eqn{\gamma}
+  }
+  \item{`glmm_bin_posterior(theta, y, X, Z, m, q = 1, A = 10000, nulambda = 1, Alambda = 25, B = 10000)`}{
+   The log posterior function for logistic mixed effects regression
+   \deqn{p(y | X, Z, \beta, u) = \prod_{i=1}^n\prod_{j=1}^m \left(\frac{1}{1 + e^{-X_{i}\beta - Z_{ij}u_i}}\right)^{y_{ij}} \left(\frac{e^{-X_i\beta - Z_{ij}u_i}}{1 + e^{-X_{i}\beta - Z_{ij}u_i}}\right)^{1-y_{ij}} }
+   with priors \eqn{\beta \sim N(0, BI)}, \eqn{\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)}, \eqn{\lambda \sim half-t(A_\lambda, nu_\lambda )}.
+   The vector \eqn{\lambda} is the diagonal of the covariance \code{G} hyperprior where \eqn{u \sim N(0, G}.  The off-diagonal hyperpriors are stored in a vector \eqn{a \sim N(0, A}.  See Chan, Jeliazkov (2009) for details.
+   The input parameter vector \code{theta} is of length \code{k}.  The first \code{k-1} parameters are for \eqn{\beta}, and the last parameter is \eqn{\gamma}
+  }
+  \item{`g_glmm_bin_posterior(theta, y, X, Z, m, q = 1, A = 10000, nulambda = 1, Alambda = 25, B = 10000) `}{
+   Gradient of the log posterior function for logistic mixed effects regression
+   \deqn{p(y | X, Z, \beta, u) = \prod_{i=1}^n\prod_{j=1}^m \left(\frac{1}{1 + e^{-X_{i}\beta - Z_{ij}u_i}}\right)^{y_{ij}} \left(\frac{e^{-X_i\beta - Z_{ij}u_i}}{1 + e^{-X_{i}\beta - Z_{ij}u_i}}\right)^{1-y_{ij}} }
+   with priors \eqn{\beta \sim N(0, BI)}, \eqn{\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)}, \eqn{\lambda \sim half-t(A_\lambda, nu_\lambda )}.
+   The vector \eqn{\lambda} is the diagonal of the covariance \code{G} hyperprior where \eqn{u \sim N(0, G}.  The off-diagonal hyperpriors are stored in a vector \eqn{a \sim N(0, A}.  See Chan, Jeliazkov (2009) for details.
+   The input parameter vector \code{theta} is of length \code{k}.  The first \code{k-1} parameters are for \eqn{\beta}, and the last parameter is \eqn{\gamma}
+  }
   \item{`poisson_posterior(theta, y, X, B = 0.01) `}{
    Log posterior for a Poisson regression model with Normal prior for the linear parameters.
    The likelihood function for poisson regression
@@ -92,4 +245,8 @@ Sample log posterior and gradient functions for select generalized linear models
 
 \references{
 Gelman, A. (2006). \emph{Prior distributions for variance parameters in hierarchical models (comment on article by Browne and Draper)}. Bayesian analysis, 1(3), 515-534.
+
+Chan, J. C. C., & Jeliazkov, I. (2009). \emph{MCMC estimation of restricted covariance matrices}. Journal of Computational and Graphical Statistics, 18(2), 457-480.
+
+Betancourt, M., & Girolami, M. (2015). \emph{Hamiltonian Monte Carlo for hierarchical models}. Current trends in Bayesian methodology with applications, 79, 30.
 }
