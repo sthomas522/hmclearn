@@ -128,7 +128,12 @@ varest <- function(data, N) {
   W <- colMeans(do.call(rbind, sampvarByChain))
 
   # variance estimator
-  varest <- (N-1)/N * W + 1/N*B
+  if (M > 1) {
+    varest <- (N-1)/N * W + 1/N*B
+  } else {
+    varest <- W
+  }
+
 
   # return variance estimator between and within sequence variance
   retval <- list(B=B,
@@ -161,7 +166,7 @@ varest <- function(data, N) {
 #'
 #' f <- hmc(N = 1000,
 #'           theta.init = rep(0, 3),
-#'           epsilon = 0.01,
+#'           epsilon = c(0.03, 0.02, 0.015),
 #'           L = 10,
 #'           logPOSTERIOR = poisson_posterior,
 #'           glogPOSTERIOR = g_poisson_posterior,
@@ -197,7 +202,7 @@ neff <- function(object, burnin=NULL, lagmax=NULL, ...) {
 #'
 #' f <- hmc(N = 1000,
 #'           theta.init = rep(0, 3),
-#'           epsilon = 0.01,
+#'           epsilon = c(0.03, 0.02, 0.015),
 #'           L = 10,
 #'           logPOSTERIOR = poisson_posterior,
 #'           glogPOSTERIOR = g_poisson_posterior,
