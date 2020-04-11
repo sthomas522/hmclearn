@@ -16,6 +16,26 @@
 \description{
 Calls \code{mcmc_hist} from the \code{bayesplot} package to display histograms of the posterior
 }
+\examples{
+# poisson regression example
+set.seed(7363)
+X <- cbind(1, matrix(rnorm(40), ncol=2))
+betavals <- c(0.8, -0.5, 1.1)
+lmu <- X \%*\% betavals
+y <- sapply(exp(lmu), FUN = rpois, n=1)
+
+f <- hmc(N = 1000,
+          theta.init = rep(0, 3),
+          epsilon = c(0.03, 0.02, 0.015),
+          L = 10,
+          logPOSTERIOR = poisson_posterior,
+          glogPOSTERIOR = g_poisson_posterior,
+          varnames = paste0("beta", 0:2),
+          param = list(y=y, X=X),
+          parallel=FALSE, chains=2)
+
+plot(f, burnin=100)
+}
 \references{
 Gabry, Jonah and Mahr, Tristan (2019).  \emph{bayesplot:  Plotting for Bayesian Models}.  \url{https://mc-stan.org/bayesplot}
 }
