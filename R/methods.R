@@ -23,7 +23,6 @@ combMatrix <- function(x, burnin) {
 #' @references Gelman, A., et. al. (2013) \emph{Bayesian Data Analysis}.  Chapman and Hall/CRC.
 #' @references Gelman, A. and Rubin, D. (1992) \emph{Inference from Iterative Simulation Using Multiple Sequences}.  Statistical Science 7(4) 457-472.
 #' @export
-#'
 #' @examples
 #' # Linear regression example
 #' set.seed(521)
@@ -99,7 +98,7 @@ print.hmclearn <- function(obj) {
 #' @param burnin optional numeric parameter for the number of initial MCMC samples to omit from the summary
 #' @param prob quantile to extract coefficients
 #' @param ... additional arguments to pass to \code{quantile}
-#' @return numeric vector of parameter point estimates
+#' @return Numeric vector of parameter point estimates based on the given \code{prob}, with a default of the median estimate.
 #' @export
 #' @examples
 #' # Linear regression example
@@ -136,7 +135,7 @@ coef.hmclearn <- function(object, burnin=NULL, prob=0.5, ...) {
 #' @param burnin optional numeric parameter for the number of initial MCMC samples to omit from the summary
 #' @param draws Number of simulated values from the posterior conditioned on \code{X}
 #' @param ... additional parameters, currently unsupported
-#' @return an object of class \code{hmclearnpred}.  Can be used as an input for \code{pp_check} functions in \code{bayesplot}
+#' @return An object of class \code{hmclearnpred}.
 #' @section Elements of \code{hmclearnpred} objects:
 #' \describe{
 #'   \item{\code{y}}{
@@ -154,7 +153,7 @@ coef.hmclearn <- function(object, burnin=NULL, prob=0.5, ...) {
 #' @export
 #'
 #' @examples
-# Linear regression example
+#' # Linear regression example
 #' set.seed(521)
 #' X <- cbind(1, matrix(rnorm(300), ncol=3))
 #' betavals <- c(0.5, -1, 2, -3)
@@ -172,7 +171,8 @@ coef.hmclearn <- function(object, burnin=NULL, prob=0.5, ...) {
 #' summary(f1)
 #'
 #' p <- predict(f1, X)
-#' plot(p$y, y, xlab="predicted", ylab="actual")
+#' predvals <- p$y
+#' plot(predvals, y, xlab="predicted", ylab="actual")
 #'
 #' X2 <- cbind(1, matrix(rnorm(30), ncol=3))
 #' p2 <- predict(f1, X2)

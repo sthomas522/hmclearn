@@ -94,19 +94,19 @@ pfun_glmm_poisson <- function(PARAM, ...) {
 #'    with priors \eqn{\beta \sim N(0, BI)}.
 #'    The input parameter vector \code{theta} is of length \code{k}, containing parameter values for \eqn{\beta}
 #'   }
-#'   \item{`glmm_poisson_posterior(theta, y, X, Z, m, q = 1, A = 10000, nulambda = 1, Alambda = 25, B = 10000) `}{
-#'    Log posterior for a Poisson mixed effect regression
-#'    \deqn{L(\beta; y, X) = \prod_{i=1}^n \prod_{j=1}^m \frac{e^{-e^{X_i\beta + Z_{ij}u_{ij}}}e^{y_i(X_i\beta + Z_{ij}u_{ij})}}{y_i!} }
-#'    with priors \eqn{\beta \sim N(0, BI)}, \eqn{\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)}, \eqn{\lambda \sim half-t(A_\lambda, nu_\lambda )}.
-#'    The vector \eqn{\lambda} is the diagonal of the covariance \code{G} hyperprior where \eqn{u \sim N(0, G}.  The off-diagonal hyperpriors are stored in a vector \eqn{a \sim N(0, A}.  See Chan, Jeliazkov (2009) for details.
-#'    The input parameter vector \code{theta} is of length \code{k}.  The first \code{k-1} parameters are for \eqn{\beta}, and the last parameter is \eqn{\gamma}
+#'   \item{`poisson_posterior(theta, y, X, B = 0.01) `}{
+#'    Log posterior for a Poisson regression model with Normal prior for the linear parameters.
+#'    The likelihood function for poisson regression
+#'    \deqn{L(\beta; y, X) = \prod_{i=1}^n \frac{e^{-e^{X_i\beta}}e^{y_iX_i\beta}}{y_i!}}
+#'    with priors \eqn{\beta \sim N(0, BI)}.
+#'    The input parameter vector \code{theta} is of length \code{k}, containing parameter values for \eqn{\beta}
 #'   }
-#'   \item{`g_glmm_poisson_posterior(theta, y, X, Z, m, q = 1, A = 10000, nulambda = 1, Alambda = 25, B = 10000) `}{
-#'    Gradient of the log posterior for a Poisson mixed effect regression
-#'    \deqn{L(\beta; y, X) = \prod_{i=1}^n \prod_{j=1}^m \frac{e^{-e^{X_i\beta + Z_{ij}u_{ij}}}e^{y_i(X_i\beta + Z_{ij}u_{ij})}}{y_i!} }
-#'    with priors \eqn{\beta \sim N(0, BI)}, \eqn{\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)}, \eqn{\lambda \sim half-t(A_\lambda, nu_\lambda )}.
-#'    The vector \eqn{\lambda} is the diagonal of the covariance \code{G} hyperprior where \eqn{u \sim N(0, G}.  The off-diagonal hyperpriors are stored in a vector \eqn{a \sim N(0, A}.  See Chan, Jeliazkov (2009) for details.
-#'    The input parameter vector \code{theta} is of length \code{k}.  The first \code{k-1} parameters are for \eqn{\beta}, and the last parameter is \eqn{\gamma}
+#'   \item{`g_poisson_posterior(theta, y, X, B = 0.01) `}{
+#'    Gradient of the log posterior for a Poisson regression model with Normal prior for the linear parameters.
+#'    The likelihood function for poisson regression
+#'    \deqn{L(\beta; y, X) = \prod_{i=1}^n \frac{e^{-e^{X_i\beta}}e^{y_iX_i\beta}}{y_i!}}
+#'    with priors \eqn{\beta \sim N(0, BI)}.
+#'    The input parameter vector \code{theta} is of length \code{k}, containing parameter values for \eqn{\beta}
 #'   }
 #'  }
 #' @section Generalized Linear Mixed Effect with available posterior and gradient functions:
@@ -139,22 +139,22 @@ pfun_glmm_poisson <- function(PARAM, ...) {
 #'    The vector \eqn{\lambda} is the diagonal of the covariance \code{G} hyperprior where \eqn{u \sim N(0, G}.  The off-diagonal hyperpriors are stored in a vector \eqn{a \sim N(0, A}.  See Chan, Jeliazkov (2009) for details.
 #'    The input parameter vector \code{theta} is of length \code{k}.  The first \code{k-1} parameters are for \eqn{\beta}, and the last parameter is \eqn{\gamma}
 #'   }
-#'   \item{`poisson_posterior(theta, y, X, B = 0.01) `}{
-#'    Log posterior for a Poisson regression model with Normal prior for the linear parameters.
-#'    The likelihood function for poisson regression
-#'    \deqn{L(\beta; y, X) = \prod_{i=1}^n \frac{e^{-e^{X_i\beta}}e^{y_iX_i\beta}}{y_i!}}
-#'    with priors \eqn{\beta \sim N(0, BI)}.
-#'    The input parameter vector \code{theta} is of length \code{k}, containing parameter values for \eqn{\beta}
+#'   \item{`glmm_poisson_posterior(theta, y, X, Z, m, q = 1, A = 10000, nulambda = 1, Alambda = 25, B = 10000) `}{
+#'    Log posterior for a Poisson mixed effect regression
+#'    \deqn{L(\beta; y, X) = \prod_{i=1}^n \prod_{j=1}^m \frac{e^{-e^{X_i\beta + Z_{ij}u_{ij}}}e^{y_i(X_i\beta + Z_{ij}u_{ij})}}{y_i!} }
+#'    with priors \eqn{\beta \sim N(0, BI)}, \eqn{\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)}, \eqn{\lambda \sim half-t(A_\lambda, nu_\lambda )}.
+#'    The vector \eqn{\lambda} is the diagonal of the covariance \code{G} hyperprior where \eqn{u \sim N(0, G}.  The off-diagonal hyperpriors are stored in a vector \eqn{a \sim N(0, A}.  See Chan, Jeliazkov (2009) for details.
+#'    The input parameter vector \code{theta} is of length \code{k}.  The first \code{k-1} parameters are for \eqn{\beta}, and the last parameter is \eqn{\gamma}
 #'   }
-#'   \item{`g_poisson_posterior(theta, y, X, B = 0.01) `}{
-#'    Gradient of the log posterior for a Poisson regression model with Normal prior for the linear parameters.
-#'    The likelihood function for poisson regression
-#'    \deqn{L(\beta; y, X) = \prod_{i=1}^n \frac{e^{-e^{X_i\beta}}e^{y_iX_i\beta}}{y_i!}}
-#'    with priors \eqn{\beta \sim N(0, BI)}.
-#'    The input parameter vector \code{theta} is of length \code{k}, containing parameter values for \eqn{\beta}
+#'   \item{`g_glmm_poisson_posterior(theta, y, X, Z, m, q = 1, A = 10000, nulambda = 1, Alambda = 25, B = 10000) `}{
+#'    Gradient of the log posterior for a Poisson mixed effect regression
+#'    \deqn{L(\beta; y, X) = \prod_{i=1}^n \prod_{j=1}^m \frac{e^{-e^{X_i\beta + Z_{ij}u_{ij}}}e^{y_i(X_i\beta + Z_{ij}u_{ij})}}{y_i!} }
+#'    with priors \eqn{\beta \sim N(0, BI)}, \eqn{\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)}, \eqn{\lambda \sim half-t(A_\lambda, nu_\lambda )}.
+#'    The vector \eqn{\lambda} is the diagonal of the covariance \code{G} hyperprior where \eqn{u \sim N(0, G}.  The off-diagonal hyperpriors are stored in a vector \eqn{a \sim N(0, A}.  See Chan, Jeliazkov (2009) for details.
+#'    The input parameter vector \code{theta} is of length \code{k}.  The first \code{k-1} parameters are for \eqn{\beta}, and the last parameter is \eqn{\gamma}
 #'   }
 #'  }
-#' @return numeric value for the log posterior or gradient of the log posterior
+#' @return Numeric vector for the log posterior or gradient of the log posterior
 #' @references Gelman, A. (2006). \emph{Prior distributions for variance parameters in hierarchical models (comment on article by Browne and Draper)}. Bayesian analysis, 1(3), 515-534.
 #' @references Chan, J. C. C., & Jeliazkov, I. (2009). \emph{MCMC estimation of restricted covariance matrices}. Journal of Computational and Graphical Statistics, 18(2), 457-480.
 #' @references Betancourt, M., & Girolami, M. (2015). \emph{Hamiltonian Monte Carlo for hierarchical models}. Current trends in Bayesian methodology with applications, 79, 30.

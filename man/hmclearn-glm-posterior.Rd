@@ -141,7 +141,7 @@ g_glmm_poisson_posterior(
 \item{Alambda}{hyperprior for the half-t prior of the random effects diagonal \eqn{A_\lambda}}
 }
 \value{
-numeric value for the log posterior or gradient of the log posterior
+Numeric vector for the log posterior or gradient of the log posterior
 }
 \description{
 Sample log posterior and gradient functions for select generalized linear models
@@ -178,19 +178,19 @@ and mixed effect models
    with priors \eqn{\beta \sim N(0, BI)}.
    The input parameter vector \code{theta} is of length \code{k}, containing parameter values for \eqn{\beta}
   }
-  \item{`glmm_poisson_posterior(theta, y, X, Z, m, q = 1, A = 10000, nulambda = 1, Alambda = 25, B = 10000) `}{
-   Log posterior for a Poisson mixed effect regression
-   \deqn{L(\beta; y, X) = \prod_{i=1}^n \prod_{j=1}^m \frac{e^{-e^{X_i\beta + Z_{ij}u_{ij}}}e^{y_i(X_i\beta + Z_{ij}u_{ij})}}{y_i!} }
-   with priors \eqn{\beta \sim N(0, BI)}, \eqn{\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)}, \eqn{\lambda \sim half-t(A_\lambda, nu_\lambda )}.
-   The vector \eqn{\lambda} is the diagonal of the covariance \code{G} hyperprior where \eqn{u \sim N(0, G}.  The off-diagonal hyperpriors are stored in a vector \eqn{a \sim N(0, A}.  See Chan, Jeliazkov (2009) for details.
-   The input parameter vector \code{theta} is of length \code{k}.  The first \code{k-1} parameters are for \eqn{\beta}, and the last parameter is \eqn{\gamma}
+  \item{`poisson_posterior(theta, y, X, B = 0.01) `}{
+   Log posterior for a Poisson regression model with Normal prior for the linear parameters.
+   The likelihood function for poisson regression
+   \deqn{L(\beta; y, X) = \prod_{i=1}^n \frac{e^{-e^{X_i\beta}}e^{y_iX_i\beta}}{y_i!}}
+   with priors \eqn{\beta \sim N(0, BI)}.
+   The input parameter vector \code{theta} is of length \code{k}, containing parameter values for \eqn{\beta}
   }
-  \item{`g_glmm_poisson_posterior(theta, y, X, Z, m, q = 1, A = 10000, nulambda = 1, Alambda = 25, B = 10000) `}{
-   Gradient of the log posterior for a Poisson mixed effect regression
-   \deqn{L(\beta; y, X) = \prod_{i=1}^n \prod_{j=1}^m \frac{e^{-e^{X_i\beta + Z_{ij}u_{ij}}}e^{y_i(X_i\beta + Z_{ij}u_{ij})}}{y_i!} }
-   with priors \eqn{\beta \sim N(0, BI)}, \eqn{\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)}, \eqn{\lambda \sim half-t(A_\lambda, nu_\lambda )}.
-   The vector \eqn{\lambda} is the diagonal of the covariance \code{G} hyperprior where \eqn{u \sim N(0, G}.  The off-diagonal hyperpriors are stored in a vector \eqn{a \sim N(0, A}.  See Chan, Jeliazkov (2009) for details.
-   The input parameter vector \code{theta} is of length \code{k}.  The first \code{k-1} parameters are for \eqn{\beta}, and the last parameter is \eqn{\gamma}
+  \item{`g_poisson_posterior(theta, y, X, B = 0.01) `}{
+   Gradient of the log posterior for a Poisson regression model with Normal prior for the linear parameters.
+   The likelihood function for poisson regression
+   \deqn{L(\beta; y, X) = \prod_{i=1}^n \frac{e^{-e^{X_i\beta}}e^{y_iX_i\beta}}{y_i!}}
+   with priors \eqn{\beta \sim N(0, BI)}.
+   The input parameter vector \code{theta} is of length \code{k}, containing parameter values for \eqn{\beta}
   }
  }
 }
@@ -226,19 +226,19 @@ and mixed effect models
    The vector \eqn{\lambda} is the diagonal of the covariance \code{G} hyperprior where \eqn{u \sim N(0, G}.  The off-diagonal hyperpriors are stored in a vector \eqn{a \sim N(0, A}.  See Chan, Jeliazkov (2009) for details.
    The input parameter vector \code{theta} is of length \code{k}.  The first \code{k-1} parameters are for \eqn{\beta}, and the last parameter is \eqn{\gamma}
   }
-  \item{`poisson_posterior(theta, y, X, B = 0.01) `}{
-   Log posterior for a Poisson regression model with Normal prior for the linear parameters.
-   The likelihood function for poisson regression
-   \deqn{L(\beta; y, X) = \prod_{i=1}^n \frac{e^{-e^{X_i\beta}}e^{y_iX_i\beta}}{y_i!}}
-   with priors \eqn{\beta \sim N(0, BI)}.
-   The input parameter vector \code{theta} is of length \code{k}, containing parameter values for \eqn{\beta}
+  \item{`glmm_poisson_posterior(theta, y, X, Z, m, q = 1, A = 10000, nulambda = 1, Alambda = 25, B = 10000) `}{
+   Log posterior for a Poisson mixed effect regression
+   \deqn{L(\beta; y, X) = \prod_{i=1}^n \prod_{j=1}^m \frac{e^{-e^{X_i\beta + Z_{ij}u_{ij}}}e^{y_i(X_i\beta + Z_{ij}u_{ij})}}{y_i!} }
+   with priors \eqn{\beta \sim N(0, BI)}, \eqn{\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)}, \eqn{\lambda \sim half-t(A_\lambda, nu_\lambda )}.
+   The vector \eqn{\lambda} is the diagonal of the covariance \code{G} hyperprior where \eqn{u \sim N(0, G}.  The off-diagonal hyperpriors are stored in a vector \eqn{a \sim N(0, A}.  See Chan, Jeliazkov (2009) for details.
+   The input parameter vector \code{theta} is of length \code{k}.  The first \code{k-1} parameters are for \eqn{\beta}, and the last parameter is \eqn{\gamma}
   }
-  \item{`g_poisson_posterior(theta, y, X, B = 0.01) `}{
-   Gradient of the log posterior for a Poisson regression model with Normal prior for the linear parameters.
-   The likelihood function for poisson regression
-   \deqn{L(\beta; y, X) = \prod_{i=1}^n \frac{e^{-e^{X_i\beta}}e^{y_iX_i\beta}}{y_i!}}
-   with priors \eqn{\beta \sim N(0, BI)}.
-   The input parameter vector \code{theta} is of length \code{k}, containing parameter values for \eqn{\beta}
+  \item{`g_glmm_poisson_posterior(theta, y, X, Z, m, q = 1, A = 10000, nulambda = 1, Alambda = 25, B = 10000) `}{
+   Gradient of the log posterior for a Poisson mixed effect regression
+   \deqn{L(\beta; y, X) = \prod_{i=1}^n \prod_{j=1}^m \frac{e^{-e^{X_i\beta + Z_{ij}u_{ij}}}e^{y_i(X_i\beta + Z_{ij}u_{ij})}}{y_i!} }
+   with priors \eqn{\beta \sim N(0, BI)}, \eqn{\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)}, \eqn{\lambda \sim half-t(A_\lambda, nu_\lambda )}.
+   The vector \eqn{\lambda} is the diagonal of the covariance \code{G} hyperprior where \eqn{u \sim N(0, G}.  The off-diagonal hyperpriors are stored in a vector \eqn{a \sim N(0, A}.  See Chan, Jeliazkov (2009) for details.
+   The input parameter vector \code{theta} is of length \code{k}.  The first \code{k-1} parameters are for \eqn{\beta}, and the last parameter is \eqn{\gamma}
   }
  }
 }

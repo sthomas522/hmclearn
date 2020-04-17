@@ -93,6 +93,9 @@ Leapfrog algorithm.
   \item{\code{M}}{
   Mass matrix used in the HMC algorithm
   }
+  \item{\code{algorithm}}{
+  \code{HMC} for Hamiltonian Monte Carlo
+  }
   \item{\code{varnames}}{
   Optional vector of parameter names
   }

@@ -16,7 +16,7 @@ neff(object, burnin = NULL, lagmax = NULL, ...)
 \item{...}{currently unused}
 }
 \value{
-numeric vector of effective sample sizes for each parameter
+Numeric vector with effective sample sizes for each parameter in the model
 }
 \description{
 Calculates an estimate of the adjusted MCMC sample size per parameter

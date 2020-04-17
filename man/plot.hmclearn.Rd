@@ -13,6 +13,9 @@
 
 \item{...}{optional additional arguments to pass to the \code{bayesplot} functions}
 }
+\value{
+Calls \code{mcmc_hist} from the \code{bayesplot} package, which returns a list including a \code{ggplot2} object.
+}
 \description{
 Calls \code{mcmc_hist} from the \code{bayesplot} package to display histograms of the posterior
 }

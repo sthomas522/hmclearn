@@ -41,6 +41,42 @@ List for \code{mh}
 \description{
 This is the basic computing function for MH and should not be called directly except by experienced users.
 }
+\section{Elements in \code{mh} list}{
+
+\describe{
+  \item{\code{N}}{
+  Number of MCMC samples
+  }
+  \item{\code{theta}}{
+  Nested list of length \code{N} of the sampled values of \code{theta} for each chain
+  }
+  \item{\code{thetaCombined}}{
+  List of dataframes containing sampled values, one for each chain
+  }
+  \item{\code{r}}{
+  NULL for Metropolis-Hastings
+  }
+  \item{\code{theta.all}}{
+  Nested list of all parameter values of \code{theta} sampled prior to accept/reject step for each
+  }
+  \item{\code{r.all}}{
+  NULL for Metropolis-Hastings
+  }
+  \item{\code{accept}}{
+  Number of accepted proposals.  The ratio \code{accept} / \code{N} is the acceptance rate
+  }
+  \item{\code{accept_v}}{
+  Vector of length \code{N} indicating which samples were accepted
+  }
+  \item{\code{M}}{
+  NULL for Metropolis-Hastings
+  }
+  \item{\code{algorithm}}{
+  \code{MH} for Metropolis-Hastings
+  }
+}
+}
+
 \examples{
 # Logistic regression example
 X <- cbind(1, seq(-100, 100, by=0.25))

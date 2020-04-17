@@ -37,6 +37,7 @@ create_Uj <- function(uj, neg=TRUE) {
 #' @param actual.mu optional numeric vector of true parameter values
 #' @param cols optional integer index indicating which parameters to display
 #' @param ... currently unused
+#' @return Returns a customized \code{ggplot} object
 #' @export
 #' @examples
 #' # Linear regression example
@@ -71,6 +72,7 @@ diagplots <- function(object, burnin=NULL, plotfun=2, actual.mu=NULL, cols=NULL,
 #' @param actual.mu optional numeric vector of true parameter values
 #' @param cols optional integer index indicating which parameters to display
 #' @param ... currently unused
+#' @return Returns a customized \code{ggplot} object
 #' @export
 #' @examples
 #' # Linear regression example

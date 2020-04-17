@@ -16,6 +16,7 @@
 #' @references Gelman, A. and Rubin, D. (1992) \emph{Inference from Iterative Simulation Using Multiple Sequences}.  Statistical Science 7(4) 457-472.
 #' @references Gelman, A., et. al. (2013) \emph{Bayesian Data Analysis}.  Chapman and Hall/CRC.
 #' @references Gabry, Jonah and Mahr, Tristan (2019).  \emph{bayesplot:  Plotting for Bayesian Models}.  \url{https://mc-stan.org/bayesplot}
+#' @return Numeric vector of Rhat statistics for each parameter
 #' @export
 #'
 #' @examples
@@ -58,6 +59,7 @@ psrf <- function(object, burnin, ...) {
 #' @references Gelman, A. and Rubin, D. (1992) \emph{Inference from Iterative Simulation Using Multiple Sequences}.  Statistical Science 7(4) 457-472.
 #' @references Gelman, A., et. al. (2013) \emph{Bayesian Data Analysis}.  Chapman and Hall/CRC.
 #' @references Gabry, Jonah and Mahr, Tristan (2019).  \emph{bayesplot:  Plotting for Bayesian Models}.  \url{https://mc-stan.org/bayesplot}
+#' @return Numeric vector of Rhat statistics for each parameter
 #' @export
 #'
 #' @examples
@@ -153,8 +155,8 @@ varest <- function(data, N) {
 #' @param lagmax maximum lag to extract for determining effective sample sizes
 #' @param ... currently unused
 #'
-#' @return numeric vector of effective sample sizes for each parameter
 #' @references Gelman, A., et. al. (2013) \emph{Bayesian Data Analysis}.  Chapman and Hall/CRC.  Section 11.5
+#' @return Numeric vector with effective sample sizes for each parameter in the model
 #' @export
 #' @examples
 #' # poisson regression example
@@ -189,8 +191,8 @@ neff <- function(object, burnin=NULL, lagmax=NULL, ...) {
 #' @param lagmax maximum lag to extract for determining effective sample sizes
 #' @param ... currently unused
 #'
-#' @return numeric vector of effective sample sizes for each parameter
 #' @references Gelman, A., et. al. (2013) \emph{Bayesian Data Analysis}.  Chapman and Hall/CRC.  Section 11.5
+#' @return Numeric vector with effective sample sizes for each parameter in the model
 #' @export
 #' @examples
 #' # poisson regression example

@@ -20,7 +20,7 @@
 \item{...}{additional parameters, currently unsupported}
 }
 \value{
-an object of class \code{hmclearnpred}.  Can be used as an input for \code{pp_check} functions in \code{bayesplot}
+An object of class \code{hmclearnpred}.
 }
 \description{
 \code{predict} generates simulated data from the posterior predictive distribution.
@@ -42,6 +42,7 @@ This simulated data can be used for posterior predictive check diagnostics from 
 }
 
 \examples{
+# Linear regression example
 set.seed(521)
 X <- cbind(1, matrix(rnorm(300), ncol=3))
 betavals <- c(0.5, -1, 2, -3)
@@ -59,7 +60,8 @@ f1 <- hmc(N = 500,
 summary(f1)
 
 p <- predict(f1, X)
-plot(p$y, y, xlab="predicted", ylab="actual")
+predvals <- p$y
+plot(predvals, y, xlab="predicted", ylab="actual")
 
 X2 <- cbind(1, matrix(rnorm(30), ncol=3))
 p2 <- predict(f1, X2)

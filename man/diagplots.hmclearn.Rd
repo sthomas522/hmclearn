@@ -26,6 +26,9 @@
 
 \item{...}{currently unused}
 }
+\value{
+Returns a customized \code{ggplot} object
+}
 \description{
 Plots histograms of the posterior estimates.  Optionally, displays the 'actual'
 values given a simulated dataset.

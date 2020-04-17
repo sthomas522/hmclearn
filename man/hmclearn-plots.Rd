@@ -115,6 +115,9 @@ mcmc_violin(object, ...)
 
 \item{lagmax}{maximum lag to extract for determining effective sample sizes}
 }
+\value{
+These functions call various plotting functions from the \code{bayesplot} package, which returns a list including \code{ggplot2} objects.
+}
 \description{
 Plots of Rhat statistics, ratios of effective sample size to total sample
 size, and autocorrelation of MCMC draws.

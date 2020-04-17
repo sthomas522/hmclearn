@@ -50,6 +50,42 @@ List for \code{hmc}
 \description{
 This is the basic computing function for HMC and should not be called directly except by experienced users.
 }
+\section{Elements for \code{hmclearn} objects}{
+
+\describe{
+  \item{\code{N}}{
+  Number of MCMC samples
+  }
+  \item{\code{theta}}{
+  Nested list of length \code{N} of the sampled values of \code{theta} for each chain
+  }
+  \item{\code{thetaCombined}}{
+  List of dataframes containing sampled values, one for each chain
+  }
+  \item{\code{r}}{
+  List of length \code{N} of the sampled momenta
+  }
+  \item{\code{theta.all}}{
+  Nested list of all parameter values of \code{theta} sampled prior to accept/reject step for each
+  }
+  \item{\code{r.all}}{
+  List of all values of the momenta \code{r} sampled prior to accept/reject
+  }
+  \item{\code{accept}}{
+  Number of accepted proposals.  The ratio \code{accept} / \code{N} is the acceptance rate
+  }
+  \item{\code{accept_v}}{
+  Vector of length \code{N} indicating which samples were accepted
+  }
+  \item{\code{M}}{
+  Mass matrix used in the HMC algorithm
+  }
+  \item{\code{algorithm}}{
+  \code{HMC} for Hamiltonian Monte Carlo
+  }
+}
+}
+
 \examples{
 # Logistic regression example
 X <- cbind(1, seq(-100, 100, by=0.25))

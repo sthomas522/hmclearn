@@ -16,7 +16,7 @@
 \item{...}{additional arguments to pass to \code{quantile}}
 }
 \value{
-numeric vector of parameter point estimates
+Numeric vector of parameter point estimates based on the given \code{prob}, with a default of the median estimate.
 }
 \description{
 Method for \code{hmclearn} objects created by \code{mh} and \code{hmc} functions.  Extracts the specified quantile of the posterior.

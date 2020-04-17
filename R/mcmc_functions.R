@@ -13,6 +13,40 @@
 #' @param ... Additional parameters for \code{logPOSTERIOR}
 #' @return List for \code{mh}
 #'
+#' @section Elements in \code{mh} list:
+#' \describe{
+#'   \item{\code{N}}{
+#'   Number of MCMC samples
+#'   }
+#'   \item{\code{theta}}{
+#'   Nested list of length \code{N} of the sampled values of \code{theta} for each chain
+#'   }
+#'   \item{\code{thetaCombined}}{
+#'   List of dataframes containing sampled values, one for each chain
+#'   }
+#'   \item{\code{r}}{
+#'   NULL for Metropolis-Hastings
+#'   }
+#'   \item{\code{theta.all}}{
+#'   Nested list of all parameter values of \code{theta} sampled prior to accept/reject step for each
+#'   }
+#'   \item{\code{r.all}}{
+#'   NULL for Metropolis-Hastings
+#'   }
+#'   \item{\code{accept}}{
+#'   Number of accepted proposals.  The ratio \code{accept} / \code{N} is the acceptance rate
+#'   }
+#'   \item{\code{accept_v}}{
+#'   Vector of length \code{N} indicating which samples were accepted
+#'   }
+#'   \item{\code{M}}{
+#'   NULL for Metropolis-Hastings
+#'   }
+#'   \item{\code{algorithm}}{
+#'   \code{MH} for Metropolis-Hastings
+#'   }
+#' }
+#'
 #' @examples
 #' # Logistic regression example
 #' X <- cbind(1, seq(-100, 100, by=0.25))
@@ -65,10 +99,6 @@ mh.fit <- function(N, theta.init, qPROP, qFUN, logPOSTERIOR, nu=1e-3,
   if (!is.null(varnames)) {
     colnames(thetaCombined) <- varnames
   }
-
-  # obj <- list(paramSim = paramSim,
-  #      thetaCombined = thetaCombined,
-  #      accept = accept)
 
   obj <- list(N=N,
               theta=paramSim,
@@ -372,9 +402,11 @@ qfun <- function(theta1, theta2, nu) {
 #' @param theta1 Vector of current quantiles
 #' @param nu Either a single numeric value for the covariance matrix, or a vector for the diagonal
 #'
-#' @return Multivariate normal density vector
 #' @references B. D. Ripley (1987) \emph{Stochastic Simulation}. Wiley.  Page 98
 #' @references Venables, W. N. and Ripley, B. D. (2002) \emph{Modern Applied Statistics with S.} Fourth edition. Springer.
+#' @return Returns a single numeric simulated value from a Normal distribution or vector of length \code{theta1}.
+#' \code{length(mu)} matrix with one sample in each row.
+#'
 #' @export
 #'
 #' @examples
@@ -465,6 +497,39 @@ leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, Minv, co
 #' @param verbose Logical to determine whether to display the progress of the HMC algorithm
 #' @param ... Additional parameters for \code{logPOSTERIOR} and \code{glogPOSTERIOR}
 #' @return List for \code{hmc}
+#' @section Elements for \code{hmclearn} objects:
+#' \describe{
+#'   \item{\code{N}}{
+#'   Number of MCMC samples
+#'   }
+#'   \item{\code{theta}}{
+#'   Nested list of length \code{N} of the sampled values of \code{theta} for each chain
+#'   }
+#'   \item{\code{thetaCombined}}{
+#'   List of dataframes containing sampled values, one for each chain
+#'   }
+#'   \item{\code{r}}{
+#'   List of length \code{N} of the sampled momenta
+#'   }
+#'   \item{\code{theta.all}}{
+#'   Nested list of all parameter values of \code{theta} sampled prior to accept/reject step for each
+#'   }
+#'   \item{\code{r.all}}{
+#'   List of all values of the momenta \code{r} sampled prior to accept/reject
+#'   }
+#'   \item{\code{accept}}{
+#'   Number of accepted proposals.  The ratio \code{accept} / \code{N} is the acceptance rate
+#'   }
+#'   \item{\code{accept_v}}{
+#'   Vector of length \code{N} indicating which samples were accepted
+#'   }
+#'   \item{\code{M}}{
+#'   Mass matrix used in the HMC algorithm
+#'   }
+#'   \item{\code{algorithm}}{
+#'   \code{HMC} for Hamiltonian Monte Carlo
+#'   }
+#' }
 #' @references Neal, Radford. 2011. \emph{MCMC Using Hamiltonian Dynamics.} In Handbook of Markov Chain Monte Carlo, edited by Steve Brooks, Andrew Gelman, Galin L. Jones, and Xiao-Li Meng, 116–62. Chapman; Hall/CRC.
 #' @examples
 #' # Logistic regression example
@@ -662,6 +727,9 @@ hmcpar <- function(paramlst, ...) {
 #'   }
 #'   \item{\code{M}}{
 #'   Mass matrix used in the HMC algorithm
+#'   }
+#'   \item{\code{algorithm}}{
+#'   \code{HMC} for Hamiltonian Monte Carlo
 #'   }
 #'   \item{\code{varnames}}{
 #'   Optional vector of parameter names

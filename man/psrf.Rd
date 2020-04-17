@@ -14,6 +14,9 @@ psrf(object, burnin, ...)
 
 \item{...}{currently unused}
 }
+\value{
+Numeric vector of Rhat statistics for each parameter
+}
 \description{
 Gelman and Rubin's diagnostic assesses the mix of multiple MCMC chain with different initial parameter values
 Values close to 1 indicate that the posterior simulation has sufficiently converged, while
