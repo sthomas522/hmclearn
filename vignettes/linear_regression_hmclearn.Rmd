@@ -1,5 +1,6 @@
 ---
 title: "hmclearn package:  Linear Regression Example"
+author: "Samuel Thomas"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{linear_regression_hmclearn}
