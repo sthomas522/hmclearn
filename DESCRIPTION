@@ -32,3 +32,4 @@ Imports:
     parallel,
     mvtnorm,
     MASS
+VignetteBuilder: knitr
