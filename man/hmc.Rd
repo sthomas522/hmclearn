@@ -164,8 +164,6 @@ f1_hmc <- hmc(N = 500,
           param=list(y=y, X=X), parallel=FALSE, chains=1)
 
 summary(f1_hmc, burnin=100)
-mcmc_trace(f1_hmc, burnin=100)
-mcmc_hist(f1_hmc, burnin=100)
 
 
 # poisson regression example
@@ -186,8 +184,6 @@ f2_hmc <- hmc(N = 500,
           parallel=FALSE, chains=1)
 
 summary(f2_hmc, burnin=100)
-mcmc_trace(f2_hmc, burnin=100)
-mcmc_hist(f2_hmc, burnin=100)
 
 \donttest{
 # linear regression

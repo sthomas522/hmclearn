@@ -132,8 +132,6 @@ f1_mh <- mh(N = 2000,
          param=list(y=y, X=X), parallel=FALSE, chains=1)
 
 summary(f1_mh)
-mcmc_trace(f1_mh, burnin=1000)
-mcmc_hist(f1_mh, burnin=1000)
 
 # poisson regression example
 set.seed(7363)
@@ -153,8 +151,6 @@ f2_mh <- mh(N = 1000,
          parallel=FALSE, chains=1)
 
 summary(f2_mh)
-mcmc_trace(f2_mh, burnin=500)
-mcmc_hist(f2_mh, burnin=500)
 
 \donttest{
 # linear regression

@@ -223,8 +223,6 @@ mhpar <- function(paramlst, ...) {
 #'          param=list(y=y, X=X), parallel=FALSE, chains=1)
 #'
 #' summary(f1_mh)
-#' mcmc_trace(f1_mh, burnin=1000)
-#' mcmc_hist(f1_mh, burnin=1000)
 #'
 #' # poisson regression example
 #' set.seed(7363)
@@ -244,8 +242,6 @@ mhpar <- function(paramlst, ...) {
 #'          parallel=FALSE, chains=1)
 #'
 #' summary(f2_mh)
-#' mcmc_trace(f2_mh, burnin=500)
-#' mcmc_hist(f2_mh, burnin=500)
 #'
 #' \donttest{
 #' # linear regression
@@ -796,8 +792,6 @@ hmcpar <- function(paramlst, ...) {
 #'           param=list(y=y, X=X), parallel=FALSE, chains=1)
 #'
 #' summary(f1_hmc, burnin=100)
-#' mcmc_trace(f1_hmc, burnin=100)
-#' mcmc_hist(f1_hmc, burnin=100)
 #'
 #'
 #' # poisson regression example
@@ -818,8 +812,6 @@ hmcpar <- function(paramlst, ...) {
 #'           parallel=FALSE, chains=1)
 #'
 #' summary(f2_hmc, burnin=100)
-#' mcmc_trace(f2_hmc, burnin=100)
-#' mcmc_hist(f2_hmc, burnin=100)
 #'
 #' \donttest{
 #' # linear regression
