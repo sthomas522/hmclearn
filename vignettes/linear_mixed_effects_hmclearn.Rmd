@@ -395,7 +395,7 @@ $$
 Initialize the random effects with high variance
 
 ```{r, echo=TRUE, eval=T}
-N <- 1e3
+N <- 2e3
 
 theta.init <- c(0, 1, # beta 
                rep(0, 18), # tau
@@ -403,13 +403,13 @@ theta.init <- c(0, 1, # beta
                1) # xi 
 
 vnames <- c(paste0("beta", 0:1), 
-            rep("tau_int", 18), 
+            paste0("tau_int", 1:18), 
            "sigeps", "xi")
 
-eps_vals <- c(1e-2, 1e-2,
-              rep(1e-2, 18), 
-              1e-3,
-              1e-2)
+eps_vals <- c(5e-1, 5e-2,
+              rep(3e-2, 18), 
+              6e-3,
+              5e-2)
 
 set.seed(41132)
 t1.hmc <- Sys.time()
@@ -426,7 +426,7 @@ t2.hmc <- Sys.time()
 t2.hmc - t1.hmc
 
 f_hmc$accept/N
-mcmc_trace(f_hmc, burnin=trunc(N*.3), pars=c("beta0", "beta1"))
+mcmc_trace(f_hmc, burnin=trunc(N*.3), pars=c("beta0", "beta1", "sigeps", "xi"))
 ```
 
 Estimated precision matrix 
@@ -443,13 +443,6 @@ Estimated precision matrix
 
 
 
-```{r, echo=TRUE, eval=T}
-xi_1_true <- 1/2*log(VarCorr(fm1)$Subject[1])
-a_true <- VarCorr(fm1)$Subject[2]/VarCorr(fm1)$Subject[1]
-xi_2_true <- 1/2*log(VarCorr(fm1)$Subject[4] - a_true^2 * exp(2*xi_1_true))
-```
-
-
 ```{r, echo=TRUE}
 summary(f_hmc, burnin=trunc(N*.3))
 ```
@@ -462,5 +455,6 @@ Compare the Frequentist estimates to HMC
 
 ```{r, echo=TRUE, fig.width=6, fig.height=4}
 beta.true <- fixef(fm1)
-diagplots(f_hmc, burnin=trunc(N*.3), actual.mu=beta.true, cols=1:2)
+diagplots(f_hmc, burnin=trunc(N*.3), plotfun = c(1,2), 
+          actual.mu=beta.true, cols=1:2)
 ```
