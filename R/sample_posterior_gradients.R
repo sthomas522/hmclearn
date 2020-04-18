@@ -413,13 +413,18 @@ g_lmm_posterior <- function(theta, y, X, Z, m, q=1, A = 1e4, nueps=1, nulambda=1
 
   # gradient for a
   if (q > 1) {
+
+    # gradient for a
     tau_lst <- split(tau_param, ceiling(seq_along(tau_param)/q))
     Tj <- lapply(tau_lst, function(tauvals) {
       Tj <- create_Uj(Dhalf %*% tauvals, neg=FALSE)
     })
     Tj <- do.call(rbind, Tj)
 
-    g_a <- -(t(1-y) + t(gradprop)) %*% Z %*% Tj -Ainv %*% a_param
+    g_a1 <- exp(-2*gamma_param) * t(Tj) %*% t(Z) %*%
+      (y - X%*%beta_param - Z%*%Dhalf_block%*%tau_param - Z%*%Tj%*%a_param)
+    g_a2 <- -Ainv %*% a_param
+    g_a <- g_a1 + g_a2
 
     g_all <- c(as.numeric(g_beta),
                as.numeric(g_tau),

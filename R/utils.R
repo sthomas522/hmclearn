@@ -8,6 +8,8 @@
 #' @importFrom stats runif
 #' @importFrom stats var
 #' @importFrom utils tail
+#' @importFrom mvtnorm dmvnorm
+#' @importFrom MASS mvrnorm
 
 # random effects covariance
 create_Uj <- function(uj, neg=TRUE) {

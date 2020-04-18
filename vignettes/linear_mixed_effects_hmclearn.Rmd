@@ -448,13 +448,13 @@ summary(f_hmc, burnin=trunc(N*.3))
 ```
 
 ```{r, echo=TRUE, fig.width=6, fig.height=4}
-mcmc_trace(f_hmc, burnin=trunc(N*.3), pars=c("beta0", "beta1"))
+mcmc_trace(f_hmc, burnin=trunc(N*.3), pars=c("beta0", "beta1", "sigeps", "xi"))
 ```
 
 Compare the Frequentist estimates to HMC
 
 ```{r, echo=TRUE, fig.width=6, fig.height=4}
 beta.true <- fixef(fm1)
-diagplots(f_hmc, burnin=trunc(N*.3), plotfun = c(1,2), 
+diagplots(f_hmc, burnin=trunc(N*.3), 
           actual.mu=beta.true, cols=1:2)
 ```
