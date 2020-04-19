@@ -80,6 +80,8 @@ psrf <- function(object, burnin, ...) {
 #'           param = list(y=y, X=X),
 #'           parallel=FALSE, chains=2)
 #'
+#' psrf(f, burnin=100)
+#'
 psrf.hmclearn <- function(object, burnin=NULL, ...) {
 
   data <- combMatrix(object$thetaCombined, burnin=burnin)

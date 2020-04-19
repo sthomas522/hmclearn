@@ -42,6 +42,8 @@ f <- hmc(N = 1000,
           param = list(y=y, X=X),
           parallel=FALSE, chains=2)
 
+psrf(f, burnin=100)
+
 }
 \references{
 Gelman, A. and Rubin, D. (1992) \emph{Inference from Iterative Simulation Using Multiple Sequences}.  Statistical Science 7(4) 457-472.

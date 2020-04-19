@@ -57,7 +57,7 @@ create_Uj <- function(uj, neg=TRUE) {
 #'           varnames = c(paste0("beta", 0:3), "log_sigma_sq"),
 #'           param=list(y=y, X=X), parallel=FALSE, chains=1)
 #'
-#' diagplots(f, burnin=100, actual.mu=c(betavals, 2*log(.2)))
+#' diagplots(f, burnin=300, actual.mu=c(betavals, 2*log(.2)))
 #'
 diagplots <- function(object, burnin=NULL, plotfun=2, actual.mu=NULL, cols=NULL, ...) {
   UseMethod("diagplots")
@@ -92,7 +92,7 @@ diagplots <- function(object, burnin=NULL, plotfun=2, actual.mu=NULL, cols=NULL,
 #'           varnames = c(paste0("beta", 0:3), "log_sigma_sq"),
 #'           param=list(y=y, X=X), parallel=FALSE, chains=1)
 #'
-#' diagplots(f, burnin=100, actual.mu=c(betavals, 2*log(.2)))
+#' diagplots(f, burnin=300, actual.mu=c(betavals, 2*log(.2)))
 #'
 diagplots.hmclearn <- function(object, burnin=NULL, plotfun=2, actual.mu=NULL, cols=NULL, ...) {
 
