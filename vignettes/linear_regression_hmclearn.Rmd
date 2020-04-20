@@ -15,9 +15,17 @@ knitr::opts_chunk$set(
 )
 ```
 
+# Introduction
+
+This vignette demonstrates fitting a linear regression model via Hamiltonian Monte Carlo (HMC) using the **hmclearn** package. 
+
+# Linear Regression Example
+
 ```{r setup}
 library(hmclearn)
 ```
+
+The user must define provide the design matrix directly for use in **hmclearn**.  Our first step is to load the data and store the design matrix $X$ and dependent variable vector $y$. 
 
 Load Scots Race data and display the first few rows of the design matrix $X$.
 
@@ -58,13 +66,17 @@ theta.true <- c(beta.true, log(sigma2.true))
 
 # Prep for HMC
 
-Likelihood function for linear regression
+HMC requires the specification of the log posterior to a proportional constant.  In addition, HMC uses the gradient of the log posterior to guide simulations.  The full derivations are provided here.
+
+## Log posterior and gradient
+
+First, we specify the likelihood function for linear regression
 
 $$
 p(y | X, \beta; \sigma^2) = \frac{1}{(2\pi\sigma^2)^{n/2}}\exp{\left(-\frac{1}{2\sigma^2} (y - X\beta)^T(y-X\beta) \right)}
 $$
 
-The posterior for $\beta$ and $\sigma^2$
+The posterior is defined with priors for $\beta$ and $\sigma^2$.  
 
 $$
 \begin{aligned}
@@ -73,7 +85,7 @@ p(\beta, \sigma^2|y; X) &\propto p(y|X, \beta, \sigma^2) p(\beta, \sigma^2) \\
 \end{aligned}
 $$
 
-Multivariate Normal prior for $\beta$ and Inverse Gamma for $\sigma^2$
+We specify a multivariate Normal prior for $\beta$ and Inverse Gamma for $\sigma^2$.  Note that Inverse Gamma can be problematic in certain models where the variance is low.  
 
 $$
 \begin{aligned}
@@ -82,13 +94,13 @@ p(\sigma^2) &\sim IG(a, b)
 \end{aligned}
 $$
 
-pdf for $\sigma^2$ prior
+The pdf for $\sigma^2$ prior
 
 $$
 p(\sigma^2) = \frac{b^a}{\Gamma(a)} (\sigma^2)^{-a-1} \exp\left(-\frac{b}{\sigma^2} \right)
 $$
 
-Log-transform $\sigma^2$ to allow proposals across entire real number line
+We perform a log-transformation of $\sigma^2$ to allow proposals across entire real number line.  For unconstrained HMC simulations, all parameters must support all real numbers.  
 
 $$
 \begin{aligned}
@@ -103,7 +115,7 @@ p_\gamma(\gamma) &= p_{\sigma^2}(g^{-1}(\gamma))\left\lvert \frac{d\sigma^2}{d\g
 \end{aligned}
 $$
 
-The posterior and log posterior for linear regression, based on $\beta$ and $\gamma$
+The posterior and log posterior for linear regression, based on $\beta$ and $\gamma$, can now be derived.  
 
 $$
 \begin{aligned}
@@ -129,7 +141,11 @@ $$
 \end{aligned}
 $$
 
-Fit model using hmc
+The functions for the log posterior and its gradient are coded in the *linear_posterior* and *g_linear_posterior* functions, respectively, in **hmclearn**.
+
+# Fit model using hmc
+
+Next, we fit the linear regression model using HMC.  A vector of $\epsilon$ values are specified to align with the data.  
 
 ```{r, echo=TRUE}
 N <- 1e4
@@ -148,16 +164,28 @@ t1.hmc <- Sys.time()
 t2.hmc <- Sys.time()
 t2.hmc - t1.hmc
 
+```
+
+The acceptance ratio for each of the HMC chains is sufficiently high for an efficient simulation.  
+
+```{r, echo=TRUE}
 f_hmc$accept/N
 ```
+
+The posterior quantiles are summarized after removing an initial *burnin* period.  
 
 ```{r, echo=TRUE}
 summary(f_hmc, burnin=2000)
 ```
 
+Trace plots provide a visual indication of stationarity.  These plots indicate that the MCMC chains are reasonably stationary.  
+
+
 ```{r, echo=TRUE, fig.width=6, fig.height=4}
 mcmc_trace(f_hmc, burnin=2000)
 ```
+
+Histograms of the posterior distribution show that Bayesian parameter estimates align with Frequentist estimates for this example. 
 
 
 ```{r, echo=TRUE, fig.width=6, fig.height=4}
@@ -165,3 +193,9 @@ diagplots(f_hmc, actual.mu=theta.true, burnin=2000)
 
 
 ```
+
+# References
+
+Venables, W. N. and Ripley, B. D. (2002) *Modern Applied Statistics with S*. Fourth edition. Springer.  ISBN 0-387-95457-0
+
+Gelman, Andrew. "Prior distributions for variance parameters in hierarchical models (comment on article by Browne and Draper)." *Bayesian analysis* 1.3 (2006): 515-534.
