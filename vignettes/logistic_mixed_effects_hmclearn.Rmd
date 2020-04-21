@@ -341,7 +341,7 @@ f_hmc <- hmc(N = N, theta.init = initvals,
           varnames = vnames, 
           parallel=TRUE, chains=2, 
           param=list(y = y, X=X2, Z=Z, m=60, q=1, B=5, 
-                     nulambda=1, Alambda=25)  )
+                     nulambda=4, Alambda=1)  )
 
 t2.hmc <- Sys.time()
 t2.hmc - t1.hmc
@@ -359,8 +359,7 @@ Trace plots provide a visual indication of stationarity.  These plots indicate t
 mcmc_trace(f_hmc, burnin=1000, pars=colnames(X))
 ```
 
-
-Obtain $\beta$ from QR decomposition
+Since we used QR decomposition to transform $\beta$ prior to fitting via HMC, we need to reverse the transformation to obtain the original parameter scale.  
 
 ```{r, echo=TRUE}
 # restore beta from Rstar in QR decomposition
@@ -370,25 +369,58 @@ calc_beta <- function(theta_param, Rstarinv) {
 
 # reverse qr decomposition
 f_hmc2 <- f_hmc
-f_hmc2$thetaCombined <- lapply(f_hmc2$thetaCombined, function(xx) {
-  xx1 <- xx[, 1:ncol(X2)] %*% Rstar_inv
-  xx[, 1:5] <- xx1
+f_hmc2$thetaCombined <- lapply(f_hmc$thetaCombined, function(xx) {
+  xx[, 1:5] <- t(apply(xx[, 1:5], 1, calc_beta, Rstarinv=Rstar_inv))
   xx
 })
 
 ```
 
+The revised summary shows the posterior distribution after transformation back to the original scale.  
 
 ```{r, echo=TRUE}
 summary(f_hmc2)
 ```
 
+We create trace plots on the transformed simulation data. 
+
 ```{r, echo=TRUE, fig.width=6, fig.height=4}
 mcmc_trace(f_hmc2, burnin=1000, pars=colnames(X))
 ```
 
-# References
+# Frequentist model
 
+To compare results, we first fit a logistic mixed effects model using the frequentist package **lme4** (Bates et. al. 2015).  
+
+```{r, echo=TRUE}
+library(lme4)
+
+f <- glmer(use ~ age + I(age^2) + urban + liv2 + (1 | district), 
+           data=Contraception, family=binomial, 
+           control=glmerControl(optCtrl=list(maxfun=20000)))
+summary(f)
+```
+
+```{r, echo=TRUE}
+
+freqvals <- c(as.numeric(fixef(f)), 
+              as.numeric(ranef(f)$district[, 1]), 
+              log(sqrt(as.numeric(VarCorr(f)[1]))))
+```
+
+
+Histograms of the posterior distribution show that Bayesian parameter estimates align with frequentist estimates.  The *cols* parameter specifies the parameters to be displayed in *diagplots*, based on the order provided to the *hmc* function. 
+
+```{r, echo=TRUE}
+diagplots(f_hmc2, burnin=1000, 
+          actual.mu=c(freqvals[1:ncol(X)], freqvals[length(freqvals)]), 
+          cols=c(1:ncol(X), length(initvals)))
+
+```
+
+
+
+# References
 
 Agresti, A. (2015). *Foundations of linear and generalized linear models*. John Wiley & Sons.  ISBN: 978-1-118-73003-4
 

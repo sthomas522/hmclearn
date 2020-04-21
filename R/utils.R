@@ -103,11 +103,13 @@ diagplots.hmclearn <- function(object, burnin=NULL, plotfun=2, actual.mu=NULL, c
     cols <- 1:ncol(data)
   }
 
-  if (!is.null(burnin)) {
-    thetaCombinedsubs <- data[-c(1:burnin), cols]
-  } else {
-    thetaCombinedsubs <- data[, cols]
-  }
+  thetaCombinedsubs <- data[, cols]
+
+  # if (!is.null(burnin)) {
+  #   thetaCombinedsubs <- data[-c(1:burnin), cols]
+  # } else {
+  #   thetaCombinedsubs <- data[, cols]
+  # }
 
   pdata <- as.data.frame(thetaCombinedsubs)
   pdata$t <- 1:nrow(pdata)

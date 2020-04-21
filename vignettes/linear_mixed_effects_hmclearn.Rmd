@@ -417,12 +417,12 @@ summary(f_hmc, burnin=trunc(N*.3))
 Histograms of the posterior distribution show that Bayesian parameter estimates align with frequentist estimates.  The *cols* parameter specifies the parameters to be displayed in *diagplots*, based on the order provided to the *hmc* function. 
 
 ```{r, echo=TRUE, fig.width=6, fig.height=4}
-beta.true <- fixef(fm1)
-xi.true <- 1/2*log(VarCorr(fm1)$Subject[1])
-sigeps.true <- log(sigma(fm1))
-theta.true <- c(beta.true, sigeps.true, xi.true)
+beta.freq <- fixef(fm1)
+xi.freq <- 1/2*log(VarCorr(fm1)$Subject[1])
+sigeps.freq <- log(sigma(fm1))
+theta.freq <- c(beta.freq, sigeps.freq, xi.freq)
 diagplots(f_hmc, burnin=trunc(N*.3), 
-          actual.mu=theta.true, cols=c(1:2, 21:22))
+          actual.mu=theta.freq, cols=c(1:2, 21:22))
 ```
 
 # References

@@ -65,9 +65,9 @@ summary(f)
 Next, we store the parameter values from the Frequentist fit
 
 ```{r, echo=TRUE}
-beta.true <- as.numeric(coefficients(f))
-sigma2.true <- sigma(f)^2
-theta.true <- c(beta.true, log(sigma2.true))
+beta.freq <- as.numeric(coefficients(f))
+sigma2.freq <- sigma(f)^2
+theta.freq <- c(beta.freq, log(sigma2.freq))
 
 ```
 
@@ -196,7 +196,7 @@ Histograms of the posterior distribution show that Bayesian parameter estimates 
 
 
 ```{r, echo=TRUE, fig.width=6, fig.height=4}
-diagplots(f_hmc, actual.mu=theta.true, burnin=2000)
+diagplots(f_hmc, actual.mu=theta.freq, burnin=2000)
 
 
 ```
