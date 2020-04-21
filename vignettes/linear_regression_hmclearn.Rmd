@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 
 This vignette demonstrates fitting a linear regression model via Hamiltonian Monte Carlo (HMC) using the **hmclearn** package. 
 
-# Linear Regression Example
+# Linear Regression Example Data
 
 ```{r setup}
 library(hmclearn)
@@ -27,7 +27,7 @@ library(hmclearn)
 
 The user must define provide the design matrix directly for use in **hmclearn**.  Our first step is to load the data and store the design matrix $X$ and dependent variable vector $y$. 
 
-Load Scots Race data and display the first few rows of the design matrix $X$.
+Load Scots Race data (Agresti 2015, Venables and Ripley 2002) and display the first few rows of the design matrix $X$.
 
 ```{r, echo=TRUE}
 ScotsRaces <- MASS::hills
@@ -47,7 +47,7 @@ head(X, 3)
 
 # Frequentist linear model
 
-To compare results, we first fit a standard linear model using the frequentist function \textit{lm}
+To compare results, we first fit a standard linear model using the frequentist function *lm*.
 
 ```{r, echo=TRUE}
 f <- lm(y ~ X-1)
@@ -85,7 +85,7 @@ p(\beta, \sigma^2|y; X) &\propto p(y|X, \beta, \sigma^2) p(\beta, \sigma^2) \\
 \end{aligned}
 $$
 
-We specify a multivariate Normal prior for $\beta$ and Inverse Gamma for $\sigma^2$.  Note that Inverse Gamma can be problematic in certain models where the variance is low.  
+We specify a multivariate Normal prior for $\beta$ and Inverse Gamma for $\sigma^2$.  Note that Inverse Gamma can be problematic in certain models where the variance is low (Gelman 2006).  
 
 $$
 \begin{aligned}
@@ -198,4 +198,8 @@ diagplots(f_hmc, actual.mu=theta.true, burnin=2000)
 
 Venables, W. N. and Ripley, B. D. (2002) *Modern Applied Statistics with S*. Fourth edition. Springer.  ISBN 0-387-95457-0
 
-Gelman, Andrew. "Prior distributions for variance parameters in hierarchical models (comment on article by Browne and Draper)." *Bayesian analysis* 1.3 (2006): 515-534.
+Gelman, Andrew. (2006) "Prior distributions for variance parameters in hierarchical models (comment on article by Browne and Draper)." *Bayesian analysis* 1.3: 515-534.
+
+Agresti, A. (2015). *Foundations of linear and generalized linear models*. John Wiley & Sons.  ISBN: 978-1-118-73003-4
+
+
