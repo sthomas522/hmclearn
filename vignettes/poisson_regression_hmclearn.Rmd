@@ -16,28 +16,32 @@ knitr::opts_chunk$set(
 )
 ```
 
+# Introduction
+
+This vignette demonstrates fitting a Poisson regression model via Hamiltonian Monte Carlo (HMC) using the **hmclearn** package. 
+
 ```{r setup}
 library(hmclearn)
 ```
 
 # GLM - Poisson Regression
 
-Poisson distribution
+For a count response, we let
 
 $$
 p(y; \mu) = \frac{e^{-\mu}\mu^y}{y!}
 $$
 
-Log link function
+with a log-link function
 
 $$
 \begin{aligned}
 \mu &:= E(Y | x) = e^{X\beta} \\
-\log \mu &= X\beta
+\log \mu &= X\beta.
 \end{aligned}
 $$
 
-Develop the likelihood
+Next, we develop the likelihood
 
 $$
 \begin{aligned}
@@ -51,7 +55,7 @@ with log-likelihood
 $$
 \begin{aligned}
 l(\beta; y, X) &= \sum_{i=1}^n -e^{X_i\beta} + y_i X_i \beta - \log y_i! \\
-&\propto \sum_{i=1}^n -e^{X_i\beta} + y_i X_i \beta
+&\propto \sum_{i=1}^n -e^{X_i\beta} + y_i X_i \beta.
 \end{aligned}
 $$
 
@@ -65,19 +69,19 @@ $$
 $$
 
 
-With pdf
+with pdf
 
 $$
 \begin{aligned}
 p(\beta) &= \frac{1}{\sqrt{\lvert 2\pi \Sigma_\beta \rvert }}e^{-\frac{1}{2}\beta^T \Sigma_\beta^{-1}\beta} \\
 \log p(\beta) &= -\frac{1}{2}\log(2\pi \lvert \Sigma_\beta \rvert) - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta \\
-&\propto -\frac{1}{2}\log \lvert\Sigma_\beta\rvert - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta
+&\propto -\frac{1}{2}\log \lvert\Sigma_\beta\rvert - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta.
 \end{aligned}
 $$
 
 Let $B = 1e3$ for instance, as a relatively uninformative prior.
 
-Now derive the log posterior
+Next, we derive the log posterior.  The log posterior is the sum of the log likelihood and the log of the prior for $\beta$.  
 
 $$
 \begin{aligned}
@@ -88,9 +92,8 @@ p(\beta | X, y) &\propto p(y | X, \beta)  p(\beta) \\
 \end{aligned}
 $$
 
-The log posterior is the sum of the log likelihood and the log of the prior for $\beta$.  
 
-We need to derive the gradient of the log posterior for the leapfrog function
+We need to derive the gradient of the log posterior for the leapfrog function in HMC.  
 
 $$
 \begin{aligned}
@@ -100,9 +103,11 @@ $$
 \end{aligned}
 $$
 
-# Data
+# Poisson Regression Example Data
 
-Load Drugs data (Agresti - Foundations of Linear and Generalized linear models p. 244)
+The user must define provide the design matrix directly for use in **hmclearn**.  Our first step is to load the data and store the design matrix $X$ and dependent variable vector $y$. 
+
+We load drug usage data (Agresti 2015) and create the design matrix $X$ and dependent vector $y$.  
 
 ```{r, echo=TRUE}
 data(Drugs)
@@ -114,11 +119,9 @@ X <- X[, 1:ncol(X)]
 # independent variable is count data
 y <- Drugs$count
 
-
 ```
 
-
-Fit a Frequentist glm
+To compare results, we first fit a standard linear model using the frequentist function *glm*.  
 
 ```{r, echo=TRUE}
 # matrix representation
@@ -147,20 +150,40 @@ t1.hmc <- Sys.time()
                     param=list(y=y, X=X)) 
 t2.hmc <- Sys.time()
 t2.hmc - t1.hmc
+```
+
+The acceptance ratio for each of the HMC chains is sufficiently high for an efficient simulation.  
+
+```{r, echo=TRUE}
 f_hmc$accept/N
 ```
+
+The posterior quantiles are summarized after removing an initial *burnin* period.  
 
 ```{r, echo=TRUE}
 summary(f_hmc, burnin=3000)
 ```
 
+
+Trace plots provide a visual indication of stationarity.  These plots indicate that the MCMC chains are reasonably stationary.  
+
 ```{r, echo=TRUE, fig.width=6, fig.height=4}
 mcmc_trace(f_hmc, burnin=3000)
 ```
 
-Compare the Frequentist estimates to HMC
+Histograms of the posterior distribution show that Bayesian parameter estimates align with Frequentist estimates.
 
 ```{r, echo=TRUE, fig.width=6, fig.height=4}
 beta.true <- coef(f)
 diagplots(f_hmc, burnin=3000, actual.mu=beta.true)
 ```
+
+# References
+
+Agresti, A. (2015). *Foundations of linear and generalized linear models*. John Wiley & Sons.  ISBN: 978-1-118-73003-4
+
+Copyright 2015, Alan Agresti, Department of Statistics, University of Florida
+
+Heinze, G., & Schemper, M. (2002). *A solution to the problem of separation in logistic regression*. Statistics in medicine, 21(16), 2409-2419.
+
+
