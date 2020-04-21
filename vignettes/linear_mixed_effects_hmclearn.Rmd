@@ -16,27 +16,27 @@ knitr::opts_chunk$set(
 )
 ```
 
+# Introduction
+
+This vignette demonstrates fitting a Linear mixed effects regression model via Hamiltonian Monte Carlo (HMC) using the **hmclearn** package. 
+
+$$
+\begin{aligned}
+y &= X\beta + Zu + \epsilon \\
+u &\sim N(0, G) \\
+\epsilon &\sim N(0, \sigma^2)
+\end{aligned}
+$$
+
 ```{r setup}
 library(hmclearn)
 ```
 
+# Linear Mixed Effects Model Example Data
 
-This update re-parameterizes the random effects parameterization $u$ per Betancourt, Girolami (2013), a paper on Hamiltonian Monte Carlo for Hierarchical Models.  
+The user must define provide the design matrix directly for use in **hmclearn**.  Our first step is to load the data and store the fixed effect design matrix $X$, random effects design matrix $Z$, and dependent variable vector $y$. 
 
-Further, the uniform parameterization of the variance parameters is replaced by a half-t family of distributions per Gelman (2006), Prior distributions for Variance parameters in hierarchical models.  This parameterization is well-behaved around 0, in contrast to inverse gamma, and provides flexibility for more informed priors than a uniform distribution.
-
-The data and application are the same.  See linear_mixed_effect_model_LDL_with_Correlation_no_gibbs_v5.Rmd for the prior parameterization and results.
-
-## Random Intercept Model
-
-\textbf{Fit LMM model}
-
-Data preparation
-
-See Agresti 9.2.5 - sample data
-
-Where $i = 1, ..., m$ and $j = 1, ..., d$ 
-
+We load drug sleepstudy data (Agresti 2015, Belenky et. al. 2003) and create the design matrices $X$ and $Z$ and dependent vector $y$.  For this model, the random effects design matrix $Z$ is specified for a random intercept model.  
 
 ```{r, echo=TRUE}
 library(lme4)
@@ -69,33 +69,24 @@ Z <- as.matrix(bdiag(Zi.lst))
 ```
 
 
-Frequentist model
-
-Random intercept model
-
-This model assumes independence for random effects
+To compare results, we first fit a linear mixed effects model using the frequentist package **lme4** (Bates et. al. 2015).  
 
 ```{r, echo=TRUE}
 # random intercept 
 
 ## linear mixed models - reference values from older code
 (fm1 <- lmer(Reaction ~ Days + (1 | Subject), sleepstudy, REML = FALSE))
-summary(fm1)# (with its own print method; see class?merMod % ./merMod-class.Rd
+summary(fm1)
 
 ```
 
-## Parameterization for $G$
+# Parameterization for $G$
 
-We select a parameterization of $G$ such that the likelihood can be derived for Metropolis-Hastings.  Further, we want a likelihood for which we can directly calculate the gradient of the log likelihood in preparation for Hamiltonian Monte Carlo.  To this end, we uses LDL decomposition of $G$ to form a flexibile parameterization that can easily handle restrictions.  
+The parameterization approach for this model uses a strategy recommended by Betancourt, Girolami (2013) to facilitate more efficient sampling in HMC.  
 
-Ref:  MCMC Estimation of Restricted Covariance Matrices by Chan and Jelizkov, 2009, Journal of Computational and Graphical Statistics
+Further, the uniform parameterization of the variance parameters is replaced by a half-t family of distributions per Gelman (2006), Prior distributions for Variance parameters in hierarchical models.  This parameterization is well-behaved around 0, in contrast to inverse gamma, and provides flexibility for more informed priors than a uniform distribution.
 
-
-## Updated parameterization
-
-The distribution of the random effects are defined as normal with a mean of zero. 
-
-Note that in this parameterization, we directly decompose $G$ instead of $G^{-1}$ as in Chan and Jelikzhov (2009).
+We select a parameterization of $G$ such that the likelihood and its gradient can be derived for HMC.  To this end, we uses LDL decomposition of $G$ to form a flexibile parameterization that can easily handle restrictions (Chan, Jelizkov 2009).  
 
 $$
 \begin{aligned}
@@ -127,11 +118,7 @@ $$
 
 Also define $\lambda := (\lambda_1, ..., \lambda_p)^T$ and $a_k := (a_{k1}, ..., a_{k, k-1})^T$ and $a := (a_2^T, ..., a_p^T)^T$
 
-Consider priors where $k = 1...p$.  The prior for $\lambda_k$ is half-t per Gelman (2006).  The previous parameterization was inverse gamma, which can be unintentionally informative for hierarchical models.  Another previous parameterization was uniform, which was also recommended by Gelman for more than 3 groups, but has the consequence of a positive bias.  
-
-Prior distributions for variance parameters in hierarchical models.  Andrew Gelman (2006)
-
-We use a half-t prior for standard deviation $\lambda_k$
+Consider priors where $k = 1...p$.  The prior for $\lambda_k$ is half-t per Gelman (2006).  
 
 $$
 \begin{aligned}
@@ -142,7 +129,7 @@ $$
 
 The hyperparameter $a_0$ does not need to be zero, and $A_0$ can be correlated and may depend on $\lambda$.  In this model, we define $a$ independent of $\lambda$. 
 
-In prior parameterizations, we directly defined the likelihood of the random effects $u$.  Per Betancourt, Girolami (2013), we re-parameterize $u$ using a standard normal parameterization we define as $\tau = (\tau_1, ..., \tau_q)$.  Here, $u$ is a deterministic function of $G$ and $\tau$.
+Per Betancourt, Girolami (2013), we re-parameterize $u$ using a standard normal parameterization we define as $\tau = (\tau_1, ..., \tau_q)$.  Here, $u$ is a deterministic function of $G$ and $\tau$.
 
 $$
 \begin{aligned}
@@ -154,13 +141,11 @@ u &:= L D^{1/2} \tau \\
 \end{aligned}
 $$
 
-The distribution of $u$ therefore does not change with this parameterization.  The intent of our re-parameterization is to allow $G$ and $\tau$ to be largely independent in the MCMC sampling.  A direct parameterization of $u$ and $G$ can introduced what has been called the Funnel from hell. See http://twiecki.github.io/blog/2017/02/08/bayesian-hierchical-non-centered/ Why hierarchical models are awesome, tricky, and Bayesian.  
+The distribution of $u$ therefore does not change with this parameterization.  The intent of our re-parameterization is to allow $G$ and $\tau$ to be largely independent in the MCMC sampling.   
 
-## Derive the full log posterior
+# Derive the log posterior and gradient
 
-For MH, we need to derive the full log posterior
-
-First, the likelihood and log-likelihood 
+First, we specify the likelihood and log-likelihood 
 
 $$
 \begin{aligned}
@@ -169,7 +154,7 @@ p(y | \beta, u_1, ..., u_c, \sigma_\epsilon^2) &\propto (\sigma_\epsilon^2)^{-n/
 \end{aligned}
 $$
 
-Bayes rule to determine posterior
+The posterior is defined for priors on $\beta$, $u$, $\sigma_\epsilon^2$, and $G$, with dependent vector $y$ and design matrices $X$ and $Z$.
 
 $$
 \begin{aligned}
@@ -181,7 +166,7 @@ p(\beta, u, \sigma_\epsilon^2, G | y, X, Z) &\propto p(y | \beta, u, \sigma_\eps
 \end{aligned}
 $$
 
-Select priors.  We parameterize all standard deviations (instead of variance) as from the half-t family.  
+We parameterize all standard deviations from the half-t family.  
 
 $$
 \begin{aligned}
@@ -192,7 +177,7 @@ a &\sim N(0, A_a)
 \end{aligned}
 $$
 
-We want proposals of $\sigma_\epsilon^2$ over the real number line.  Therfore we derive the distribution of the log Inverse Gamma based on a simple change of variable
+We want proposals of $\sigma_\epsilon^2$ over the real number line.  Therfore we derive the distribution of the transformed parameter $\gamma$ based on a change of variable
 
 $$
 \begin{aligned}
@@ -214,7 +199,7 @@ p_{\gamma}(\gamma) &= p_{\sigma_\epsilon}(g^{-1}(\gamma))\lvert \frac{d\sigma_\e
 $$
 
 
-We have hyperpriors $\lambda$ and $a$ for $G$
+We have hyperpriors $\lambda$ and $a$ for $G$. 
 
 Re-parameterize $\xi_k = \log \lambda_k$ and $e^{\xi_k} = \lambda_k$
 
@@ -265,7 +250,6 @@ a_{q,q-1}
 \end{aligned}
 $$
 
-
 Since we decompose $G$ using $L D L^T$.  We make use of the determinant property of a square matrix, where the determinant of a square matrix is equal to the determinant of its transpose.  Also, from above $\lvert L \rvert = 1$
 
 $$
@@ -300,7 +284,7 @@ p(\tau) &\sim e^{-\frac{1}{2}\tau^T I \tau} \\
 $$
 
 
-Write the full log posterior
+Finally, we write the full log posterior
 
 $$
 \begin{aligned}
@@ -315,13 +299,9 @@ $$
 \end{aligned}
 $$
 
-\pagebreak
+## Derive the gradient of the log posterior
 
-# Hamiltonian Monte Carlo
-
-Derive the gradient of the log posterior
-
-Gradient of $\tau$ 
+Derive the partial derivative of $\tau$ 
 
 $$
 \begin{aligned}
@@ -331,7 +311,7 @@ $$
 \end{aligned}
 $$
 
-Gradient of $\xi_k$.  Here $J^{kk}$ is the singular entry matrix of $e^{\xi_k}$ at $kk$, with the remaining matrix elements zero.
+Derive the partial derivative of $\xi_k$.  Here $J^{kk}$ is the singular entry matrix of $e^{\xi_k}$ at $kk$, with the remaining matrix elements zero.
 
 $$
 \begin{aligned}
@@ -341,7 +321,7 @@ $$
 $$
 
 
-The gradient with respect to $a$:
+Derive the partial derivative with respect to $a$.
 
 Note that the following are equivalent
 
@@ -353,16 +333,6 @@ $$
 
 Therefore, the portion of the log likelihood dependent on $a$ becomes
 
-$$
-\begin{aligned}
-l(a, ..) &= -\frac{e^{-2\gamma}}{2}(y-X\beta-ZLD^{1/2}\tau)^T(y - X\beta-ZLD^{1/2}\tau) \\
-&= -\frac{e^{-2\gamma}}{2}(y - X\beta - Z(D^{1/2}\tau + \widetilde{T}a))^T(y - X\beta - Z(D^{1/2}\tau + \widetilde{T}a)) \\
-&= -\frac{e^{-2\gamma}}{2}(y - X\beta - ZD^{1/2}\tau - Z\widetilde{T}a)^T (y - X\beta - ZD^{1/2}\tau - Z\widetilde{T}a) \\
-\frac{\partial l}{\partial a} &= e^{-2\gamma}(Z\widetilde{T})^T (y - X\beta-ZD^{1/2}\tau - Z\widetilde{T}a) \\
-&= e^{-2\gamma}\widetilde{T}^T Z^T(y - X\beta-ZD^{1/2}\tau - Z\widetilde{T}a)
-\end{aligned}
-$$
-
 
 $$
 \begin{aligned}
@@ -371,7 +341,7 @@ $$
 \end{aligned}
 $$
 
-Gradient of full log posterior
+The gradient of full log posterior can now be specified
 
 $$
 \begin{aligned}
@@ -388,11 +358,10 @@ $$
 \end{aligned}
 $$
 
-\pagebreak
+# Hamiltonian Monte Carlo
 
-# Hamiltonian Monte Carlo with unit diagonal
+Run HMC for linear mixed effects regression model
 
-Initialize the random effects with high variance
 
 ```{r, echo=TRUE, eval=T}
 N <- 2e3
@@ -424,37 +393,48 @@ t1.hmc <- Sys.time()
             parallel=TRUE, chains=2)
 t2.hmc <- Sys.time()
 t2.hmc - t1.hmc
+```
 
+The acceptance ratio for each of the HMC chains is sufficiently high for an efficient simulation.  
+
+```{r, echo=TRUE}
 f_hmc$accept/N
+```
+
+
+Trace plots provide a visual indication of stationarity.  These plots indicate that the MCMC chains are reasonably stationary.  
+
+```{r, echo=TRUE, fig.width=6, fig.height=4}
 mcmc_trace(f_hmc, burnin=trunc(N*.3), pars=c("beta0", "beta1", "sigeps", "xi"))
 ```
 
-Estimated precision matrix 
-
-    beta0     beta1    u_int1  u_slope1    su_int2  u_slope2    u_int3  u_slope3    u_int4  u_slope4    u_int5  u_slope5 
-    0.040     0.301     0.012     0.150     0.010     0.205     0.003     0.080     0.004     0.105     0.005     0.157 
-   u_int6  u_slope6    u_int7  u_slope7    u_int8  u_slope8    u_int9  u_slope9   u_int10 u_slope10   u_int11 u_slope11 
-    0.011     0.181     0.007     0.117     0.006     0.109     0.011     0.133     0.011     0.127     0.014     0.216 
-  u_int12 u_slope12   u_int13 u_slope13   u_int14 u_slope14   u_int15 u_slope15   u_int16 u_slope16   u_int17 u_slope17 
-    0.006     0.139     0.004     0.118     0.007     0.105     0.012     0.193     0.007     0.106     0.010     0.135 
-  u_int18 u_slope18   sig2eps      xi_1      xi_2         a 
-    0.005     0.113     0.00014     3.338     4.336   101.582 
-    
-
-
+The posterior quantiles are summarized after removing an initial *burnin* period.  
 
 ```{r, echo=TRUE}
 summary(f_hmc, burnin=trunc(N*.3))
 ```
 
-```{r, echo=TRUE, fig.width=6, fig.height=4}
-mcmc_trace(f_hmc, burnin=trunc(N*.3), pars=c("beta0", "beta1", "sigeps", "xi"))
-```
-
-Compare the Frequentist estimates to HMC
+Histograms of the posterior distribution show that Bayesian parameter estimates align with frequentist estimates.  The *cols* parameter specifies the parameters to be displayed in *diagplots*, based on the order provided to the *hmc* function. 
 
 ```{r, echo=TRUE, fig.width=6, fig.height=4}
 beta.true <- fixef(fm1)
+xi.true <- 1/2*log(VarCorr(fm1)$Subject[1])
+sigeps.true <- log(sigma(fm1))
+theta.true <- c(beta.true, sigeps.true, xi.true)
 diagplots(f_hmc, burnin=trunc(N*.3), 
-          actual.mu=beta.true, cols=1:2)
+          actual.mu=theta.true, cols=c(1:2, 21:22))
 ```
+
+# References
+
+Agresti, A. (2015). *Foundations of linear and generalized linear models*. John Wiley & Sons.  ISBN: 978-1-118-73003-4
+
+Betancourt, M., & Girolami, M. (2015). Hamiltonian Monte Carlo for hierarchical models. *Current trends in Bayesian methodology with applications*, 79(30), 2-4.
+
+Gelman, Andrew. (2006) "Prior distributions for variance parameters in hierarchical models (comment on article by Browne and Draper)." *Bayesian analysis* 1.3: 515-534.
+
+Gregory Belenky, Nancy J. Wesensten, David R. Thorne, Maria L. Thomas, Helen C. Sing, Daniel P. Redmond, Michael B. Russo and Thomas J. Balkin (2003) Patterns of performance degradation and restoration during sleep restriction and subsequent recovery: a sleep dose-response study. *Journal of Sleep Research* 12, 1–12.
+
+Bates, D., M\"{a}chler, M., Bolker, B., & Walker, S. (2015). Fitting linear mixed-effects models using lme4. *Journal of Statistical Software* 67(1)
+
+Chan, J. C. C., & Jeliazkov, I. (2009). MCMC estimation of restricted covariance matrices. *Journal of Computational and Graphical Statistics*, 18(2), 457-480.

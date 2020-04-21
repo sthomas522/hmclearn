@@ -19,6 +19,13 @@ knitr::opts_chunk$set(
 
 This vignette demonstrates fitting a linear regression model via Hamiltonian Monte Carlo (HMC) using the **hmclearn** package. 
 
+$$
+\begin{aligned}
+y &= X\beta + \epsilon \\
+\epsilon &\sim N(0, \sigma^2)
+\end{aligned}
+$$
+
 # Linear Regression Example Data
 
 ```{r setup}
