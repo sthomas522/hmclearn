@@ -170,9 +170,9 @@ diagplots(f_hmc, burnin=3000, actual.mu=beta.freq)
 
 # References
 
-Agresti, A. (2015). *Foundations of linear and generalized linear models*. John Wiley & Sons.  ISBN: 978-1-118-73003-4
+TODO: This example is also in Agresti, and we compare results to his.....
 
-Copyright 2015, Alan Agresti, Department of Statistics, University of Florida
+Agresti, A. (2015). *Foundations of linear and generalized linear models*. John Wiley & Sons.  ISBN: 978-1-118-73003-4
 
 Heinze, G., & Schemper, M. (2002). *A solution to the problem of separation in logistic regression*. Statistics in medicine, 21(16), 2409-2419.
 
