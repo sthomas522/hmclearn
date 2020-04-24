@@ -1,7 +1,7 @@
 ---
 title: "hmclearn:  Poisson Regression Example"
-author:  "Samuel Thomas"
-date: "``r Sys.Date()`"
+author: "Samuel Thomas"
+date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{poisson_regression_hmclearn}
@@ -107,7 +107,7 @@ $$
 
 The user must define provide the design matrix directly for use in **hmclearn**.  Our first step is to load the data and store the design matrix $X$ and dependent variable vector $y$. 
 
-We load drug usage data (Agresti 2015) and create the design matrix $X$ and dependent vector $y$.  
+We load drug usage data and create the design matrix $X$ and dependent vector $y$.  This example also appears in Agresti (2015), and we compare results to his.  
 
 ```{r, echo=TRUE}
 data(Drugs)
@@ -178,12 +178,12 @@ beta.freq <- coef(f)
 diagplots(f_hmc, burnin=3000, actual.mu=beta.freq)
 ```
 
+# Source
+
+Data originally provided by Harry Khamis, Wright State University
+
 # References
 
 Agresti, A. (2015). *Foundations of linear and generalized linear models*. John Wiley & Sons.  ISBN: 978-1-118-73003-4
-
-Copyright 2015, Alan Agresti, Department of Statistics, University of Florida
-
-Heinze, G., & Schemper, M. (2002). *A solution to the problem of separation in logistic regression*. Statistics in medicine, 21(16), 2409-2419.
 
 

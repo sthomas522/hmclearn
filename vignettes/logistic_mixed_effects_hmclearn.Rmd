@@ -1,7 +1,7 @@
 ---
 title: "hmclearn package:  Logistic Mixed Effects Regression Example"
-author:  "Samuel Thomas"
-date: "``r Sys.Date()`"
+author: "Samuel Thomas"
+date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{logistic_mixed_effects_hmclearn}
@@ -411,7 +411,7 @@ freqvals <- c(as.numeric(fixef(f)),
 
 Histograms of the posterior distribution show that Bayesian parameter estimates align with frequentist estimates.  The *cols* parameter specifies the parameters to be displayed in *diagplots*, based on the order provided to the *hmc* function. 
 
-```{r, echo=TRUE}
+```{r, echo=TRUE, fig.width=6, fig.height=4}
 diagplots(f_hmc2, burnin=1000, 
           actual.mu=c(freqvals[1:ncol(X)], freqvals[length(freqvals)]), 
           cols=c(1:ncol(X), length(initvals)))
@@ -419,13 +419,16 @@ diagplots(f_hmc2, burnin=1000,
 ```
 
 
+# Source
+
+Steele, F., Diamond, I. And Amin, S. (1996). Immunization uptake in rural Bangladesh: a multilevel analysis. *Journal of the Royal Statistical Society*, Series A (159): 289-299.  
+
+\url{http://www.bristol.ac.uk/cmm/learning/mmsoftware/data-rev.html}
 
 # References
-
-Agresti, A. (2015). *Foundations of linear and generalized linear models*. John Wiley & Sons.  ISBN: 978-1-118-73003-4
-
-Steele, F., Diamond, I. And Amin, S. (1996). Immunization uptake in rural Bangladesh: a multilevel analysis. *Journal of the Royal Statistical Society*, Series A (159): 289-299.
 
 Bates, D., M\"{a}chler, M., Bolker, B., & Walker, S. (2015). Fitting linear mixed-effects models using lme4. *Journal of Statistical Software* 67(1)
 
 Bates, D., M\"{a}chler, M., & Bolker, B. (2014). mlmRev: Examples from multilevel modelling software review. *R package version, 1*.
+
+Agresti, A. (2015). *Foundations of linear and generalized linear models*. John Wiley & Sons.  ISBN: 978-1-118-73003-4

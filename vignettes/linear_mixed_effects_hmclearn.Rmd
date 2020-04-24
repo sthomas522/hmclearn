@@ -1,7 +1,7 @@
 ---
 title: "hmclearn package:  Linear Mixed Effects Regression Example"
 author:  "Samuel Thomas"
-date: "``r Sys.Date()`"
+date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{linear_mixed_effects_hmclearn}
@@ -36,7 +36,7 @@ library(hmclearn)
 
 The user must define provide the design matrix directly for use in **hmclearn**.  Our first step is to load the data and store the fixed effect design matrix $X$, random effects design matrix $Z$, and dependent variable vector $y$. 
 
-We load drug sleepstudy data (Agresti 2015, Belenky et. al. 2003) and create the design matrices $X$ and $Z$ and dependent vector $y$.  For this model, the random effects design matrix $Z$ is specified for a random intercept model.  
+We load drug sleepstudy data (Belenky et. al. 2003) and create the design matrices $X$ and $Z$ and dependent vector $y$.  For this model, the random effects design matrix $Z$ is specified for a random intercept model.  
 
 ```{r, echo=TRUE}
 library(lme4)
@@ -425,16 +425,18 @@ diagplots(f_hmc, burnin=trunc(N*.3),
           actual.mu=theta.freq, cols=c(1:2, 21:22))
 ```
 
+# Source
+
+Gregory Belenky, Nancy J. Wesensten, David R. Thorne, Maria L. Thomas, Helen C. Sing, Daniel P. Redmond, Michael B. Russo and Thomas J. Balkin (2003) Patterns of performance degradation and restoration during sleep restriction and subsequent recovery: a sleep dose-response study. *Journal of Sleep Research* 12, 1–12.
+
 # References
 
-Agresti, A. (2015). *Foundations of linear and generalized linear models*. John Wiley & Sons.  ISBN: 978-1-118-73003-4
+Bates, D., M\"{a}chler, M., Bolker, B., & Walker, S. (2015). Fitting linear mixed-effects models using lme4. *Journal of Statistical Software* 67(1)
 
 Betancourt, M., & Girolami, M. (2015). Hamiltonian Monte Carlo for hierarchical models. *Current trends in Bayesian methodology with applications*, 79(30), 2-4.
 
 Gelman, Andrew. (2006) "Prior distributions for variance parameters in hierarchical models (comment on article by Browne and Draper)." *Bayesian analysis* 1.3: 515-534.
 
-Gregory Belenky, Nancy J. Wesensten, David R. Thorne, Maria L. Thomas, Helen C. Sing, Daniel P. Redmond, Michael B. Russo and Thomas J. Balkin (2003) Patterns of performance degradation and restoration during sleep restriction and subsequent recovery: a sleep dose-response study. *Journal of Sleep Research* 12, 1–12.
-
-Bates, D., M\"{a}chler, M., Bolker, B., & Walker, S. (2015). Fitting linear mixed-effects models using lme4. *Journal of Statistical Software* 67(1)
-
 Chan, J. C. C., & Jeliazkov, I. (2009). MCMC estimation of restricted covariance matrices. *Journal of Computational and Graphical Statistics*, 18(2), 457-480.
+
+Agresti, A. (2015). *Foundations of linear and generalized linear models*. John Wiley & Sons.  ISBN: 978-1-118-73003-4

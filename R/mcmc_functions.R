@@ -139,9 +139,9 @@ mhpar <- function(paramlst, ...) {
 #' @param nu Single value or vector parameter passed to \code{qPROP} or \code{qFUN} for the proposal density
 #' @param varnames Optional vector of theta parameter names
 #' @param param List of additional parameters for \code{logPOSTERIOR} and \code{glogPOSTERIOR}
-#' @param ... Additional parameters for \code{logPOSTERIOR}
 #' @param chains Number of MCMC chains to run
-#' @param parallel Logical to set whether MCMC chains should be run in parallel
+#' @param parallel Logical to set whether multiple MCMC chains should be run in parallel
+#' @param ... Additional parameters for \code{logPOSTERIOR}
 #' @return Object of class \code{hmclearn}
 #'
 #' @section Elements for \code{hmclearn} objects:
@@ -690,9 +690,9 @@ hmcpar <- function(paramlst, ...) {
 #' @param constrain Optional vector of which parameters in \code{theta} accept positive values only.  Default is that all parameters accept all real numbers
 #' @param verbose Logical to determine whether to display the progress of the HMC algorithm
 #' @param param List of additional parameters for \code{logPOSTERIOR} and \code{glogPOSTERIOR}
-#' @param ... Additional parameters for \code{logPOSTERIOR}
 #' @param chains Number of MCMC chains to run
-#' @param parallel Logical to set whether MCMC chains should be run in parallel
+#' @param parallel Logical to set whether multiple MCMC chains should be run in parallel
+#' @param ... Additional parameters for \code{logPOSTERIOR}
 #' @return Object of class \code{hmclearn}
 #'
 #' @section Elements for \code{hmclearn} objects:
@@ -782,7 +782,7 @@ hmcpar <- function(paramlst, ...) {
 #' betavals <- c(0.5, -1, 2, -3)
 #' y <- X%*%betavals + rnorm(100, sd=.2)
 #'
-#' f1_hmc <- hmc(N = 500,
+#' fm1_hmc <- hmc(N = 500,
 #'           theta.init = c(rep(0, 4), 1),
 #'           epsilon = 0.01,
 #'           L = 10,
@@ -791,7 +791,7 @@ hmcpar <- function(paramlst, ...) {
 #'           varnames = c(paste0("beta", 0:3), "log_sigma_sq"),
 #'           param=list(y=y, X=X), parallel=FALSE, chains=1)
 #'
-#' summary(f1_hmc, burnin=100)
+#' summary(fm1_hmc, burnin=100)
 #'
 #'
 #' # poisson regression example
@@ -801,7 +801,7 @@ hmcpar <- function(paramlst, ...) {
 #' lmu <- X %*% betavals
 #' y <- sapply(exp(lmu), FUN = rpois, n=1)
 #'
-#' f2_hmc <- hmc(N = 500,
+#' fm2_hmc <- hmc(N = 500,
 #'           theta.init = rep(0, 3),
 #'           epsilon = 0.01,
 #'           L = 10,
@@ -811,9 +811,8 @@ hmcpar <- function(paramlst, ...) {
 #'           param = list(y=y, X=X),
 #'           parallel=FALSE, chains=1)
 #'
-#' summary(f2_hmc, burnin=100)
+#' summary(fm2_hmc, burnin=100)
 #'
-#' \donttest{
 #' # linear regression
 #' data(warpbreaks)
 #'
@@ -829,39 +828,33 @@ hmcpar <- function(paramlst, ...) {
 #'                logPOSTERIOR = linear_posterior,
 #'                glogPOSTERIOR = g_linear_posterior,
 #'                varnames = c(colnames(X), "log_sigma_sq"),
-#'                param=list(y=y, X=X), parallel = TRUE, chains = 2)
+#'                param=list(y=y, X=X), parallel = FALSE, chains = 1)
 #'
 #' fm3_hmc$accept / N
-#' summary(fm3_hmc)
-#'
-#' mcmc_trace(fm3_hmc, burnin=100)
-#' mcmc_hist(fm3_hmc, burnin=100)
-#'
+#' summary(fm3_hmc, burnin=200)
 #'
 #' # logistic regression
-#' library(mlbench)
-#' data(BreastCancer)
+#' data(PimaIndiansDiabetes)
 #'
-#' bc <- BreastCancer[complete.cases(BreastCancer), ]
-#' X <- model.matrix(Class ~ Cl.thickness + Cell.size + Cell.shape, data = bc)
-#' y <- ifelse(bc$Class == "benign", 0, 1)
-#' p <- ncol(X)
+#' y <- ifelse(PimaIndiansDiabetes$diabetes == 'pos', 1, 0)
+#' X <- cbind(1, as.matrix(PimaIndiansDiabetes[, -which(colnames(PimaIndiansDiabetes) == "diabetes")]))
+#' colnames(X)[1] <- "int"
+#'
 #' N <- 1e3
+#' eps_vals <- c(5e-2, 2e-3, 2e-4, 1e-3, 1e-3,
+#'               1e-4, 1e-3, 3e-2, 4e-4)
 #'
-#' set.seed(321)
-#' fm4_hmc <- hmc(N, theta.init = rep(0, p),
-#'                epsilon = 1e-1, L=20,
-#'                logPOSTERIOR = logistic_posterior,
-#'                glogPOSTERIOR = g_logistic_posterior,
-#'                randlength = TRUE,
-#'                varnames = colnames(X),
-#'                param=list(y=y, X=X), parallel = TRUE, chains=2)
+#' set.seed(412)
+#' fm4_hmc <- hmc(N = N, theta.init = rep(0, 9),
+#'              epsilon = eps_vals, L = 10,
+#'              logPOSTERIOR = logistic_posterior,
+#'              glogPOSTERIOR = g_logistic_posterior,
+#'              varnames = colnames(X),
+#'              param=list(y = y, X=X),
+#'              parallel=FALSE, chains=1)
 #'
 #' fm4_hmc$accept / N
-#'
-#' summary(fm4_hmc)
-#' mcmc_rhat(fm4_hmc)
-#' mcmc_rhat_hist(fm4_hmc)
+#' summary(fm4_hmc, burnin=200)
 #'
 #' # poisson regression
 #' library(carData)
@@ -874,19 +867,20 @@ hmcpar <- function(paramlst, ...) {
 #' y <- AMSsurvey$count
 #' p <- ncol(X)
 #'
-#' N <- 1e3
+#' N <- 2e3
 #'
-#' fm5_hmc <- hmc(N, theta.init = rep(0, p), epsilon = 2e-3, L = 20,
+#' eps_vals <- c(2.2e-3, 2e-3, 2e-3, 2e-3, 2e-3, 3e-3,
+#'               2e-3, 2e-3)
+#'
+#' fm5_hmc <- hmc(N, theta.init = rep(0, p),
+#'                epsilon = eps_vals, L = 20,
 #'                logPOSTERIOR = poisson_posterior,
 #'                glogPOSTERIOR=g_poisson_posterior,
 #'                varnames = colnames(X),
-#'                param=list(y = y, X=X), parallel=TRUE, chains=2)
+#'                param=list(y = y, X=X), parallel=FALSE, chains=1)
 #' fm5_hmc$accept / N
 #'
-#' summary(fm5_hmc)
-#'
-#' plot(fm5_hmc, burnin=100)
-#' }
+#' summary(fm5_hmc, burnin=400)
 #'
 #' @author Samuel Thomas \email{samthoma@@iu.edu}, Wanzhu Tu \email{wtu@iu.edu}
 #' @references \emph{HMC in R} paper
@@ -970,3 +964,27 @@ hmc <- function(N=10000, theta.init, epsilon=1e-2, L=10, logPOSTERIOR, glogPOSTE
 
   }
 }
+
+
+# # logistic regression
+# library(mlbench)
+# data(BreastCancer)
+#
+# bc <- BreastCancer[complete.cases(BreastCancer), ]
+# X <- model.matrix(Class ~ Cl.thickness + Cell.size + Cell.shape, data = bc)
+# y <- ifelse(bc$Class == "benign", 0, 1)
+# p <- ncol(X)
+# N <- 1e3
+#
+# set.seed(321)
+# fm4_hmc <- hmc(N, theta.init = rep(0, p),
+#                epsilon = 1e-1, L=20,
+#                logPOSTERIOR = logistic_posterior,
+#                glogPOSTERIOR = g_logistic_posterior,
+#                randlength = TRUE,
+#                varnames = colnames(X),
+#                param=list(y=y, X=X), parallel = TRUE, chains=2)
+#
+# fm4_hmc$accept / N
+#
+# summary(fm4_hmc)

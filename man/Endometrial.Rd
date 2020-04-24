@@ -14,7 +14,7 @@ A data frame with 79 rows and 4 variables:
 }
 }
 \source{
-\url{http://users.stat.ufl.edu/~aa/glm/data/Endometrial.dat}
+Heinze, G., & Schemper, M. (2002). \emph{A solution to the problem of separation in logistic regression}. Statistics in medicine, 21(16), 2409-2419.
 }
 \usage{
 Endometrial
@@ -23,10 +23,6 @@ Endometrial
 Data from a study about Endometrial Cancer
 }
 \references{
-Agresti, A. (2015). \emph{Foundations of linear and generalized linear models}. John Wiley & Sons.
-
-Copyright 2015, Alan Agresti, Department of Statistics, University of Florida
-
-Heinze, G., & Schemper, M. (2002). \emph{A solution to the problem of separation in logistic regression}. Statistics in medicine, 21(16), 2409-2419.
+Agresti, A. (2015). \emph{Foundations of linear and generalized linear models}. John Wiley & Sons.  \url{http://users.stat.ufl.edu/~aa/glm/data/Endometrial.dat}
 }
 \keyword{datasets}

@@ -1,7 +1,7 @@
 ---
 title: "hmclearn:  Logistic Regression Example"
 author: "Samuel Thomas"
-date: "``r Sys.Date()`"
+date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{logistic_regression_hmclearn}
@@ -96,7 +96,7 @@ $$
 
 The user must define provide the design matrix directly for use in **hmclearn**.  Our first step is to load the data and store the design matrix $X$ and dependent variable vector $y$. 
 
-Load Endometrial cancer data set (Agresti 2015) and create $X$ and $y$.  
+First, we load the Endometrial cancer data set (Heinze and Schember 2002) and create $X$ and $y$.  This example also appears in Agresti (2015), and we compare results to his.  
 
 ```{r, echo=TRUE}
 data(Endometrial)
@@ -168,12 +168,13 @@ beta.freq <- coef(f)
 diagplots(f_hmc, burnin=3000, actual.mu=beta.freq)
 ```
 
-# References
+# Source
 
-TODO: This example is also in Agresti, and we compare results to his.....
+Heinze, G., & Schemper, M. (2002). *A solution to the problem of separation in logistic regression*. Statistics in medicine, 21(16), 2409-2419.
+
+# Reference
 
 Agresti, A. (2015). *Foundations of linear and generalized linear models*. John Wiley & Sons.  ISBN: 978-1-118-73003-4
 
-Heinze, G., & Schemper, M. (2002). *A solution to the problem of separation in logistic regression*. Statistics in medicine, 21(16), 2409-2419.
 
 

@@ -1,6 +1,7 @@
 ---
 title: "hmclearn package:  Linear Regression Example"
 author: "Samuel Thomas"
+date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{linear_regression_hmclearn}
@@ -34,7 +35,7 @@ library(hmclearn)
 
 The user must define provide the design matrix directly for use in **hmclearn**.  Our first step is to load the data and store the design matrix $X$ and dependent variable vector $y$. 
 
-Load Scots Race data (Agresti 2015, Venables and Ripley 2002) and display the first few rows of the design matrix $X$.
+Load Scots Race data (Atkinson 1986, Venables and Ripley 2002) and display the first few rows of the design matrix $X$.  This example also appears in Agresti (2015), and we compare results to his.  
 
 ```{r, echo=TRUE}
 ScotsRaces <- MASS::hills
@@ -200,6 +201,10 @@ diagplots(f_hmc, actual.mu=theta.freq, burnin=2000)
 
 
 ```
+
+# Source
+
+A.C. Atkinson (1986) Comment: Aspects of diagnostic regression analysis. *Statistical Science* 1, 397–402.
 
 # References
 

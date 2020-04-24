@@ -92,7 +92,7 @@ test_that("paper examples", {
   library(lme4)
 
   # Gopher data:  Gdat dataframe
-  data(gopherdat2)
+  data(Gdat)
 
   ##########
   # block diagonal

@@ -17,7 +17,7 @@ A data frame with 30 rows and 7 variables:
 }
 }
 \source{
-\url{https://bbolker.github.io/mixedmodels-misc/ecostats_chap.html}
+Ozgul, A., Oli, M. K., Bolker, B. M., & Perez-Heydrich, C. (2009). \emph{Upper respiratory tract disease, force of infection, and effects on survival of gopher tortoises}. Ecological Applications, 19(3), 786–798
 }
 \usage{
 Gdat
@@ -26,8 +26,8 @@ Gdat
 A dataset containing the count of fresh gopher shells by area.
 }
 \references{
-Ozgul, A., Oli, M. K., Bolker, B. M., & Perez-Heydrich, C. (2009). \emph{Upper respiratory tract disease, force of infection, and effects on survival of gopher tortoises}. Ecological Applications, 19(3), 786–798
-
 Fox, G. A., Negrete-Yankelevich, S., & Sosa, V. J. (Eds.). (2015). \emph{Ecological statistics: contemporary theory and application}. Oxford University Press, USA.
+
+Bolker, Ben (2018) GLMM Worked Examples  \url{https://bbolker.github.io/mixedmodels-misc/ecostats_chap.html}
 }
 \keyword{datasets}

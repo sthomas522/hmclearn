@@ -170,4 +170,3 @@ diagplots.hmclearn <- function(object, burnin=NULL, plotfun=2, actual.mu=NULL, c
 
 
 
-
