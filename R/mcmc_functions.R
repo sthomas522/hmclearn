@@ -459,6 +459,8 @@ leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, Minv, co
 #'   }
 #' }
 #' @references Neal, Radford. 2011. \emph{MCMC Using Hamiltonian Dynamics.} In Handbook of Markov Chain Monte Carlo, edited by Steve Brooks, Andrew Gelman, Galin L. Jones, and Xiao-Li Meng, 116–62. Chapman; Hall/CRC.
+#' @references Betancourt, Michael. 2017.  \emph{A Conceptual Introduction to Hamiltonian Monte Carlo}
+#' @references Thomas, S., Tu, W. 2020. \emph{Hamiltonian Monte Carlo}. In Wiley StatsRef: Statistics Reference Online (eds N. Balakrishnan, T. Colton, B. Everitt, W. Piegorsch, F. Ruggeri and J.L. Teugels).
 #' @examples
 #' # Logistic regression example
 #' X <- cbind(1, seq(-100, 100, by=0.25))
@@ -747,9 +749,9 @@ hmcpar <- function(paramlst, ...) {
 #'
 #'
 #' @author Samuel Thomas \email{samthoma@@iu.edu}, Wanzhu Tu \email{wtu@iu.edu}
-#' @references \emph{HMC in R} paper
-#' @references Thomas, S., Li, X., and Tu, W.  2019.  \emph{Hamiltonian Monte Carlo}.  Wiley
 #' @references Neal, Radford. 2011. \emph{MCMC Using Hamiltonian Dynamics.} In Handbook of Markov Chain Monte Carlo, edited by Steve Brooks, Andrew Gelman, Galin L. Jones, and Xiao-Li Meng, 116–62. Chapman; Hall/CRC.
+#' @references Betancourt, Michael. 2017.  \emph{A Conceptual Introduction to Hamiltonian Monte Carlo}
+#' @references Thomas, S., Tu, W. 2020. \emph{Hamiltonian Monte Carlo}. In Wiley StatsRef: Statistics Reference Online (eds N. Balakrishnan, T. Colton, B. Everitt, W. Piegorsch, F. Ruggeri and J.L. Teugels).
 #' @keywords hamiltonian monte carlo
 #' @export
 hmc <- function(N=10000, theta.init, epsilon=1e-2, L=10, logPOSTERIOR, glogPOSTERIOR,

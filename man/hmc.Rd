@@ -188,11 +188,11 @@ summary(fm2_hmc, burnin=100)
 
 }
 \references{
-\emph{HMC in R} paper
-
-Thomas, S., Li, X., and Tu, W.  2019.  \emph{Hamiltonian Monte Carlo}.  Wiley
-
 Neal, Radford. 2011. \emph{MCMC Using Hamiltonian Dynamics.} In Handbook of Markov Chain Monte Carlo, edited by Steve Brooks, Andrew Gelman, Galin L. Jones, and Xiao-Li Meng, 116–62. Chapman; Hall/CRC.
+
+Betancourt, Michael. 2017.  \emph{A Conceptual Introduction to Hamiltonian Monte Carlo}
+
+Thomas, S., Tu, W. 2020. \emph{Hamiltonian Monte Carlo}. In Wiley StatsRef: Statistics Reference Online (eds N. Balakrishnan, T. Colton, B. Everitt, W. Piegorsch, F. Ruggeri and J.L. Teugels).
 }
 \author{
 Samuel Thomas \email{samthoma@iu.edu}, Wanzhu Tu \email{wtu@iu.edu}
