@@ -133,24 +133,6 @@ f1_mh <- mh(N = 3e3,
 
 summary(f1_mh, burnin=1000)
 
-# poisson regression example
-set.seed(7363)
-X <- cbind(1, matrix(rnorm(40), ncol=2))
-betavals <- c(0.8, -0.5, 1.1)
-lmu <- X \%*\% betavals
-y <- sapply(exp(lmu), FUN = rpois, n=1)
-
-f2_mh <- mh(N = 3e3,
-         theta.init = rep(0, 3),
-         nu = rep(0.01, 3),
-         qPROP = qprop,
-         qFUN = qfun,
-         logPOSTERIOR = poisson_posterior,
-         varnames = paste0("beta", 0:2),
-         param = list(y=y, X=X),
-         parallel=FALSE, chains=1)
-
-summary(f2_mh, burnin=1000)
 
 }
 \author{

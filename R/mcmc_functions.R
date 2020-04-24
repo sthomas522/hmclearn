@@ -224,24 +224,6 @@ mhpar <- function(paramlst, ...) {
 #'
 #' summary(f1_mh, burnin=1000)
 #'
-#' # poisson regression example
-#' set.seed(7363)
-#' X <- cbind(1, matrix(rnorm(40), ncol=2))
-#' betavals <- c(0.8, -0.5, 1.1)
-#' lmu <- X %*% betavals
-#' y <- sapply(exp(lmu), FUN = rpois, n=1)
-#'
-#' f2_mh <- mh(N = 3e3,
-#'          theta.init = rep(0, 3),
-#'          nu = rep(0.01, 3),
-#'          qPROP = qprop,
-#'          qFUN = qfun,
-#'          logPOSTERIOR = poisson_posterior,
-#'          varnames = paste0("beta", 0:2),
-#'          param = list(y=y, X=X),
-#'          parallel=FALSE, chains=1)
-#'
-#' summary(f2_mh, burnin=1000)
 #'
 #' @author Samuel Thomas \email{samthoma@@iu.edu}, Wanzhu Tu \email{wtu@iu.edu}
 #' @export
@@ -762,29 +744,6 @@ hmcpar <- function(paramlst, ...) {
 #'           parallel=FALSE, chains=1)
 #'
 #' summary(fm2_hmc, burnin=100)
-#'
-#' # logistic regression
-#' data("PimaIndiansDiabetes", package="mlbench")
-#'
-#' y <- ifelse(PimaIndiansDiabetes$diabetes == 'pos', 1, 0)
-#' X <- cbind(1, as.matrix(PimaIndiansDiabetes[, -which(colnames(PimaIndiansDiabetes) == "diabetes")]))
-#' colnames(X)[1] <- "int"
-#'
-#' N <- 1e3
-#' eps_vals <- c(5e-2, 2e-3, 2e-4, 1e-3, 1e-3,
-#'               1e-4, 1e-3, 3e-2, 4e-4)
-#'
-#' set.seed(412)
-#' fm3_hmc <- hmc(N = N, theta.init = rep(0, 9),
-#'              epsilon = eps_vals, L = 10,
-#'              logPOSTERIOR = logistic_posterior,
-#'              glogPOSTERIOR = g_logistic_posterior,
-#'              varnames = colnames(X),
-#'              param=list(y = y, X=X),
-#'              parallel=FALSE, chains=1)
-#'
-#' fm3_hmc$accept / N
-#' summary(fm3_hmc, burnin=200)
 #'
 #'
 #' @author Samuel Thomas \email{samthoma@@iu.edu}, Wanzhu Tu \email{wtu@iu.edu}

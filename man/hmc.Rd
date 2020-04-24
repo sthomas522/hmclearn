@@ -185,29 +185,6 @@ fm2_hmc <- hmc(N = 500,
 
 summary(fm2_hmc, burnin=100)
 
-# logistic regression
-data("PimaIndiansDiabetes", package="mlbench")
-
-y <- ifelse(PimaIndiansDiabetes$diabetes == 'pos', 1, 0)
-X <- cbind(1, as.matrix(PimaIndiansDiabetes[, -which(colnames(PimaIndiansDiabetes) == "diabetes")]))
-colnames(X)[1] <- "int"
-
-N <- 1e3
-eps_vals <- c(5e-2, 2e-3, 2e-4, 1e-3, 1e-3,
-              1e-4, 1e-3, 3e-2, 4e-4)
-
-set.seed(412)
-fm3_hmc <- hmc(N = N, theta.init = rep(0, 9),
-             epsilon = eps_vals, L = 10,
-             logPOSTERIOR = logistic_posterior,
-             glogPOSTERIOR = g_logistic_posterior,
-             varnames = colnames(X),
-             param=list(y = y, X=X),
-             parallel=FALSE, chains=1)
-
-fm3_hmc$accept / N
-summary(fm3_hmc, burnin=200)
-
 
 }
 \references{
