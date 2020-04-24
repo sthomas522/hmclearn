@@ -4,13 +4,11 @@ We developed the R package **hmclearn** to provide users with a framework to lea
 
 While the core functions are included for both **hmc** and **mh** algorithms, users must provide their own functions for the log posterior and, for HMC, the gradient of the log posterior.  Default values are provided for the tuning parameters.  However, users will likely need to adjust the parameters for their particular applications.  
 
-These functions were developed as part of my work learning advanced MCMC methods.  I hope this work helps those who are interested in learning these powerful methods for statistical analysis.  
-
 # Installation
 
-The most recent **hmclearn** release can be installed from CRAN via
+The most recent **hmclearn** package can be installed from github via
 
 ```r
-install.packages("hmclearn")
+devtools::install_github("sthomas522/hmclearn")
 ```
 

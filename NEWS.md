@@ -1,3 +1,3 @@
-# hmclearn 0.0.1
+# hmclearn 0.0.2
 
-Initial CRAN release
+In development
