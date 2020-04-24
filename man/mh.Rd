@@ -122,7 +122,7 @@ X <- cbind(1, matrix(rnorm(300), ncol=3))
 betavals <- c(0.5, -1, 2, -3)
 y <- X\%*\%betavals + rnorm(100, sd=.2)
 
-f1_mh <- mh(N = 2000,
+f1_mh <- mh(N = 5e3,
          theta.init = c(rep(0, 4), 1),
          nu <- c(rep(0.001, 4), 0.1),
          qPROP = qprop,
@@ -131,7 +131,7 @@ f1_mh <- mh(N = 2000,
          varnames = c(paste0("beta", 0:3), "log_sigma_sq"),
          param=list(y=y, X=X), parallel=FALSE, chains=1)
 
-summary(f1_mh)
+summary(f1_mh, burnin=1000)
 
 # poisson regression example
 set.seed(7363)
@@ -140,7 +140,7 @@ betavals <- c(0.8, -0.5, 1.1)
 lmu <- X \%*\% betavals
 y <- sapply(exp(lmu), FUN = rpois, n=1)
 
-f2_mh <- mh(N = 1000,
+f2_mh <- mh(N = 5e3,
          theta.init = rep(0, 3),
          nu = rep(0.01, 3),
          qPROP = qprop,
@@ -150,57 +150,7 @@ f2_mh <- mh(N = 1000,
          param = list(y=y, X=X),
          parallel=FALSE, chains=1)
 
-summary(f2_mh)
-
-\donttest{
-# linear regression
-data(warpbreaks)
-
-X <- model.matrix(breaks ~ wool*tension, data=warpbreaks)
-y <- warpbreaks$breaks
-
-Nmh <- 1e5
-nuval <- c(rep(4, 6), 1e-1)
-f3_mh <- mh(Nmh, theta.init = c(rep(0, 6), 1), nu=nuval,
-             qPROP = qprop, qFUN = qfun,
-             logPOSTERIOR = linear_posterior,
-             varnames = c(colnames(X), "log_sigma_sq"),
-             param=list(y=y, X=X), parallel= TRUE, chains=2)
-
-f3_mh$accept / Nmh
-
-summary(f3_mh, burnin=1000)
-mcmc_trace(f3_mh, burnin=1000)
-mcmc_hist(f3_mh, burnin=1000)
-
-# poisson regression
-library(carData)
-data(AMSsurvey)
-
-# design matrix
-X <- model.matrix(count ~ type + sex + citizen, data=AMSsurvey)
-
-# independent variable is count data
-y <- AMSsurvey$count
-p <- ncol(X)
-
-Nmh <- 5e4
-
-nuval <- c(rep(1, p-1), 1e-1)
-
-f4_mh <- mh(Nmh, theta.init =rep(0, p), nu=1e-3,
-             qPROP = qprop, qFUN = qfun,
-             logPOSTERIOR = poisson_posterior,
-             varnames = colnames(X),
-             param=list(y=y, X=X))
-
-f4_mh$accept / Nmh
-
-summary(f4_mh)
-
-mcmc_trace(f4_mh, burnin=1000)
-mcmc_dens(f4_mh, burnin=1000)
-}
+summary(f2_mh, burnin=1000)
 
 }
 \author{

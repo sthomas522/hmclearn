@@ -5,23 +5,24 @@ test_that("mh testing", {
   betavals <- c(0.5, -1, 2, -3)
   y <- X%*%betavals + rnorm(100, sd=.2)
 
-  f1 <- mh(N = 2000,
+  f1 <- mh(N = 5e3,
            theta.init = c(rep(0, 4), 1),
            nu <- c(rep(0.001, 4), 0.1),
            qPROP = qprop,
            qFUN = qfun,
            logPOSTERIOR = linear_posterior,
            varnames = c(paste0("beta", 0:3), "log_sigma_sq"),
-           param=list(y=y, X=X), parallel=FALSE, chains=1)
+           param=list(y=y, X=X), parallel=FALSE, chains=2)
 
-  medparam1 <- as.vector(summary(f1)[, 3])
+  medparam1 <- as.vector(summary(f1, burnin=1000)[, 3])
 
-  expect_equal(round(medparam1, 7),
-               c(0.5262811,
-                 -0.9978062,
-                 2.0070419,
-                 -2.9620583,
-                 -2.9369102))
+  expect_equal(round(medparam1, 6),
+               c(0.535630,
+                 -1.008264,
+                 2.016371,
+                 -2.981911,
+                 -3.057343))
+
 
   # Logistic regression example
   X <- cbind(1, seq(-100, 100, by=0.25))
@@ -42,13 +43,12 @@ test_that("mh testing", {
             logPOSTERIOR = logistic_posterior,
             varnames = paste0("beta", 0:1),
             param = list(y=y, X=X),
-            parallel=FALSE, chains=1)
+            parallel=FALSE, chains=2)
 
-  medparam2 <- as.vector(summary(f2, burnin=500)[, 3])
-  medparam2
+  medparam2 <- as.vector(summary(f2, burnin=200)[, 3])
 
-  expect_equal(round(medparam2, 7),
-               c(-0.8716308, 0.1875842))
+  expect_equal(round(medparam2, 6),
+               c(-0.872098, 0.188425))
 
   # poisson regression example
   set.seed(7363)
@@ -57,7 +57,7 @@ test_that("mh testing", {
   lmu <- X %*% betavals
   y <- sapply(exp(lmu), FUN = rpois, n=1)
 
-  f3 <- mh(N = 2000,
+  f3 <- mh(N = 5e3,
             theta.init = rep(0, 3),
             nu = rep(0.01, 3),
             qPROP = qprop,
@@ -65,13 +65,12 @@ test_that("mh testing", {
             logPOSTERIOR = poisson_posterior,
             varnames = paste0("beta", 0:2),
             param = list(y=y, X=X),
-            parallel=FALSE, chains=1)
+            parallel=FALSE, chains=2)
 
-  medparam3 <- as.vector(summary(f3, burnin=500)[, 3])
-  medparam3
+  medparam3 <- as.vector(summary(f3, burnin=1000)[, 3])
 
-  expect_equal(round(medparam3, 7),
-               c(0.8487477, -0.5099939, 1.1685409))
+  expect_equal(round(medparam3, 6),
+               c(0.824951, -0.515598, 1.183672))
 
 })
 

@@ -107,7 +107,7 @@ test_that("hmc testing", {
   expect_equal(p4_hmc, test4b)
 
   # logistic regression
-  data("PimaIndiansDiabetes")
+  data("PimaIndiansDiabetes", package = "mlbench")
 
   y <- ifelse(PimaIndiansDiabetes$diabetes == 'pos', 1, 0)
   X <- cbind(1, as.matrix(PimaIndiansDiabetes[, -which(colnames(PimaIndiansDiabetes) == "diabetes")]))
@@ -141,8 +141,7 @@ test_that("hmc testing", {
   expect_equal(p5_hmc, test5b)
 
   # poisson regression
-  library(carData)
-  data(AMSsurvey)
+  data("AMSsurvey", package="carData")
 
   # design matrix
   X <- model.matrix(count ~ type + sex + citizen, data=AMSsurvey)

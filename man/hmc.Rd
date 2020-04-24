@@ -185,28 +185,8 @@ fm2_hmc <- hmc(N = 500,
 
 summary(fm2_hmc, burnin=100)
 
-# linear regression
-data(warpbreaks)
-
-X <- model.matrix(breaks ~ wool*tension, data=warpbreaks)
-y <- warpbreaks$breaks
-
-N <- 1e3
-eps_vals <- c(rep(2e-1, 6), 2e-2)
-
-set.seed(143)
-fm3_hmc <- hmc(N, theta.init = c(rep(0, 6), 1),
-               epsilon = eps_vals, L = 20,
-               logPOSTERIOR = linear_posterior,
-               glogPOSTERIOR = g_linear_posterior,
-               varnames = c(colnames(X), "log_sigma_sq"),
-               param=list(y=y, X=X), parallel = FALSE, chains = 1)
-
-fm3_hmc$accept / N
-summary(fm3_hmc, burnin=200)
-
 # logistic regression
-data(PimaIndiansDiabetes)
+data("PimaIndiansDiabetes", package="mlbench")
 
 y <- ifelse(PimaIndiansDiabetes$diabetes == 'pos', 1, 0)
 X <- cbind(1, as.matrix(PimaIndiansDiabetes[, -which(colnames(PimaIndiansDiabetes) == "diabetes")]))
@@ -217,7 +197,7 @@ eps_vals <- c(5e-2, 2e-3, 2e-4, 1e-3, 1e-3,
               1e-4, 1e-3, 3e-2, 4e-4)
 
 set.seed(412)
-fm4_hmc <- hmc(N = N, theta.init = rep(0, 9),
+fm3_hmc <- hmc(N = N, theta.init = rep(0, 9),
              epsilon = eps_vals, L = 10,
              logPOSTERIOR = logistic_posterior,
              glogPOSTERIOR = g_logistic_posterior,
@@ -225,34 +205,9 @@ fm4_hmc <- hmc(N = N, theta.init = rep(0, 9),
              param=list(y = y, X=X),
              parallel=FALSE, chains=1)
 
-fm4_hmc$accept / N
-summary(fm4_hmc, burnin=200)
+fm3_hmc$accept / N
+summary(fm3_hmc, burnin=200)
 
-# poisson regression
-library(carData)
-data(AMSsurvey)
-
-# design matrix
-X <- model.matrix(count ~ type + sex + citizen, data=AMSsurvey)
-
-# independent variable is count data
-y <- AMSsurvey$count
-p <- ncol(X)
-
-N <- 2e3
-
-eps_vals <- c(2.2e-3, 2e-3, 2e-3, 2e-3, 2e-3, 3e-3,
-              2e-3, 2e-3)
-
-fm5_hmc <- hmc(N, theta.init = rep(0, p),
-               epsilon = eps_vals, L = 20,
-               logPOSTERIOR = poisson_posterior,
-               glogPOSTERIOR=g_poisson_posterior,
-               varnames = colnames(X),
-               param=list(y = y, X=X), parallel=FALSE, chains=1)
-fm5_hmc$accept / N
-
-summary(fm5_hmc, burnin=400)
 
 }
 \references{
