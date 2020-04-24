@@ -12,9 +12,9 @@
 #'   \item{density}{estimated tortoise density}
 #'   \item{prev}{Seroprevalence}
 #' }
-#' @references Ozgul, A., Oli, M. K., Bolker, B. M., & Perez-Heydrich, C. (2009). \emph{Upper respiratory tract disease, force of infection, and effects on survival of gopher tortoises}. Ecological Applications, 19(3), 786–798
 #' @references Fox, G. A., Negrete-Yankelevich, S., & Sosa, V. J. (Eds.). (2015). \emph{Ecological statistics: contemporary theory and application}. Oxford University Press, USA.
-#' @source \url{https://bbolker.github.io/mixedmodels-misc/ecostats_chap.html}
+#' @source Ozgul, A., Oli, M. K., Bolker, B. M., & Perez-Heydrich, C. (2009). \emph{Upper respiratory tract disease, force of infection, and effects on survival of gopher tortoises}. Ecological Applications, 19(3), 786–798
+#' @references Bolker, Ben (2018) GLMM Worked Examples  \url{https://bbolker.github.io/mixedmodels-misc/ecostats_chap.html}
 "Gdat"
 
 #' Endometrial Cancer Dataset
@@ -28,10 +28,8 @@
 #'   \item{EH}{Endometrium height}
 #'   \item{HG}{histology of patient (0=Low, 1=High)}
 #' }
-#' @references Agresti, A. (2015). \emph{Foundations of linear and generalized linear models}. John Wiley & Sons.
-#' @references Copyright 2015, Alan Agresti, Department of Statistics, University of Florida
-#' @references Heinze, G., & Schemper, M. (2002). \emph{A solution to the problem of separation in logistic regression}. Statistics in medicine, 21(16), 2409-2419.
-#' @source \url{http://users.stat.ufl.edu/~aa/glm/data/Endometrial.dat}
+#' @references Agresti, A. (2015). \emph{Foundations of linear and generalized linear models}. John Wiley & Sons.  \url{http://users.stat.ufl.edu/~aa/glm/data/Endometrial.dat}
+#' @source Heinze, G., & Schemper, M. (2002). \emph{A solution to the problem of separation in logistic regression}. Statistics in medicine, 21(16), 2409-2419.
 "Endometrial"
 
 #' Student Drug Usage Dataset
@@ -45,10 +43,8 @@
 #'   \item{M}{Marijuana usage (Yes/No)}
 #'   \item{count}{number of responses}
 #' }
-#' @references Agresti, A. (2015). \emph{Foundations of linear and generalized linear models}. John Wiley & Sons.
-#' @references Copyright 2015, Alan Agresti, Department of Statistics, University of Florida
-#' @references Data originally provided by Harry Khamis, Wright State University
-#' @source \url{http://users.stat.ufl.edu/~aa/glm/data/Drugs.dat}
+#' @references Agresti, A. (2015). \emph{Foundations of linear and generalized linear models}. John Wiley & Sons.  \url{http://users.stat.ufl.edu/~aa/glm/data/Drugs.dat}
+#' @source Data originally provided by Harry Khamis, Wright State University
 "Drugs"
 
 

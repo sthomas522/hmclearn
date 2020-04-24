@@ -37,7 +37,7 @@ mh(
 
 \item{chains}{Number of MCMC chains to run}
 
-\item{parallel}{Logical to set whether MCMC chains should be run in parallel}
+\item{parallel}{Logical to set whether multiple MCMC chains should be run in parallel}
 
 \item{...}{Additional parameters for \code{logPOSTERIOR}}
 }
@@ -116,56 +116,23 @@ All parameters specified within the list \code{param} are passed to these the po
 }
 
 \examples{
-\dontrun{
-# linear regression
-data(warpbreaks)
+# Linear regression example
+set.seed(521)
+X <- cbind(1, matrix(rnorm(300), ncol=3))
+betavals <- c(0.5, -1, 2, -3)
+y <- X\%*\%betavals + rnorm(100, sd=.2)
 
-X <- model.matrix(breaks ~ wool*tension, data=warpbreaks)
-y <- warpbreaks$breaks
+f1_mh <- mh(N = 3e3,
+         theta.init = c(rep(0, 4), 1),
+         nu <- c(rep(0.001, 4), 0.1),
+         qPROP = qprop,
+         qFUN = qfun,
+         logPOSTERIOR = linear_posterior,
+         varnames = c(paste0("beta", 0:3), "log_sigma_sq"),
+         param=list(y=y, X=X), parallel=FALSE, chains=1)
 
-Nmh <- 1e5
-nuval <- c(rep(4, 6), 1e-1)
-fm1_mh <- mh(Nmh, theta.init = c(rep(0, 6), 1), nu=nuval,
-             qPROP = qprop, qFUN = qfun,
-             logPOSTERIOR = linear_posterior,
-             varnames = c(colnames(X), "log_sigma_sq"),
-             param=list(y=y, X=X), parallel= TRUE, chains=2)
+summary(f1_mh, burnin=1000)
 
-fm1_mh$accept / Nmh
-
-summary(fm1_mh, burnin=1000)
-mcmc_trace(fm1_mh, burnin=1000)
-mcmc_hist(fm1_mh, burnin=1000)
-
-# poisson regression
-
-library(carData)
-data(AMSsurvey)
-
-# design matrix
-X <- model.matrix(count ~ type + sex + citizen, data=AMSsurvey)
-
-# independent variable is count data
-y <- AMSsurvey$count
-p <- ncol(X)
-
-Nmh <- 5e4
-
-nuval <- c(rep(1, p-1), 1e-1)
-
-fm3_mh <- mh(Nmh, theta.init =rep(0, p), nu=1e-3,
-             qPROP = qprop, qFUN = qfun,
-             logPOSTERIOR = poisson_posterior,
-             varnames = colnames(X),
-             param=list(y=y, X=X))
-
-fm3_mh$accept / Nmh
-
-summary(fm3_mh)
-
-mcmc_trace(fm3_mh, burnin=1000)
-mcmc_dens(fm3_mh, burnin=1000)
-}
 
 }
 \author{

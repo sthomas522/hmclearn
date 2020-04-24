@@ -50,6 +50,64 @@ List for \code{hmc}
 \description{
 This is the basic computing function for HMC and should not be called directly except by experienced users.
 }
+\section{Elements for \code{hmclearn} objects}{
+
+\describe{
+  \item{\code{N}}{
+  Number of MCMC samples
+  }
+  \item{\code{theta}}{
+  Nested list of length \code{N} of the sampled values of \code{theta} for each chain
+  }
+  \item{\code{thetaCombined}}{
+  List of dataframes containing sampled values, one for each chain
+  }
+  \item{\code{r}}{
+  List of length \code{N} of the sampled momenta
+  }
+  \item{\code{theta.all}}{
+  Nested list of all parameter values of \code{theta} sampled prior to accept/reject step for each
+  }
+  \item{\code{r.all}}{
+  List of all values of the momenta \code{r} sampled prior to accept/reject
+  }
+  \item{\code{accept}}{
+  Number of accepted proposals.  The ratio \code{accept} / \code{N} is the acceptance rate
+  }
+  \item{\code{accept_v}}{
+  Vector of length \code{N} indicating which samples were accepted
+  }
+  \item{\code{M}}{
+  Mass matrix used in the HMC algorithm
+  }
+  \item{\code{algorithm}}{
+  \code{HMC} for Hamiltonian Monte Carlo
+  }
+}
+}
+
+\examples{
+# Logistic regression example
+X <- cbind(1, seq(-100, 100, by=0.25))
+betavals <- c(-0.9, 0.2)
+lodds <- X \%*\% betavals
+prob1 <- as.numeric(1 / (1 + exp(-lodds)))
+
+set.seed(9874)
+y <- sapply(prob1, function(xx) {
+  sample(c(0, 1), 1, prob=c(1-xx, xx))
+})
+
+f1 <- hmc.fit(N = 500,
+          theta.init = rep(0, 2),
+          epsilon = c(0.1, 0.002),
+          L = 10,
+          logPOSTERIOR = logistic_posterior,
+          glogPOSTERIOR = g_logistic_posterior,
+          y=y, X=X)
+
+f1$accept / f1$N
+}
 \references{
 Neal, Radford. 2011. \emph{MCMC Using Hamiltonian Dynamics.} In Handbook of Markov Chain Monte Carlo, edited by Steve Brooks, Andrew Gelman, Galin L. Jones, and Xiao-Li Meng, 116–62. Chapman; Hall/CRC.
 }

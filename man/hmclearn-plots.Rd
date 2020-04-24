@@ -115,6 +115,9 @@ mcmc_violin(object, ...)
 
 \item{lagmax}{maximum lag to extract for determining effective sample sizes}
 }
+\value{
+These functions call various plotting functions from the \code{bayesplot} package, which returns a list including \code{ggplot2} objects.
+}
 \description{
 Plots of Rhat statistics, ratios of effective sample size to total sample
 size, and autocorrelation of MCMC draws.
@@ -203,6 +206,30 @@ size, and autocorrelation of MCMC draws.
 }
 }
 
+\examples{
+# poisson regression example
+set.seed(7363)
+X <- cbind(1, matrix(rnorm(40), ncol=2))
+betavals <- c(0.8, -0.5, 1.1)
+lmu <- X \%*\% betavals
+y <- sapply(exp(lmu), FUN = rpois, n=1)
+
+f <- hmc(N = 1000,
+          theta.init = rep(0, 3),
+          epsilon = c(0.03, 0.02, 0.015),
+          L = 10,
+          logPOSTERIOR = poisson_posterior,
+          glogPOSTERIOR = g_poisson_posterior,
+          varnames = paste0("beta", 0:2),
+          param = list(y=y, X=X),
+          parallel=FALSE, chains=2)
+
+mcmc_trace(f, burnin=100)
+mcmc_hist(f, burnin=100)
+mcmc_intervals(f, burnin=100)
+mcmc_rhat(f, burnin=100)
+mcmc_violin(f, burnin=100)
+}
 \references{
 Gabry, Jonah and Mahr, Tristan (2019).  \emph{bayesplot:  Plotting for Bayesian Models}.  \url{https://mc-stan.org/bayesplot}
 

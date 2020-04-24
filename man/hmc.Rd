@@ -49,7 +49,7 @@ hmc(
 
 \item{chains}{Number of MCMC chains to run}
 
-\item{parallel}{Logical to set whether MCMC chains should be run in parallel}
+\item{parallel}{Logical to set whether multiple MCMC chains should be run in parallel}
 
 \item{...}{Additional parameters for \code{logPOSTERIOR}}
 }
@@ -92,6 +92,9 @@ Leapfrog algorithm.
   }
   \item{\code{M}}{
   Mass matrix used in the HMC algorithm
+  }
+  \item{\code{algorithm}}{
+  \code{HMC} for Hamiltonian Monte Carlo
   }
   \item{\code{varnames}}{
   Optional vector of parameter names
@@ -145,79 +148,43 @@ Leapfrog algorithm.
 }
 
 \examples{
-\dontrun{
-# linear regression
-data(warpbreaks)
+# Linear regression example
+set.seed(521)
+X <- cbind(1, matrix(rnorm(300), ncol=3))
+betavals <- c(0.5, -1, 2, -3)
+y <- X\%*\%betavals + rnorm(100, sd=.2)
 
-X <- model.matrix(breaks ~ wool*tension, data=warpbreaks)
-y <- warpbreaks$breaks
+fm1_hmc <- hmc(N = 500,
+          theta.init = c(rep(0, 4), 1),
+          epsilon = 0.01,
+          L = 10,
+          logPOSTERIOR = linear_posterior,
+          glogPOSTERIOR = g_linear_posterior,
+          varnames = c(paste0("beta", 0:3), "log_sigma_sq"),
+          param=list(y=y, X=X), parallel=FALSE, chains=1)
 
-N <- 1e4
-eps_vals <- c(rep(2e-1, 6), 2e-2)
+summary(fm1_hmc, burnin=100)
 
-set.seed(143)
-fm1_hmc <- hmc(N, theta.init = c(rep(0, 6), 1),
-               epsilon = eps_vals, L = 20,
-               logPOSTERIOR = linear_posterior,
-               glogPOSTERIOR = g_linear_posterior,
-               varnames = c(colnames(X), "log_sigma_sq"),
-               param=list(y=y, X=X), parallel = TRUE, chains = 2)
 
-fm1_hmc$accept / N
-summary(fm1_hmc)
+# poisson regression example
+set.seed(7363)
+X <- cbind(1, matrix(rnorm(40), ncol=2))
+betavals <- c(0.8, -0.5, 1.1)
+lmu <- X \%*\% betavals
+y <- sapply(exp(lmu), FUN = rpois, n=1)
 
-mcmc_trace(fm1_hmc, burnin=1000)
-mcmc_hist(fm1_hmc, burnin=1000)
+fm2_hmc <- hmc(N = 500,
+          theta.init = rep(0, 3),
+          epsilon = 0.01,
+          L = 10,
+          logPOSTERIOR = poisson_posterior,
+          glogPOSTERIOR = g_poisson_posterior,
+          varnames = paste0("beta", 0:2),
+          param = list(y=y, X=X),
+          parallel=FALSE, chains=1)
 
-# logistic regression
-library(mlbench)
-data(BreastCancer)
+summary(fm2_hmc, burnin=100)
 
-bc <- BreastCancer[complete.cases(BreastCancer), ]
-X <- model.matrix(Class ~ Cl.thickness + Cell.size + Cell.shape, data = bc)
-y <- ifelse(bc$Class == "benign", 0, 1)
-p <- ncol(X)
-N <- 1e4
-
-set.seed(321)
-fm2_hmc <- hmc(N, theta.init = rep(0, p),
-               epsilon = 1e-1, L=20,
-               logPOSTERIOR = logistic_posterior,
-               glogPOSTERIOR = g_logistic_posterior,
-               randlength = TRUE,
-               varnames = colnames(X),
-               param=list(y=y, X=X), parallel = TRUE, chains=2)
-
-fm2_hmc$accept / N
-
-summary(fm2_hmc)
-mcmc_rhat(fm2_hmc)
-mcmc_rhat_hist(fm2_hmc)
-
-# poisson regression
-library(carData)
-data(AMSsurvey)
-
-# design matrix
-X <- model.matrix(count ~ type + sex + citizen, data=AMSsurvey)
-
-# independent variable is count data
-y <- AMSsurvey$count
-p <- ncol(X)
-
-N <- 1e4
-
-fm3_hmc <- hmc(N, theta.init = rep(0, p), epsilon = 2e-3, L = 20,
-               logPOSTERIOR = poisson_posterior,
-               glogPOSTERIOR=g_poisson_posterior,
-               varnames = colnames(X),
-               param=list(y = y, X=X), parallel=TRUE, chains=2)
-fm3_hmc$accept / N
-
-summary(fm3_hmc)
-
-plot(fm3_hmc, burnin=1000)
-}
 
 }
 \references{

@@ -16,11 +16,31 @@
 \item{...}{currently unused}
 }
 \value{
-numeric vector of effective sample sizes for each parameter
+Numeric vector with effective sample sizes for each parameter in the model
 }
 \description{
 Calculates an estimate of the adjusted MCMC sample size per parameter
 adjusted for autocorrelation.
+}
+\examples{
+# poisson regression example
+set.seed(7363)
+X <- cbind(1, matrix(rnorm(40), ncol=2))
+betavals <- c(0.8, -0.5, 1.1)
+lmu <- X \%*\% betavals
+y <- sapply(exp(lmu), FUN = rpois, n=1)
+
+f <- hmc(N = 1000,
+          theta.init = rep(0, 3),
+          epsilon = c(0.03, 0.02, 0.015),
+          L = 10,
+          logPOSTERIOR = poisson_posterior,
+          glogPOSTERIOR = g_poisson_posterior,
+          varnames = paste0("beta", 0:2),
+          param = list(y=y, X=X),
+          parallel=FALSE, chains=2)
+
+neff(f, burnin=100)
 }
 \references{
 Gelman, A., et. al. (2013) \emph{Bayesian Data Analysis}.  Chapman and Hall/CRC.  Section 11.5

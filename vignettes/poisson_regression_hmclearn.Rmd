@@ -1,0 +1,189 @@
+---
+title: "hmclearn:  Poisson Regression Example"
+author: "Samuel Thomas"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{poisson_regression_hmclearn}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Introduction
+
+This vignette demonstrates fitting a Poisson regression model via Hamiltonian Monte Carlo (HMC) using the **hmclearn** package. 
+
+```{r setup}
+library(hmclearn)
+```
+
+# GLM - Poisson Regression
+
+For a count response, we let
+
+$$
+p(y; \mu) = \frac{e^{-\mu}\mu^y}{y!}
+$$
+
+with a log-link function
+
+$$
+\begin{aligned}
+\mu &:= E(Y | x) = e^{X\beta} \\
+\log \mu &= X\beta.
+\end{aligned}
+$$
+
+Next, we develop the likelihood
+
+$$
+\begin{aligned}
+L(\mu; y) &= \prod_{i=1}^n \frac{e^{-\mu_i}\mu_i^{y_i}}{y_i!} \\
+L(\beta; y, X) &= \prod_{i=1}^n \frac{e^{-e^{X_i\beta}}e^{y_iX_i\beta}}{y_i!} \\
+\end{aligned}
+$$
+
+with log-likelihood
+
+$$
+\begin{aligned}
+l(\beta; y, X) &= \sum_{i=1}^n -e^{X_i\beta} + y_i X_i \beta - \log y_i! \\
+&\propto \sum_{i=1}^n -e^{X_i\beta} + y_i X_i \beta.
+\end{aligned}
+$$
+
+We set a multivariate Normal prior for $\beta$
+
+$$
+\begin{aligned}
+\beta &\sim N(0, \Sigma_\beta) \\
+&\sim N(0, BI)
+\end{aligned}
+$$
+
+
+with pdf
+
+$$
+\begin{aligned}
+p(\beta) &= \frac{1}{\sqrt{\lvert 2\pi \Sigma_\beta \rvert }}e^{-\frac{1}{2}\beta^T \Sigma_\beta^{-1}\beta} \\
+\log p(\beta) &= -\frac{1}{2}\log(2\pi \lvert \Sigma_\beta \rvert) - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta \\
+&\propto -\frac{1}{2}\log \lvert\Sigma_\beta\rvert - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta.
+\end{aligned}
+$$
+
+Let $B = 1e3$ for instance, as a relatively uninformative prior.
+
+Next, we derive the log posterior.  The log posterior is the sum of the log likelihood and the log of the prior for $\beta$.  
+
+$$
+\begin{aligned}
+p(\beta | X, y) &\propto p(y | X, \beta)  p(\beta) \\
+\log p(\beta | X, y) & \propto \log p(y | X, \beta) + \log p(\beta) \\
+&\propto \sum_{i=1}^n \left( -e^{X_i\beta} + y_i X_i \beta\right) -\frac{1}{2}\log \lvert\Sigma_\beta\rvert - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta \\
+&\propto \sum_{i=1}^n \left( -e^{X_i\beta} + y_i X_i \beta\right) - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta
+\end{aligned}
+$$
+
+
+We need to derive the gradient of the log posterior for the leapfrog function in HMC.  
+
+$$
+\begin{aligned}
+\log p(\beta | X, y) & \propto \log p(y | X, \beta) + \log p(\beta) \\
+&\propto \sum_{i=1}^n \left( -e^{X_i\beta} + y_i X_i \beta\right) - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta \\
+\frac{\partial}{\partial \beta}\log p(\beta|X, y) &\propto \sum_{i=1}^n\left( -e^{X_i\beta}X_i + y_iX_i\right) - \Sigma_\beta^{-1} \beta
+\end{aligned}
+$$
+
+# Poisson Regression Example Data
+
+The user must define provide the design matrix directly for use in **hmclearn**.  Our first step is to load the data and store the design matrix $X$ and dependent variable vector $y$. 
+
+We load drug usage data and create the design matrix $X$ and dependent vector $y$.  This example also appears in Agresti (2015), and we compare results to his.  
+
+```{r, echo=TRUE}
+data(Drugs)
+
+# design matrix
+X <- model.matrix(count ~ A + C + M + A:C + A:M + C:M , data=Drugs)
+X <- X[, 1:ncol(X)]
+
+# independent variable is count data
+y <- Drugs$count
+
+```
+
+To compare results, we first fit a standard linear model using the frequentist function *glm*.  
+
+```{r, echo=TRUE}
+# matrix representation
+f <- glm(y ~ X-1, family=poisson(link=log))
+summary(f)
+
+```
+
+# HMC poisson regression
+
+Run HMC for poisson regression model
+
+```{r, echo=TRUE}
+N <- 1e4
+
+eps_vals <- c(rep(5e-4, 2), 1e-3, 2e-3, 1e-3, 2e-3, 5e-4)
+
+set.seed(412)
+t1.hmc <- Sys.time()
+ f_hmc <- hmc(N = N, theta.init = rep(0, 7), 
+                    epsilon = eps_vals, L = 50, 
+                    logPOSTERIOR = poisson_posterior,
+                    glogPOSTERIOR = g_poisson_posterior, 
+                    varnames = colnames(X), 
+                    parallel=TRUE, chains=2,
+                    param=list(y=y, X=X)) 
+t2.hmc <- Sys.time()
+t2.hmc - t1.hmc
+```
+
+The acceptance ratio for each of the HMC chains is sufficiently high for an efficient simulation.  
+
+```{r, echo=TRUE}
+f_hmc$accept/N
+```
+
+The posterior quantiles are summarized after removing an initial *burnin* period.  
+
+```{r, echo=TRUE}
+summary(f_hmc, burnin=3000)
+```
+
+
+Trace plots provide a visual indication of stationarity.  These plots indicate that the MCMC chains are reasonably stationary.  
+
+```{r, echo=TRUE, fig.width=6, fig.height=4}
+mcmc_trace(f_hmc, burnin=3000)
+```
+
+Histograms of the posterior distribution show that Bayesian parameter estimates align with Frequentist estimates.
+
+```{r, echo=TRUE, fig.width=6, fig.height=4}
+beta.freq <- coef(f)
+diagplots(f_hmc, burnin=3000, actual.mu=beta.freq)
+```
+
+# Source
+
+Data originally provided by Harry Khamis, Wright State University
+
+# References
+
+Agresti, A. (2015). *Foundations of linear and generalized linear models*. John Wiley & Sons.  ISBN: 978-1-118-73003-4
+
+

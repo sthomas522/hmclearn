@@ -41,3 +41,62 @@ List for \code{mh}
 \description{
 This is the basic computing function for MH and should not be called directly except by experienced users.
 }
+\section{Elements in \code{mh} list}{
+
+\describe{
+  \item{\code{N}}{
+  Number of MCMC samples
+  }
+  \item{\code{theta}}{
+  Nested list of length \code{N} of the sampled values of \code{theta} for each chain
+  }
+  \item{\code{thetaCombined}}{
+  List of dataframes containing sampled values, one for each chain
+  }
+  \item{\code{r}}{
+  NULL for Metropolis-Hastings
+  }
+  \item{\code{theta.all}}{
+  Nested list of all parameter values of \code{theta} sampled prior to accept/reject step for each
+  }
+  \item{\code{r.all}}{
+  NULL for Metropolis-Hastings
+  }
+  \item{\code{accept}}{
+  Number of accepted proposals.  The ratio \code{accept} / \code{N} is the acceptance rate
+  }
+  \item{\code{accept_v}}{
+  Vector of length \code{N} indicating which samples were accepted
+  }
+  \item{\code{M}}{
+  NULL for Metropolis-Hastings
+  }
+  \item{\code{algorithm}}{
+  \code{MH} for Metropolis-Hastings
+  }
+}
+}
+
+\examples{
+# Logistic regression example
+X <- cbind(1, seq(-100, 100, by=0.25))
+betavals <- c(-0.9, 0.2)
+lodds <- X \%*\% betavals
+prob1 <- as.numeric(1 / (1 + exp(-lodds)))
+
+set.seed(9874)
+y <- sapply(prob1, function(xx) {
+  sample(c(0, 1), 1, prob=c(1-xx, xx))
+})
+
+f1 <- mh.fit(N = 2000,
+         theta.init = rep(0, 2),
+         nu = c(0.03, 0.001),
+         qPROP = qprop,
+         qFUN = qfun,
+         logPOSTERIOR = logistic_posterior,
+         varnames = paste0("beta", 0:1),
+         y=y, X=X)
+
+f1$accept / f1$N
+}

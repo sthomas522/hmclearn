@@ -1,0 +1,434 @@
+---
+title: "hmclearn package:  Logistic Mixed Effects Regression Example"
+author: "Samuel Thomas"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{logistic_mixed_effects_hmclearn}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Introduction
+
+This vignette demonstrates fitting a Logistic mixed effects regression model via Hamiltonian Monte Carlo (HMC) using the **hmclearn** package. 
+
+For a mixed effects model with binary response, we let
+
+$$
+p = Pr(Y = 1 | X, Z) = [1 + e^{-X\beta-Zu}]^{-1}
+$$
+or
+
+$$
+\begin{aligned}
+\text{logit}[P(y = 1 | u)] &= X\beta + Zu \\
+u &\sim N(0, G)
+\end{aligned}
+$$
+
+
+```{r setup}
+library(hmclearn)
+```
+
+
+# Logistic Mixed Effects Model Example Data
+
+The user must define provide the design matrix directly for use in **hmclearn**.  Our first step is to load the data and store the fixed effect design matrix $X$, random effects design matrix $Z$, and dependent variable vector $y$. 
+
+We load drug Contraception data (Bates, et. al. 2014) and create the design matrices $X$ and $Z$ and dependent vector $y$.  For this model, the random effects design matrix $Z$ is specified for a random intercept model.  
+
+```{r, echo=TRUE}
+Contraception <- mlmRev::Contraception
+
+Contraception$liv2 <- ifelse(Contraception$livch == "0", 0, 1)
+
+##########
+# block diagonal
+Zi.lst <- split(rep(1, nrow(Contraception)), Contraception$district)
+Zi.lst <- lapply(Zi.lst, as.matrix)
+Z <- Matrix::bdiag(Zi.lst)
+Z <- as.matrix(Z)
+
+urban <- ifelse(Contraception$urban == "Y", 1, 0)
+
+X <- cbind(1, Contraception$age, Contraception$age^2, urban, Contraception$liv2)
+colnames(X) <- c("int", "age", "age_sq", "urban", "liv2")
+y <- ifelse(Contraception$use == "Y", 1, 0)
+
+```
+
+
+## QR decomposition of design matrix
+
+To facilitate a more efficient fitting of the model, we apply QR decomposition to the fixed effects design matrix $X$.  
+
+Let $\theta = R^*\beta$ (below).  The HMC estimates $\theta$, from which we can use the deterministic formula to determine $\beta$
+
+$$
+\begin{aligned}
+X &= Q^* R^* \\
+Q^* &= Q \cdot \sqrt{n-1} \\
+R^* &= \frac{1}{\sqrt{n-1}}R \\
+X\beta &= Q^* R^* \beta \\
+\beta &= R^{*^{-1}}\theta
+\end{aligned}
+$$
+
+```{r, echo=TRUE}
+xqr <- qr(X)
+Q <- qr.Q(xqr)
+R <- qr.R(xqr)
+
+n <- nrow(X)
+X2 <- Q * sqrt(n-1)
+Rstar <- R / sqrt(n-1)
+Rstar_inv <- solve(Rstar)
+colnames(X2) <- c("int", "age", "age_sq", "urban", "liv2")
+
+# new intercept from QR decomposition
+diagval <- X2[1,1]
+
+
+##########
+# block diagonal
+Zi.lst <- split(rep(diagval, nrow(Contraception)), Contraception$district)
+Zi.lst <- lapply(Zi.lst, as.matrix)
+Z2 <- Matrix::bdiag(Zi.lst)
+Z2 <- as.matrix(Z2)
+
+```
+
+
+## Likelihood Derivation
+
+First, we derive the likelihood for our logistic mixed effects regression model.
+
+$$
+\begin{aligned}
+p(y | X, Z, \beta, u) &= \prod_{i=1}^n\prod_{j=1}^m \left(\frac{1}{1 + e^{-X_{i}\beta - Z_{ij}u_i}}\right)^{y_{ij}} \left(\frac{e^{-X_i\beta - Z_{ij}u_i}}{1 + e^{-X_{i}\beta - Z_{ij}u_i}}\right)^{1-y_{ij}} \\
+\log p(y|X,Z,\beta,u) &= \sum_{i=1}^n\sum_{j=1}^m -y_{ij}\log (1 + e^{-X_i\beta - Z_{ij}u_i}) + (1 - y_{ij})\log e^{-X_i\beta - Z_{ij}u_i} \\
+&- (1-y_{ij})\log(1 + e^{-X_i\beta - Z_{ij}u_i}) \\
+&= \sum_{i=1}^n \sum_{j=1}^m -y_{ij}\log (1 + e^{-X_i\beta - Z_{ij}u_i}) - (1-y_{ij})(X_{ij}\beta + Z_{ij}u_i) \\
+&- (1-y_{ij})\log(1 + e^{-X_i\beta - Z_{ij}u_i}) \\
+&= \sum_{i=1}^n\sum_{j=1}^m -y_{ij}\log(1 + e^{-X_i\beta-Z_{ij}u_i}) - (X_{ij}\beta + Z_{ij}u_i - \log(1+e^{-X_i\beta-Z_{ij}u_i})) \\
+&+ y_{ij}(X_{ij}\beta + Z_{ij}u_i + \log(1 + e^{-X_i\beta - Z_{ij}u_i})) \\
+&=\sum_{i=1}^n \sum_{j=1}^m -(1 - y_{ij})(X_{i}\beta + Z_{ij}u_i) - \log(1 + e^{-X_{i}\beta - Z_{ij}u_i}) \\
+&= -(1 - y)^T(X\beta + Zu) - \log(1 + e^{-\sum_{i=1}^n \sum_{j=1}^m (X_i\beta + Z_{ij}u_i)})
+\end{aligned}
+$$
+
+# Priors
+
+Priors are needed for our parameters $\beta$ and $G$ to formulate the posterior.  
+
+We set a multivariate Normal prior for $\beta$
+
+$$
+\begin{aligned}
+\beta &\sim N(0, \Sigma_\beta) \\
+&\sim N(0, BI)
+\end{aligned}
+$$
+
+
+with pdf
+
+$$
+\begin{aligned}
+p(\beta) &= \frac{1}{\sqrt{\lvert 2\pi \Sigma_\beta \rvert }}e^{-\frac{1}{2}\beta^T \Sigma_\beta^{-1}\beta} \\
+\log p(\beta) &= -\frac{1}{2}\log(2\pi \lvert \Sigma_\beta \rvert) - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta \\
+&\propto -\frac{1}{2}\log \lvert\Sigma_\beta\rvert - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta.
+\end{aligned}
+$$
+
+
+# Parameterization for $G$
+
+The parameterization approach for this model uses a strategy recommended by Betancourt, Girolami (2013) to facilitate more efficient sampling in HMC.  
+
+Further, the uniform parameterization of the variance parameters is replaced by a half-t family of distributions per Gelman (2006), Prior distributions for Variance parameters in hierarchical models.  This parameterization is well-behaved around 0, in contrast to inverse gamma, and provides flexibility for more informed priors than a uniform distribution.
+
+We select a parameterization of $G$ such that the likelihood and its gradient can be derived for HMC.  To this end, we uses LDL decomposition of $G$ to form a flexibile parameterization that can easily handle restrictions (Chan, Jelizkov 2009).  
+
+$$
+\begin{aligned}
+u &\sim N(0, G)  \\
+G &= L D L^T \\
+&= L D^{1/2} D^{1/2} L^T \\
+\end{aligned}
+$$
+
+Let $\lambda_k$ where $k = 1, ... p$ denote the diagonal entries of $D^{1/2}$ and let $a_{kj}$ where $1 \leq j < k \leq p$ denote free elements of lower unitrangular matrix $L$
+
+$$
+D^{1/2} := 
+\begin{pmatrix}
+\lambda_1 & 0 & ... & 0 \\
+0 & \lambda_2 & 0 ... & 0 \\
+... & ... & ... & ... \\
+0 & 0 & ... & \lambda_p
+\end{pmatrix}, 
+L :=
+\begin{pmatrix}
+1 & 0 & 0 & ... & 0 \\
+a_{21} & 1 & 0 & ... & 0 \\
+a_{31} & a_{32} & 1 & ... & ... \\
+... & ... & ... & ... & ... \\
+a_{p1} & a_{p2} & ... & ... & 1 \\
+\end{pmatrix}
+$$
+
+Also define $\lambda := (\lambda_1, ..., \lambda_p)^T$ and $a_k := (a_{k1}, ..., a_{k, k-1})^T$ and $a := (a_2^T, ..., a_p^T)^T$
+
+Consider priors where $k = 1...p$.  The prior for $\lambda_k$ is half-t per Gelman (2006).  
+
+$$
+\begin{aligned}
+p(\lambda_k) &\sim \left(1 + \frac{1}{\nu}\left(\frac{\lambda_k}{A} \right)^2 \right)^{-(\nu+1)/2} \\
+a|\lambda &\sim N(a_0, A_0)
+\end{aligned}
+$$
+
+The hyperparameter $a_0$ does not need to be zero, and $A_0$ can be correlated and may depend on $\lambda$.  In this model, we define $a$ independent of $\lambda$. 
+
+Per Betancourt, Girolami (2013), we re-parameterize $u$ using a standard normal parameterization we define as $\tau = (\tau_1, ..., \tau_q)$.  Here, $u$ is a deterministic function of $G$ and $\tau$.
+
+
+$$
+\begin{aligned}
+\tau &\sim N(0, I_q) \\
+u &:= L D^{1/2} \tau \\
+&\sim N(0, LD^{1/2} I (L D^{1/2})^T) \\
+&\sim N(0, L D^{1/2} D^{1/2} L^T) \\
+&\sim N(0, G)
+\end{aligned}
+$$
+
+The distribution of $u$ therefore does not change with this parameterization.  The intent of our re-parameterization is to allow $G$ and $\tau$ to be largely independent in the MCMC sampling.   
+
+## Log posterior derivation
+
+Now that we have the log likelihood and priors specified, we can derive the log posterior.  
+
+$$
+\begin{aligned}
+p(\beta, u, G | y, X, Z) &\propto p(y | \beta, u, G)  p(\beta, u, G) \\
+&\propto p(y|\beta, u, G) p(\beta) p(u|G) p(G) \\
+\log p(\beta, u, G | y, X, Z) &\propto \log p(y|\beta, u, G) + \log p(\beta) + \log p(u|G) + \log p(G)
+\end{aligned}
+$$
+
+The log posterior is the sum of the log likelihood and the log of the prior for $\beta$.  
+
+We have hyperpriors $\lambda$ and $a$ for $G$.  Also, we use a half-t prior for variance parameters per Gelman (2006). 
+
+$$
+\begin{aligned}
+p(\lambda_k) &\sim \left(1 + \frac{1}{\nu}\left(\frac{\lambda_k}{A} \right)^2 \right)^{-(\nu+1)/2} \\
+p_{\xi_k}(\xi_k) &= p_{\lambda_k}(g^{-1}(\xi_k)) \left\lvert \frac{d\lambda_k}{d\xi_k}  \right\rvert \\
+&= p_{\lambda_k} (e^{\xi_k})\lvert e^{\xi_k}\rvert \\
+&\propto  \left(1 + \frac{1}{\nu}\left(\frac{e^{\xi_k}}{A} \right)^2 \right)^{-(\nu+1)/2} e^{\xi_k}\\
+&\propto \left(1 + \frac{1}{\nu}\left(\frac{e^{2\xi_k}}{A^2} \right) \right)^{-(\nu+1)/2} e^{\xi_k}\\
+\log p(\xi_k) &\propto -\frac{\nu+1}{2}\log\left(1 + \frac{1}{\nu}\left(\frac{e^{2\xi_k}}{A^2} \right) \right) + \xi_k \\
+\frac{\partial}{\partial\xi_k}\log p(\xi_k) &\propto -\frac{\nu+1}{2}\frac{1}{1 + \frac{1}{\nu}\left( \frac{e^{2\xi_k}}{A^2} \right)}\frac{2e^{2\xi_k}}{\nu A^2} + 1 \\
+&\propto -(\nu+1)\frac{1}{1 + \nu A^2 e^{-2\xi_k}} + 1
+\end{aligned}
+$$
+
+We assign a relatively uniformative prior for $a$
+
+$$
+\begin{aligned}
+a_k &\sim N(0, A) \\
+p(a_k) &\propto \lvert A  \rvert^{-1/2} e^{-\frac{1}{2} a_k^T A^{-1} a_k} \\
+\log p(a_k) &\propto -\frac{1}{2}a_k^T A^{-1} a_k
+\end{aligned}
+$$
+
+The gradient with respect to $a$:
+
+Note that the following are equivalent
+
+$$
+\begin{aligned}
+L D^{1/2}\tau = D^{1/2} \tau + \widetilde{T} a
+\end{aligned}
+$$
+
+Therefore, the portion of the log likelihood dependent on $a$ becomes
+
+$$
+\begin{aligned}
+l(a, ..) &\propto -(1 - y)^T(X\beta + ZLD^{1/2}\tau) - \log(1 + e^{-\sum_{i=1}^n \sum_{j=1}^m (X_i\beta + Z_{ij}LD^{1/2}\tau_j)}) \\
+&-\frac{1}{2}\log \lvert\Sigma_\beta\rvert - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta \\
+&-\sum_{k=1}^q \left(\frac{\nu_{\lambda_k}+1}{2}\log\left(1 + \frac{1}{\nu_{\lambda_k}} 
+\frac{e^{2\xi_k}}{A_{\lambda_k}^2}\right)+ \xi_k\right)\\
+&-\frac{1}{2} a^T A^{-1} a -\frac{1}{2} \tau^T \tau\\
+&\propto -(1 - y)^T Z\widetilde{T} - \left(\frac{e^{-(X\beta + ZLD^{1/2}\tau)}}{1 + e^{-(X\beta + ZLD^{1/2}\tau)}}\right)^T  Z\widetilde{T} - A^{-1}a
+\end{aligned}
+$$
+
+
+Finally, we write the full log posterior
+
+Note: we use $A_\xi$ and $A_a$ to distinguish between hyperpriors for $\xi$ and for $a$
+
+$$
+\begin{aligned}
+\log p(\beta, u, G | y, X, Z) &\propto \log p(y|\beta, u, G) + \log p(\beta) + \log p(u|G) + \log p(G) \\
+\log p(\beta, \gamma, \tau, \xi_1...\xi_q,a | y, X, Z) &\propto \log p(y | \beta, \tau, \gamma, \xi, a) + \log p(\beta) + \log p(\gamma)+ \log p(\tau) + \log p(\xi) + \log p(a) \\
+&\propto  -(1 - y)^T(X\beta + Zu) - \log(1 + e^{-\sum_{i=1}^n \sum_{j=1}^m (X_i\beta + Z_{ij}u_i)}) \\
+&-\frac{1}{2}\log \lvert\Sigma_\beta\rvert - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta \\
+&-\sum_{k=1}^q \left(\frac{\nu_{\lambda_k}+1}{2}\log\left(1 + \frac{1}{\nu_{\lambda_k}} 
+\frac{e^{2\xi_k}}{A_{\lambda_k}^2}\right)+ \xi_k\right)\\
+&-\frac{1}{2} a^T A^{-1} a -\frac{1}{2} \tau^T \tau\\
+&\propto  -(1 - y)^T(X\beta + ZLD^{1/2}\tau) - \log(1 + e^{-\sum_{i=1}^n \sum_{j=1}^m (X_i\beta + Z_{ij}LD^{1/2}\tau_j)}) \\
+&-\frac{1}{2}\log \lvert\Sigma_\beta\rvert - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta \\
+&-\sum_{k=1}^q \left(\frac{\nu_{\lambda_k}+1}{2}\log\left(1 + \frac{1}{\nu_{\lambda_k}} 
+\frac{e^{2\xi_k}}{A_{\lambda_k}^2}\right)+ \xi_k\right)\\
+&-\frac{1}{2} a^T A^{-1} a -\frac{1}{2} \tau^T \tau\\
+\end{aligned}
+$$
+
+
+The gradient of the log posterior must be derived for the leapfrog function
+
+$$
+\begin{aligned}
+\log p(\beta, \gamma, \tau, \xi_1...\xi_q,a | y, X, Z) &\propto  -(1 - y)^T(X\beta + ZLD^{1/2}\tau) - \log(1 + e^{-\sum_{i=1}^n \sum_{j=1}^m (X_i\beta + Z_{ij}LD^{1/2}\tau_j)}) \\
+&-\frac{1}{2}\log \lvert\Sigma_\beta\rvert - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta \\
+&-\sum_{k=1}^q \left(\frac{\nu_{\lambda_k}+1}{2}\log\left(1 + \frac{1}{\nu_{\lambda_k}} 
+\frac{e^{2\xi_k}}{A_{\lambda_k}^2}\right)+ \xi_k\right)\\
+&-\frac{1}{2} a^T A^{-1} a -\frac{1}{2} \tau^T \tau\\
+\frac{\partial l}{\partial\beta} &\propto -(1-y)^T X + \left(\frac{e^{-(X\beta + Zu)}}{1 + e^{-(X\beta + Zu)}}\right)^T X - \Sigma_\beta^{-1}\beta\\
+\frac{\partial l}{\partial \tau} &\propto -(1-y)^T ZLD^{1/2} + \left(\frac{e^{-(X\beta + Zu)}}{1 + e^{-(X\beta + Zu)}}\right)^T ZLD^{1/2} - \tau\\
+\frac{\partial l}{\partial \xi_k} &= -(1-y)^T ZLJ^{kk}\tau + \left(\frac{e^{-(X\beta + Zu)}}{1 + e^{-(X\beta + Zu)}}\right)^T ZLJ^{kk}\tau- (\nu_{\lambda_k}+1)\frac{1}{1 + \nu_{\lambda_k}A_{\lambda_k}^2 e^{-2\xi_k}}+1 \\
+\frac{\partial l}{\partial a} &= -(1 - y)^T Z\widetilde{T} - \left(\frac{e^{-(X\beta + ZLD^{1/2}\tau)}}{1 + e^{-(X\beta + ZLD^{1/2}\tau)}}\right)^T  Z\widetilde{T} - A^{-1}a
+\end{aligned}
+$$
+
+Run HMC for logistic regression model using QR decomposed design matrices
+
+```{r, echo=TRUE}
+N <- 2e3
+
+set.seed(412)
+initvals<- c(rep(0, 5), # fixed effects
+                rnorm(60, mean=0, sd=0.1), # random intercepts
+                0) # variance of random intercepts
+
+
+vnames <- c(colnames(X), 
+            paste0("tau_int", 1:60), 
+            "xi1")
+
+epsvals <- c(5e-2, rep(1e-2, 4), rep(5e-2, 61))
+
+t1.hmc <- Sys.time()
+f_hmc <- hmc(N = N, theta.init = initvals, 
+          epsilon = epsvals, L = 10, 
+          logPOSTERIOR = glmm_bin_posterior, 
+          glogPOSTERIOR = g_glmm_bin_posterior, 
+          varnames = vnames, 
+          parallel=TRUE, chains=2, 
+          param=list(y = y, X=X2, Z=Z, m=60, q=1, B=5, 
+                     nulambda=4, Alambda=1)  )
+
+t2.hmc <- Sys.time()
+t2.hmc - t1.hmc
+```
+
+The acceptance ratio for each of the HMC chains is sufficiently high for an efficient simulation.  
+
+```{r, echo=TRUE}
+f_hmc$accept/N
+```
+
+Trace plots provide a visual indication of stationarity.  These plots indicate that the MCMC chains are reasonably stationary.  
+
+```{r, echo=TRUE}
+mcmc_trace(f_hmc, burnin=1000, pars=colnames(X))
+```
+
+Since we used QR decomposition to transform $\beta$ prior to fitting via HMC, we need to reverse the transformation to obtain the original parameter scale.  
+
+```{r, echo=TRUE}
+# restore beta from Rstar in QR decomposition
+calc_beta <- function(theta_param, Rstarinv) {
+  as.numeric(Rstarinv %*% theta_param)
+}
+
+# reverse qr decomposition
+f_hmc2 <- f_hmc
+f_hmc2$thetaCombined <- lapply(f_hmc$thetaCombined, function(xx) {
+  xx[, 1:5] <- t(apply(xx[, 1:5], 1, calc_beta, Rstarinv=Rstar_inv))
+  xx
+})
+
+```
+
+The revised summary shows the posterior distribution after transformation back to the original scale.  
+
+```{r, echo=TRUE}
+summary(f_hmc2)
+```
+
+We create trace plots on the transformed simulation data. 
+
+```{r, echo=TRUE, fig.width=6, fig.height=4}
+mcmc_trace(f_hmc2, burnin=1000, pars=colnames(X))
+```
+
+# Frequentist model
+
+To compare results, we first fit a logistic mixed effects model using the frequentist package **lme4** (Bates et. al. 2015).  
+
+```{r, echo=TRUE}
+library(lme4)
+
+f <- glmer(use ~ age + I(age^2) + urban + liv2 + (1 | district), 
+           data=Contraception, family=binomial, 
+           control=glmerControl(optCtrl=list(maxfun=20000)))
+summary(f)
+```
+
+```{r, echo=TRUE}
+
+freqvals <- c(as.numeric(fixef(f)), 
+              as.numeric(ranef(f)$district[, 1]), 
+              log(sqrt(as.numeric(VarCorr(f)[1]))))
+```
+
+
+Histograms of the posterior distribution show that Bayesian parameter estimates align with frequentist estimates.  The *cols* parameter specifies the parameters to be displayed in *diagplots*, based on the order provided to the *hmc* function. 
+
+```{r, echo=TRUE, fig.width=6, fig.height=4}
+diagplots(f_hmc2, burnin=1000, 
+          actual.mu=c(freqvals[1:ncol(X)], freqvals[length(freqvals)]), 
+          cols=c(1:ncol(X), length(initvals)))
+
+```
+
+
+# Source
+
+Steele, F., Diamond, I. And Amin, S. (1996). Immunization uptake in rural Bangladesh: a multilevel analysis. *Journal of the Royal Statistical Society*, Series A (159): 289-299.  
+
+\url{http://www.bristol.ac.uk/cmm/learning/mmsoftware/data-rev.html}
+
+# References
+
+Bates, D., M\"{a}chler, M., Bolker, B., & Walker, S. (2015). Fitting linear mixed-effects models using lme4. *Journal of Statistical Software* 67(1)
+
+Bates, D., M\"{a}chler, M., & Bolker, B. (2014). mlmRev: Examples from multilevel modelling software review. *R package version, 1*.
+
+Agresti, A. (2015). *Foundations of linear and generalized linear models*. John Wiley & Sons.  ISBN: 978-1-118-73003-4

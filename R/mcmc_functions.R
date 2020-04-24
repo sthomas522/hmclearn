@@ -13,6 +13,62 @@
 #' @param ... Additional parameters for \code{logPOSTERIOR}
 #' @return List for \code{mh}
 #'
+#' @section Elements in \code{mh} list:
+#' \describe{
+#'   \item{\code{N}}{
+#'   Number of MCMC samples
+#'   }
+#'   \item{\code{theta}}{
+#'   Nested list of length \code{N} of the sampled values of \code{theta} for each chain
+#'   }
+#'   \item{\code{thetaCombined}}{
+#'   List of dataframes containing sampled values, one for each chain
+#'   }
+#'   \item{\code{r}}{
+#'   NULL for Metropolis-Hastings
+#'   }
+#'   \item{\code{theta.all}}{
+#'   Nested list of all parameter values of \code{theta} sampled prior to accept/reject step for each
+#'   }
+#'   \item{\code{r.all}}{
+#'   NULL for Metropolis-Hastings
+#'   }
+#'   \item{\code{accept}}{
+#'   Number of accepted proposals.  The ratio \code{accept} / \code{N} is the acceptance rate
+#'   }
+#'   \item{\code{accept_v}}{
+#'   Vector of length \code{N} indicating which samples were accepted
+#'   }
+#'   \item{\code{M}}{
+#'   NULL for Metropolis-Hastings
+#'   }
+#'   \item{\code{algorithm}}{
+#'   \code{MH} for Metropolis-Hastings
+#'   }
+#' }
+#'
+#' @examples
+#' # Logistic regression example
+#' X <- cbind(1, seq(-100, 100, by=0.25))
+#' betavals <- c(-0.9, 0.2)
+#' lodds <- X %*% betavals
+#' prob1 <- as.numeric(1 / (1 + exp(-lodds)))
+#'
+#' set.seed(9874)
+#' y <- sapply(prob1, function(xx) {
+#'   sample(c(0, 1), 1, prob=c(1-xx, xx))
+#' })
+#'
+#' f1 <- mh.fit(N = 2000,
+#'          theta.init = rep(0, 2),
+#'          nu = c(0.03, 0.001),
+#'          qPROP = qprop,
+#'          qFUN = qfun,
+#'          logPOSTERIOR = logistic_posterior,
+#'          varnames = paste0("beta", 0:1),
+#'          y=y, X=X)
+#'
+#' f1$accept / f1$N
 #' @export
 mh.fit <- function(N, theta.init, qPROP, qFUN, logPOSTERIOR, nu=1e-3,
                varnames=NULL, param=list(), ...) {
@@ -43,10 +99,6 @@ mh.fit <- function(N, theta.init, qPROP, qFUN, logPOSTERIOR, nu=1e-3,
   if (!is.null(varnames)) {
     colnames(thetaCombined) <- varnames
   }
-
-  # obj <- list(paramSim = paramSim,
-  #      thetaCombined = thetaCombined,
-  #      accept = accept)
 
   obj <- list(N=N,
               theta=paramSim,
@@ -87,9 +139,9 @@ mhpar <- function(paramlst, ...) {
 #' @param nu Single value or vector parameter passed to \code{qPROP} or \code{qFUN} for the proposal density
 #' @param varnames Optional vector of theta parameter names
 #' @param param List of additional parameters for \code{logPOSTERIOR} and \code{glogPOSTERIOR}
-#' @param ... Additional parameters for \code{logPOSTERIOR}
 #' @param chains Number of MCMC chains to run
-#' @param parallel Logical to set whether MCMC chains should be run in parallel
+#' @param parallel Logical to set whether multiple MCMC chains should be run in parallel
+#' @param ... Additional parameters for \code{logPOSTERIOR}
 #' @return Object of class \code{hmclearn}
 #'
 #' @section Elements for \code{hmclearn} objects:
@@ -155,56 +207,23 @@ mhpar <- function(paramlst, ...) {
 #' }
 #'
 #' @examples
-#' \dontrun{
-#' # linear regression
-#' data(warpbreaks)
+#' # Linear regression example
+#' set.seed(521)
+#' X <- cbind(1, matrix(rnorm(300), ncol=3))
+#' betavals <- c(0.5, -1, 2, -3)
+#' y <- X%*%betavals + rnorm(100, sd=.2)
 #'
-#' X <- model.matrix(breaks ~ wool*tension, data=warpbreaks)
-#' y <- warpbreaks$breaks
+#' f1_mh <- mh(N = 3e3,
+#'          theta.init = c(rep(0, 4), 1),
+#'          nu <- c(rep(0.001, 4), 0.1),
+#'          qPROP = qprop,
+#'          qFUN = qfun,
+#'          logPOSTERIOR = linear_posterior,
+#'          varnames = c(paste0("beta", 0:3), "log_sigma_sq"),
+#'          param=list(y=y, X=X), parallel=FALSE, chains=1)
 #'
-#' Nmh <- 1e5
-#' nuval <- c(rep(4, 6), 1e-1)
-#' fm1_mh <- mh(Nmh, theta.init = c(rep(0, 6), 1), nu=nuval,
-#'              qPROP = qprop, qFUN = qfun,
-#'              logPOSTERIOR = linear_posterior,
-#'              varnames = c(colnames(X), "log_sigma_sq"),
-#'              param=list(y=y, X=X), parallel= TRUE, chains=2)
+#' summary(f1_mh, burnin=1000)
 #'
-#' fm1_mh$accept / Nmh
-#'
-#' summary(fm1_mh, burnin=1000)
-#' mcmc_trace(fm1_mh, burnin=1000)
-#' mcmc_hist(fm1_mh, burnin=1000)
-#'
-#' # poisson regression
-#'
-#' library(carData)
-#' data(AMSsurvey)
-#'
-#' # design matrix
-#' X <- model.matrix(count ~ type + sex + citizen, data=AMSsurvey)
-#'
-#' # independent variable is count data
-#' y <- AMSsurvey$count
-#' p <- ncol(X)
-#'
-#' Nmh <- 5e4
-#'
-#' nuval <- c(rep(1, p-1), 1e-1)
-#'
-#' fm3_mh <- mh(Nmh, theta.init =rep(0, p), nu=1e-3,
-#'              qPROP = qprop, qFUN = qfun,
-#'              logPOSTERIOR = poisson_posterior,
-#'              varnames = colnames(X),
-#'              param=list(y=y, X=X))
-#'
-#' fm3_mh$accept / Nmh
-#'
-#' summary(fm3_mh)
-#'
-#' mcmc_trace(fm3_mh, burnin=1000)
-#' mcmc_dens(fm3_mh, burnin=1000)
-#' }
 #'
 #' @author Samuel Thomas \email{samthoma@@iu.edu}, Wanzhu Tu \email{wtu@iu.edu}
 #' @export
@@ -289,10 +308,15 @@ mh <- function(N, theta.init, qPROP, qFUN, logPOSTERIOR, nu=1e-3,
 #' @param theta2 Vector for mean parameter
 #' @param nu Either a single numeric value for the covariance matrix, or a vector for the diagonal
 #'
-#' @return Multivariate normal density vector
+#' @return Multivariate normal density vector log-transformed
 #' @references Alan Genz, Frank Bretz, Tetsuhisa Miwa, Xuefei
 #' Mi, Friedrich Leisch, Fabian Scheipl and Torsten Hothorn (2019).  \emph{mvtnorm: Multivariate Normal and t Distributions}
 #' @export
+#'
+#' @examples
+#' qfun(0, 0, 1)
+#' log(1/sqrt(2*pi))
+#'
 qfun <- function(theta1, theta2, nu) {
   k <- length(theta1)
   nu <- diag(nu, k, k)
@@ -306,10 +330,17 @@ qfun <- function(theta1, theta2, nu) {
 #' @param theta1 Vector of current quantiles
 #' @param nu Either a single numeric value for the covariance matrix, or a vector for the diagonal
 #'
-#' @return Multivariate normal density vector
 #' @references B. D. Ripley (1987) \emph{Stochastic Simulation}. Wiley.  Page 98
 #' @references Venables, W. N. and Ripley, B. D. (2002) \emph{Modern Applied Statistics with S.} Fourth edition. Springer.
+#' @return Returns a single numeric simulated value from a Normal distribution or vector of length \code{theta1}.
+#' \code{length(mu)} matrix with one sample in each row.
+#'
 #' @export
+#'
+#' @examples
+#' s <- replicate(1000, qprop(0, 1))
+#' summary(s)
+#' hist(s, col='light blue')
 qprop <- function(theta1, nu) {
   k <- length(theta1)
   nu <- diag(nu, k, k)
@@ -332,6 +363,14 @@ qprop <- function(theta1, nu) {
 #' @references Neal, Radford. 2011. \emph{MCMC Using Hamiltonian Dynamics.} In Handbook of Markov Chain Monte Carlo, edited by Steve Brooks, Andrew Gelman, Galin L. Jones, and Xiao-Li Meng, 116–62. Chapman; Hall/CRC.
 #' @return List containing two elements:  \code{theta.new} the ending value of theta and \code{r.new} the ending value of the momentum
 #' @export
+#'
+#' @examples
+#' set.seed(321)
+#' X <- cbind(1, rnorm(10))
+#' y <- rnorm(10)
+#' p <- runif(3) - 0.5
+#' leapfrog(rep(0,3), p, 0.01, linear_posterior, g_linear_posterior,
+#'          diag(3), FALSE, X=X, y=y)
 leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, Minv, constrain,
                      lastSTEP=FALSE, ...) {
 
@@ -339,9 +378,6 @@ leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, Minv, co
   g.ld <- glogPOSTERIOR(theta_lf,  ...)
 
   # first momentum update
-  # info <- paste("r", length(r), "epsilon", length(epsilon), "g.ld", length(g.ld))
-  # print(info)
-
   r.new <- as.numeric(r + epsilon/2*g.ld)
 
   # theta update
@@ -389,7 +425,61 @@ leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, Minv, co
 #' @param verbose Logical to determine whether to display the progress of the HMC algorithm
 #' @param ... Additional parameters for \code{logPOSTERIOR} and \code{glogPOSTERIOR}
 #' @return List for \code{hmc}
+#' @section Elements for \code{hmclearn} objects:
+#' \describe{
+#'   \item{\code{N}}{
+#'   Number of MCMC samples
+#'   }
+#'   \item{\code{theta}}{
+#'   Nested list of length \code{N} of the sampled values of \code{theta} for each chain
+#'   }
+#'   \item{\code{thetaCombined}}{
+#'   List of dataframes containing sampled values, one for each chain
+#'   }
+#'   \item{\code{r}}{
+#'   List of length \code{N} of the sampled momenta
+#'   }
+#'   \item{\code{theta.all}}{
+#'   Nested list of all parameter values of \code{theta} sampled prior to accept/reject step for each
+#'   }
+#'   \item{\code{r.all}}{
+#'   List of all values of the momenta \code{r} sampled prior to accept/reject
+#'   }
+#'   \item{\code{accept}}{
+#'   Number of accepted proposals.  The ratio \code{accept} / \code{N} is the acceptance rate
+#'   }
+#'   \item{\code{accept_v}}{
+#'   Vector of length \code{N} indicating which samples were accepted
+#'   }
+#'   \item{\code{M}}{
+#'   Mass matrix used in the HMC algorithm
+#'   }
+#'   \item{\code{algorithm}}{
+#'   \code{HMC} for Hamiltonian Monte Carlo
+#'   }
+#' }
 #' @references Neal, Radford. 2011. \emph{MCMC Using Hamiltonian Dynamics.} In Handbook of Markov Chain Monte Carlo, edited by Steve Brooks, Andrew Gelman, Galin L. Jones, and Xiao-Li Meng, 116–62. Chapman; Hall/CRC.
+#' @examples
+#' # Logistic regression example
+#' X <- cbind(1, seq(-100, 100, by=0.25))
+#' betavals <- c(-0.9, 0.2)
+#' lodds <- X %*% betavals
+#' prob1 <- as.numeric(1 / (1 + exp(-lodds)))
+#'
+#' set.seed(9874)
+#' y <- sapply(prob1, function(xx) {
+#'   sample(c(0, 1), 1, prob=c(1-xx, xx))
+#' })
+#'
+#' f1 <- hmc.fit(N = 500,
+#'           theta.init = rep(0, 2),
+#'           epsilon = c(0.1, 0.002),
+#'           L = 10,
+#'           logPOSTERIOR = logistic_posterior,
+#'           glogPOSTERIOR = g_logistic_posterior,
+#'           y=y, X=X)
+#'
+#' f1$accept / f1$N
 #' @export
 hmc.fit <- function(N, theta.init, epsilon, L, logPOSTERIOR, glogPOSTERIOR, varnames=NULL,
                 randlength=FALSE, Mdiag=NULL, constrain=NULL, verbose=FALSE, ...) {
@@ -532,9 +622,9 @@ hmcpar <- function(paramlst, ...) {
 #' @param constrain Optional vector of which parameters in \code{theta} accept positive values only.  Default is that all parameters accept all real numbers
 #' @param verbose Logical to determine whether to display the progress of the HMC algorithm
 #' @param param List of additional parameters for \code{logPOSTERIOR} and \code{glogPOSTERIOR}
-#' @param ... Additional parameters for \code{logPOSTERIOR}
 #' @param chains Number of MCMC chains to run
-#' @param parallel Logical to set whether MCMC chains should be run in parallel
+#' @param parallel Logical to set whether multiple MCMC chains should be run in parallel
+#' @param ... Additional parameters for \code{logPOSTERIOR}
 #' @return Object of class \code{hmclearn}
 #'
 #' @section Elements for \code{hmclearn} objects:
@@ -565,6 +655,9 @@ hmcpar <- function(paramlst, ...) {
 #'   }
 #'   \item{\code{M}}{
 #'   Mass matrix used in the HMC algorithm
+#'   }
+#'   \item{\code{algorithm}}{
+#'   \code{HMC} for Hamiltonian Monte Carlo
 #'   }
 #'   \item{\code{varnames}}{
 #'   Optional vector of parameter names
@@ -615,79 +708,43 @@ hmcpar <- function(paramlst, ...) {
 #' }
 #'
 #' @examples
-#' \dontrun{
-#' # linear regression
-#' data(warpbreaks)
+#' # Linear regression example
+#' set.seed(521)
+#' X <- cbind(1, matrix(rnorm(300), ncol=3))
+#' betavals <- c(0.5, -1, 2, -3)
+#' y <- X%*%betavals + rnorm(100, sd=.2)
 #'
-#' X <- model.matrix(breaks ~ wool*tension, data=warpbreaks)
-#' y <- warpbreaks$breaks
+#' fm1_hmc <- hmc(N = 500,
+#'           theta.init = c(rep(0, 4), 1),
+#'           epsilon = 0.01,
+#'           L = 10,
+#'           logPOSTERIOR = linear_posterior,
+#'           glogPOSTERIOR = g_linear_posterior,
+#'           varnames = c(paste0("beta", 0:3), "log_sigma_sq"),
+#'           param=list(y=y, X=X), parallel=FALSE, chains=1)
 #'
-#' N <- 1e4
-#' eps_vals <- c(rep(2e-1, 6), 2e-2)
+#' summary(fm1_hmc, burnin=100)
 #'
-#' set.seed(143)
-#' fm1_hmc <- hmc(N, theta.init = c(rep(0, 6), 1),
-#'                epsilon = eps_vals, L = 20,
-#'                logPOSTERIOR = linear_posterior,
-#'                glogPOSTERIOR = g_linear_posterior,
-#'                varnames = c(colnames(X), "log_sigma_sq"),
-#'                param=list(y=y, X=X), parallel = TRUE, chains = 2)
 #'
-#' fm1_hmc$accept / N
-#' summary(fm1_hmc)
+#' # poisson regression example
+#' set.seed(7363)
+#' X <- cbind(1, matrix(rnorm(40), ncol=2))
+#' betavals <- c(0.8, -0.5, 1.1)
+#' lmu <- X %*% betavals
+#' y <- sapply(exp(lmu), FUN = rpois, n=1)
 #'
-#' mcmc_trace(fm1_hmc, burnin=1000)
-#' mcmc_hist(fm1_hmc, burnin=1000)
+#' fm2_hmc <- hmc(N = 500,
+#'           theta.init = rep(0, 3),
+#'           epsilon = 0.01,
+#'           L = 10,
+#'           logPOSTERIOR = poisson_posterior,
+#'           glogPOSTERIOR = g_poisson_posterior,
+#'           varnames = paste0("beta", 0:2),
+#'           param = list(y=y, X=X),
+#'           parallel=FALSE, chains=1)
 #'
-#' # logistic regression
-#' library(mlbench)
-#' data(BreastCancer)
+#' summary(fm2_hmc, burnin=100)
 #'
-#' bc <- BreastCancer[complete.cases(BreastCancer), ]
-#' X <- model.matrix(Class ~ Cl.thickness + Cell.size + Cell.shape, data = bc)
-#' y <- ifelse(bc$Class == "benign", 0, 1)
-#' p <- ncol(X)
-#' N <- 1e4
-#'
-#' set.seed(321)
-#' fm2_hmc <- hmc(N, theta.init = rep(0, p),
-#'                epsilon = 1e-1, L=20,
-#'                logPOSTERIOR = logistic_posterior,
-#'                glogPOSTERIOR = g_logistic_posterior,
-#'                randlength = TRUE,
-#'                varnames = colnames(X),
-#'                param=list(y=y, X=X), parallel = TRUE, chains=2)
-#'
-#' fm2_hmc$accept / N
-#'
-#' summary(fm2_hmc)
-#' mcmc_rhat(fm2_hmc)
-#' mcmc_rhat_hist(fm2_hmc)
-#'
-#' # poisson regression
-#' library(carData)
-#' data(AMSsurvey)
-#'
-#' # design matrix
-#' X <- model.matrix(count ~ type + sex + citizen, data=AMSsurvey)
-#'
-#' # independent variable is count data
-#' y <- AMSsurvey$count
-#' p <- ncol(X)
-#'
-#' N <- 1e4
-#'
-#' fm3_hmc <- hmc(N, theta.init = rep(0, p), epsilon = 2e-3, L = 20,
-#'                logPOSTERIOR = poisson_posterior,
-#'                glogPOSTERIOR=g_poisson_posterior,
-#'                varnames = colnames(X),
-#'                param=list(y = y, X=X), parallel=TRUE, chains=2)
-#' fm3_hmc$accept / N
-#'
-#' summary(fm3_hmc)
-#'
-#' plot(fm3_hmc, burnin=1000)
-#' }
 #'
 #' @author Samuel Thomas \email{samthoma@@iu.edu}, Wanzhu Tu \email{wtu@iu.edu}
 #' @references \emph{HMC in R} paper
@@ -771,3 +828,27 @@ hmc <- function(N=10000, theta.init, epsilon=1e-2, L=10, logPOSTERIOR, glogPOSTE
 
   }
 }
+
+
+# # logistic regression
+# library(mlbench)
+# data(BreastCancer)
+#
+# bc <- BreastCancer[complete.cases(BreastCancer), ]
+# X <- model.matrix(Class ~ Cl.thickness + Cell.size + Cell.shape, data = bc)
+# y <- ifelse(bc$Class == "benign", 0, 1)
+# p <- ncol(X)
+# N <- 1e3
+#
+# set.seed(321)
+# fm4_hmc <- hmc(N, theta.init = rep(0, p),
+#                epsilon = 1e-1, L=20,
+#                logPOSTERIOR = logistic_posterior,
+#                glogPOSTERIOR = g_logistic_posterior,
+#                randlength = TRUE,
+#                varnames = colnames(X),
+#                param=list(y=y, X=X), parallel = TRUE, chains=2)
+#
+# fm4_hmc$accept / N
+#
+# summary(fm4_hmc)

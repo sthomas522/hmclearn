@@ -92,6 +92,7 @@
 #'   barplot.
 #'  }
 #' }
+#' @return These functions call various plotting functions from the \code{bayesplot} package, which returns a list including \code{ggplot2} objects.
 #' @references Gabry, Jonah and Mahr, Tristan (2019).  \emph{bayesplot:  Plotting for Bayesian Models}.  \url{https://mc-stan.org/bayesplot}
 #' @references Gabry, J., Simpson, D., Vehtari, A., Betancourt, M., and Gelman, A (2019).  \emph{Visualization in Bayesian Workflow}.  Journal of the Royal Statistical Society: Series A. Vol 182.  Issue 2.  p.389-402.
 #' @references Gelman, A. and Rubin, D. (1992) \emph{Inference from Iterative Simulation Using Multiple Sequences}.  Statistical Science 7(4) 457-472.
@@ -100,6 +101,29 @@ NULL
 
 #' @rdname hmclearn-plots
 #' @export
+#' @examples
+#' # poisson regression example
+#' set.seed(7363)
+#' X <- cbind(1, matrix(rnorm(40), ncol=2))
+#' betavals <- c(0.8, -0.5, 1.1)
+#' lmu <- X %*% betavals
+#' y <- sapply(exp(lmu), FUN = rpois, n=1)
+#'
+#' f <- hmc(N = 1000,
+#'           theta.init = rep(0, 3),
+#'           epsilon = c(0.03, 0.02, 0.015),
+#'           L = 10,
+#'           logPOSTERIOR = poisson_posterior,
+#'           glogPOSTERIOR = g_poisson_posterior,
+#'           varnames = paste0("beta", 0:2),
+#'           param = list(y=y, X=X),
+#'           parallel=FALSE, chains=2)
+#'
+#' mcmc_trace(f, burnin=100)
+#' mcmc_hist(f, burnin=100)
+#' mcmc_intervals(f, burnin=100)
+#' mcmc_rhat(f, burnin=100)
+#' mcmc_violin(f, burnin=100)
 mcmc_intervals <- function(object, ...) {
   UseMethod("mcmc_intervals")
 }
@@ -359,9 +383,28 @@ mcmc_violin.hmclearn <- function(object, burnin=NULL, ...) {
 #' @param ... optional additional arguments to pass to the \code{bayesplot} functions
 #'
 #' @references Gabry, Jonah and Mahr, Tristan (2019).  \emph{bayesplot:  Plotting for Bayesian Models}.  \url{https://mc-stan.org/bayesplot}
+#' @return Calls \code{mcmc_hist} from the \code{bayesplot} package, which returns a list including a \code{ggplot2} object.
 #' @export
+#' @examples
+#' # poisson regression example
+#' set.seed(7363)
+#' X <- cbind(1, matrix(rnorm(40), ncol=2))
+#' betavals <- c(0.8, -0.5, 1.1)
+#' lmu <- X %*% betavals
+#' y <- sapply(exp(lmu), FUN = rpois, n=1)
+#'
+#' f <- hmc(N = 1000,
+#'           theta.init = rep(0, 3),
+#'           epsilon = c(0.03, 0.02, 0.015),
+#'           L = 10,
+#'           logPOSTERIOR = poisson_posterior,
+#'           glogPOSTERIOR = g_poisson_posterior,
+#'           varnames = paste0("beta", 0:2),
+#'           param = list(y=y, X=X),
+#'           parallel=FALSE, chains=2)
+#'
+#' plot(f, burnin=100)
 plot.hmclearn <- function(x, burnin=NULL, ...) {
-  # diagplots(x, ...)
   thetaCombined <- combMatrix(x$thetaCombined, burnin=burnin)
   bayesplot::mcmc_hist(thetaCombined, ...)
 }

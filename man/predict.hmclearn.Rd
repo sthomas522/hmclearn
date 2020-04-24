@@ -4,12 +4,10 @@
 \alias{predict.hmclearn}
 \title{Model Predictions for HMC or MH}
 \usage{
-\method{predict}{hmclearn}(object, y, X, fam = "linear", burnin = NULL, draws = NULL, ...)
+\method{predict}{hmclearn}(object, X, fam = "linear", burnin = NULL, draws = NULL, ...)
 }
 \arguments{
 \item{object}{an object of class \code{hmclearn}, usually a result of a call to \code{mh} or \code{hmc}}
-
-\item{y}{vector of the dependent variables used to fit the model}
 
 \item{X}{design matrix, either from fitting the model or new data}
 
@@ -22,7 +20,7 @@
 \item{...}{additional parameters, currently unsupported}
 }
 \value{
-an object of class \code{hmclearnpred}.  Can be used as an input for \code{pp_check} functions in \code{bayesplot}
+An object of class \code{hmclearnpred}.
 }
 \description{
 \code{predict} generates simulated data from the posterior predictive distribution.
@@ -32,9 +30,9 @@ This simulated data can be used for posterior predictive check diagnostics from 
 
 \describe{
   \item{\code{y}}{
-  Numeric vector of the dependent variable
+  Median simulated values for each observation in \code{X}
   }
-  \item{\code{ypred}}{
+  \item{\code{yrep}}{
   Matrix of simulated values where each row is a draw from the posterior predictive distribution
   }
   \item{\code{X}}{
@@ -43,6 +41,33 @@ This simulated data can be used for posterior predictive check diagnostics from 
 }
 }
 
+\examples{
+# Linear regression example
+set.seed(521)
+X <- cbind(1, matrix(rnorm(300), ncol=3))
+betavals <- c(0.5, -1, 2, -3)
+y <- X\%*\%betavals + rnorm(100, sd=.2)
+
+f1 <- hmc(N = 500,
+          theta.init = c(rep(0, 4), 1),
+          epsilon = 0.01,
+          L = 10,
+          logPOSTERIOR = linear_posterior,
+          glogPOSTERIOR = g_linear_posterior,
+          varnames = c(paste0("beta", 0:3), "log_sigma_sq"),
+          param=list(y=y, X=X), parallel=FALSE, chains=1)
+
+summary(f1)
+
+p <- predict(f1, X)
+predvals <- p$y
+plot(predvals, y, xlab="predicted", ylab="actual")
+
+X2 <- cbind(1, matrix(rnorm(30), ncol=3))
+p2 <- predict(f1, X2)
+p2$y
+
+}
 \references{
 Gabry, Jonah and Mahr, Tristan (2019).  \emph{bayesplot:  Plotting for Bayesian Models}.  \url{https://mc-stan.org/bayesplot}
 

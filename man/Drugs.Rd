@@ -14,7 +14,7 @@ A data frame with 8 rows and 4 variables:
 }
 }
 \source{
-\url{http://users.stat.ufl.edu/~aa/glm/data/Drugs.dat}
+Data originally provided by Harry Khamis, Wright State University
 }
 \usage{
 Drugs
@@ -23,10 +23,6 @@ Drugs
 Data from a survey of 2276 high school students about drug usage
 }
 \references{
-Agresti, A. (2015). \emph{Foundations of linear and generalized linear models}. John Wiley & Sons.
-
-Copyright 2015, Alan Agresti, Department of Statistics, University of Florida
-
-Data originally provided by Harry Khamis, Wright State University
+Agresti, A. (2015). \emph{Foundations of linear and generalized linear models}. John Wiley & Sons.  \url{http://users.stat.ufl.edu/~aa/glm/data/Drugs.dat}
 }
 \keyword{datasets}

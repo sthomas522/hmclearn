@@ -1,0 +1,180 @@
+---
+title: "hmclearn:  Logistic Regression Example"
+author: "Samuel Thomas"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{logistic_regression_hmclearn}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Introduction
+
+This vignette demonstrates fitting a logistic regression model via Hamiltonian Monte Carlo (HMC) using the **hmclearn** package. 
+
+```{r setup}
+library(hmclearn)
+```
+
+
+# GLM - Logistic Regression
+
+For binary response, we let
+
+$$
+p = Pr(Y = 1 | X) = [1 + e^{-X\beta}]^{-1}
+$$
+
+
+With likelihood and log-likelihood
+
+$$
+\begin{aligned}
+L(\beta; X, y) &= \prod_{i=1}^n p^{y_i} (1-p)^{1-y_i} \\
+&= \prod_{i=1}^{n} \left(\frac{1}{1+e^{-X_i\beta}}\right)^{y_i} 
+\left(\frac{e^{-X_i\beta}}{1+e^{-X_i\beta}}\right)^{1-y_i}  \\
+l(\beta;X,y) &= \sum_{i=1}^n -y_i\log(1+e^{-X_i\beta}) + (1-y_i)(-X_i\beta - \log(1+e^{-X_i\beta})) \\
+&= \sum_{i=1}^n -\log(1+e^{-X_i\beta}) - X_i\beta(1 - y_i) \\
+&= \sum_{i=1}^n X_i\beta(y_i - 1) - \log(1 + e^{-X_i\beta})
+\end{aligned}
+$$
+
+We set a multivariate Normal prior for $\beta$
+
+$$
+\begin{aligned}
+\beta &\sim N(0, \Sigma_\beta) \\
+&\sim N(0, BI)
+\end{aligned}
+$$
+
+With pdf
+
+$$
+\begin{aligned}
+p(\beta) &= \frac{1}{\sqrt{\lvert 2\pi \Sigma_\beta \rvert }}e^{-\frac{1}{2}\beta^T \Sigma_\beta^{-1}\beta} \\
+\log p(\beta) &= -\frac{1}{2}\log(2\pi \lvert \Sigma_\beta \rvert) - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta \\
+&\propto -\frac{1}{2}\log \lvert\Sigma_\beta\rvert - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta
+\end{aligned}
+$$
+
+Let $B = 1e3$ for instance, as a relatively uninformative prior.
+
+Now derive the log posterior
+
+$$
+\begin{aligned}
+p(\beta | X, y) &\propto p(y | X, \beta)  p(\beta) \\
+\log p(\beta | X, y) & \propto \log p(y | X, \beta) + \log p(\beta) \\
+&\propto \sum_{i=1}^n X_i\beta(y_i - 1) - \log(1 + e^{-X_i\beta}) -\frac{1}{2}\log \lvert\Sigma_\beta\rvert - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta 
+\end{aligned}
+$$
+
+The log posterior is the sum of the log likelihood and the log of the prior for $\beta$.  
+
+Next, we need to derive the gradient of the log posterior for the leapfrog function
+
+$$
+\begin{aligned}
+p(\beta | X, y) &\propto p(y | X, \beta)  p(\beta) \\
+\log p(\beta | X, y) & \propto \log p(y | X, \beta) + \log p(\beta) \\
+&\propto \sum_{i=1}^n X_i\beta(y_i - 1) - \log(1 + e^{-X_i\beta}) -\frac{1}{2}\log \lvert\Sigma_\beta\rvert - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta \\
+\frac{\partial\log p(\beta | X, y) }{\partial\beta} &\propto X(y - 1)+ \frac{e^{-X\beta}}{1 + e^{-X\beta}}X - \Sigma_\beta^{-1} \beta^T
+\end{aligned}
+$$
+
+# Logistic Regression Example Data
+
+The user must define provide the design matrix directly for use in **hmclearn**.  Our first step is to load the data and store the design matrix $X$ and dependent variable vector $y$. 
+
+First, we load the Endometrial cancer data set (Heinze and Schember 2002) and create $X$ and $y$.  This example also appears in Agresti (2015), and we compare results to his.  
+
+```{r, echo=TRUE}
+data(Endometrial)
+
+# data prep
+Endometrial$PI2 <- with(Endometrial, (PI - mean(PI)) / sd(PI))
+Endometrial$EH2 <- with(Endometrial, (EH - mean(EH)) / sd(EH))
+Endometrial$NV2 <- Endometrial$NV - 0.5
+
+X <- cbind(1, as.matrix(Endometrial[, which(colnames(Endometrial) %in% c("PI2", "EH2", "NV2"))]))
+y <- Endometrial$HG
+
+colnames(X) <- c("(Intercept)", "PI2", "EH2", "NV2")
+
+```
+
+# Frequentist model
+
+To compare results, we first fit a standard linear model using the frequentist function *glm*.  Note the high standard error estimates for the Intercept and NV2.  
+
+```{r, echo=TRUE}
+f <- glm(y ~ X-1, family = binomial())
+summary(f)
+
+```
+
+# Fit model using hmc
+
+Next, we fit the logistic regression model using HMC.  
+
+```{r, echo=TRUE}
+N <- 1e4
+
+set.seed(412)
+t1.hmc <- Sys.time()
+ f_hmc <- hmc(N = N, theta.init = rep(1, 4), 
+            epsilon = 1e-1, L = 20, 
+            logPOSTERIOR = logistic_posterior, 
+            glogPOSTERIOR = g_logistic_posterior, 
+            varnames = colnames(X),
+            param=list(y = y, X=X), 
+            parallel=TRUE, chains=2)
+t2.hmc <- Sys.time()
+t2.hmc - t1.hmc
+```
+
+The acceptance ratio for each of the HMC chains is sufficiently high for an efficient simulation.  
+
+```{r, echo=TRUE}
+f_hmc$accept/N
+```
+
+The posterior quantiles are summarized after removing an initial *burnin* period.  
+
+```{r, echo=TRUE}
+summary(f_hmc, burnin=3000)
+```
+
+Trace plots provide a visual indication of stationarity.  These plots indicate that the MCMC chains are reasonably stationary.  
+
+```{r, echo=TRUE, fig.width=6, fig.height=4}
+mcmc_trace(f_hmc, burnin=3000)
+```
+
+Histograms of the posterior distribution show that Bayesian parameter estimates align with Frequentist estimates for parameters PI2 and EH2.  The posterior distributions are skewed for the Intercept and NV2 based on the likelihood and priors provided in this example.  
+
+```{r, echo=TRUE, fig.width=6, fig.height=4}
+beta.freq <- coef(f)
+diagplots(f_hmc, burnin=3000, actual.mu=beta.freq)
+```
+
+# Source
+
+Heinze, G., & Schemper, M. (2002). *A solution to the problem of separation in logistic regression*. Statistics in medicine, 21(16), 2409-2419.
+
+# Reference
+
+Agresti, A. (2015). *Foundations of linear and generalized linear models*. John Wiley & Sons.  ISBN: 978-1-118-73003-4
+
+
+

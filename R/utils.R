@@ -8,6 +8,8 @@
 #' @importFrom stats runif
 #' @importFrom stats var
 #' @importFrom utils tail
+#' @importFrom mvtnorm dmvnorm
+#' @importFrom MASS mvrnorm
 
 # random effects covariance
 create_Uj <- function(uj, neg=TRUE) {
@@ -37,7 +39,26 @@ create_Uj <- function(uj, neg=TRUE) {
 #' @param actual.mu optional numeric vector of true parameter values
 #' @param cols optional integer index indicating which parameters to display
 #' @param ... currently unused
+#' @return Returns a customized \code{ggplot} object
 #' @export
+#' @examples
+#' # Linear regression example
+#' set.seed(522)
+#' X <- cbind(1, matrix(rnorm(300), ncol=3))
+#' betavals <- c(0.5, -1, 2, -3)
+#' y <- X%*%betavals + rnorm(100, sd=.2)
+#'
+#' f <- hmc(N = 1000,
+#'           theta.init = c(rep(0, 4), 1),
+#'           epsilon = 0.01,
+#'           L = 10,
+#'           logPOSTERIOR = linear_posterior,
+#'           glogPOSTERIOR = g_linear_posterior,
+#'           varnames = c(paste0("beta", 0:3), "log_sigma_sq"),
+#'           param=list(y=y, X=X), parallel=FALSE, chains=1)
+#'
+#' diagplots(f, burnin=300, actual.mu=c(betavals, 2*log(.2)))
+#'
 diagplots <- function(object, burnin=NULL, plotfun=2, actual.mu=NULL, cols=NULL, ...) {
   UseMethod("diagplots")
 }
@@ -53,7 +74,26 @@ diagplots <- function(object, burnin=NULL, plotfun=2, actual.mu=NULL, cols=NULL,
 #' @param actual.mu optional numeric vector of true parameter values
 #' @param cols optional integer index indicating which parameters to display
 #' @param ... currently unused
+#' @return Returns a customized \code{ggplot} object
 #' @export
+#' @examples
+#' # Linear regression example
+#' set.seed(522)
+#' X <- cbind(1, matrix(rnorm(300), ncol=3))
+#' betavals <- c(0.5, -1, 2, -3)
+#' y <- X%*%betavals + rnorm(100, sd=.2)
+#'
+#' f <- hmc(N = 1000,
+#'           theta.init = c(rep(0, 4), 1),
+#'           epsilon = 0.01,
+#'           L = 10,
+#'           logPOSTERIOR = linear_posterior,
+#'           glogPOSTERIOR = g_linear_posterior,
+#'           varnames = c(paste0("beta", 0:3), "log_sigma_sq"),
+#'           param=list(y=y, X=X), parallel=FALSE, chains=1)
+#'
+#' diagplots(f, burnin=300, actual.mu=c(betavals, 2*log(.2)))
+#'
 diagplots.hmclearn <- function(object, burnin=NULL, plotfun=2, actual.mu=NULL, cols=NULL, ...) {
 
   data <- combMatrix(object$thetaCombined, burnin=burnin)
@@ -63,11 +103,13 @@ diagplots.hmclearn <- function(object, burnin=NULL, plotfun=2, actual.mu=NULL, c
     cols <- 1:ncol(data)
   }
 
-  if (!is.null(burnin)) {
-    thetaCombinedsubs <- data[-c(1:burnin), cols]
-  } else {
-    thetaCombinedsubs <- data[, cols]
-  }
+  thetaCombinedsubs <- data[, cols]
+
+  # if (!is.null(burnin)) {
+  #   thetaCombinedsubs <- data[-c(1:burnin), cols]
+  # } else {
+  #   thetaCombinedsubs <- data[, cols]
+  # }
 
   pdata <- as.data.frame(thetaCombinedsubs)
   pdata$t <- 1:nrow(pdata)
@@ -125,7 +167,6 @@ diagplots.hmclearn <- function(object, burnin=NULL, plotfun=2, actual.mu=NULL, c
 
 
 }
-
 
 
 

@@ -41,6 +41,14 @@ List containing two elements:  \code{theta.new} the ending value of theta and \c
 \description{
 Runs a single iteration of the leapfrog algorithm.  Typically called directly from \code{hmc}
 }
+\examples{
+set.seed(321)
+X <- cbind(1, rnorm(10))
+y <- rnorm(10)
+p <- runif(3) - 0.5
+leapfrog(rep(0,3), p, 0.01, linear_posterior, g_linear_posterior,
+         diag(3), FALSE, X=X, y=y)
+}
 \references{
 Neal, Radford. 2011. \emph{MCMC Using Hamiltonian Dynamics.} In Handbook of Markov Chain Monte Carlo, edited by Steve Brooks, Andrew Gelman, Galin L. Jones, and Xiao-Li Meng, 116–62. Chapman; Hall/CRC.
 }
