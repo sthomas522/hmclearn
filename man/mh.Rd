@@ -122,7 +122,7 @@ X <- cbind(1, matrix(rnorm(300), ncol=3))
 betavals <- c(0.5, -1, 2, -3)
 y <- X\%*\%betavals + rnorm(100, sd=.2)
 
-f1_mh <- mh(N = 5e3,
+f1_mh <- mh(N = 3e3,
          theta.init = c(rep(0, 4), 1),
          nu <- c(rep(0.001, 4), 0.1),
          qPROP = qprop,
@@ -140,7 +140,7 @@ betavals <- c(0.8, -0.5, 1.1)
 lmu <- X \%*\% betavals
 y <- sapply(exp(lmu), FUN = rpois, n=1)
 
-f2_mh <- mh(N = 5e3,
+f2_mh <- mh(N = 3e3,
          theta.init = rep(0, 3),
          nu = rep(0.01, 3),
          qPROP = qprop,
