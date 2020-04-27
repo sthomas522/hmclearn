@@ -519,7 +519,6 @@ hmc.fit <- function(N, theta.init, epsilon, L, logPOSTERIOR, glogPOSTERIOR, varn
     Minv <- diag(1 / Mdiag)
   }
 
-  # print(diag(Minv))
 
   # store all momentum and theta values
   iter.all <- 1
@@ -559,8 +558,8 @@ hmc.fit <- function(N, theta.init, epsilon, L, logPOSTERIOR, glogPOSTERIOR, varn
     u <- runif(1)
 
     # use log transform for ratio due to low numbers
-    num <- logPOSTERIOR(theta.new,  ...) - 0.5*(r.new %*% r.new)
-    den <- logPOSTERIOR(theta[[jj-1]], ...) - 0.5*(r0 %*% r0)
+    num <- logPOSTERIOR(theta.new,  ...) - 0.5*(r.new %*% Minv %*% r.new)
+    den <- logPOSTERIOR(theta[[jj-1]], ...) - 0.5*(r0 %*% Minv %*% r0)
 
     log.alpha <- pmin(0, num - den)
 
@@ -788,7 +787,6 @@ hmc <- function(N=10000, theta.init, epsilon=1e-2, L=10, logPOSTERIOR, glogPOSTE
     # store array
     obj <- list(N=N,
                 theta = lapply(res, function(xx) xx$theta),
-                # thetaCombined = sapply(thetaCombined, as.matrix, simplify="array"),
                 thetaCombined = thetaCombined,
                 r = lapply(res, function(xx) xx$r),
                 theta.all = lapply(res, function(xx) xx$theta),
@@ -814,7 +812,6 @@ hmc <- function(N=10000, theta.init, epsilon=1e-2, L=10, logPOSTERIOR, glogPOSTE
 
     obj <- list(N=N,
                 theta = lapply(res, function(xx) xx$theta),
-                # thetaCombined = sapply(thetaCombined, as.matrix, simplify="array"),
                 thetaCombined = thetaCombined,
                 r = NULL,
                 theta.all = lapply(res, function(xx) xx$theta),
@@ -831,26 +828,3 @@ hmc <- function(N=10000, theta.init, epsilon=1e-2, L=10, logPOSTERIOR, glogPOSTE
   }
 }
 
-
-# # logistic regression
-# library(mlbench)
-# data(BreastCancer)
-#
-# bc <- BreastCancer[complete.cases(BreastCancer), ]
-# X <- model.matrix(Class ~ Cl.thickness + Cell.size + Cell.shape, data = bc)
-# y <- ifelse(bc$Class == "benign", 0, 1)
-# p <- ncol(X)
-# N <- 1e3
-#
-# set.seed(321)
-# fm4_hmc <- hmc(N, theta.init = rep(0, p),
-#                epsilon = 1e-1, L=20,
-#                logPOSTERIOR = logistic_posterior,
-#                glogPOSTERIOR = g_logistic_posterior,
-#                randlength = TRUE,
-#                varnames = colnames(X),
-#                param=list(y=y, X=X), parallel = TRUE, chains=2)
-#
-# fm4_hmc$accept / N
-#
-# summary(fm4_hmc)
