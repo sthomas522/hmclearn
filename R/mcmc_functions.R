@@ -561,6 +561,7 @@ hmc.fit <- function(N, theta.init, epsilon, L, logPOSTERIOR, glogPOSTERIOR, varn
     num <- logPOSTERIOR(theta.new,  ...) - 0.5*(r.new %*% Minv %*% r.new)
     den <- logPOSTERIOR(theta[[jj-1]], ...) - 0.5*(r0 %*% Minv %*% r0)
 
+    # alpha = min[1, exp(num - den) ]
     log.alpha <- pmin(0, num - den)
 
     if (log(u) < log.alpha) {
