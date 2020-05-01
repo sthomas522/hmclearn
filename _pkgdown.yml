@@ -1,5 +1,7 @@
 destination: docs
 
+url: http://sthomas522.github.io/hmclearn
+
 template:
   params:
     bootswatch: sandstone
