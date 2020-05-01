@@ -1,0 +1,60 @@
+destination: docs
+
+reference:
+- title: "Hamiltonian Monte Carlo (HMC)"
+  desc: "Functions and helpers for fitting models using the MCMC algorithm HMC"
+- contents:
+  - hmc
+  - hmc.fit
+  - leapfrog
+- title: "Metropolis-Hastings (MH)"
+  desc: "Functions and helpers for fitting models using the MCMC algorithm MH"
+- contents:
+  - mh
+  - mh.fit
+  - qfun
+  - qprop
+- title: "Plotting functions from the bayesplot package"
+  desc:  "Use bayesplot to assess fit explore the posterior distributions of HMC and MH models"
+- contents:
+  - hmclearn-plots
+  - plot.hmclearn
+- title: "Summary Statistics from MCMC Simulations"
+  desc: "Functions to summarize and predict using the simulated posterior distribution"
+- contents:
+  - summary.hmclearn
+  - coef.hmclearn
+  - predict.hmclearn
+- title: "MCMC diagnostics"
+  desc: "Functions for some standard MCMC diagnostics"
+- contents:
+  - neff
+  - neff.hmclearn
+  - psrf
+  - psrf.hmclearn
+  - diagplots
+  - diagplots.hmclearn
+- title: "Sample Linear Regression Functions for Use in hmclearn"
+  desc: >
+    Log posterior and gradient functions for select
+    Generalized Linear Models and Mixed Effect Models.
+    Functions starting g_ are gradient functions.
+- contents:
+  - linear_posterior
+  - g_linear_posterior
+  - logistic_posterior
+  - g_logistic_posterior
+  - lmm_posterior
+  - g_lmm_posterior
+  - glmm_bin_posterior
+  - g_glmm_bin_posterior
+  - glmm_poisson_posterior
+  - g_glmm_poisson_posterior
+- title: "Sample Data"
+  desc: "Included data sets to practice fitting models using HMC"
+- contents:
+  - Drugs
+  - Endometrial
+  - Gdat
+
+
