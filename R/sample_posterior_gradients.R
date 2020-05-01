@@ -48,6 +48,10 @@ pfun_glmm_poisson <- function(PARAM, ...) {
 #' Sample log posterior and gradient functions for select generalized linear models
 #' and mixed effect models
 #'
+#' These functions can be used to fit common generalized linear models and mixed effect models.
+#' See the accompanying vignettes for details on the derivations of the log posterior and gradient.
+#' In addition, these functions can be used as templates to build custom models to fit using HMC.
+#'
 #' @name hmclearn-glm-posterior
 #'
 #' @param theta vector of parameters.  Stored as a single vector in order fixed effect, random effect, log-transformed diagonal \eqn{\lambda}, and off-diagonal of \code{G} vector \code{a}

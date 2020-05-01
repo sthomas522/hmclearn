@@ -144,8 +144,9 @@ g_glmm_poisson_posterior(
 Numeric vector for the log posterior or gradient of the log posterior
 }
 \description{
-Sample log posterior and gradient functions for select generalized linear models
-and mixed effect models
+These functions can be used to fit common generalized linear models and mixed effect models.
+See the accompanying vignettes for details on the derivations of the log posterior and gradient.
+In addition, these functions can be used as templates to build custom models to fit using HMC.
 }
 \section{Generalized Linear Models with available posterior and gradient functions}{
 
