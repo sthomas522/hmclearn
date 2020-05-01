@@ -12,8 +12,8 @@
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/sandstone/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
 
@@ -144,7 +144,7 @@
       <tr>
         <th colspan="2">
           <h2 id="section-hamiltonian-monte-carlo-hmc-" class="hasAnchor"><a href="#section-hamiltonian-monte-carlo-hmc-" class="anchor"></a>Hamiltonian Monte Carlo (HMC)</h2>
-          <p class="section-desc"><p>Functions and helpers for fitting models using the MCMC algorithm HMC</p></p>
+          <p class="section-desc"><p>Functions and helpers for fitting models using the MCMC algorithm HMC. Also exported is the leapfrog function, largely for pedagogical purposes.</p></p>
         </th>
       </tr>
       
@@ -175,7 +175,7 @@
       <tr>
         <th colspan="2">
           <h2 id="section-metropolis-hastings-mh-" class="hasAnchor"><a href="#section-metropolis-hastings-mh-" class="anchor"></a>Metropolis-Hastings (MH)</h2>
-          <p class="section-desc"><p>Functions and helpers for fitting models using the MCMC algorithm MH</p></p>
+          <p class="section-desc"><p>Functions and helpers for fitting models using the MCMC algorithm MH. Also includes functions to facilitate the random walk Metropolis algorithm using a multivariate normal proposal.</p></p>
         </th>
       </tr>
       
@@ -212,7 +212,7 @@
       <tr>
         <th colspan="2">
           <h2 id="section-plotting-functions-from-the-bayesplot-package" class="hasAnchor"><a href="#section-plotting-functions-from-the-bayesplot-package" class="anchor"></a>Plotting functions from the bayesplot package</h2>
-          <p class="section-desc"><p>Use bayesplot to assess fit explore the posterior distributions of HMC and MH models</p></p>
+          <p class="section-desc"><p>Use bayesplot to assess fit explore the posterior distributions of HMC and MH models. Includes functions for plotting Rhat statistics, effective sample sizes, histograms, density plots, trace plots, and autocorrelation, among other functions.</p></p>
         </th>
       </tr>
       
@@ -268,7 +268,7 @@
       <tr>
         <th colspan="2">
           <h2 id="section-mcmc-diagnostics" class="hasAnchor"><a href="#section-mcmc-diagnostics" class="anchor"></a>MCMC diagnostics</h2>
-          <p class="section-desc"><p>Functions for some standard MCMC diagnostics</p></p>
+          <p class="section-desc"><p>Functions for some standard MCMC diagnostics. Includes effective sample size, potential scale reduction factor (or Rhat), , and diagnostic plots that can be used to compare results from this package to fitting models using other techniques.</p></p>
         </th>
       </tr>
       
@@ -319,7 +319,7 @@ from models fit via <code>mh</code> or <code>hmc</code></p></td>
       <tr>
         <th colspan="2">
           <h2 id="section-sample-linear-regression-functions-for-use-in-hmclearn" class="hasAnchor"><a href="#section-sample-linear-regression-functions-for-use-in-hmclearn" class="anchor"></a>Sample Linear Regression Functions for Use in hmclearn</h2>
-          <p class="section-desc"><p>Log posterior and gradient functions for select Generalized Linear Models and Mixed Effect Models. Functions starting g_ are gradient functions.</p></p>
+          <p class="section-desc"><p>Includes log posterior and gradient functions for Linear, Logistic, and Poisson regression models, as well as Mixed Effect models. Functions starting <em>g_</em> are gradient functions.</p></p>
         </th>
       </tr>
       

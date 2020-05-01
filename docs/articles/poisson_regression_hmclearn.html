@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>hmclearn:  Poisson Regression Example • hmclearn</title>
-<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
+<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/sandstone/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
 <script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
@@ -231,21 +231,21 @@ p(\beta | X, y) &amp;\propto p(y | X, \beta)  p(\beta) \\
                     <span class="kw">param</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="kw">y</span><span class="kw">=</span><span class="no">y</span>, <span class="kw">X</span><span class="kw">=</span><span class="no">X</span>))
 <span class="no">t2.hmc</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span>()
 <span class="no">t2.hmc</span> - <span class="no">t1.hmc</span>
-<span class="co">#&gt; Time difference of 52.88597 secs</span></pre></body></html></div>
+<span class="co">#&gt; Time difference of 32.95235 secs</span></pre></body></html></div>
 <p>The acceptance ratio for each of the HMC chains is sufficiently high for an efficient simulation.</p>
 <div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="no">f_hmc</span>$<span class="no">accept</span>/<span class="no">N</span>
-<span class="co">#&gt; [1] 0.9800 0.9801</span></pre></body></html></div>
+<span class="co">#&gt; [1] 0.9815 0.9815</span></pre></body></html></div>
 <p>The posterior quantiles are summarized after removing an initial <em>burnin</em> period.</p>
 <div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">3000</span>)
 <span class="co">#&gt; Summary of MCMC simulation</span>
-<span class="co">#&gt;                     5%        25%       50%        75%        95%      rhat</span>
-<span class="co">#&gt; (Intercept)  5.5313309  5.5936746  5.633567  5.6729798  5.7290269 1.0080318</span>
-<span class="co">#&gt; Ayes         0.3660624  0.4342742  0.485813  0.5388263  0.6142029 1.0083922</span>
-<span class="co">#&gt; Cyes        -2.1848352 -2.0174534 -1.903212 -1.7869757 -1.6222251 1.0228214</span>
-<span class="co">#&gt; Myes        -6.2026569 -5.6320129 -5.326732 -5.0084785 -4.6400837 0.9999326</span>
-<span class="co">#&gt; Ayes:Cyes    1.7739623  1.9506333  2.073176  2.1918787  2.3668123 1.0254805</span>
-<span class="co">#&gt; Ayes:Myes    2.3011765  2.7014959  3.002463  3.2935954  3.9250166 1.0003004</span>
-<span class="co">#&gt; Cyes:Myes    2.5973826  2.7435121  2.848911  2.9494626  3.0874802 1.0040366</span></pre></body></html></div>
+<span class="co">#&gt;                     5%        25%        50%        75%        95%      rhat</span>
+<span class="co">#&gt; (Intercept)  5.5317998  5.5922197  5.6312641  5.6702696  5.7319012 1.0014865</span>
+<span class="co">#&gt; Ayes         0.3664839  0.4423926  0.4922933  0.5440683  0.6211929 1.0065124</span>
+<span class="co">#&gt; Cyes        -2.1406603 -1.9790474 -1.8754613 -1.7738350 -1.6233438 1.0015688</span>
+<span class="co">#&gt; Myes        -6.2577188 -5.7483168 -5.4035010 -5.1114216 -4.7361792 1.0001622</span>
+<span class="co">#&gt; Ayes:Cyes    1.7579226  1.9246022  2.0346144  2.1512754  2.3205168 0.9999802</span>
+<span class="co">#&gt; Ayes:Myes    2.3751881  2.7409959  3.0380853  3.3893417  3.8871658 1.0061050</span>
+<span class="co">#&gt; Cyes:Myes    2.6445102  2.7738805  2.8772105  2.9913681  3.1692726 1.0369054</span></pre></body></html></div>
 <p>Trace plots provide a visual indication of stationarity. These plots indicate that the MCMC chains are reasonably stationary.</p>
 <div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="fu"><a href="../reference/hmclearn-plots.html">mcmc_trace</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">3000</span>)</pre></body></html></div>
 <p><img src="poisson_regression_hmclearn_files/figure-html/unnamed-chunk-7-1.png" width="576"></p>

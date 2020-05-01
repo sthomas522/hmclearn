@@ -1,21 +1,36 @@
 destination: docs
 
+template:
+  params:
+    bootswatch: sandstone
+
 reference:
 - title: "Hamiltonian Monte Carlo (HMC)"
-  desc: "Functions and helpers for fitting models using the MCMC algorithm HMC"
+  desc: >
+    Functions and helpers for fitting models using the MCMC algorithm HMC.
+
+    Also exported is the leapfrog function, largely for pedagogical purposes.
 - contents:
   - hmc
   - hmc.fit
   - leapfrog
 - title: "Metropolis-Hastings (MH)"
-  desc: "Functions and helpers for fitting models using the MCMC algorithm MH"
+  desc: >
+    Functions and helpers for fitting models using the MCMC algorithm MH.
+
+    Also includes functions to facilitate the random walk Metropolis algorithm using
+    a multivariate normal proposal.
 - contents:
   - mh
   - mh.fit
   - qfun
   - qprop
 - title: "Plotting functions from the bayesplot package"
-  desc:  "Use bayesplot to assess fit explore the posterior distributions of HMC and MH models"
+  desc: >
+    Use bayesplot to assess fit explore the posterior distributions
+    of HMC and MH models.  Includes functions for plotting Rhat statistics,
+    effective sample sizes, histograms, density plots, trace plots,
+    and autocorrelation, among other functions.
 - contents:
   - hmclearn-plots
   - plot.hmclearn
@@ -26,7 +41,12 @@ reference:
   - coef.hmclearn
   - predict.hmclearn
 - title: "MCMC diagnostics"
-  desc: "Functions for some standard MCMC diagnostics"
+  desc: >
+    Functions for some standard MCMC diagnostics.
+
+    Includes effective sample size, potential scale reduction factor (or Rhat), ,
+    and diagnostic plots that can be used to compare results from this
+    package to fitting models using other techniques.
 - contents:
   - neff
   - neff.hmclearn
@@ -36,9 +56,8 @@ reference:
   - diagplots.hmclearn
 - title: "Sample Linear Regression Functions for Use in hmclearn"
   desc: >
-    Log posterior and gradient functions for select
-    Generalized Linear Models and Mixed Effect Models.
-    Functions starting g_ are gradient functions.
+    Includes log posterior and gradient functions for Linear, Logistic, and Poisson regression models,
+    as well as Mixed Effect models.  Functions starting *g_* are gradient functions.
 - contents:
   - linear_posterior
   - g_linear_posterior
