@@ -704,7 +704,7 @@ g_glmm_poisson_posterior <- function(theta, y, X, Z, m, q=1, A = 1e4,
     bd <- kronecker(diag(m), diag(zv, q, q))
     -t(exp(XZbetau) - y) %*% Z %*% L_block %*% bd %*% Dhalf_block %*% tau_param
   })
-  g_xi <- g_xi - (nulambda + 1) / (1 + nulambda*Alambda^2 * exp(-2*xi_param))
+  g_xi <- g_xi - (nulambda + 1) / (1 + nulambda*Alambda^2 * exp(-2*xi_param)) - 1
 
   if (q > 1) {
     tau_lst <- split(tau_param, ceiling(seq_along(tau_param)/q))
