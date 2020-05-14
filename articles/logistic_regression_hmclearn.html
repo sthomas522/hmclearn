@@ -90,7 +90,7 @@
       <h1 data-toc-skip>hmclearn: Logistic Regression Example</h1>
                         <h4 class="author">Samuel Thomas</h4>
             
-            <h4 class="date">2020-05-01</h4>
+            <h4 class="date">2020-05-14</h4>
       
       
       <div class="hidden name"><code>logistic_regression_hmclearn.Rmd</code></div>
@@ -223,18 +223,18 @@ p(\beta | X, y) &amp;\propto p(y | X, \beta)  p(\beta) \\
             <span class="kw">parallel</span><span class="kw">=</span><span class="fl">TRUE</span>, <span class="kw">chains</span><span class="kw">=</span><span class="fl">2</span>)
 <span class="no">t2.hmc</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span>()
 <span class="no">t2.hmc</span> - <span class="no">t1.hmc</span>
-<span class="co">#&gt; Time difference of 29.96694 secs</span></pre></body></html></div>
+<span class="co">#&gt; Time difference of 30.42589 secs</span></pre></body></html></div>
 <p>The acceptance ratio for each of the HMC chains is sufficiently high for an efficient simulation.</p>
 <div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="no">f_hmc</span>$<span class="no">accept</span>/<span class="no">N</span>
-<span class="co">#&gt; [1] 0.9127 0.9140</span></pre></body></html></div>
+<span class="co">#&gt; [1] 0.9144 0.9155</span></pre></body></html></div>
 <p>The posterior quantiles are summarized after removing an initial <em>burnin</em> period.</p>
 <div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">3000</span>)
 <span class="co">#&gt; Summary of MCMC simulation</span>
-<span class="co">#&gt;                      5%        25%        50%        75%        95%     rhat</span>
-<span class="co">#&gt; (Intercept) -0.04017342  1.1949614  2.6205037  4.6245565  8.1470494 1.000220</span>
-<span class="co">#&gt; PI2         -1.23966010 -0.7578152 -0.4513172 -0.1619036  0.2456566 1.000150</span>
-<span class="co">#&gt; EH2         -3.18380985 -2.5233698 -2.1043449 -1.7291993 -1.2496974 1.000026</span>
-<span class="co">#&gt; NV2          2.65348139  5.0815160  7.9320874 11.8910517 18.9366115 1.000121</span></pre></body></html></div>
+<span class="co">#&gt;                       5%        25%        50%        75%        95%      rhat</span>
+<span class="co">#&gt; (Intercept) -0.001262177  1.2371211  2.5848669  4.5569692  7.7872484 1.0004187</span>
+<span class="co">#&gt; PI2         -1.224836523 -0.7603083 -0.4575751 -0.1639686  0.2343274 1.0001397</span>
+<span class="co">#&gt; EH2         -3.132711001 -2.5032915 -2.1002889 -1.7335410 -1.2560120 0.9999289</span>
+<span class="co">#&gt; NV2          2.741750069  5.2184377  7.9355860 11.7800598 18.2311958 1.0003928</span></pre></body></html></div>
 <p>Trace plots provide a visual indication of stationarity. These plots indicate that the MCMC chains are reasonably stationary.</p>
 <div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="fu"><a href="../reference/hmclearn-plots.html">mcmc_trace</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">3000</span>)</pre></body></html></div>
 <p><img src="logistic_regression_hmclearn_files/figure-html/unnamed-chunk-7-1.png" width="576"></p>
