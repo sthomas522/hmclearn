@@ -90,7 +90,7 @@
       <h1 data-toc-skip>hmclearn package: Linear Regression Example</h1>
                         <h4 class="author">Samuel Thomas</h4>
             
-            <h4 class="date">2020-05-14</h4>
+            <h4 class="date">2020-05-15</h4>
       
       
       <div class="hidden name"><code>linear_regression_hmclearn.Rmd</code></div>
@@ -249,25 +249,25 @@ p(\beta, \gamma|y, X) &amp;\propto p(y|X, \beta, \gamma) p(\beta, \gamma) \\
                     <span class="kw">parallel</span><span class="kw">=</span><span class="fl">TRUE</span>, <span class="kw">chains</span><span class="kw">=</span><span class="fl">2</span>)
 <span class="no">t2.hmc</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span>()
 <span class="no">t2.hmc</span> - <span class="no">t1.hmc</span>
-<span class="co">#&gt; Time difference of 27.20728 secs</span></pre></body></html></div>
+<span class="co">#&gt; Time difference of 30.26719 secs</span></pre></body></html></div>
 <p>The acceptance ratio for each of the HMC chains is sufficiently high for an efficient simulation.</p>
 <div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="no">f_hmc</span>$<span class="no">accept</span>/<span class="no">N</span>
-<span class="co">#&gt; [1] 0.9725 0.9758</span></pre></body></html></div>
+<span class="co">#&gt; [1] 0.9732 0.9748</span></pre></body></html></div>
 <p>The posterior quantiles are summarized after removing an initial <em>burnin</em> period.</p>
 <div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">2000</span>)
 <span class="co">#&gt; Summary of MCMC simulation</span>
 <span class="co">#&gt;                           5%           25%           50%          75%</span>
-<span class="co">#&gt; intercept      -4.2029075369  3.5153487037  8.5462109296 13.327647162</span>
-<span class="co">#&gt; dist            2.8255984829  3.6584070119  4.2193186685  4.882057457</span>
-<span class="co">#&gt; climb          -0.0076646839 -0.0034432814 -0.0004785800  0.002403209</span>
-<span class="co">#&gt; climb_distance  0.0003912957  0.0007227214  0.0009466102  0.001163652</span>
-<span class="co">#&gt; log_sigma2      4.7599590812  4.9925723588  5.1550705351  5.321244733</span>
-<span class="co">#&gt;                         95%      rhat</span>
-<span class="co">#&gt; intercept      20.032554120 0.9999533</span>
-<span class="co">#&gt; dist            5.777086051 1.0002723</span>
-<span class="co">#&gt; climb           0.006800225 1.0000404</span>
-<span class="co">#&gt; climb_distance  0.001479876 0.9999578</span>
-<span class="co">#&gt; log_sigma2      5.570843563 1.0002702</span></pre></body></html></div>
+<span class="co">#&gt; intercept      -5.0038478644  3.3950265669  8.2281496319 12.951014264</span>
+<span class="co">#&gt; dist            2.8628416884  3.6927623352  4.2710959093  4.849835897</span>
+<span class="co">#&gt; climb          -0.0072363595 -0.0029959710 -0.0002309876  0.002674983</span>
+<span class="co">#&gt; climb_distance  0.0003362883  0.0007156674  0.0009291254  0.001133718</span>
+<span class="co">#&gt; log_sigma2      4.7644952178  4.9968516863  5.1662873464  5.340306878</span>
+<span class="co">#&gt;                         95%     rhat</span>
+<span class="co">#&gt; intercept      19.141001704 1.029112</span>
+<span class="co">#&gt; dist            5.845840171 1.040613</span>
+<span class="co">#&gt; climb           0.007632993 1.013617</span>
+<span class="co">#&gt; climb_distance  0.001444542 1.027172</span>
+<span class="co">#&gt; log_sigma2      5.594633786 1.025730</span></pre></body></html></div>
 <p>Trace plots provide a visual indication of stationarity. These plots indicate that the MCMC chains are reasonably stationary.</p>
 <div class="sourceCode" id="cb8"><html><body><pre class="r"><span class="fu"><a href="../reference/hmclearn-plots.html">mcmc_trace</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">2000</span>)</pre></body></html></div>
 <p><img src="linear_regression_hmclearn_files/figure-html/unnamed-chunk-8-1.png" width="576"></p>
