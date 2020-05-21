@@ -170,7 +170,7 @@ test_that("vignette examples", {
                glogPOSTERIOR = g_glmm_bin_posterior,
                varnames = vnames,
                parallel=FALSE, chains=1,
-               param=list(y = y, X=X2, Z=Z2, m=60, q=1, B=5,
+               param=list(y = y, X=X2, Z=Z2, m=60, q=1, sig2beta=5,
                           nulambda=1, Alambda=25)  )
 
   # test values
@@ -250,7 +250,7 @@ test_that("vignette examples", {
                varnames = vnames,
                param=list(y = y, X=X, Z=Z, m=18, q=1,
                           nueps=4, Aeps=1,
-                          nulambda=1, Alambda=1, B=1e-5),
+                          nulambda=1, Alambda=1, sig2beta=1e5),
                parallel=FALSE, chains=1)
 
   # test values

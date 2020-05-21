@@ -8,7 +8,6 @@ leapfrog(
   theta_lf,
   r,
   epsilon,
-  logPOSTERIOR,
   glogPOSTERIOR,
   Minv,
   constrain,
@@ -22,8 +21,6 @@ leapfrog(
 \item{r}{starting momentum vector}
 
 \item{epsilon}{Step-size parameter for \code{leapfrog}}
-
-\item{logPOSTERIOR}{Function to calculate and return the log posterior given a vector of values of \code{theta}}
 
 \item{glogPOSTERIOR}{Function to calculate and return the gradient of the log posterior given a vector of values of \code{theta}}
 
@@ -46,7 +43,7 @@ set.seed(321)
 X <- cbind(1, rnorm(10))
 y <- rnorm(10)
 p <- runif(3) - 0.5
-leapfrog(rep(0,3), p, 0.01, linear_posterior, g_linear_posterior,
+leapfrog(rep(0,3), p, 0.01, g_linear_posterior,
          diag(3), FALSE, X=X, y=y)
 }
 \references{

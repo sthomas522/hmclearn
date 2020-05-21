@@ -64,7 +64,7 @@ We set a multivariate Normal prior for $\beta$
 $$
 \begin{aligned}
 \beta &\sim N(0, \Sigma_\beta) \\
-&\sim N(0, BI)
+&\sim N(0, \sigma_\beta^2I)
 \end{aligned}
 $$
 

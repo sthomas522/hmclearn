@@ -60,7 +60,7 @@ pfun_glmm_poisson <- function(PARAM, ...) {
 #' @param Z numeric design matrix of random effect parameters
 #' @param a hyperprior for the Inverse Gamma shape parameter
 #' @param b hyperprior for the Inverse Gamma scale parameter
-#' @param B prior for linear predictors is multivariate Normal with mean 0 with diagonal covariance B^-1
+#' @param sig2beta diagonal covariance of prior for linear predictors is multivariate normal with mean 0
 #' @param m number of random effect linear parameters
 #' @param q number of random effects covariance parameters
 #' @param A hyperprior numeric vector for the random effects off-diagonal \code{a}
@@ -202,13 +202,12 @@ NULL
 
 #' @rdname hmclearn-glm-posterior
 #' @export
-linear_posterior <- function(theta, y, X, a=1e-4, b=1e-4, B=0.001) {
+linear_posterior <- function(theta, y, X, a=1e-4, b=1e-4, sig2beta=1e3) {
   k <- length(theta)
   beta_param <- as.numeric(theta[1:(k-1)])
   gamma_param <- theta[k]
 
-  nu <- diag(1/B, k-1, k-1)
-  inv.nu <- diag(B, k-1, k-1)
+  inv.nu <- diag(1/sig2beta, k-1, k-1)
 
   n <- nrow(X)
   result <- -(n/2 + a)*gamma_param - exp(-gamma_param)/2 * t(y - X%*%beta_param) %*%
@@ -218,14 +217,13 @@ linear_posterior <- function(theta, y, X, a=1e-4, b=1e-4, B=0.001) {
 
 #' @rdname hmclearn-glm-posterior
 #' @export
-g_linear_posterior <- function(theta, y, X, a=1e-4, b=1e-4, B=0.001) {
+g_linear_posterior <- function(theta, y, X, a=1e-4, b=1e-4, sig2beta=1e3) {
   k <- length(theta)
   beta_param <- as.numeric(theta[1:(k-1)])
   gamma_param <- theta[k]
   n <- nrow(X)
 
-  nu <- diag(1/B, k-1, k-1)
-  inv.nu <- diag(B, k-1, k-1)
+  inv.nu <- diag(1/sig2beta, k-1, k-1)
 
   grad_beta <- exp(-gamma_param)  * t(X) %*% (y - X%*%beta_param)  - (inv.nu %*% beta_param)
   grad_gamma <- -(n/2 + a) + exp(-gamma_param)/2 * t(y - X%*%beta_param) %*%
@@ -235,28 +233,26 @@ g_linear_posterior <- function(theta, y, X, a=1e-4, b=1e-4, B=0.001) {
 
 #' @rdname hmclearn-glm-posterior
 #' @export
-logistic_posterior <- function(theta, y, X, B=0.01) {
+logistic_posterior <- function(theta, y, X, sig2beta=1e2) {
   k <- length(theta)
   beta_param <- as.numeric(theta)
 
-  nu <- diag(1/B, k, k)
-  inv.nu <- diag(B, k, k)
+  inv.nu <- diag(1/sig2beta, k, k)
 
   result <- log_lik_bin(beta_param=beta_param, y=y, X=X) +
-    -1/2*log(det(2*pi*nu)) - 1/2* t(beta_param) %*% inv.nu %*% beta_param
+    - 1/2* t(beta_param) %*% inv.nu %*% beta_param
 
   return(result)
 }
 
 #' @rdname hmclearn-glm-posterior
 #' @export
-g_logistic_posterior <- function(theta, y, X, B=0.01) {
+g_logistic_posterior <- function(theta, y, X, sig2beta=1e2) {
   n <- length(y)
   k <- length(theta)
   beta <- as.numeric(theta)
 
-  nu <- diag(1/B, k, k)
-  inv.nu <- diag(B, k, k)
+  inv.nu <- diag(1/sig2beta, k, k)
 
   result <- t(y-1) %*% X %*% diag(1, k, k) +
     t(exp(-X %*% theta) / (1 + exp(-X %*% theta))) %*% X - t(inv.nu %*% theta)
@@ -265,12 +261,11 @@ g_logistic_posterior <- function(theta, y, X, B=0.01) {
 
 #' @rdname hmclearn-glm-posterior
 #' @export
-poisson_posterior <- function(theta, y, X, B=0.01) {
+poisson_posterior <- function(theta, y, X, sig2beta=1e2) {
   k <- length(theta)
   beta_param <- theta
 
-  nu <- diag(1/B, k, k)
-  inv.nu <- diag(B, k, k)
+  inv.nu <- diag(1/sig2beta, k, k)
 
   result <- log_lik_poisson(beta_param=beta_param, y=y, X=X) -
     - 1/2* t(beta_param) %*% inv.nu %*% beta_param
@@ -280,19 +275,18 @@ poisson_posterior <- function(theta, y, X, B=0.01) {
 
 #' @rdname hmclearn-glm-posterior
 #' @export
-g_poisson_posterior <- function(theta, y, X, B=0.01) {
+g_poisson_posterior <- function(theta, y, X, sig2beta=1e2) {
   n <- length(y)
   k <- length(theta)
 
-  nu <- diag(1/B, k, k)
-  inv.nu <- diag(B, k, k)
+  inv.nu <- diag(1/sig2beta, k, k)
 
   y %*% X - crossprod(exp(X %*% theta), X) - crossprod(theta, inv.nu)
 }
 
 #' @rdname hmclearn-glm-posterior
 #' @export
-lmm_posterior <- function(theta, y, X, Z, m, q=1, A = 1e4, nueps=1, nulambda=1, Aeps=25, Alambda=25, B=0.001) {
+lmm_posterior <- function(theta, y, X, Z, m, q=1, A = 1e4, nueps=1, nulambda=1, Aeps=25, Alambda=25, sig2beta=1e3) {
   Z <- as.matrix(Z)
   p <- ncol(X)
   n <- nrow(X)
@@ -317,8 +311,7 @@ lmm_posterior <- function(theta, y, X, Z, m, q=1, A = 1e4, nueps=1, nulambda=1, 
     a_param <- 0
   }
 
-  nu <- diag(1/B, p, p)
-  inv.nu <- diag(B, p, p)
+  inv.nu <- diag(1/sig2beta, p, p)
 
 
   # reconstruct G LDLT decomposition
@@ -350,7 +343,7 @@ lmm_posterior <- function(theta, y, X, Z, m, q=1, A = 1e4, nueps=1, nulambda=1, 
 
 #' @rdname hmclearn-glm-posterior
 #' @export
-g_lmm_posterior <- function(theta, y, X, Z, m, q=1, A = 1e4, nueps=1, nulambda=1, Aeps=25, Alambda=25, B=0.001) {
+g_lmm_posterior <- function(theta, y, X, Z, m, q=1, A = 1e4, nueps=1, nulambda=1, Aeps=25, Alambda=25, sig2beta=1e3) {
   Z <- as.matrix(Z)
   p <- ncol(X)
   n <- nrow(X)
@@ -375,8 +368,7 @@ g_lmm_posterior <- function(theta, y, X, Z, m, q=1, A = 1e4, nueps=1, nulambda=1
     a_param <- 0
   }
 
-  nu <- diag(1/B, p, p)
-  inv.nu <- diag(B, p, p)
+  inv.nu <- diag(1/sig2beta, p, p)
 
   # reconstruct G LDLT decomposition
   Dhalf <- diag(exp(xi_param), q, q)
@@ -448,14 +440,13 @@ g_lmm_posterior <- function(theta, y, X, Z, m, q=1, A = 1e4, nueps=1, nulambda=1
 #' @rdname hmclearn-glm-posterior
 #' @export
 glmm_bin_posterior <- function(theta, y, X, Z, m, q=1, A = 1e4,
-                               nulambda=1, Alambda=25, B=1e4) {
+                               nulambda=1, Alambda=25, sig2beta=1e4) {
   Z <- as.matrix(Z)
   p <- ncol(X)
   n <- nrow(X)
 
   # prior covariance for beta
-  Sig_beta <- diag(B, p, p)
-  Sig_inv_beta <- diag(1/B, p, p)
+  Sig_inv_beta <- diag(1/sig2beta, p, p)
 
   # extract parameters from theta vector
   beta_param <- theta[1:p]
@@ -489,7 +480,7 @@ glmm_bin_posterior <- function(theta, y, X, Z, m, q=1, A = 1e4,
   XZbetau <- X %*% beta_param + Z %*% u_param
 
   log_likelihood <- sum( -(1-y) * XZbetau - log(1 + exp(-XZbetau)))
-  log_beta_prior <- -1/2 * p*log(B) - 1/2*t(beta_param) %*% Sig_inv_beta%*% beta_param
+  log_beta_prior <- - 1/2*t(beta_param) %*% Sig_inv_beta%*% beta_param
   log_tau_prior <- -1/2 * t(tau_param) %*% tau_param
   log_xi_prior <- -(nulambda + 1)/2 * log(1 + 1/nulambda * exp(2*xi_param) / Alambda^2)
 
@@ -500,14 +491,13 @@ glmm_bin_posterior <- function(theta, y, X, Z, m, q=1, A = 1e4,
 #' @rdname hmclearn-glm-posterior
 #' @export
 g_glmm_bin_posterior <- function(theta, y, X, Z, m, q=1, A = 1e4,
-                                 nulambda=1, Alambda=25, B=1e4) {
+                                 nulambda=1, Alambda=25, sig2beta=1e4) {
   Z <- as.matrix(Z)
   p <- ncol(X)
   n <- nrow(X)
 
   # prior covariance for beta
-  Sig_beta <- diag(B, p, p)
-  Sig_inv_beta <- diag(1/B, p, p)
+  Sig_inv_beta <- diag(1/sig2beta, p, p)
 
   # extract parameters from theta vector
   beta_param <- theta[1:p]
@@ -590,15 +580,14 @@ g_glmm_bin_posterior <- function(theta, y, X, Z, m, q=1, A = 1e4,
 #' @rdname hmclearn-glm-posterior
 #' @export
 glmm_poisson_posterior <- function(theta, y, X, Z, m, q=1, A = 1e4,
-                                   nulambda=1, Alambda=25, B=1e4) {
+                                   nulambda=1, Alambda=25, sig2beta=1e4) {
   Z <- as.matrix(Z)
   p <- ncol(X)
   n <- nrow(X)
   q <- 1
 
   # prior covariance for beta
-  Sig_beta <- diag(B, p, p)
-  Sig_inv_beta <- diag(1/B, p, p)
+  Sig_inv_beta <- diag(1/sig2beta, p, p)
 
   # extract parameters from theta vector
   beta_param <- theta[1:p]
@@ -632,7 +621,7 @@ glmm_poisson_posterior <- function(theta, y, X, Z, m, q=1, A = 1e4,
   XZbetau <- X %*% beta_param + Z %*% u_param
 
   log_likelihood <- -sum(exp(XZbetau)) + y %*% XZbetau
-  log_beta_prior <- -1/2 * p*log(B) - 1/2*t(beta_param) %*% Sig_inv_beta%*% beta_param
+  log_beta_prior <- - 1/2*t(beta_param) %*% Sig_inv_beta%*% beta_param
   log_tau_prior <- -1/2 * t(tau_param) %*% tau_param
   log_xi_prior <- -(nulambda + 1)/2 * log(1 + 1/nulambda * exp(2*xi_param) / Alambda^2)
 
@@ -643,15 +632,14 @@ glmm_poisson_posterior <- function(theta, y, X, Z, m, q=1, A = 1e4,
 #' @rdname hmclearn-glm-posterior
 #' @export
 g_glmm_poisson_posterior <- function(theta, y, X, Z, m, q=1, A = 1e4,
-                                     nulambda=1, Alambda=25, B=1e4) {
+                                     nulambda=1, Alambda=25, sig2beta=1e4) {
   Z <- as.matrix(Z)
   p <- ncol(X)
   n <- nrow(X)
   q <- 1
 
   # prior covariance for beta
-  Sig_beta <- diag(B, p, p)
-  Sig_inv_beta <- diag(1/B, p, p)
+  Sig_inv_beta <- diag(1/sig2beta, p, p)
 
   # extract parameters from theta vector
   beta_param <- theta[1:p]

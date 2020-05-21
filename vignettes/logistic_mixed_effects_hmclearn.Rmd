@@ -135,7 +135,7 @@ We set a multivariate Normal prior for $\beta$
 $$
 \begin{aligned}
 \beta &\sim N(0, \Sigma_\beta) \\
-&\sim N(0, BI)
+&\sim N(0, \sigma_\beta^2I)
 \end{aligned}
 $$
 
@@ -340,7 +340,7 @@ f_hmc <- hmc(N = N, theta.init = initvals,
           glogPOSTERIOR = g_glmm_bin_posterior, 
           varnames = vnames, 
           parallel=TRUE, chains=2, 
-          param=list(y = y, X=X2, Z=Z, m=60, q=1, B=5, 
+          param=list(y = y, X=X2, Z=Z, m=60, q=1, sig2beta=5, 
                      nulambda=4, Alambda=1)  )
 
 t2.hmc <- Sys.time()

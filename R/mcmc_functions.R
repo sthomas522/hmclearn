@@ -354,7 +354,7 @@ qprop <- function(theta1, nu) {
 #' @param theta_lf starting parameter vector
 #' @param r starting momentum vector
 #' @param epsilon Step-size parameter for \code{leapfrog}
-#' @param logPOSTERIOR Function to calculate and return the log posterior given a vector of values of \code{theta}
+# #' @param logPOSTERIOR Function to calculate and return the log posterior given a vector of values of \code{theta}
 #' @param glogPOSTERIOR Function to calculate and return the gradient of the log posterior given a vector of values of \code{theta}
 #' @param Minv Inverse Mass matrix
 #' @param constrain Optional vector of which parameters in \code{theta} accept positive values only.  Default is that all parameters accept all real numbers
@@ -369,9 +369,9 @@ qprop <- function(theta1, nu) {
 #' X <- cbind(1, rnorm(10))
 #' y <- rnorm(10)
 #' p <- runif(3) - 0.5
-#' leapfrog(rep(0,3), p, 0.01, linear_posterior, g_linear_posterior,
+#' leapfrog(rep(0,3), p, 0.01, g_linear_posterior,
 #'          diag(3), FALSE, X=X, y=y)
-leapfrog <- function(theta_lf, r, epsilon, logPOSTERIOR, glogPOSTERIOR, Minv, constrain,
+leapfrog <- function(theta_lf, r, epsilon, glogPOSTERIOR, Minv, constrain,
                      lastSTEP=FALSE, ...) {
 
   # gradient of log posterior for old theta
@@ -544,7 +544,7 @@ hmc.fit <- function(N, theta.init, epsilon, L, logPOSTERIOR, glogPOSTERIOR, varn
       iter.all <- iter.all + 1
 
       lstp <- i == L_vals[jj]
-      lf <- leapfrog(theta_lf = theta.new, r = r.new, epsilon = eps_vals[, jj], logPOSTERIOR = logPOSTERIOR,
+      lf <- leapfrog(theta_lf = theta.new, r = r.new, epsilon = eps_vals[, jj], # logPOSTERIOR = logPOSTERIOR,
                      glogPOSTERIOR = glogPOSTERIOR,
                      Minv=Minv, constrain=constrain, lastSTEP=lstp, ...)
 

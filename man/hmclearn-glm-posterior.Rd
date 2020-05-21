@@ -17,17 +17,17 @@
 \title{Sample log posterior and gradient functions for select generalized linear models
 and mixed effect models}
 \usage{
-linear_posterior(theta, y, X, a = 1e-04, b = 1e-04, B = 0.001)
+linear_posterior(theta, y, X, a = 1e-04, b = 1e-04, sig2beta = 1000)
 
-g_linear_posterior(theta, y, X, a = 1e-04, b = 1e-04, B = 0.001)
+g_linear_posterior(theta, y, X, a = 1e-04, b = 1e-04, sig2beta = 1000)
 
-logistic_posterior(theta, y, X, B = 0.01)
+logistic_posterior(theta, y, X, sig2beta = 100)
 
-g_logistic_posterior(theta, y, X, B = 0.01)
+g_logistic_posterior(theta, y, X, sig2beta = 100)
 
-poisson_posterior(theta, y, X, B = 0.01)
+poisson_posterior(theta, y, X, sig2beta = 100)
 
-g_poisson_posterior(theta, y, X, B = 0.01)
+g_poisson_posterior(theta, y, X, sig2beta = 100)
 
 lmm_posterior(
   theta,
@@ -41,7 +41,7 @@ lmm_posterior(
   nulambda = 1,
   Aeps = 25,
   Alambda = 25,
-  B = 0.001
+  sig2beta = 1000
 )
 
 g_lmm_posterior(
@@ -56,7 +56,7 @@ g_lmm_posterior(
   nulambda = 1,
   Aeps = 25,
   Alambda = 25,
-  B = 0.001
+  sig2beta = 1000
 )
 
 glmm_bin_posterior(
@@ -69,7 +69,7 @@ glmm_bin_posterior(
   A = 10000,
   nulambda = 1,
   Alambda = 25,
-  B = 10000
+  sig2beta = 10000
 )
 
 g_glmm_bin_posterior(
@@ -82,7 +82,7 @@ g_glmm_bin_posterior(
   A = 10000,
   nulambda = 1,
   Alambda = 25,
-  B = 10000
+  sig2beta = 10000
 )
 
 glmm_poisson_posterior(
@@ -95,7 +95,7 @@ glmm_poisson_posterior(
   A = 10000,
   nulambda = 1,
   Alambda = 25,
-  B = 10000
+  sig2beta = 10000
 )
 
 g_glmm_poisson_posterior(
@@ -108,7 +108,7 @@ g_glmm_poisson_posterior(
   A = 10000,
   nulambda = 1,
   Alambda = 25,
-  B = 10000
+  sig2beta = 10000
 )
 }
 \arguments{
@@ -122,7 +122,7 @@ g_glmm_poisson_posterior(
 
 \item{b}{hyperprior for the Inverse Gamma scale parameter}
 
-\item{B}{prior for linear predictors is multivariate Normal with mean 0 with diagonal covariance B^-1}
+\item{sig2beta}{diagonal covariance of prior for linear predictors is multivariate normal with mean 0}
 
 \item{Z}{numeric design matrix of random effect parameters}
 
