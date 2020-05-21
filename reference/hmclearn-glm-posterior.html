@@ -146,17 +146,17 @@ See the accompanying vignettes for details on the derivations of the log posteri
 In addition, these functions can be used as templates to build custom models to fit using HMC.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>linear_posterior</span>(<span class='no'>theta</span>, <span class='no'>y</span>, <span class='no'>X</span>, <span class='kw'>a</span> <span class='kw'>=</span> <span class='fl'>1e-04</span>, <span class='kw'>b</span> <span class='kw'>=</span> <span class='fl'>1e-04</span>, <span class='kw'>B</span> <span class='kw'>=</span> <span class='fl'>0.001</span>)
+    <pre class="usage"><span class='fu'>linear_posterior</span>(<span class='no'>theta</span>, <span class='no'>y</span>, <span class='no'>X</span>, <span class='kw'>a</span> <span class='kw'>=</span> <span class='fl'>1e-04</span>, <span class='kw'>b</span> <span class='kw'>=</span> <span class='fl'>1e-04</span>, <span class='kw'>sig2beta</span> <span class='kw'>=</span> <span class='fl'>1000</span>)
 
-<span class='fu'>g_linear_posterior</span>(<span class='no'>theta</span>, <span class='no'>y</span>, <span class='no'>X</span>, <span class='kw'>a</span> <span class='kw'>=</span> <span class='fl'>1e-04</span>, <span class='kw'>b</span> <span class='kw'>=</span> <span class='fl'>1e-04</span>, <span class='kw'>B</span> <span class='kw'>=</span> <span class='fl'>0.001</span>)
+<span class='fu'>g_linear_posterior</span>(<span class='no'>theta</span>, <span class='no'>y</span>, <span class='no'>X</span>, <span class='kw'>a</span> <span class='kw'>=</span> <span class='fl'>1e-04</span>, <span class='kw'>b</span> <span class='kw'>=</span> <span class='fl'>1e-04</span>, <span class='kw'>sig2beta</span> <span class='kw'>=</span> <span class='fl'>1000</span>)
 
-<span class='fu'>logistic_posterior</span>(<span class='no'>theta</span>, <span class='no'>y</span>, <span class='no'>X</span>, <span class='kw'>B</span> <span class='kw'>=</span> <span class='fl'>0.01</span>)
+<span class='fu'>logistic_posterior</span>(<span class='no'>theta</span>, <span class='no'>y</span>, <span class='no'>X</span>, <span class='kw'>sig2beta</span> <span class='kw'>=</span> <span class='fl'>100</span>)
 
-<span class='fu'>g_logistic_posterior</span>(<span class='no'>theta</span>, <span class='no'>y</span>, <span class='no'>X</span>, <span class='kw'>B</span> <span class='kw'>=</span> <span class='fl'>0.01</span>)
+<span class='fu'>g_logistic_posterior</span>(<span class='no'>theta</span>, <span class='no'>y</span>, <span class='no'>X</span>, <span class='kw'>sig2beta</span> <span class='kw'>=</span> <span class='fl'>100</span>)
 
-<span class='fu'>poisson_posterior</span>(<span class='no'>theta</span>, <span class='no'>y</span>, <span class='no'>X</span>, <span class='kw'>B</span> <span class='kw'>=</span> <span class='fl'>0.01</span>)
+<span class='fu'>poisson_posterior</span>(<span class='no'>theta</span>, <span class='no'>y</span>, <span class='no'>X</span>, <span class='kw'>sig2beta</span> <span class='kw'>=</span> <span class='fl'>100</span>)
 
-<span class='fu'>g_poisson_posterior</span>(<span class='no'>theta</span>, <span class='no'>y</span>, <span class='no'>X</span>, <span class='kw'>B</span> <span class='kw'>=</span> <span class='fl'>0.01</span>)
+<span class='fu'>g_poisson_posterior</span>(<span class='no'>theta</span>, <span class='no'>y</span>, <span class='no'>X</span>, <span class='kw'>sig2beta</span> <span class='kw'>=</span> <span class='fl'>100</span>)
 
 <span class='fu'>lmm_posterior</span>(
   <span class='no'>theta</span>,
@@ -170,7 +170,7 @@ In addition, these functions can be used as templates to build custom models to 
   <span class='kw'>nulambda</span> <span class='kw'>=</span> <span class='fl'>1</span>,
   <span class='kw'>Aeps</span> <span class='kw'>=</span> <span class='fl'>25</span>,
   <span class='kw'>Alambda</span> <span class='kw'>=</span> <span class='fl'>25</span>,
-  <span class='kw'>B</span> <span class='kw'>=</span> <span class='fl'>0.001</span>
+  <span class='kw'>sig2beta</span> <span class='kw'>=</span> <span class='fl'>1000</span>
 )
 
 <span class='fu'>g_lmm_posterior</span>(
@@ -185,7 +185,7 @@ In addition, these functions can be used as templates to build custom models to 
   <span class='kw'>nulambda</span> <span class='kw'>=</span> <span class='fl'>1</span>,
   <span class='kw'>Aeps</span> <span class='kw'>=</span> <span class='fl'>25</span>,
   <span class='kw'>Alambda</span> <span class='kw'>=</span> <span class='fl'>25</span>,
-  <span class='kw'>B</span> <span class='kw'>=</span> <span class='fl'>0.001</span>
+  <span class='kw'>sig2beta</span> <span class='kw'>=</span> <span class='fl'>1000</span>
 )
 
 <span class='fu'>glmm_bin_posterior</span>(
@@ -198,7 +198,7 @@ In addition, these functions can be used as templates to build custom models to 
   <span class='kw'>A</span> <span class='kw'>=</span> <span class='fl'>10000</span>,
   <span class='kw'>nulambda</span> <span class='kw'>=</span> <span class='fl'>1</span>,
   <span class='kw'>Alambda</span> <span class='kw'>=</span> <span class='fl'>25</span>,
-  <span class='kw'>B</span> <span class='kw'>=</span> <span class='fl'>10000</span>
+  <span class='kw'>sig2beta</span> <span class='kw'>=</span> <span class='fl'>10000</span>
 )
 
 <span class='fu'>g_glmm_bin_posterior</span>(
@@ -211,7 +211,7 @@ In addition, these functions can be used as templates to build custom models to 
   <span class='kw'>A</span> <span class='kw'>=</span> <span class='fl'>10000</span>,
   <span class='kw'>nulambda</span> <span class='kw'>=</span> <span class='fl'>1</span>,
   <span class='kw'>Alambda</span> <span class='kw'>=</span> <span class='fl'>25</span>,
-  <span class='kw'>B</span> <span class='kw'>=</span> <span class='fl'>10000</span>
+  <span class='kw'>sig2beta</span> <span class='kw'>=</span> <span class='fl'>10000</span>
 )
 
 <span class='fu'>glmm_poisson_posterior</span>(
@@ -224,7 +224,7 @@ In addition, these functions can be used as templates to build custom models to 
   <span class='kw'>A</span> <span class='kw'>=</span> <span class='fl'>10000</span>,
   <span class='kw'>nulambda</span> <span class='kw'>=</span> <span class='fl'>1</span>,
   <span class='kw'>Alambda</span> <span class='kw'>=</span> <span class='fl'>25</span>,
-  <span class='kw'>B</span> <span class='kw'>=</span> <span class='fl'>10000</span>
+  <span class='kw'>sig2beta</span> <span class='kw'>=</span> <span class='fl'>10000</span>
 )
 
 <span class='fu'>g_glmm_poisson_posterior</span>(
@@ -237,7 +237,7 @@ In addition, these functions can be used as templates to build custom models to 
   <span class='kw'>A</span> <span class='kw'>=</span> <span class='fl'>10000</span>,
   <span class='kw'>nulambda</span> <span class='kw'>=</span> <span class='fl'>1</span>,
   <span class='kw'>Alambda</span> <span class='kw'>=</span> <span class='fl'>25</span>,
-  <span class='kw'>B</span> <span class='kw'>=</span> <span class='fl'>10000</span>
+  <span class='kw'>sig2beta</span> <span class='kw'>=</span> <span class='fl'>10000</span>
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -264,8 +264,8 @@ In addition, these functions can be used as templates to build custom models to 
       <td><p>hyperprior for the Inverse Gamma scale parameter</p></td>
     </tr>
     <tr>
-      <th>B</th>
-      <td><p>prior for linear predictors is multivariate Normal with mean 0 with diagonal covariance B^-1</p></td>
+      <th>sig2beta</th>
+      <td><p>diagonal covariance of prior for linear predictors is multivariate normal with mean 0</p></td>
     </tr>
     <tr>
       <th>Z</th>
