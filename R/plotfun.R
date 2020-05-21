@@ -11,7 +11,7 @@
 #' @param lagmax maximum lag to extract for determining effective sample sizes
 #' @param ... optional additional arguments to pass to the \code{bayesplot} functions
 #'
-#' @section Plot Descriptions from \code{bayesplot} package documentation:
+#' @section Plot Descriptions from the \code{bayesplot} package documentation:
 #' \describe{
 #'   \item{`mcmc_hist(object, burnin=NULL, ...)`}{
 #'    Default plot called by `plot` function.  Histograms of posterior draws with all chains merged.
@@ -47,11 +47,7 @@
 #'   \item{`mcmc_scatter(object, burnin=NULL, ...)`}{
 #'    Bivariate scatterplot of posterior draws. If using a very large number of
 #'    posterior draws then `mcmc_hex()` may be preferable to avoid
-#'    overplotting. For models fit using [NUTS] the `np`,
-#'    and `np_style` arguments can be used to add additional information in
-#'    the plot (in this case the approximate location of divergences).
-#'    For more on why the scatter plot with divergences is a useful
-#'    diagnostic tool see [Gabry et al. (2019)](https://github.com/jgabry/bayes-vis-paper#readme).
+#'    overplotting.
 #'   }
 #'   \item{`mcmc_hex(object, burnin=NULL, ...)`}{
 #'    Hexagonal heatmap of 2-D bin counts. This plot is useful in cases where

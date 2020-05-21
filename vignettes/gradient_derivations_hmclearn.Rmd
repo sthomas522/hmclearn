@@ -1,0 +1,94 @@
+---
+title: "Gradient Derivations for HMC"
+author: "Samuel Thomas"
+date: "5/21/2020"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{gradient_derivations_hmclearn}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Linear Regression
+
+Likelihood for linear regression
+
+$$
+f(\mathbf{y} | \mathbf{X}, \boldsymbol\beta, \sigma^2) = \frac{1}{(2\pi\sigma^2)^{n/2}}\exp\left( -\frac{1}{2\sigma^2} (\mathbf{y} - \mathbf{X}\boldsymbol\beta)^T(\mathbf{y} - \mathbf{X}\boldsymbol\beta) \right)
+$$
+Log likelihood
+
+$$
+\log f(\mathbf{y}|\mathbf{X}, \boldsymbol\beta, \sigma^2) = -\frac{n}{2}\log\sigma^2 - \frac{1}{2\sigma^2} (\mathbf{y} - \mathbf{X}\boldsymbol\beta)^T(\mathbf{y} - \mathbf{X}\boldsymbol\beta) 
+$$
+
+Specify priors
+
+$$
+\begin{aligned}
+\boldsymbol\beta &\sim N(0, \sigma_\beta^2 \mathbf{I}) \\
+\sigma^2 &\sim IG(a, b)
+\end{aligned}
+$$
+
+$$
+\begin{aligned}
+f(\boldsymbol\beta) &\propto \exp(-\frac{\boldsymbol\beta^T \mathbf{I} \boldsymbol\beta}{2\sigma_\beta^2})
+\\
+f(\sigma^2) &= \frac{b^a}{\Gamma{(a)}}(\sigma^2)^{-a-1}\exp\left( -\frac{b}{\sigma^2} \right) \\
+&\propto (\sigma^2)^{-a-1}\exp\left( -\frac{b}{\sigma^2} \right)
+\end{aligned} 
+$$
+One variable transformation (general)
+
+$$
+f_Y(y) = f_X(g^{-1}(y))\left | \frac{dx}{dy}  \right |
+$$
+
+
+Transformation for $\sigma^2$ where $\gamma = \log\sigma^2$, for support on $\mathbb{R}$
+
+$$
+\begin{aligned}
+\sigma^2 &= g^{-1}(\gamma) = e^{\gamma} \\
+f(\gamma) &= \frac{b^a}{\Gamma{(a)}} (e^\gamma)^{-a-1}  \exp\left(- \frac{b}{e^{\gamma}}  \right) e^{\gamma} \\
+&\propto \exp{\left(-a\gamma - \frac{b}{e^{\gamma}} \right)}
+\end{aligned}
+$$
+
+Set $\boldsymbol\theta := (\boldsymbol\beta, \gamma)$
+
+Log prior
+
+$$
+\begin{aligned}
+\log{f(\boldsymbol\theta)} &= \log f(\boldsymbol\beta, \gamma) = \log f(\boldsymbol\beta | \gamma) f(\gamma) = \log f(\boldsymbol\beta) + \log f(\gamma) \\
+&\propto -\frac{\boldsymbol\beta^T \mathbf{I} \boldsymbol\beta}{2\sigma_\beta^2} - \left(a\gamma + \frac{b}{e^{\gamma}} \right)
+\end{aligned}
+$$
+
+Log posterior = log likelihood + log prior
+
+$$
+\begin{aligned}
+\log f(\boldsymbol\theta | \mathbf{y}, \mathbf{X}) &\propto  -\frac{n}{2}\gamma - \frac{1}{2e^\gamma} (\mathbf{y} - \mathbf{X}\boldsymbol\beta)^T(\mathbf{y} - \mathbf{X}\boldsymbol\beta) -\frac{\boldsymbol\beta^T \mathbf{I} \boldsymbol\beta}{2\sigma_\beta^2} - \left(a\gamma + \frac{b}{e^{\gamma}} \right) \\
+&\propto -\left (\frac{n}{2} + a  \right)\gamma - \frac{e^{-\gamma}}{2} (\mathbf{y} - \mathbf{X}\boldsymbol\beta)^T(\mathbf{y} - \mathbf{X}\boldsymbol\beta)-\frac{\boldsymbol\beta^T \mathbf{I} \boldsymbol\beta}{2\sigma_\beta^2} - b e^{-\gamma}
+\end{aligned}
+$$
+
+Gradient of the log posterior
+
+$$
+\begin{aligned}
+\nabla_{\boldsymbol\beta} \log(\boldsymbol\theta) &\propto -\frac{e^{-\gamma}}{2} \left( \mathbf{X}^T (\mathbf{X}\boldsymbol\beta - \mathbf{y})  + \mathbf{X}^T (\mathbf{X}\boldsymbol\beta - \mathbf{y}) \right) - \frac{1}{\sigma_\beta^2} \mathbf{I} \boldsymbol\beta\\
+&\propto -e^{-\gamma} \mathbf{X}^T (\mathbf{X}\boldsymbol\beta - \mathbf{y})- \frac{1}{\sigma_\beta^2} \mathbf{I}\boldsymbol\beta\\
+&\propto e^{-\gamma} \mathbf{X}^T ( \mathbf{y} - \mathbf{X}\boldsymbol\beta)- \frac{1}{\sigma_\beta^2} \mathbf{I}\boldsymbol\beta  \\
+\nabla_\gamma\log\boldsymbol\theta &\propto -\left (\frac{n}{2} + a  \right) +  \frac{e^{-\gamma}}{2} (\mathbf{y} - \mathbf{X}\boldsymbol\beta)^T(\mathbf{y} - \mathbf{X}\boldsymbol\beta) + b e^{-\gamma}
+\end{aligned}
+$$
+
+
