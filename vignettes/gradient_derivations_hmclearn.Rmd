@@ -20,6 +20,7 @@ Likelihood for linear regression
 $$
 f(\mathbf{y} | \mathbf{X}, \boldsymbol\beta, \sigma^2) = \frac{1}{(2\pi\sigma^2)^{n/2}}\exp\left( -\frac{1}{2\sigma^2} (\mathbf{y} - \mathbf{X}\boldsymbol\beta)^T(\mathbf{y} - \mathbf{X}\boldsymbol\beta) \right)
 $$
+
 Log likelihood
 
 $$
@@ -213,4 +214,73 @@ $$
 \pagebreak
 
 ## Poisson regression
+
+Probability
+
+$$
+p(y | \mu) = \frac{e^{-\mu}\mu^y}{y!}
+$$
+
+Link function
+
+$$
+\begin{aligned}
+\boldsymbol\mu &:= E(\mathbf{y} | \mathbf{X}, \boldsymbol\beta) = e^{\mathbf{X}\boldsymbol\beta}  \\
+\log \boldsymbol\mu &:= \mathbf{X}\boldsymbol\beta 
+\end{aligned}
+$$
+
+
+Likelihood
+
+$$
+\begin{aligned}
+f(\mathbf{y} | \mathbf{X}, \boldsymbol\beta) &= \prod_{i=1}^n \frac{e^{-\mu_i} \mu_i^{y_i}}{y_i!} \\
+&= \prod_{i=1}^n \frac{e^{-e^{\mathbf{x}_i^T\boldsymbol\beta}}(e^{\mathbf{x}_i^T\boldsymbol\beta})^{y_i}}{y_i!} \\
+&= \prod_{i=1}^n \frac{e^{-e^{\mathbf{x}_i^T\boldsymbol\beta}}e^{\mathbf{x}_i^T\boldsymbol\beta y_i} }{y_i!} 
+\end{aligned}
+$$
+
+Log likelihood without constants
+
+$$
+\begin{aligned}
+\log f(\mathbf{y} | \mathbf{X}, \boldsymbol\beta) &\propto \sum_{i=1}^n \log e^{-e^{\mathbf{x}_i^T\boldsymbol\beta}} + \log e^{\mathbf{x}_i^T\boldsymbol\beta y_i} \\
+&\propto \sum_{i=1}^n -e^{\mathbf{x}_i^T\boldsymbol\beta} + \mathbf{x}_i^T\boldsymbol\beta y_i \\
+&\propto \mathbf{y}^T\mathbf{X}\boldsymbol\beta - \mathbf{1}_n^T e^{\mathbf{X}\boldsymbol\beta}
+\end{aligned}
+$$
+
+Specify priors
+
+$$
+\begin{aligned}
+\boldsymbol\beta &\sim N(0, \sigma_\beta^2 \mathbf{I}) 
+\end{aligned}
+$$
+
+Set $\boldsymbol\theta := (\boldsymbol\beta, \gamma)$
+
+Log prior
+
+$$
+\begin{aligned}
+\log{f(\boldsymbol\theta)} &= \log f(\boldsymbol\beta)  \\
+&\propto -\frac{\boldsymbol\beta^T \mathbf{I} \boldsymbol\beta}{2\sigma_\beta^2} 
+\end{aligned}
+$$
+
+Log posterior = log likelihood + log prior
+
+$$
+\begin{aligned}
+\log f(\boldsymbol\beta | \mathbf{y}, \mathbf{X}) &\propto \mathbf{y}^T\mathbf{X}\boldsymbol\beta - \mathbf{1}_n^T e^{\mathbf{X}\boldsymbol\beta} -\frac{\boldsymbol\beta^T \mathbf{I} \boldsymbol\beta}{2\sigma_\beta^2} 
+\end{aligned}
+$$
+
+Gradient of the log posterior
+
+$$
+\nabla_\beta \log f(\boldsymbol\beta | \mathbf{y}, \mathbf{X}) \propto \mathbf{X}^T (\mathbf{y} - e^{\mathbf{X}\boldsymbol\beta}) - \frac{\mathbf{I}\boldsymbol\beta}{\sigma_\beta^2}
+$$
 

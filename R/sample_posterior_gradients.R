@@ -281,7 +281,10 @@ g_poisson_posterior <- function(theta, y, X, sig2beta=1e2) {
 
   inv.nu <- diag(1/sig2beta, k, k)
 
-  y %*% X - crossprod(exp(X %*% theta), X) - crossprod(theta, inv.nu)
+  #y %*% X - crossprod(exp(X %*% theta), X) - crossprod(theta, inv.nu)
+  #crossprod(y - exp(X %*% theta), X) - crossprod(theta, inv.nu)
+  # t(y - exp(X %*% theta)) %*% X - t(theta) %*% inv.nu
+  t(X) %*% (y - exp(X %*% theta)) - inv.nu %*% theta
 }
 
 #' @rdname hmclearn-glm-posterior
