@@ -162,6 +162,100 @@ f(\gamma) &amp;= \frac{b^a}{\Gamma{(a)}} (e^\gamma)^{-a-1}  \exp\left(- \frac{b}
 \nabla_\gamma\log\boldsymbol\theta &amp;\propto -\left (\frac{n}{2} + a  \right) +  \frac{e^{-\gamma}}{2} (\mathbf{y} - \mathbf{X}\boldsymbol\beta)^T(\mathbf{y} - \mathbf{X}\boldsymbol\beta) + b e^{-\gamma}
 \end{aligned}
 \]</span></p>
+<div style="page-break-after: always;"></div>
+</div>
+<div id="logistic-regression" class="section level2">
+<h2 class="hasAnchor">
+<a href="#logistic-regression" class="anchor"></a>Logistic Regression</h2>
+<p>Probability</p>
+<p><span class="math display">\[
+P(\mathbf{Y} = \mathbf{y}|\mathbf{X}) = [1+\exp(-\mathbf{X}\boldsymbol\beta)]^{-1}
+\]</span></p>
+<p>Likelihood</p>
+<p><span class="math display">\[
+\begin{aligned}
+f(\mathbf{y} | \mathbf{X}, \boldsymbol\beta) &amp;= \prod_{i=1}^n p(y_i)^{y_i}(1-p(y_i))^{1-y_i} \\
+&amp;= \prod_{i=1}^n \left(\frac{1}{1+e^{-\mathbf{x}_i\boldsymbol\beta}}\right)^{y_i} \left(\frac{e^{-\mathbf{x}_i\boldsymbol\beta}}{1+e^{-\mathbf{x}_i\boldsymbol\beta}}\right)^{1-y_i} 
+\end{aligned}
+\]</span></p>
+<p>Log likelihood</p>
+<p><span class="math display">\[
+\begin{aligned}
+\log f(\mathbf{y}|\mathbf{X}, \boldsymbol\beta) &amp;= \sum_{i=1}^n -y_i\log(1 + e^{-\mathbf{x}_i\boldsymbol\beta}) - (1-y_i)\mathbf{x}_i\boldsymbol\beta - (1 - y_i)\log(1 + e^{-\mathbf{x}_i\boldsymbol\beta}) \\
+&amp;= \sum_{i=1}^n -y_i\log(1+e^{-\mathbf{x}_i\boldsymbol\beta}) - \mathbf{x}_i\boldsymbol\beta + y_i\mathbf{x}_i\boldsymbol\beta - \log(1 + e^{-\mathbf{x}_i\boldsymbol\beta})+y_i\log(1+e^{-\mathbf{x}_i\boldsymbol\beta}) \\
+&amp;= \sum_{i=1}^n -\mathbf{x}_i\boldsymbol\beta + y_i\mathbf{x}_i\boldsymbol\beta - \log(1 + e^{-\mathbf{x}_i\boldsymbol\beta}) \\
+&amp;= \sum_{i=1}^n (y_i-1)\mathbf{x}_i\boldsymbol\beta - \log(1 + e^{-\mathbf{x}_i\boldsymbol\beta}) \\
+&amp;= (\mathbf{y} - \mathbf{1}_n)^T \mathbf{X}\boldsymbol\beta - \mathbf{1}_n^T\log(1 + e^{-\mathbf{X}\boldsymbol\beta})
+\end{aligned}
+\]</span></p>
+<p>Specify priors</p>
+<p><span class="math display">\[
+\begin{aligned}
+\boldsymbol\beta &amp;\sim N(0, \sigma_\beta^2 \mathbf{I}) 
+\end{aligned}
+\]</span></p>
+<p>Set <span class="math inline">\(\boldsymbol\theta := (\boldsymbol\beta, \gamma)\)</span></p>
+<p>Log prior</p>
+<p><span class="math display">\[
+\begin{aligned}
+\log{f(\boldsymbol\theta)} &amp;= \log f(\boldsymbol\beta)  \\
+&amp;\propto -\frac{\boldsymbol\beta^T \mathbf{I} \boldsymbol\beta}{2\sigma_\beta^2} 
+\end{aligned}
+\]</span></p>
+<p>Log posterior = log likelihood + log prior</p>
+<p><span class="math display">\[
+\begin{aligned}
+\log f(\boldsymbol\beta | \mathbf{y}, \mathbf{X}) &amp;\propto (\mathbf{y} - \mathbf{1}_n)^T \mathbf{X}\boldsymbol\beta - \mathbf{1}_n^T\log(1 + e^{-\mathbf{X}\boldsymbol\beta}) -\frac{\boldsymbol\beta^T \mathbf{I} \boldsymbol\beta}{2\sigma_\beta^2} \\
+&amp;\propto \boldsymbol\beta^T\mathbf{X}^T(\mathbf{y} - \mathbf{1}_n) - [\log(1 + e^{-\mathbf{X}\boldsymbol\beta})]^T\mathbf{1}_n -\frac{\boldsymbol\beta^T \mathbf{I} \boldsymbol\beta}{2\sigma_\beta^2} 
+\end{aligned}
+\]</span> Gradient of the log posterior</p>
+<p>This gradient is a bit complex, we will split into 3 functions</p>
+<p><span class="math display">\[
+\begin{aligned}
+f=\log f(\boldsymbol\beta, \mathbf{y}, \mathbf{X}) &amp;\propto f_1(\mathbf{X}, \boldsymbol\beta) + f_2(\mathbf{X}, \boldsymbol\beta) + f_3(\mathbf{X}, \boldsymbol\beta)
+\end{aligned}
+\]</span></p>
+<p>Gradient</p>
+<p><span class="math display">\[
+\begin{aligned}
+\nabla_\beta f &amp;\propto \nabla_\beta f_1(\mathbf{X},\boldsymbol\beta) + \nabla_\beta f_2(\mathbf{X},\boldsymbol\beta) + \nabla_\beta f_3(\mathbf{X}, \boldsymbol\beta)
+\end{aligned}
+\]</span> First and third functions simplest</p>
+<p><span class="math display">\[
+\begin{aligned}
+\nabla_\beta f_1(\mathbf{X}, \boldsymbol\beta) &amp;= \nabla_\beta (\mathbf{y} - \mathbf{1}_n)^T \mathbf{X}\boldsymbol\beta \\
+&amp;= \mathbf{X}^T (\mathbf{y} - \mathbf{1}_n)\\
+\nabla_\beta f_3(\mathbf{X}, \boldsymbol\beta) &amp;= -\nabla_\beta \frac{\boldsymbol\beta^T \mathbf{I} \boldsymbol\beta}{2\sigma_\beta^2} \\
+&amp;= -\frac{1}{\sigma_\beta^2}\mathbf{I}\boldsymbol\beta
+\end{aligned}
+\]</span></p>
+<p>Second function more complex</p>
+<p><span class="math display">\[
+\begin{aligned}
+f_2(\mathbf{X}, \boldsymbol\beta) &amp;=  -[\log(1 + e^{-\mathbf{X}\boldsymbol\beta})]^T \mathbf{1}_n  \\
+&amp;= -\begin{bmatrix}
+\log (1 + e^{-\mathbf{x}_1^T\boldsymbol\beta}) &amp;
+\log (1 + e^{-\mathbf{x}_2^T\boldsymbol\beta}) &amp;
+... &amp;
+\log (1 + e^{-\mathbf{x}_n^T\boldsymbol\beta})
+\end{bmatrix} \mathbf{1}_n\\
+\nabla_\beta f_2(\mathbf{X}, \boldsymbol\beta) &amp;= -
+\begin{bmatrix}
+\frac{1}{1 + e^{-\mathbf{x}_1^T\boldsymbol\beta}}e^{-\mathbf{x}_1^T\boldsymbol\beta}(-\mathbf{x}_1) &amp;
+\frac{1}{1 + e^{-\mathbf{x}_2^T\boldsymbol\beta}}e^{-\mathbf{x}_2^T\boldsymbol\beta}(-\mathbf{x}_2) &amp;
+... &amp;
+\frac{1}{1 + e^{-\mathbf{x}_n^T\boldsymbol\beta}}e^{-\mathbf{x}_n^T\boldsymbol\beta}(-\mathbf{x}_n) 
+\end{bmatrix} \mathbf{1}_n\\
+&amp;= \mathbf{X}^T \left(\frac{e^{-\mathbf{X}\boldsymbol\beta}}{1 + e^{-\mathbf{X}\boldsymbol\beta}}\right) 
+\end{aligned}
+\]</span></p>
+<p>Finally, the gradient of the log posterior</p>
+<p><span class="math display">\[
+\begin{aligned}
+\nabla_\beta \log f(\boldsymbol\beta, \mathbf{y}, \mathbf{X}) &amp;\propto  \mathbf{X}^T (\mathbf{y} - \mathbf{1}_n) +\mathbf{X}^T \left(\frac{e^{-\mathbf{X}\boldsymbol\beta}}{1 + e^{-\mathbf{X}\boldsymbol\beta}}\right)  -\frac{1}{\sigma_\beta^2}\mathbf{I}\boldsymbol\beta \\
+&amp;\propto \mathbf{X}^T \left[\mathbf{y} - \mathbf{1}_n + \frac{e^{-\mathbf{X}\boldsymbol\beta}}{1 + e^{-\mathbf{X}\boldsymbol\beta}} \right] -\frac{1}{\sigma_\beta^2}\mathbf{I}\boldsymbol\beta 
+\end{aligned}
+\]</span></p>
 </div>
   </div>
 
@@ -180,7 +274,7 @@ f(\gamma) &amp;= \frac{b^a}{\Gamma{(a)}} (e^\gamma)^{-a-1}  \exp\left(- \frac{b}
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
 
       </footer>

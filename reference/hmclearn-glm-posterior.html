@@ -311,7 +311,7 @@ In addition, these functions can be used as templates to build custom models to 
 
     
 
-<dl>
+<dl'>
   <dt>`linear_posterior(theta, y, X, a=1e-4, b=1e-4, B=0.001)`</dt><dd><p>The log posterior function for linear regression
    $$p(y | X, \beta; \sigma^2) = \frac{1}{(2\pi\sigma^2)^{n/2}}\exp{\left(-\frac{1}{2\sigma^2} (y - X\beta)^T(y-X\beta) \right)}$$
    with priors \(p(\sigma^2) \sim IG(a, b)\) and \(\beta \sim N(0, BI)\).  The variance term is log transformed \(\gamma = \log\sigma^2\)
@@ -349,7 +349,7 @@ In addition, these functions can be used as templates to build custom models to 
 
     
 
-<dl>
+<dl'>
   <dt>`lmm_posterior(theta, y, X, Z, m, q = 1, A = 10000, nueps = 1, nulambda = 1, Aeps = 25, Alambda = 25, B = 0.001) `</dt><dd><p>The log posterior function for linear mixed effects regression
    $$p(y | \beta, u, \sigma_\epsilon^2) \propto (\sigma_\epsilon^2)^{-n/2} e^{-\frac{1}{2\sigma_\epsilon^2}(y - X\beta - Zu)^T (y - X\beta - Zu)}$$
    with priors \(\beta \sim N(0, BI)\), \(\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)\), \(\lambda \sim half-t(A_\lambda, nu_\lambda )\).
@@ -444,7 +444,7 @@ In addition, these functions can be used as templates to build custom models to 
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
 
       </footer>

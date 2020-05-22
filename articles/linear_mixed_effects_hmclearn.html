@@ -93,7 +93,7 @@
       <h1 data-toc-skip>hmclearn package: Linear Mixed Effects Regression Example</h1>
                         <h4 class="author">Samuel Thomas</h4>
             
-            <h4 class="date">2020-05-21</h4>
+            <h4 class="date">2020-05-22</h4>
       
       
       <div class="hidden name"><code>linear_mixed_effects_hmclearn.Rmd</code></div>
@@ -457,62 +457,62 @@ L D^{1/2}\tau = D^{1/2} \tau + \widetilde{T} a
             <span class="kw">parallel</span><span class="kw">=</span><span class="fl">TRUE</span>, <span class="kw">chains</span><span class="kw">=</span><span class="fl">2</span>)
 <span class="no">t2.hmc</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span>()
 <span class="no">t2.hmc</span> - <span class="no">t1.hmc</span>
-<span class="co">#&gt; Time difference of 37.43206 secs</span></pre></body></html></div>
+<span class="co">#&gt; Time difference of 31.23085 secs</span></pre></body></html></div>
 <p>The acceptance ratio for each of the HMC chains is sufficiently high for an efficient simulation.</p>
 <div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="no">f_hmc</span>$<span class="no">accept</span>/<span class="no">N</span>
-<span class="co">#&gt; [1] 0.803 0.793</span></pre></body></html></div>
+<span class="co">#&gt; [1] 0.7935 0.8345</span></pre></body></html></div>
 <p>Trace plots provide a visual indication of stationarity. These plots indicate that the MCMC chains are reasonably stationary.</p>
 <div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="fu"><a href="../reference/hmclearn-plots.html">mcmc_trace</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html">trunc</a></span>(<span class="no">N</span>*<span class="fl">.3</span>), <span class="kw">pars</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"beta0"</span>, <span class="st">"beta1"</span>, <span class="st">"sigeps"</span>, <span class="st">"xi"</span>))</pre></body></html></div>
 <p><img src="linear_mixed_effects_hmclearn_files/figure-html/unnamed-chunk-6-1.png" width="576"></p>
 <p>The posterior quantiles are summarized after removing an initial <em>burnin</em> period.</p>
 <div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html">trunc</a></span>(<span class="no">N</span>*<span class="fl">.3</span>))
 <span class="co">#&gt; Summary of MCMC simulation</span>
-<span class="co">#&gt;                     5%           25%          50%          75%          95%</span>
-<span class="co">#&gt; beta0     233.39612244 242.848930409 249.85289489 257.27873536 265.16085962</span>
-<span class="co">#&gt; beta1       9.26699716   9.979356022  10.46287146  10.97805865  11.84099261</span>
-<span class="co">#&gt; tau_int1    0.57788922   0.899170093   1.13300549   1.39530904   1.76708231</span>
-<span class="co">#&gt; tau_int2   -2.83147617  -2.389561298  -2.09149338  -1.78626377  -1.33960380</span>
-<span class="co">#&gt; tau_int3   -2.38052752  -1.938480002  -1.66694048  -1.38509519  -1.02770211</span>
-<span class="co">#&gt; tau_int4   -0.37630664  -0.055685420   0.15207421   0.40133653   0.73563032</span>
-<span class="co">#&gt; tau_int5   -0.22061294   0.077161521   0.30876662   0.53148017   0.88181160</span>
-<span class="co">#&gt; tau_int6   -0.30969226   0.007974093   0.25291742   0.47477095   0.79202554</span>
-<span class="co">#&gt; tau_int7   -0.04407385   0.281900589   0.49244579   0.72764785   1.03056631</span>
-<span class="co">#&gt; tau_int8   -0.55815704  -0.258151482  -0.03395969   0.19362389   0.51392714</span>
-<span class="co">#&gt; tau_int9   -1.81423689  -1.433304565  -1.16914700  -0.91086422  -0.57917798</span>
-<span class="co">#&gt; tau_int10   1.28693567   1.693408880   1.96630677   2.27344128   2.70184573</span>
-<span class="co">#&gt; tau_int11  -1.13605886  -0.778930958  -0.53877135  -0.28706674   0.01680978</span>
-<span class="co">#&gt; tau_int12  -0.13684080   0.185960773   0.42180587   0.63503325   0.99808631</span>
-<span class="co">#&gt; tau_int13  -0.71801879  -0.401538706  -0.18206585   0.04479188   0.36575545</span>
-<span class="co">#&gt; tau_int14   0.46377156   0.775171216   1.02141449   1.27138125   1.61041029</span>
-<span class="co">#&gt; tau_int15  -0.31273758  -0.011661218   0.23082419   0.46068423   0.78895649</span>
-<span class="co">#&gt; tau_int16  -0.69592675  -0.365740499  -0.13284148   0.09251375   0.41095416</span>
-<span class="co">#&gt; tau_int17  -0.57834438  -0.271426698  -0.02892097   0.19776391   0.51849268</span>
-<span class="co">#&gt; tau_int18  -0.03392156   0.284046541   0.51817811   0.76054601   1.12153980</span>
-<span class="co">#&gt; sigeps      3.33399794   3.388445505   3.42246359   3.45914696   3.51141603</span>
-<span class="co">#&gt; xi          3.36195368   3.497670803   3.60400145   3.73110530   3.91352045</span>
+<span class="co">#&gt;                     5%          25%          50%          75%          95%</span>
+<span class="co">#&gt; beta0     236.77560984 244.49679539 250.41748175 256.26726185 265.51995368</span>
+<span class="co">#&gt; beta1       9.13313219   9.85130035  10.35220304  10.87389352  11.63931827</span>
+<span class="co">#&gt; tau_int1    0.54058731   0.86794625   1.11864688   1.37948350   1.80774878</span>
+<span class="co">#&gt; tau_int2   -2.88621656  -2.36441299  -2.02846595  -1.74116609  -1.38287647</span>
+<span class="co">#&gt; tau_int3   -2.33098206  -1.89554450  -1.63307375  -1.37450060  -1.01249181</span>
+<span class="co">#&gt; tau_int4   -0.38051236  -0.08206728   0.14968504   0.35864480   0.68576832</span>
+<span class="co">#&gt; tau_int5   -0.22549950   0.08564290   0.30538531   0.51506809   0.83510983</span>
+<span class="co">#&gt; tau_int6   -0.21735938   0.05914756   0.27382883   0.48439215   0.84074177</span>
+<span class="co">#&gt; tau_int7   -0.06044385   0.25210816   0.46648838   0.70669512   1.04466905</span>
+<span class="co">#&gt; tau_int8   -0.57174596  -0.26649579  -0.04451817   0.18420250   0.46995825</span>
+<span class="co">#&gt; tau_int9   -1.83346265  -1.45169675  -1.18558422  -0.95209415  -0.61135022</span>
+<span class="co">#&gt; tau_int10   1.19996664   1.64565152   1.95813762   2.29400284   2.77925732</span>
+<span class="co">#&gt; tau_int11  -1.04613247  -0.72348968  -0.52416586  -0.30519670   0.01287475</span>
+<span class="co">#&gt; tau_int12  -0.11903539   0.20752391   0.41381853   0.63597783   0.99180364</span>
+<span class="co">#&gt; tau_int13  -0.71338659  -0.36960907  -0.16305079   0.05535408   0.38211762</span>
+<span class="co">#&gt; tau_int14   0.40834155   0.75823714   1.00430521   1.26997947   1.72546503</span>
+<span class="co">#&gt; tau_int15  -0.27968954   0.02123374   0.22306094   0.46097477   0.79219492</span>
+<span class="co">#&gt; tau_int16  -0.69050961  -0.35705745  -0.14455875   0.06178780   0.38243503</span>
+<span class="co">#&gt; tau_int17  -0.57235371  -0.26882087  -0.05330756   0.16844693   0.48323873</span>
+<span class="co">#&gt; tau_int18  -0.02500719   0.29296819   0.52446350   0.75618021   1.09183018</span>
+<span class="co">#&gt; sigeps      3.33451333   3.38167253   3.41944736   3.45643247   3.51232736</span>
+<span class="co">#&gt; xi          3.31016427   3.48905168   3.61943822   3.75655264   3.94646475</span>
 <span class="co">#&gt;                rhat</span>
-<span class="co">#&gt; beta0     1.0112004</span>
-<span class="co">#&gt; beta1     0.9998609</span>
-<span class="co">#&gt; tau_int1  1.0324298</span>
-<span class="co">#&gt; tau_int2  1.0035115</span>
-<span class="co">#&gt; tau_int3  1.0007587</span>
-<span class="co">#&gt; tau_int4  1.0074514</span>
-<span class="co">#&gt; tau_int5  1.0124809</span>
-<span class="co">#&gt; tau_int6  1.0072597</span>
-<span class="co">#&gt; tau_int7  1.0158040</span>
-<span class="co">#&gt; tau_int8  1.0060057</span>
-<span class="co">#&gt; tau_int9  1.0001601</span>
-<span class="co">#&gt; tau_int10 1.0217159</span>
-<span class="co">#&gt; tau_int11 1.0020715</span>
-<span class="co">#&gt; tau_int12 1.0077824</span>
-<span class="co">#&gt; tau_int13 1.0030625</span>
-<span class="co">#&gt; tau_int14 1.0256842</span>
-<span class="co">#&gt; tau_int15 1.0121278</span>
-<span class="co">#&gt; tau_int16 1.0002736</span>
-<span class="co">#&gt; tau_int17 1.0132302</span>
-<span class="co">#&gt; tau_int18 1.0137844</span>
-<span class="co">#&gt; sigeps    0.9996877</span>
-<span class="co">#&gt; xi        1.0177187</span></pre></body></html></div>
+<span class="co">#&gt; beta0     1.0907523</span>
+<span class="co">#&gt; beta1     1.0018006</span>
+<span class="co">#&gt; tau_int1  1.0559016</span>
+<span class="co">#&gt; tau_int2  1.0114932</span>
+<span class="co">#&gt; tau_int3  1.0067224</span>
+<span class="co">#&gt; tau_int4  1.0717297</span>
+<span class="co">#&gt; tau_int5  1.0602521</span>
+<span class="co">#&gt; tau_int6  1.0250057</span>
+<span class="co">#&gt; tau_int7  1.0451391</span>
+<span class="co">#&gt; tau_int8  1.0319331</span>
+<span class="co">#&gt; tau_int9  1.0152741</span>
+<span class="co">#&gt; tau_int10 1.0669701</span>
+<span class="co">#&gt; tau_int11 1.0186360</span>
+<span class="co">#&gt; tau_int12 1.0598688</span>
+<span class="co">#&gt; tau_int13 1.0607568</span>
+<span class="co">#&gt; tau_int14 1.0509122</span>
+<span class="co">#&gt; tau_int15 1.0409700</span>
+<span class="co">#&gt; tau_int16 1.0335558</span>
+<span class="co">#&gt; tau_int17 1.0316133</span>
+<span class="co">#&gt; tau_int18 1.0363971</span>
+<span class="co">#&gt; sigeps    0.9998857</span>
+<span class="co">#&gt; xi        1.0090725</span></pre></body></html></div>
 <p>Histograms of the posterior distribution show that Bayesian parameter estimates align with frequentist estimates. The <em>cols</em> parameter specifies the parameters to be displayed in <em>diagplots</em>, based on the order provided to the <em>hmc</em> function.</p>
 <div class="sourceCode" id="cb8"><html><body><pre class="r"><span class="no">beta.freq</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lme4/man/fixef.html">fixef</a></span>(<span class="no">fm1</span>)
 <span class="no">xi.freq</span> <span class="kw">&lt;-</span> <span class="fl">1</span>/<span class="fl">2</span>*<span class="fu"><a href="https://rdrr.io/r/base/Log.html">log</a></span>(<span class="fu"><a href="https://rdrr.io/pkg/lme4/man/VarCorr.html">VarCorr</a></span>(<span class="no">fm1</span>)$<span class="no">Subject</span>[<span class="fl">1</span>])
@@ -554,7 +554,7 @@ L D^{1/2}\tau = D^{1/2} \tau + \widetilde{T} a
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
 
       </footer>
