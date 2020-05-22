@@ -206,6 +206,6 @@ Finally, the gradient of the log posterior
 $$
 \begin{aligned}
 \nabla_\beta \log f(\boldsymbol\beta, \mathbf{y}, \mathbf{X}) &\propto  \mathbf{X}^T (\mathbf{y} - \mathbf{1}_n) +\mathbf{X}^T \left(\frac{e^{-\mathbf{X}\boldsymbol\beta}}{1 + e^{-\mathbf{X}\boldsymbol\beta}}\right)  -\frac{1}{\sigma_\beta^2}\mathbf{I}\boldsymbol\beta \\
-&\propto \mathbf{X}^T \left[\mathbf{y} - \mathbf{1}_n + \frac{e^{-\mathbf{X}\boldsymbol\beta}}{1 + e^{-\mathbf{X}\boldsymbol\beta}} \right] -\frac{1}{\sigma_\beta^2}\mathbf{I}\boldsymbol\beta 
+&\propto \mathbf{X}^T \left(\mathbf{y} - \mathbf{1}_n + \frac{e^{-\mathbf{X}\boldsymbol\beta}}{1 + e^{-\mathbf{X}\boldsymbol\beta}} \right) -\frac{1}{\sigma_\beta^2}\mathbf{I}\boldsymbol\beta 
 \end{aligned}
 $$
