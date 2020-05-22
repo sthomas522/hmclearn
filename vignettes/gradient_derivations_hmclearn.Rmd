@@ -91,4 +91,121 @@ $$
 \end{aligned}
 $$
 
+\pagebreak
 
+## Logistic Regression
+
+Probability
+
+$$
+P(\mathbf{Y} = \mathbf{y}|\mathbf{X}) = [1+\exp(-\mathbf{X}\boldsymbol\beta)]^{-1}
+$$
+
+Likelihood
+
+$$
+\begin{aligned}
+f(\mathbf{y} | \mathbf{X}, \boldsymbol\beta) &= \prod_{i=1}^n p(y_i)^{y_i}(1-p(y_i))^{1-y_i} \\
+&= \prod_{i=1}^n \left(\frac{1}{1+e^{-\mathbf{x}_i\boldsymbol\beta}}\right)^{y_i} \left(\frac{e^{-\mathbf{x}_i\boldsymbol\beta}}{1+e^{-\mathbf{x}_i\boldsymbol\beta}}\right)^{1-y_i} 
+\end{aligned}
+$$
+
+Log likelihood
+
+$$
+\begin{aligned}
+\log f(\mathbf{y}|\mathbf{X}, \boldsymbol\beta) &= \sum_{i=1}^n -y_i\log(1 + e^{-\mathbf{x}_i\boldsymbol\beta}) - (1-y_i)\mathbf{x}_i\boldsymbol\beta - (1 - y_i)\log(1 + e^{-\mathbf{x}_i\boldsymbol\beta}) \\
+&= \sum_{i=1}^n -y_i\log(1+e^{-\mathbf{x}_i\boldsymbol\beta}) - \mathbf{x}_i\boldsymbol\beta + y_i\mathbf{x}_i\boldsymbol\beta - \log(1 + e^{-\mathbf{x}_i\boldsymbol\beta})+y_i\log(1+e^{-\mathbf{x}_i\boldsymbol\beta}) \\
+&= \sum_{i=1}^n -\mathbf{x}_i\boldsymbol\beta + y_i\mathbf{x}_i\boldsymbol\beta - \log(1 + e^{-\mathbf{x}_i\boldsymbol\beta}) \\
+&= \sum_{i=1}^n (y_i-1)\mathbf{x}_i\boldsymbol\beta - \log(1 + e^{-\mathbf{x}_i\boldsymbol\beta}) \\
+&= (\mathbf{y} - \mathbf{1}_n)^T \mathbf{X}\boldsymbol\beta - \mathbf{1}_n^T\log(1 + e^{-\mathbf{X}\boldsymbol\beta})
+\end{aligned}
+$$
+
+Specify priors
+
+$$
+\begin{aligned}
+\boldsymbol\beta &\sim N(0, \sigma_\beta^2 \mathbf{I}) 
+\end{aligned}
+$$
+
+Set $\boldsymbol\theta := (\boldsymbol\beta, \gamma)$
+
+Log prior
+
+$$
+\begin{aligned}
+\log{f(\boldsymbol\theta)} &= \log f(\boldsymbol\beta)  \\
+&\propto -\frac{\boldsymbol\beta^T \mathbf{I} \boldsymbol\beta}{2\sigma_\beta^2} 
+\end{aligned}
+$$
+
+Log posterior = log likelihood + log prior
+
+$$
+\begin{aligned}
+\log f(\boldsymbol\beta | \mathbf{y}, \mathbf{X}) &\propto (\mathbf{y} - \mathbf{1}_n)^T \mathbf{X}\boldsymbol\beta - \mathbf{1}_n^T\log(1 + e^{-\mathbf{X}\boldsymbol\beta}) -\frac{\boldsymbol\beta^T \mathbf{I} \boldsymbol\beta}{2\sigma_\beta^2} \\
+&\propto \boldsymbol\beta^T\mathbf{X}^T(\mathbf{y} - \mathbf{1}_n) - [\log(1 + e^{-\mathbf{X}\boldsymbol\beta})]^T\mathbf{1}_n -\frac{\boldsymbol\beta^T \mathbf{I} \boldsymbol\beta}{2\sigma_\beta^2} 
+\end{aligned}
+$$
+Gradient of the log posterior
+
+This gradient is a bit complex, we will split into 3 functions
+
+$$
+\begin{aligned}
+f=\log f(\boldsymbol\beta, \mathbf{y}, \mathbf{X}) &\propto f_1(\mathbf{X}, \boldsymbol\beta) + f_2(\mathbf{X}, \boldsymbol\beta) + f_3(\mathbf{X}, \boldsymbol\beta)
+\end{aligned}
+$$
+
+Gradient
+
+$$
+\begin{aligned}
+\nabla_\beta f &\propto \nabla_\beta f_1(\mathbf{X},\boldsymbol\beta) + \nabla_\beta f_2(\mathbf{X},\boldsymbol\beta) + \nabla_\beta f_3(\mathbf{X}, \boldsymbol\beta)
+\end{aligned}
+$$
+First and third functions simplest
+
+$$
+\begin{aligned}
+\nabla_\beta f_1(\mathbf{X}, \boldsymbol\beta) &= \nabla_\beta (\mathbf{y} - \mathbf{1}_n)^T \mathbf{X}\boldsymbol\beta \\
+&= \mathbf{X}^T (\mathbf{y} - \mathbf{1}_n)\\
+\nabla_\beta f_3(\mathbf{X}, \boldsymbol\beta) &= -\nabla_\beta \frac{\boldsymbol\beta^T \mathbf{I} \boldsymbol\beta}{2\sigma_\beta^2} \\
+&= -\frac{1}{\sigma_\beta^2}\mathbf{I}\boldsymbol\beta
+\end{aligned}
+$$
+
+
+Second function more complex
+
+$$
+\begin{aligned}
+f_2(\mathbf{X}, \boldsymbol\beta) &=  -[\log(1 + e^{-\mathbf{X}\boldsymbol\beta})]^T \mathbf{1}_n  \\
+&= -\begin{bmatrix}
+\log (1 + e^{-\mathbf{x}_1^T\boldsymbol\beta}) &
+\log (1 + e^{-\mathbf{x}_2^T\boldsymbol\beta}) &
+... &
+\log (1 + e^{-\mathbf{x}_n^T\boldsymbol\beta})
+\end{bmatrix} \mathbf{1}_n\\
+\nabla_\beta f_2(\mathbf{X}, \boldsymbol\beta) &= -
+\begin{bmatrix}
+\frac{1}{1 + e^{-\mathbf{x}_1^T\boldsymbol\beta}}e^{-\mathbf{x}_1^T\boldsymbol\beta}(-\mathbf{x}_1) &
+\frac{1}{1 + e^{-\mathbf{x}_2^T\boldsymbol\beta}}e^{-\mathbf{x}_2^T\boldsymbol\beta}(-\mathbf{x}_2) &
+... &
+\frac{1}{1 + e^{-\mathbf{x}_n^T\boldsymbol\beta}}e^{-\mathbf{x}_n^T\boldsymbol\beta}(-\mathbf{x}_n) 
+\end{bmatrix} \mathbf{1}_n\\
+&= \mathbf{X}^T \left(\frac{e^{-\mathbf{X}\boldsymbol\beta}}{1 + e^{-\mathbf{X}\boldsymbol\beta}}\right) 
+\end{aligned}
+$$
+
+
+Finally, the gradient of the log posterior
+
+$$
+\begin{aligned}
+\nabla_\beta \log f(\boldsymbol\beta, \mathbf{y}, \mathbf{X}) &\propto  \mathbf{X}^T (\mathbf{y} - \mathbf{1}_n) +\mathbf{X}^T \left(\frac{e^{-\mathbf{X}\boldsymbol\beta}}{1 + e^{-\mathbf{X}\boldsymbol\beta}}\right)  -\frac{1}{\sigma_\beta^2}\mathbf{I}\boldsymbol\beta \\
+&\propto \mathbf{X}^T \left[\mathbf{y} - \mathbf{1}_n + \frac{e^{-\mathbf{X}\boldsymbol\beta}}{1 + e^{-\mathbf{X}\boldsymbol\beta}} \right] -\frac{1}{\sigma_\beta^2}\mathbf{I}\boldsymbol\beta 
+\end{aligned}
+$$
