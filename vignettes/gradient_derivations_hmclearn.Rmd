@@ -209,3 +209,8 @@ $$
 &\propto \mathbf{X}^T \left(\mathbf{y} - \mathbf{1}_n + \frac{e^{-\mathbf{X}\boldsymbol\beta}}{1 + e^{-\mathbf{X}\boldsymbol\beta}} \right) -\frac{1}{\sigma_\beta^2}\mathbf{I}\boldsymbol\beta 
 \end{aligned}
 $$
+
+\pagebreak
+
+## Poisson regression
+
