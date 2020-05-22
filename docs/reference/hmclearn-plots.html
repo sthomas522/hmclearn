@@ -96,6 +96,9 @@ size, and autocorrelation of MCMC draws." />
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="../articles/gradient_derivations_hmclearn.html">Gradient Derivations for HMC</a>
+    </li>
+    <li>
       <a href="../articles/linear_mixed_effects_hmclearn.html">hmclearn package:  Linear Mixed Effects Regression Example</a>
     </li>
     <li>
@@ -250,7 +253,7 @@ size, and autocorrelation of MCMC draws.</p>
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>These functions call various plotting functions from the <code>bayesplot</code> package, which returns a list including <code>ggplot2</code> objects.</p>
-    <h2 class="hasAnchor" id="plot-descriptions-from-bayesplot-package-documentation"><a class="anchor" href="#plot-descriptions-from-bayesplot-package-documentation"></a>Plot Descriptions from <code>bayesplot</code> package documentation</h2>
+    <h2 class="hasAnchor" id="plot-descriptions-from-the-bayesplot-package-documentation"><a class="anchor" href="#plot-descriptions-from-the-bayesplot-package-documentation"></a>Plot Descriptions from the <code>bayesplot</code> package documentation</h2>
 
     
 
@@ -272,11 +275,7 @@ size, and autocorrelation of MCMC draws.</p>
    with uncertainty intervals shown as shaded areas under the curves.</p></dd>
   <dt>`mcmc_scatter(object, burnin=NULL, ...)`</dt><dd><p>Bivariate scatterplot of posterior draws. If using a very large number of
    posterior draws then `mcmc_hex()` may be preferable to avoid
-   overplotting. For models fit using [NUTS] the `np`,
-   and `np_style` arguments can be used to add additional information in
-   the plot (in this case the approximate location of divergences).
-   For more on why the scatter plot with divergences is a useful
-   diagnostic tool see [Gabry et al. (2019)](https://github.com/jgabry/bayes-vis-paper#readme).</p></dd>
+   overplotting.</p></dd>
   <dt>`mcmc_hex(object, burnin=NULL, ...)`</dt><dd><p>Hexagonal heatmap of 2-D bin counts. This plot is useful in cases where
    the posterior sample size is large enough that `mcmc_scatter()` suffers
    from overplotting.</p></dd>

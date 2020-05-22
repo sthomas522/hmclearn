@@ -2,3 +2,4 @@
 
 language: R
 cache: packages
+TRAVIS_REPO_SLUG: sthomas522/hmclearn
