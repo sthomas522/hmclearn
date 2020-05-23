@@ -284,3 +284,197 @@ $$
 \nabla_\beta \log f(\boldsymbol\beta | \mathbf{y}, \mathbf{X}) \propto \mathbf{X}^T (\mathbf{y} - e^{\mathbf{X}\boldsymbol\beta}) - \frac{\mathbf{I}\boldsymbol\beta}{\sigma_\beta^2}
 $$
 
+\pagebreak
+
+## Linear mixed effects model
+
+Specify the model
+
+$$
+\begin{aligned}
+\mathbf{y} &= \mathbf{X}\boldsymbol\beta + \mathbf{Z}\mathbf{u} + \boldsymbol\epsilon \\
+\mathbf{u} &\sim N(0, \mathbf{G}) \\
+\boldsymbol\epsilon &\sim N(0, \sigma_\epsilon^2)
+\end{aligned}
+$$
+
+Response for each subject is a vector $\mathbf{y} = (\mathbf{y}_1, ..., \mathbf{y}_n)$ for $n$ subjects $i= 1, ..., n$.  Each subject has $d$ observations $\mathbf{y}_i = (y_{i1}, ..., y_{id})$ and we let $j = 1, ..., d$. The fixed effect design matrix is composed of matrices for each subject, $\mathbf{X} = (\mathbf{X}_1, ..., \mathbf{X}_n)$, and $\mathbf{X}_i \in \mathbb{R}^{d\times (q+1)}$ for the fixed effects parameters $\boldsymbol\beta = (\beta_0, ..., \beta_q)$. The full fixed effects design matrix is therefore $\mathbf{X} \in \mathbb{R}^{nd \times (q+1)}$.
+
+For random effects, $\mathbf{Z} = \text{diag}(\mathbf{Z}_1, ..., \mathbf{Z}_n)$, with individual random effects matrices $\mathbf{Z}_i$ for each of the $i$ subjects. A random intercept model specifies $\mathbf{Z}_i$ as a column vector of ones where $\mathbf{Z}_i = \mathbf{z}_i = \mathbf{1}_d$. The full random effects design matrix $\mathbf{Z} \in \mathbb{R}^{nd\times n}$.  The parameterization for random effects is $\mathbf{u} = (\mathbf{u}_1, ..., \mathbf{u}_n)^T$ with vectors $\mathbf{u}_i$ for each subject. A random intercept model is somewhat simplified where $\mathbf{u}_i = u_i$ denotes a single random intercept parameter for each subject $i$, and $\mathbf{u} = (u_1, ..., u_n)^T$.
+
+We set $\mathbf{u}$ as one of our priors, following a multivariate normal distribution, $\mathbf{u} \sim N(0, \mathbf{G})$. For our random intercept model, the specification of the covariance matrix $\mathbf{G}$ is expanded to facilitate efficient sampling using HMC.  We let $\mathbf{u} = \mathbf{G}^{1/2}\boldsymbol\tau$ where $\mathbf{G}^{1/2} = \lambda \mathbf{I}_n$. An additional parameter $\boldsymbol\tau = (\tau_1, ..., \tau_n)^T$ where each of these parameters is standard normal $\tau_i \sim N(0, 1)$. The full covariance matrix is then $\mathbf{G} = \lambda^2 \mathbf{I}_n \boldsymbol\tau$.
+
+The error for each subject $i$ is $\boldsymbol\epsilon_i \sim N(0, \sigma_{\epsilon}^2 \mathbf{I}_d)$. Since the error distribution is constant for each observations, 
+
+$$
+\boldsymbol\epsilon \sim N(0, \sigma_{\epsilon}^2 \mathbf{I}_{nd})
+$$
+
+For pedagogical purposes, we derive and code the log posterior and gradient for the random intercept model only. Additional functions will be developed for more general mixed effect model specifications.
+
+Random intercept model:
+
+$$
+\begin{aligned}
+\mathbf{y}_i &= \mathbf{X}_i\boldsymbol\beta + \mathbf{z}_i u_i + \boldsymbol\epsilon_i \\
+ &= \mathbf{X}_i\boldsymbol\beta + \mathbf{1}_d u_i + \boldsymbol\epsilon_i
+\end{aligned}
+$$
+
+Expand by individual observation
+
+$$
+y_{ij} = x_{ij}\boldsymbol\beta + z_{ij} u_i + \epsilon_{ij}
+$$
+
+Likelihood for random intercept model
+
+$$
+f(\mathbf{y} | \mathbf{X}, \mathbf{Z}, \boldsymbol\beta, \mathbf{u}, \sigma^2) = \frac{1}{(2\pi\sigma_\epsilon^2)^{nd/2}}\exp\left( -\frac{1}{2\sigma^2} (\mathbf{y} - \mathbf{X}\boldsymbol\beta - \mathbf{Z}\mathbf{u})^T(\mathbf{y} - \mathbf{X}\boldsymbol\beta - \mathbf{Z}\mathbf{u}) \right)
+$$
+
+Log likelihood excluding constants
+
+$$
+\log f(\mathbf{y}|\mathbf{X}, \mathbf{Z}, \boldsymbol\beta, \mathbf{u}, \sigma_\epsilon) = -\frac{nd}{2}\log\sigma_\epsilon^2 - \frac{1}{2\sigma_\epsilon^2} (\mathbf{y} - \mathbf{X}\boldsymbol\beta - \mathbf{Z}\mathbf{u})^T(\mathbf{y} - \mathbf{X}\boldsymbol\beta - \mathbf{Z}\mathbf{u}) 
+$$
+
+We adjust the formulation of the log likelihood in terms of $\lambda$ and $\boldsymbol\tau$.  
+
+$$
+\log f(\mathbf{y}|\mathbf{X}, \mathbf{Z}, \boldsymbol\beta, \lambda, \boldsymbol\tau, \sigma_\epsilon) = -\frac{nd}{2}\log\sigma_\epsilon^2 - \frac{1}{2\sigma_\epsilon^2} (\mathbf{y} - \mathbf{X}\boldsymbol\beta - \lambda\mathbf{Z}\boldsymbol\tau)^T(\mathbf{y} - \mathbf{X}\boldsymbol\beta - \lambda\mathbf{Z}\boldsymbol\tau) 
+$$
+
+Specify priors explicitly next.  We let $\lambda$ follow a 2-parameter half-t distribution with hyperparameters $\nu_\lambda$, $A_\lambda$. Again, $\boldsymbol\tau$ are standard normal. We also let $\epsilon$ follow a 2-parameter half-t with hyperparameters $\nu_\epsilon$ and $A_\epsilon$. 
+
+$$
+\begin{aligned}
+\boldsymbol\beta &\sim N(0, \sigma_\beta^2 \mathbf{I}_{q+1}) \\
+\lambda &\sim \text{half-t}(\nu_\lambda, A_\lambda) \\
+\boldsymbol\tau &\sim N(0, I_n) \\
+\sigma_\epsilon &\sim \text{half-t}(\nu_\epsilon, A_\epsilon)
+\end{aligned}
+$$
+
+Next, we specify the densities for the priors, omitting constants
+
+$$
+\begin{aligned}
+\pi(\boldsymbol\beta) &\propto e^{-\frac{1}{2}\boldsymbol\beta^T \mathbf{I}_{(q+1)}\boldsymbol\beta}, \qquad \boldsymbol\beta \in \mathbb{R}^{q+1} \\
+\pi(\lambda) &\propto \left(1 + \frac{1}{\nu_\lambda}\left(\frac{\lambda}{A_\lambda} \right)^2 \right)^{-(\nu_\lambda + 1)/2}, \qquad \lambda \in (0, \infty)\\
+\pi(\boldsymbol\tau) &\propto e^{-\frac{1}{2}\boldsymbol\tau^T \mathbf{I}_n \boldsymbol\tau}, \qquad \boldsymbol\tau \in \mathbb{R}^{n} \\
+\pi(\sigma_\epsilon) &\propto \left(1 + \frac{1}{\nu_\epsilon}\left(\frac{\sigma_\epsilon}{A_\epsilon} \right)^2 \right)^{-(\nu_\epsilon + 1)/2}, \qquad \sigma_\epsilon \in (0, \infty)
+\end{aligned}
+$$
+
+Proposals for all parameters must be over $\mathbb{R}$. However, the half-t priors $\lambda$ and $\sigma_\epsilon$ are restricted to strictly positive numbers. We apply a $\log$ transform such that these parameters span $\mathbb{R}$. 
+
+Re-parameterize $\lambda$ and $\sigma_\epsilon$ to $\xi$ and $\gamma$, respectively.
+
+$$
+\begin{aligned}
+\xi &= \log\lambda, \quad \lambda = e^\xi \\
+\gamma &= \log\sigma_\epsilon, \quad \sigma_\epsilon = e^\gamma
+\end{aligned}
+$$
+ 
+ Apply the Jacobian to obtain the distribution of $\xi$
+ 
+ $$
+ \begin{aligned}
+ \pi_\xi(\xi) &= \pi_\lambda(g^{-1}(\xi))\left | \frac{d\lambda}{d\xi} \right | \\
+ &= \pi_\lambda(e^{\xi}) | e^\xi |\\
+ &\propto \left(1 + \frac{1}{\nu_\xi}\left(\frac{\xi}{A_\xi} \right)^2 \right)^{-(\nu_\xi + 1)/2} e^{\xi}
+ \end{aligned}
+ $$
+
+ Apply the Jacobian to obtain the distribution of $\gamma$
+ 
+ $$
+ \begin{aligned}
+ \pi_\gamma(\gamma) &= \pi_{\sigma_\epsilon}(g^{-1}(\gamma))\left | \frac{d\sigma_\epsilon}{d\gamma} \right | \\
+ &= \pi_{\sigma_\epsilon}(e^{\gamma}) | e^\gamma |\\
+ &\propto \left(1 + \frac{1}{\nu_\gamma}\left(\frac{\gamma}{A_\gamma} \right)^2 \right)^{-(\nu_\gamma + 1)/2} e^{\gamma}
+ \end{aligned}
+ $$
+
+Next, the log priors that we use with transformations, again omitting constants. Note that the log densities of the priors with log densities include an additive term for the transformed distribution (i.e. $\xi$ and $\gamma$). 
+
+$$
+\begin{aligned}
+\log \pi(\beta) &\propto -\frac{\boldsymbol\beta^T \mathbf{I}_{(q+1)}\boldsymbol\beta}{2\sigma_\beta^2} \\
+\log \pi(\xi) &\propto -\frac{\nu_\xi + 1}{2} \log \left( 1 + \frac{1}{\nu_\xi} \left(\frac{e^\xi}{A_\xi} \right)^2 \right) + \xi \\
+\log \pi(\boldsymbol\tau) &\propto -\frac{1}{2}\boldsymbol\tau^T \mathbf{I}_n \boldsymbol\tau \\
+\log \pi(\gamma) &\propto -\frac{\nu_\gamma + 1}{2} \log \left( 1 + \frac{1}{\nu_\gamma} \left(\frac{e^\gamma}{A_\gamma} \right)^2 \right) + \gamma
+\end{aligned}
+$$
+
+Our final adjustment to the log likelihood replaces $\lambda$ and $\sigma_\epsilon$ with $\xi$ and $\gamma$, respectively.
+
+$$
+\log f(\mathbf{y}|\mathbf{X}, \mathbf{Z}, \boldsymbol\beta, \xi, \boldsymbol\tau, \gamma) = -nd\gamma - \frac{1}{2 e^{2\gamma}} (\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau)^T(\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau) 
+$$
+
+The log posterior is the log likelihood plus the log prior. In this example, the prior parameters are independent of each other.
+
+$$
+\begin{aligned}
+\log f(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z}) &\propto \log f(\mathbf{y} | \mathbf{X}, \mathbf{Z}, \boldsymbol\beta, \xi, \boldsymbol\tau, \gamma)  + \log \pi(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma) \\ 
+&\propto \log f(\mathbf{y} | \mathbf{X}, \mathbf{Z}, \boldsymbol\beta, \xi, \boldsymbol\tau, \gamma) + \log \pi(\boldsymbol\beta) + \log \pi(\xi) + \log\pi(\boldsymbol\tau) + \log\pi(\gamma) \\
+&\propto -nd\gamma - \frac{1}{2 e^{2\gamma}} (\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau)^T(\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau) - \\
+&\quad \frac{\boldsymbol\beta^T \mathbf{I}_{(q+1)}\boldsymbol\beta}{2\sigma_\beta^2} -\frac{\nu_\xi + 1}{2} \log \left( 1 + \frac{1}{\nu_\xi} \left(\frac{e^\xi}{A_\xi} \right)^2 \right) + \xi - \\
+&\quad \frac{1}{2}\boldsymbol\tau^T \mathbf{I}_n \boldsymbol\tau -\frac{\nu_\gamma + 1}{2} \log \left( 1 + \frac{1}{\nu_\gamma} \left(\frac{e^\gamma}{A_\gamma} \right)^2 \right) + \gamma
+\end{aligned}
+$$
+
+Next, we compute the gradient of the log posterior
+
+First $\nabla_\beta$
+
+$$
+\begin{aligned}
+\nabla_\beta \log f(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z}) &\propto -\frac{1}{2e^{2\gamma}} (-2)\mathbf{X}^T(y-\mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau)- \frac{1}{\sigma_\beta^2}\mathbf{I}_{(q+1)}\boldsymbol\beta \\
+&\propto e^{-2\gamma}\mathbf{X}^T(y-\mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau)- \frac{1}{\sigma_\beta^2}\mathbf{I}_{(q+1)}\boldsymbol\beta
+\end{aligned}
+$$
+
+Next $\nabla_\xi$
+
+$$
+\begin{aligned}
+\nabla_\xi \log f(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z}) &\propto -\frac{e^{-2\gamma}}{2}(-2)(\mathbf{Z}\boldsymbol\tau)^T e^{\xi} (\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau) - \frac{\nu_\xi + 1}{2}\left( 1 + \frac{1}{\nu_\xi} \left(\frac{e^\xi}{A_\xi} \right)^2 \right)^{-1}\frac{2\xi}{\nu_\xi A_\xi^2} + 1 \\
+&\propto e^{-2\gamma + \xi} \boldsymbol\tau^T \mathbf{Z}^T (\mathbf{y}-\mathbf{X}\boldsymbol\beta -e^{\xi}\mathbf{Z}\boldsymbol\tau) - \frac{\nu_\xi + 1}{1 + \nu_\xi A_\xi^2 e^{-2\xi}} + 1
+\end{aligned}
+$$
+
+Next $\nabla_\tau$
+
+$$
+\begin{aligned}
+\nabla_\tau \log f(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z}) &\propto -\frac{e^{-2\gamma}}{2}(-2)(\mathbf{Z}\boldsymbol)^T e^{\xi}(\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau) - \frac{1}{2}\mathbf{I}_n\boldsymbol\tau \\
+&\propto e^{-2\gamma} \mathbf{Z}^T(\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau) - \frac{1}{2}\mathbf{I}_n \boldsymbol\tau
+\end{aligned}
+$$
+
+Next $\nabla_\gamma$
+
+$$
+\begin{aligned}
+\nabla_\gamma \log f(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z}) &\propto -nd + e^{-2\gamma}(\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau)^T (\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau) - \frac{\nu_\gamma + 1}{2}\left( 1 + \frac{1}{\nu_\gamma} \left(\frac{e^\gamma}{A_\gamma} \right)^2 \right)^{-1}\frac{2\gamma}{\nu_\gamma A_\gamma^2} + 1 \\ 
+&\propto -nd + e^{-2\gamma}(\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau)^T (\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau) - \frac{\nu_\gamma + 1}{1 + \nu_\gamma A_\gamma^2 e^{-2\gamma}} + 1
+\end{aligned}
+$$
+
+
+Full gradient of the log posterior specified
+
+$$
+\begin{aligned}
+\nabla_\beta \log f(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z})
+&\propto e^{-2\gamma}\mathbf{X}^T(y-\mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau)- \frac{1}{\sigma_\beta^2}\mathbf{I}_{(q+1)}\boldsymbol\beta \\
+\nabla_\xi \log f(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z}) 
+&\propto e^{-2\gamma + \xi} \boldsymbol\tau^T \mathbf{Z}^T (\mathbf{y}-\mathbf{X}\boldsymbol\beta -e^{\xi}\mathbf{Z}\boldsymbol\tau) - \frac{\nu_\xi + 1}{1 + \nu_\xi A_\xi^2 e^{-2\xi}} + 1 \\
+\nabla_\tau \log f(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z}) &\propto e^{-2\gamma} \mathbf{Z}^T(\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau) - \frac{1}{2}\mathbf{I}_n \boldsymbol\tau \\
+\nabla_\gamma \log f(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z}) &\propto  -nd + e^{-2\gamma}(\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau)^T (\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau) - \frac{\nu_\gamma + 1}{1 + \nu_\gamma A_\gamma^2 e^{-2\gamma}} + 1
+\end{aligned}
+$$
