@@ -58,16 +58,22 @@ pfun_glmm_poisson <- function(PARAM, ...) {
 #' @param y numeric vector for the dependent variable
 #' @param X numeric design matrix of fixed effect parameters
 #' @param Z numeric design matrix of random effect parameters
+#' @param n number of subjects for mixed effect models, or number of observations for standard glm
+#' @param d number of observations per subject
 #' @param a hyperprior for the Inverse Gamma shape parameter
 #' @param b hyperprior for the Inverse Gamma scale parameter
 #' @param sig2beta diagonal covariance of prior for linear predictors is multivariate normal with mean 0
 #' @param m number of random effect linear parameters
 #' @param q number of random effects covariance parameters
 #' @param A hyperprior numeric vector for the random effects off-diagonal \code{a}
-#' @param nueps hyperprior for the half-t prior of the error parameter \eqn{\nu}
-#' @param nulambda hyperprior for the half-t prior of the random effects diagonal \eqn{\lambda}
-#' @param Aeps hyperprior for the half-t prior of the error parameter \eqn{A_\epsilon}
-#' @param Alambda hyperprior for the half-t prior of the random effects diagonal \eqn{A_\lambda}
+#' @param nueps hyperprior \eqn{\nu} for the half-t prior of the error parameter
+#' @param nulambda hyperprior \eqn{\nu} for the half-t prior of the random effects diagonal
+#' @param nuxi hyperprior \eqn{\nu} for the half-t prior of the random effects diagonal
+#' @param nugamma hyperprior \eqn{\nu} for the half-t prior of the log transformed error
+#' @param Aeps hyperprior \eqn{A} for the half-t prior of the error parameter
+#' @param Alambda hyperprior \eqn{A} for the half-t prior of the random effects diagonal
+#' @param Axi hyperprior \eqn{A} for the half-t prior of the random effects diagonal
+#' @param Agamma hyperprior \eqn{A} for the half-t prior of the log transformed error
 #' @section Generalized Linear Models with available posterior and gradient functions:
 #' \describe{
 #'   \item{`linear_posterior(theta, y, X, a=1e-4, b=1e-4, B=0.001)`}{
@@ -289,156 +295,253 @@ g_poisson_posterior <- function(theta, y, X, sig2beta=1e2) {
 
 #' @rdname hmclearn-glm-posterior
 #' @export
-lmm_posterior <- function(theta, y, X, Z, m, q=1, A = 1e4, nueps=1, nulambda=1, Aeps=25, Alambda=25, sig2beta=1e3) {
+lmm_posterior <- function(theta, y, X, Z, n, d, nrandom=1,
+                          nugamma=1, nuxi=1, Agamma=25, Axi=25, sig2beta=1e3) {
   Z <- as.matrix(Z)
   p <- ncol(X)
-  n <- nrow(X)
 
   # extract parameters from theta vector
   beta_param <- as.numeric(theta[1:p])
-  tau_param <- theta[(p+1):(p+m*q)]
+  tau_param <- theta[(p+1):(p+n*nrandom)]
 
   # log of sig2eps
-  gamma_param <- theta[p+m*q+1]
+  gamma_param <- theta[p+n*nrandom+1]
 
   # diagonal of G matrix
-  xi_param <- theta[(p+m*q+2):(p+m*q+q+1)]
-
-  # off diagonal of G matrix
-  if (q > 1) {
-    a_param <- tail(theta, q*(q-1)/2)
-    Ainv <- diag(1/A, length(a_param), length(a_param))
-    log_a_prior <- -1/2*(t(a_param) %*% Ainv %*% a_param)
-  } else {
-    log_a_prior <- 0
-    a_param <- 0
-  }
-
-  inv.nu <- diag(1/sig2beta, p, p)
-
+  xi_param <- theta[(p+n*nrandom+2):(p+n*nrandom+nrandom+1)]
 
   # reconstruct G LDLT decomposition
-  Dhalf <- diag(exp(xi_param), q, q)
+  LDhalf <- diag(exp(xi_param), nrandom, nrandom)
+  LDhalf_block <- kronecker(diag(n), LDhalf)
 
-  L <- diag(q)
-  L[lower.tri(L, diag=FALSE)] <- a_param
-
-
-  LDhalf <- L %*% Dhalf
-
-  Ainv <- diag(1/A, length(a_param), length(a_param))
-
-  LDhalf_block <- kronecker(diag(m), LDhalf)
-
-  # u is deterministic function of xi, a, and tau
+  # u is deterministic function of xi and tau
   u_param <- LDhalf_block %*% tau_param
 
-  log_likelihood <- -n*gamma_param - exp(-2*gamma_param)/2 *
+  log_likelihood <- -n*d*gamma_param - exp(-2*gamma_param)/2 *
     t(y - X%*%beta_param - Z%*%u_param) %*% (y - X%*%beta_param - Z%*%u_param)
-  log_beta_prior <- - 1/2* t(beta_param) %*% inv.nu %*% beta_param
+  log_beta_prior <- - 1/2* t(beta_param) %*% beta_param / sig2beta
   log_tau_prior <- -1/2 * t(tau_param) %*% tau_param
-  log_gamma_prior <- -(nueps + 1)/2 * log(1 + 1/nueps*exp(2*gamma_param)/Aeps^2) + gamma_param
-  log_xi_prior <- -(nulambda+1)/2 * log(1 + 1/nulambda*exp(2*xi_param)/Alambda^2) + xi_param
+  log_gamma_prior <- -(nugamma + 1)/2 * log(1 + 1/nugamma*exp(2*gamma_param)/Agamma^2) + gamma_param
+  log_xi_prior <- -(nuxi+1)/2 * log(1 + 1/nuxi*exp(2*xi_param)/Axi^2) + xi_param
 
-  result <- log_likelihood + log_beta_prior + log_tau_prior + log_gamma_prior + sum(log_xi_prior) + log_a_prior
+  result <- log_likelihood + log_beta_prior + log_tau_prior + log_gamma_prior + sum(log_xi_prior)
   return(as.numeric(result))
 }
 
+
+
+#' #' @rdname hmclearn-glm-posterior
+#' #' @export
+#' lmm_posterior <- function(theta, y, X, Z, m, q=1, A = 1e4, nueps=1, nulambda=1, Aeps=25, Alambda=25, sig2beta=1e3) {
+#'   Z <- as.matrix(Z)
+#'   p <- ncol(X)
+#'   n <- nrow(X)
+#'
+#'   # extract parameters from theta vector
+#'   beta_param <- as.numeric(theta[1:p])
+#'   tau_param <- theta[(p+1):(p+m*q)]
+#'
+#'   # log of sig2eps
+#'   gamma_param <- theta[p+m*q+1]
+#'
+#'   # diagonal of G matrix
+#'   xi_param <- theta[(p+m*q+2):(p+m*q+q+1)]
+#'
+#'   # off diagonal of G matrix
+#'   if (q > 1) {
+#'     a_param <- tail(theta, q*(q-1)/2)
+#'     Ainv <- diag(1/A, length(a_param), length(a_param))
+#'     log_a_prior <- -1/2*(t(a_param) %*% Ainv %*% a_param)
+#'   } else {
+#'     log_a_prior <- 0
+#'     a_param <- 0
+#'   }
+#'
+#'   inv.nu <- diag(1/sig2beta, p, p)
+#'
+#'
+#'   # reconstruct G LDLT decomposition
+#'   Dhalf <- diag(exp(xi_param), q, q)
+#'
+#'   L <- diag(q)
+#'   L[lower.tri(L, diag=FALSE)] <- a_param
+#'
+#'
+#'   LDhalf <- L %*% Dhalf
+#'
+#'   Ainv <- diag(1/A, length(a_param), length(a_param))
+#'
+#'   LDhalf_block <- kronecker(diag(m), LDhalf)
+#'
+#'   # u is deterministic function of xi, a, and tau
+#'   u_param <- LDhalf_block %*% tau_param
+#'
+#'   log_likelihood <- -n*gamma_param - exp(-2*gamma_param)/2 *
+#'     t(y - X%*%beta_param - Z%*%u_param) %*% (y - X%*%beta_param - Z%*%u_param)
+#'   log_beta_prior <- - 1/2* t(beta_param) %*% inv.nu %*% beta_param
+#'   log_tau_prior <- -1/2 * t(tau_param) %*% tau_param
+#'   log_gamma_prior <- -(nueps + 1)/2 * log(1 + 1/nueps*exp(2*gamma_param)/Aeps^2) + gamma_param
+#'   log_xi_prior <- -(nulambda+1)/2 * log(1 + 1/nulambda*exp(2*xi_param)/Alambda^2) + xi_param
+#'
+#'   result <- log_likelihood + log_beta_prior + log_tau_prior + log_gamma_prior + sum(log_xi_prior) + log_a_prior
+#'   return(as.numeric(result))
+#' }
+
 #' @rdname hmclearn-glm-posterior
 #' @export
-g_lmm_posterior <- function(theta, y, X, Z, m, q=1, A = 1e4, nueps=1, nulambda=1, Aeps=25, Alambda=25, sig2beta=1e3) {
+g_lmm_posterior <- function(theta, y, X, Z, n, d, nrandom=1,
+                            nugamma=1, nuxi=1, Agamma=25, Axi=25, sig2beta=1e3) {
   Z <- as.matrix(Z)
   p <- ncol(X)
-  n <- nrow(X)
 
   # extract parameters from theta vector
   beta_param <- as.numeric(theta[1:p])
-  tau_param <- theta[(p+1):(p+m*q)]
+  tau_param <- theta[(p+1):(p+n*nrandom)]
 
   # log of sig2eps
-  gamma_param <- theta[p+m*q+1]
+  gamma_param <- theta[p+n*nrandom+1]
 
   # diagonal of G matrix
-  xi_param <- theta[(p+m*q+2):(p+m*q+q+1)]
-
-  # off diagonal of G matrix
-  if (q > 1) {
-    a_param <- tail(theta, q*(q-1)/2)
-    Ainv <- diag(1/A, length(a_param), length(a_param))
-    log_a_prior <- -1/2*(t(a_param) %*% Ainv %*% a_param)
-  } else {
-    log_a_prior <- 0
-    a_param <- 0
-  }
-
-  inv.nu <- diag(1/sig2beta, p, p)
+  xi_param <- theta[(p+n*nrandom+2):(p+n*nrandom+nrandom+1)]
 
   # reconstruct G LDLT decomposition
-  Dhalf <- diag(exp(xi_param), q, q)
-  Dhalf_block <- kronecker(diag(m), Dhalf)
+  Dhalf <- diag(exp(xi_param), nrandom, nrandom)
+  Dhalf_block <- kronecker(diag(n), Dhalf)
 
-  L <- diag(q)
-  L[lower.tri(L, diag=FALSE)] <- a_param
+  L <- diag(nrandom)
 
-  L_block <- kronecker(diag(m), L)
+  L_block <- kronecker(diag(n), L)
 
   LDhalf <- L %*% Dhalf
-
-  Ainv <- diag(1/A, length(a_param), length(a_param))
-
-  LDhalf_block <- kronecker(diag(m), LDhalf)
+  LDhalf_block <- kronecker(diag(n), LDhalf)
 
   # u is deterministic function of xi, a, and tau
   u_param <- LDhalf_block %*% tau_param
 
   # gradient
-  g_beta <- exp(-2*gamma_param) * t(X) %*% (y - X%*%beta_param - Z%*%u_param) - (inv.nu %*% beta_param)
+  g_beta <- exp(-2*gamma_param) * t(X) %*% (y - X%*%beta_param - Z%*%u_param) - beta_param / sig2beta
   g_tau <- exp(-2*gamma_param) * Dhalf_block %*% t(L_block) %*% t(Z) %*%
     (y - X%*%beta_param - Z%*%u_param) - tau_param
-  g_gamma <- -(n-1) + exp(-2*gamma_param) * t(y - X%*%beta_param - Z%*%u_param) %*%
+  g_gamma <- -n*d + exp(-2*gamma_param) * t(y - X%*%beta_param - Z%*%u_param) %*%
     (y - X%*%beta_param - Z%*%u_param) -
-    (nueps + 1) / (1 + nueps*Aeps^2 * exp(-2*gamma_param))
+    (nugamma + 1) / (1 + nugamma*Agamma^2 * exp(-2*gamma_param)) + 1
 
   # gradient for xi using matrix algebra
-  zero_v <- rep(0, q)
-  g_xi <- sapply(seq_along(1:q), function(jj) {
+  zero_v <- rep(0, nrandom)
+  g_xi <- sapply(seq_along(1:nrandom), function(jj) {
     zv <- zero_v
     zv[jj] <- 1
-    bd <- kronecker(diag(m), diag(zv))
-    tot <- (y - X%*%beta_param - Z%*%u_param) %*% t(Z %*% L_block %*% bd %*% Dhalf_block %*% tau_param)
+    bd <- kronecker(diag(n), diag(zv))
+    tot <- (y - X%*%beta_param - Z%*%u_param) %*%
+      t(Z %*% L_block %*% bd %*% Dhalf_block %*% tau_param)
     exp(-2*gamma_param) * sum(diag(tot))
   })
-  g_xi <- g_xi - (nulambda + 1) / (1 + nulambda*Alambda^2 * exp(-2*xi_param)) + 1
+  g_xi <- g_xi - (nuxi + 1) / (1 + nuxi*Axi^2 * exp(-2*xi_param)) + 1
 
-  # gradient for a
-  if (q > 1) {
-
-    # gradient for a
-    tau_lst <- split(tau_param, ceiling(seq_along(tau_param)/q))
-    Tj <- lapply(tau_lst, function(tauvals) {
-      Tj <- create_Uj(Dhalf %*% tauvals, neg=FALSE)
-    })
-    Tj <- do.call(rbind, Tj)
-
-    g_a1 <- exp(-2*gamma_param) * t(Tj) %*% t(Z) %*%
-      (y - X%*%beta_param - Z%*%Dhalf_block%*%tau_param - Z%*%Tj%*%a_param)
-    g_a2 <- -Ainv %*% a_param
-    g_a <- g_a1 + g_a2
-
-    g_all <- c(as.numeric(g_beta),
-               as.numeric(g_tau),
-               as.numeric(g_gamma),
-               g_xi,
-               as.numeric(g_a))
-  } else {
-    g_all <- c(as.numeric(g_beta),
-               as.numeric(g_tau),
-               as.numeric(g_gamma),
-               g_xi)
-  }
+  g_all <- c(as.numeric(g_beta),
+             as.numeric(g_tau),
+             as.numeric(g_gamma),
+             g_xi)
 
   return(g_all)
 }
+
+
+#' #' @rdname hmclearn-glm-posterior
+#' #' @export
+#' g_lmm_posterior <- function(theta, y, X, Z, m, q=1, A = 1e4, nueps=1, nulambda=1, Aeps=25, Alambda=25, sig2beta=1e3) {
+#'   Z <- as.matrix(Z)
+#'   p <- ncol(X)
+#'   n <- nrow(X)
+#'
+#'   # extract parameters from theta vector
+#'   beta_param <- as.numeric(theta[1:p])
+#'   tau_param <- theta[(p+1):(p+m*q)]
+#'
+#'   # log of sig2eps
+#'   gamma_param <- theta[p+m*q+1]
+#'
+#'   # diagonal of G matrix
+#'   xi_param <- theta[(p+m*q+2):(p+m*q+q+1)]
+#'
+#'   # off diagonal of G matrix
+#'   if (q > 1) {
+#'     a_param <- tail(theta, q*(q-1)/2)
+#'     Ainv <- diag(1/A, length(a_param), length(a_param))
+#'     log_a_prior <- -1/2*(t(a_param) %*% Ainv %*% a_param)
+#'   } else {
+#'     log_a_prior <- 0
+#'     a_param <- 0
+#'   }
+#'
+#'   inv.nu <- diag(1/sig2beta, p, p)
+#'
+#'   # reconstruct G LDLT decomposition
+#'   Dhalf <- diag(exp(xi_param), q, q)
+#'   Dhalf_block <- kronecker(diag(m), Dhalf)
+#'
+#'   L <- diag(q)
+#'   L[lower.tri(L, diag=FALSE)] <- a_param
+#'
+#'   L_block <- kronecker(diag(m), L)
+#'
+#'   LDhalf <- L %*% Dhalf
+#'
+#'   Ainv <- diag(1/A, length(a_param), length(a_param))
+#'
+#'   LDhalf_block <- kronecker(diag(m), LDhalf)
+#'
+#'   # u is deterministic function of xi, a, and tau
+#'   u_param <- LDhalf_block %*% tau_param
+#'
+#'   # gradient
+#'   g_beta <- exp(-2*gamma_param) * t(X) %*% (y - X%*%beta_param - Z%*%u_param) - (inv.nu %*% beta_param)
+#'   g_tau <- exp(-2*gamma_param) * Dhalf_block %*% t(L_block) %*% t(Z) %*%
+#'     (y - X%*%beta_param - Z%*%u_param) - tau_param
+#'   g_gamma <- -(n-1) + exp(-2*gamma_param) * t(y - X%*%beta_param - Z%*%u_param) %*%
+#'     (y - X%*%beta_param - Z%*%u_param) -
+#'     (nueps + 1) / (1 + nueps*Aeps^2 * exp(-2*gamma_param))
+#'
+#'   # gradient for xi using matrix algebra
+#'   zero_v <- rep(0, q)
+#'   g_xi <- sapply(seq_along(1:q), function(jj) {
+#'     zv <- zero_v
+#'     zv[jj] <- 1
+#'     bd <- kronecker(diag(m), diag(zv))
+#'     tot <- (y - X%*%beta_param - Z%*%u_param) %*% t(Z %*% L_block %*% bd %*% Dhalf_block %*% tau_param)
+#'     exp(-2*gamma_param) * sum(diag(tot))
+#'   })
+#'   g_xi <- g_xi - (nulambda + 1) / (1 + nulambda*Alambda^2 * exp(-2*xi_param)) + 1
+#'
+#'   # gradient for a
+#'   if (q > 1) {
+#'
+#'     # gradient for a
+#'     tau_lst <- split(tau_param, ceiling(seq_along(tau_param)/q))
+#'     Tj <- lapply(tau_lst, function(tauvals) {
+#'       Tj <- create_Uj(Dhalf %*% tauvals, neg=FALSE)
+#'     })
+#'     Tj <- do.call(rbind, Tj)
+#'
+#'     g_a1 <- exp(-2*gamma_param) * t(Tj) %*% t(Z) %*%
+#'       (y - X%*%beta_param - Z%*%Dhalf_block%*%tau_param - Z%*%Tj%*%a_param)
+#'     g_a2 <- -Ainv %*% a_param
+#'     g_a <- g_a1 + g_a2
+#'
+#'     g_all <- c(as.numeric(g_beta),
+#'                as.numeric(g_tau),
+#'                as.numeric(g_gamma),
+#'                g_xi,
+#'                as.numeric(g_a))
+#'   } else {
+#'     g_all <- c(as.numeric(g_beta),
+#'                as.numeric(g_tau),
+#'                as.numeric(g_gamma),
+#'                g_xi)
+#'   }
+#'
+#'   return(g_all)
+#' }
 
 #' @rdname hmclearn-glm-posterior
 #' @export

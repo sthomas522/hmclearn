@@ -203,7 +203,6 @@ test_that("vignette examples", {
 
   # dependent variable
   y <- sleepstudy$Reaction
-  n <- length(y)
 
   yi.lst <- split(sleepstudy$Reaction, sleepstudy$Subject)
 
@@ -218,12 +217,15 @@ test_that("vignette examples", {
   X <- as.matrix(do.call(rbind, Xi.lst))
 
   # random effects
-  m <- length(unique(sleepstudy$Subject))
+  n <- length(unique(sleepstudy$Subject))
+  d <- length(y)/n
+  nrandom <- 1
 
   ##########
   # intercept
-  Zi.lst <- replicate(m, matrix(rep(1, n/m), ncol=1), simplify=FALSE)
-  Z <- as.matrix(bdiag(Zi.lst))
+  Z <- kronecker(diag(n), matrix(rep(1, d), ncol=1))
+  # Zi.lst <- replicate(m, matrix(rep(1, n/m), ncol=1), simplify=FALSE)
+  # Z <- as.matrix(bdiag(Zi.lst))
 
   # reduce from 2e3 for testing
   N <- 5e2
@@ -248,9 +250,9 @@ test_that("vignette examples", {
                logPOSTERIOR = lmm_posterior,
                glogPOSTERIOR = g_lmm_posterior,
                varnames = vnames,
-               param=list(y = y, X=X, Z=Z, m=18, q=1,
-                          nueps=4, Aeps=1,
-                          nulambda=1, Alambda=1, sig2beta=1e5),
+               param=list(y = y, X=X, Z=Z, n=n, d=d, nrandom=1,
+                          nugamma=4, Agamma=1,
+                          nuxi=1, Axi=1, sig2beta=1e5),
                parallel=FALSE, chains=1)
 
   # test values

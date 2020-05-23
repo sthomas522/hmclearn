@@ -452,7 +452,7 @@ Next $\nabla_\tau$
 $$
 \begin{aligned}
 \nabla_\tau \log f(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z}) &\propto -\frac{e^{-2\gamma}}{2}(-2)(\mathbf{Z}\boldsymbol)^T e^{\xi}(\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau) - \frac{1}{2}\mathbf{I}_n\boldsymbol\tau \\
-&\propto e^{-2\gamma} \mathbf{Z}^T(\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau) - \frac{1}{2}\mathbf{I}_n \boldsymbol\tau
+&\propto e^{-2\gamma} \mathbf{Z}^T(\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau) - \mathbf{I}_n \boldsymbol\tau
 \end{aligned}
 $$
 
@@ -474,7 +474,7 @@ $$
 &\propto e^{-2\gamma}\mathbf{X}^T(y-\mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau)- \frac{1}{\sigma_\beta^2}\mathbf{I}_{(q+1)}\boldsymbol\beta \\
 \nabla_\xi \log f(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z}) 
 &\propto e^{-2\gamma + \xi} \boldsymbol\tau^T \mathbf{Z}^T (\mathbf{y}-\mathbf{X}\boldsymbol\beta -e^{\xi}\mathbf{Z}\boldsymbol\tau) - \frac{\nu_\xi + 1}{1 + \nu_\xi A_\xi^2 e^{-2\xi}} + 1 \\
-\nabla_\tau \log f(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z}) &\propto e^{-2\gamma} \mathbf{Z}^T(\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau) - \frac{1}{2}\mathbf{I}_n \boldsymbol\tau \\
+\nabla_\tau \log f(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z}) &\propto e^{-2\gamma} \mathbf{Z}^T(\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau) - \mathbf{I}_n \boldsymbol\tau \\
 \nabla_\gamma \log f(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z}) &\propto  -nd + e^{-2\gamma}(\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau)^T (\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau) - \frac{\nu_\gamma + 1}{1 + \nu_\gamma A_\gamma^2 e^{-2\gamma}} + 1
 \end{aligned}
 $$
