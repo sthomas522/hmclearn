@@ -54,9 +54,6 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/gradient_derivations_hmclearn.html">Gradient Derivations for HMC</a>
-    </li>
-    <li>
       <a href="../articles/linear_mixed_effects_hmclearn.html">hmclearn package:  Linear Mixed Effects Regression Example</a>
     </li>
     <li>
@@ -234,21 +231,21 @@ p(\beta | X, y) &amp;\propto p(y | X, \beta)  p(\beta) \\
                     <span class="kw">param</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="kw">y</span><span class="kw">=</span><span class="no">y</span>, <span class="kw">X</span><span class="kw">=</span><span class="no">X</span>))
 <span class="no">t2.hmc</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span>()
 <span class="no">t2.hmc</span> - <span class="no">t1.hmc</span>
-<span class="co">#&gt; Time difference of 32.55477 secs</span></pre></body></html></div>
+<span class="co">#&gt; Time difference of 30.04547 secs</span></pre></body></html></div>
 <p>The acceptance ratio for each of the HMC chains is sufficiently high for an efficient simulation.</p>
 <div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="no">f_hmc</span>$<span class="no">accept</span>/<span class="no">N</span>
-<span class="co">#&gt; [1] 0.9814 0.9820</span></pre></body></html></div>
+<span class="co">#&gt; [1] 0.9804 0.9799</span></pre></body></html></div>
 <p>The posterior quantiles are summarized after removing an initial <em>burnin</em> period.</p>
 <div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">3000</span>)
 <span class="co">#&gt; Summary of MCMC simulation</span>
-<span class="co">#&gt;                     5%        25%        50%        75%        95%      rhat</span>
-<span class="co">#&gt; (Intercept)  5.5254741  5.5854867  5.6265241  5.6665795  5.7216660 1.0002856</span>
-<span class="co">#&gt; Ayes         0.3695307  0.4446831  0.4950977  0.5459109  0.6210641 0.9999586</span>
-<span class="co">#&gt; Cyes        -2.1560784 -2.0060256 -1.8882715 -1.7758452 -1.6102403 1.0062125</span>
-<span class="co">#&gt; Myes        -6.1418546 -5.7022651 -5.3858420 -5.0595292 -4.5958396 1.0030448</span>
-<span class="co">#&gt; Ayes:Cyes    1.7532351  1.9327426  2.0558686  2.1856996  2.3510207 1.0037982</span>
-<span class="co">#&gt; Ayes:Myes    2.3386505  2.7336387  3.0574188  3.3834908  3.8205251 1.0011049</span>
-<span class="co">#&gt; Cyes:Myes    2.5878447  2.7368052  2.8386931  2.9439430  3.0926092 1.0059009</span></pre></body></html></div>
+<span class="co">#&gt;                     5%        25%        50%        75%        95%     rhat</span>
+<span class="co">#&gt; (Intercept)  5.5302407  5.5917468  5.6341840  5.6738678  5.7289662 1.008173</span>
+<span class="co">#&gt; Ayes         0.3621006  0.4373735  0.4888678  0.5398476  0.6180176 1.015634</span>
+<span class="co">#&gt; Cyes        -2.1602715 -1.9935618 -1.8788365 -1.7677171 -1.6178018 1.014964</span>
+<span class="co">#&gt; Myes        -6.3444924 -5.7947479 -5.4643933 -5.1285550 -4.7033734 1.006360</span>
+<span class="co">#&gt; Ayes:Cyes    1.7621988  1.9253759  2.0452110  2.1690286  2.3533091 1.022172</span>
+<span class="co">#&gt; Ayes:Myes    2.4066076  2.8178159  3.1213116  3.4230280  3.9721713 1.001696</span>
+<span class="co">#&gt; Cyes:Myes    2.6215654  2.7558172  2.8592391  2.9646937  3.1454376 1.021865</span></pre></body></html></div>
 <p>Trace plots provide a visual indication of stationarity. These plots indicate that the MCMC chains are reasonably stationary.</p>
 <div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="fu"><a href="../reference/hmclearn-plots.html">mcmc_trace</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">3000</span>)</pre></body></html></div>
 <p><img src="poisson_regression_hmclearn_files/figure-html/unnamed-chunk-7-1.png" width="576"></p>

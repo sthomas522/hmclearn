@@ -2,13 +2,12 @@ pandoc: 2.7.3
 pkgdown: 1.5.1.9000
 pkgdown_sha: ac78596154e403df5f4e683f2185d88225a0fea6
 articles:
-  gradient_derivations_hmclearn: gradient_derivations_hmclearn.html
   linear_mixed_effects_hmclearn: linear_mixed_effects_hmclearn.html
   linear_regression_hmclearn: linear_regression_hmclearn.html
   logistic_mixed_effects_hmclearn: logistic_mixed_effects_hmclearn.html
   logistic_regression_hmclearn: logistic_regression_hmclearn.html
   poisson_regression_hmclearn: poisson_regression_hmclearn.html
-last_built: 2020-05-25T00:37Z
+last_built: 2020-05-25T23:42Z
 urls:
   reference: http://sthomas522.github.io/hmclearn/reference
   article: http://sthomas522.github.io/hmclearn/articles

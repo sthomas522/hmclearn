@@ -44,17 +44,7 @@ and mixed effect models — hmclearn-glm-posterior • hmclearn</title>
 and mixed effect models — hmclearn-glm-posterior" />
 <meta property="og:description" content="These functions can be used to fit common generalized linear models and mixed effect models.
 See the accompanying vignettes for details on the derivations of the log posterior and gradient.
-In addition, these functions can be used as templates to build custom models to fit using HMC.
-# extract parameters from theta vector
-  beta_param &amp;lt;- as.numeric(theta[1:p])
-  tau_param &amp;lt;- theta[(p+1):(p+m*q)]
-# extract parameters from theta vector
-  beta_param &amp;lt;- as.numeric(theta[1:p])
-  tau_param &amp;lt;- theta[(p+1):(p+m*q)]
-# prior covariance for beta
-  Sig_inv_beta &amp;lt;- diag(1/sig2beta, p, p)
-# prior covariance for beta
-  Sig_inv_beta &amp;lt;- diag(1/sig2beta, p, p)" />
+In addition, these functions can be used as templates to build custom models to fit using HMC." />
 
 
 
@@ -109,9 +99,6 @@ In addition, these functions can be used as templates to build custom models to 
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/gradient_derivations_hmclearn.html">Gradient Derivations for HMC</a>
-    </li>
-    <li>
       <a href="../articles/linear_mixed_effects_hmclearn.html">hmclearn package:  Linear Mixed Effects Regression Example</a>
     </li>
     <li>
@@ -157,16 +144,6 @@ and mixed effect models</h1>
     <p>These functions can be used to fit common generalized linear models and mixed effect models.
 See the accompanying vignettes for details on the derivations of the log posterior and gradient.
 In addition, these functions can be used as templates to build custom models to fit using HMC.</p>
-<p># extract parameters from theta vector
-  beta_param &lt;- as.numeric(theta[1:p])
-  tau_param &lt;- theta[(p+1):(p+m*q)]</p>
-<p># extract parameters from theta vector
-  beta_param &lt;- as.numeric(theta[1:p])
-  tau_param &lt;- theta[(p+1):(p+m*q)]</p>
-<p># prior covariance for beta
-  Sig_inv_beta &lt;- diag(1/sig2beta, p, p)</p>
-<p># prior covariance for beta
-  Sig_inv_beta &lt;- diag(1/sig2beta, p, p)</p>
     </div>
 
     <pre class="usage"><span class='fu'>linear_posterior</span>(<span class='no'>theta</span>, <span class='no'>y</span>, <span class='no'>X</span>, <span class='kw'>a</span> <span class='kw'>=</span> <span class='fl'>1e-04</span>, <span class='kw'>b</span> <span class='kw'>=</span> <span class='fl'>1e-04</span>, <span class='kw'>sig2beta</span> <span class='kw'>=</span> <span class='fl'>1000</span>)
@@ -240,11 +217,10 @@ In addition, these functions can be used as templates to build custom models to 
   <span class='no'>y</span>,
   <span class='no'>X</span>,
   <span class='no'>Z</span>,
-  <span class='no'>m</span>,
-  <span class='kw'>q</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>A</span> <span class='kw'>=</span> <span class='fl'>10000</span>,
-  <span class='kw'>nulambda</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>Alambda</span> <span class='kw'>=</span> <span class='fl'>25</span>,
+  <span class='no'>n</span>,
+  <span class='kw'>nrandom</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>nuxi</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>Axi</span> <span class='kw'>=</span> <span class='fl'>25</span>,
   <span class='kw'>sig2beta</span> <span class='kw'>=</span> <span class='fl'>10000</span>
 )
 
@@ -253,11 +229,10 @@ In addition, these functions can be used as templates to build custom models to 
   <span class='no'>y</span>,
   <span class='no'>X</span>,
   <span class='no'>Z</span>,
-  <span class='no'>m</span>,
-  <span class='kw'>q</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>A</span> <span class='kw'>=</span> <span class='fl'>10000</span>,
-  <span class='kw'>nulambda</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>Alambda</span> <span class='kw'>=</span> <span class='fl'>25</span>,
+  <span class='no'>n</span>,
+  <span class='kw'>nrandom</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>nuxi</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>Axi</span> <span class='kw'>=</span> <span class='fl'>25</span>,
   <span class='kw'>sig2beta</span> <span class='kw'>=</span> <span class='fl'>10000</span>
 )</pre>
 
@@ -266,135 +241,100 @@ In addition, these functions can be used as templates to build custom models to 
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>theta</th>
-      <td><p>vector of parameters.  Stored as a single vector in order fixed effect, random effect, log-transformed diagonal \(\lambda\), and off-diagonal of <code>G</code> vector <code>a</code></p></td>
+      <td><p>vector of parameters.  See details below for the order of parameters for each model</p></td>
     </tr>
     <tr>
       <th>y</th>
-      <td><p>numeric vector for the dependent variable</p></td>
+      <td><p>numeric vector for the dependent variable for all models</p></td>
     </tr>
     <tr>
       <th>X</th>
-      <td><p>numeric design matrix of fixed effect parameters</p></td>
+      <td><p>numeric design matrix of fixed effect parameters for all models</p></td>
     </tr>
     <tr>
       <th>a</th>
-      <td><p>hyperprior for the Inverse Gamma shape parameter</p></td>
+      <td><p>hyperprior for the Inverse Gamma shape parameter for \(\sigma_\epsilon\) in linear regression models</p></td>
     </tr>
     <tr>
       <th>b</th>
-      <td><p>hyperprior for the Inverse Gamma scale parameter</p></td>
+      <td><p>hyperprior for the Inverse Gamma scale parameter for \(\sigma_\epsilon\) in linear regression models</p></td>
     </tr>
     <tr>
       <th>sig2beta</th>
-      <td><p>diagonal covariance of prior for linear predictors is multivariate normal with mean 0</p></td>
+      <td><p>diagonal covariance of prior for linear predictors is multivariate normal with mean 0 for linear regression and linear mixed effect models.</p></td>
     </tr>
     <tr>
       <th>Z</th>
-      <td><p>numeric design matrix of random effect parameters</p></td>
+      <td><p>numeric design matrix of random effect parameters for all mixed effects models</p></td>
     </tr>
     <tr>
       <th>n</th>
-      <td><p>number of subjects for mixed effect models, or number of observations for standard glm</p></td>
+      <td><p>number of observations for standard glm models, or number of subjects for all mixed effect models</p></td>
     </tr>
     <tr>
       <th>d</th>
-      <td><p>number of observations per subject</p></td>
+      <td><p>number of observations per subject for mixed effects models, but an input for linear mixed effect models only.</p></td>
+    </tr>
+    <tr>
+      <th>nrandom</th>
+      <td><p>number of random effects covariance parameters for all mixed effects models</p></td>
     </tr>
     <tr>
       <th>nugamma</th>
-      <td><p>hyperprior \(\nu\) for the half-t prior of the log transformed error</p></td>
+      <td><p>hyperprior \(\nu\) for the half-t prior of the log transformed error for linear mixed effects model \(\gamma\)</p></td>
     </tr>
     <tr>
       <th>nuxi</th>
-      <td><p>hyperprior \(\nu\) for the half-t prior of the random effects diagonal</p></td>
+      <td><p>hyperprior \(\nu\) for the half-t prior of the random effects diagonal for all mixed effects models \(\xi\)</p></td>
     </tr>
     <tr>
       <th>Agamma</th>
-      <td><p>hyperprior \(A\) for the half-t prior of the log transformed error</p></td>
+      <td><p>hyperprior \(A\) for the half-t prior of the log transformed error for linear mixed effects model \(\gamma\)</p></td>
     </tr>
     <tr>
       <th>Axi</th>
-      <td><p>hyperprior \(A\) for the half-t prior of the random effects diagonal</p></td>
-    </tr>
-    <tr>
-      <th>m</th>
-      <td><p>number of random effect linear parameters</p></td>
-    </tr>
-    <tr>
-      <th>q</th>
-      <td><p>number of random effects covariance parameters</p></td>
-    </tr>
-    <tr>
-      <th>A</th>
-      <td><p>hyperprior numeric vector for the random effects off-diagonal <code>a</code></p></td>
-    </tr>
-    <tr>
-      <th>nulambda</th>
-      <td><p>hyperprior \(\nu\) for the half-t prior of the random effects diagonal</p></td>
-    </tr>
-    <tr>
-      <th>Alambda</th>
-      <td><p>hyperprior \(A\) for the half-t prior of the random effects diagonal</p></td>
-    </tr>
-    <tr>
-      <th>nueps</th>
-      <td><p>hyperprior \(\nu\) for the half-t prior of the error parameter</p></td>
-    </tr>
-    <tr>
-      <th>Aeps</th>
-      <td><p>hyperprior \(A\) for the half-t prior of the error parameter</p></td>
+      <td><p>hyperprior \(A\) for the half-t prior of the random effects diagonal for all mixed effects models\(\xi\)</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>Numeric vector for the log posterior or gradient of the log posterior</p>
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
-
-    
-
-
-
-
-
-
-
-
     <h2 class="hasAnchor" id="generalized-linear-models-with-available-posterior-and-gradient-functions"><a class="anchor" href="#generalized-linear-models-with-available-posterior-and-gradient-functions"></a>Generalized Linear Models with available posterior and gradient functions</h2>
 
     
 
 <dl>
-  <dt>`linear_posterior(theta, y, X, a=1e-4, b=1e-4, B=0.001)`</dt><dd><p>The log posterior function for linear regression
-   $$p(y | X, \beta; \sigma^2) = \frac{1}{(2\pi\sigma^2)^{n/2}}\exp{\left(-\frac{1}{2\sigma^2} (y - X\beta)^T(y-X\beta) \right)}$$
-   with priors \(p(\sigma^2) \sim IG(a, b)\) and \(\beta \sim N(0, BI)\).  The variance term is log transformed \(\gamma = \log\sigma^2\)
-   The input parameter vector <code>theta</code> is of length <code>k</code>.  The first <code>k-1</code> parameters are for \(\beta\), and the last parameter is \(\gamma\)
-   Note that the Inverse Gamma prior can be problematic for certain applications with low variance.  See Gelman (2006)</p></dd>
-  <dt>`g_linear_posterior(theta, y, X, a = 1e-04, b = 1e-04, B = 0.001)`</dt><dd><p>Gradient of the log posterior for a linear regression model with Normal prior for the linear parameters and Inverse Gamma for the error term.
-   $$p(y | X, \beta; \sigma^2) = \frac{1}{(2\pi\sigma^2)^{n/2}}\exp{\left(-\frac{1}{2\sigma^2} (y - X\beta)^T(y-X\beta) \right)}$$
-   with priors \(p(\sigma^2) \sim IG(a, b)\) and \(\beta \sim N(0, BI)\).  The variance term is log transformed \(\gamma = \log\sigma^2\)
-   The input parameter vector <code>theta</code> is of length <code>k</code>.  The first <code>k-1</code> parameters are for \(\beta\), and the last parameter is \(\gamma\)
-   Note that the Inverse Gamma prior can be problematic for certain applications with low variance.  See Gelman (2006)</p></dd>
-  <dt>`logistic_posterior(theta, y, X, B = 0.01) `</dt><dd><p>Log posterior for a logistic regression model with Normal prior for the linear parameters.
+  <dt>`linear_posterior(theta, y, X, a=1e-4, b=1e-4, sig2beta = 1e3)`</dt><dd><p>The log posterior function for linear regression
+   $$f(y | X, \beta, \sigma) = \frac{1}{(2\pi\sigma^2)^{n/2}}\exp{\left(-\frac{1}{2\sigma^2} (y - X\beta)^T(y-X\beta) \right)}$$
+   with priors \(p(\sigma^2) \sim IG(a, b)\) and \(\beta \sim N(0, \sigma_\beta^2 I)\).  The variance term is log transformed \(\gamma = \log\sigma\)
+   The input parameter vector \(theta\) is of length \(k\).  The first \(k-1\) parameters are for \(\beta\), and the last parameter is \(\gamma\)
+   Note that the Inverse Gamma prior can be problematic for certain applications with low variance, such as hierarchical models.  See Gelman (2006)</p></dd>
+  <dt>`g_linear_posterior(theta, y, X, a = 1e-04, b = 1e-04, sig2beta=1e3)`</dt><dd><p>Gradient of the log posterior for a linear regression model with Normal prior for the linear parameters and Inverse Gamma for the error term.
+   $$f(y | X, \beta, \sigma) = \frac{1}{(2\pi\sigma^2)^{n/2}}\exp{\left(-\frac{1}{2\sigma^2} (y - X\beta)^T(y-X\beta) \right)}$$
+   with priors \(p(\sigma^2) \sim IG(a, b)\) and \(\beta \sim N(0, \sigma_\beta^2 I)\).  The variance term is log transformed \(\gamma = \log\sigma\)
+   The input parameter vector \(theta\) is of length \(k\).  The first \(k-1\) parameters are for \(\beta\), and the last parameter is \(\gamma\)
+   Note that the Inverse Gamma prior can be problematic for certain applications with low variance, such as hierarchical models.  See Gelman (2006)</p></dd>
+  <dt>`logistic_posterior(theta, y, X, sig2beta=100) `</dt><dd><p>Log posterior for a logistic regression model with Normal prior for the linear parameters.
    The likelihood function for logistic regression
-   $$L(\beta; X, y) = \prod_{i=1}^{n} \left(\frac{1}{1+e^{-X_i\beta}}\right)^{y_i} \left(\frac{e^{-X_i\beta}}{1+e^{-X_i\beta}}\right)^{1-y_i}$$
-   with priors \(\beta \sim N(0, BI)\).
-   The input parameter vector <code>theta</code> is of length <code>k</code>, containing parameter values for \(\beta\)</p></dd>
-  <dt>`g_logistic_posterior(theta, y, X, B = 0.01) `</dt><dd><p>Gradient of the log posterior for a logistic regression model with Normal prior for the linear parameters.
+   $$f(\beta| X, y) = \prod_{i=1}^{n} \left(\frac{1}{1+e^{-X_i\beta}}\right)^{y_i} \left(\frac{e^{-X_i\beta}}{1+e^{-X_i\beta}}\right)^{1-y_i}$$
+   with priors \(\beta \sim N(0, \sigma_\beta^2 I)\).
+   The input parameter vector \(theta\) is of length \(k\), containing parameter values for \(\beta\)</p></dd>
+  <dt>`g_logistic_posterior(theta, y, X, sig2beta=100) `</dt><dd><p>Gradient of the log posterior for a logistic regression model with Normal prior for the linear parameters.
    The likelihood function for logistic regression
-   $$L(\beta; X, y) = \prod_{i=1}^{n} \left(\frac{1}{1+e^{-X_i\beta}}\right)^{y_i} \left(\frac{e^{-X_i\beta}}{1+e^{-X_i\beta}}\right)^{1-y_i}$$
-   with priors \(\beta \sim N(0, BI)\).
-   The input parameter vector <code>theta</code> is of length <code>k</code>, containing parameter values for \(\beta\)</p></dd>
-  <dt>`poisson_posterior(theta, y, X, B = 0.01) `</dt><dd><p>Log posterior for a Poisson regression model with Normal prior for the linear parameters.
+   $$f(\beta| X, y) = \prod_{i=1}^{n} \left(\frac{1}{1+e^{-X_i\beta}}\right)^{y_i} \left(\frac{e^{-X_i\beta}}{1+e^{-X_i\beta}}\right)^{1-y_i}$$
+   with priors \(\beta \sim N(0, \sigma_\beta^2 I)\).
+   The input parameter vector \(theta\) is of length \(k\), containing parameter values for \(\beta\)</p></dd>
+  <dt>`poisson_posterior(theta, y, X, sig2beta=100) `</dt><dd><p>Log posterior for a Poisson regression model with Normal prior for the linear parameters.
    The likelihood function for poisson regression
-   $$L(\beta; y, X) = \prod_{i=1}^n \frac{e^{-e^{X_i\beta}}e^{y_iX_i\beta}}{y_i!}$$
-   with priors \(\beta \sim N(0, BI)\).
-   The input parameter vector <code>theta</code> is of length <code>k</code>, containing parameter values for \(\beta\)</p></dd>
-  <dt>`g_poisson_posterior(theta, y, X, B = 0.01) `</dt><dd><p>Gradient of the log posterior for a Poisson regression model with Normal prior for the linear parameters.
+   $$f(\beta| y, X) = \prod_{i=1}^n \frac{e^{-e^{X_i\beta}}e^{y_iX_i\beta}}{y_i!}$$
+   with priors \(\beta \sim N(0, \sigma_\beta^2 I)\).
+   The input parameter vector \(theta\) is of length \(k\), containing parameter values for \(\beta\)</p></dd>
+  <dt>`g_poisson_posterior(theta, y, X, sig2beta=100) `</dt><dd><p>Gradient of the log posterior for a Poisson regression model with Normal prior for the linear parameters.
    The likelihood function for poisson regression
-   $$L(\beta; y, X) = \prod_{i=1}^n \frac{e^{-e^{X_i\beta}}e^{y_iX_i\beta}}{y_i!}$$
-   with priors \(\beta \sim N(0, BI)\).
-   The input parameter vector <code>theta</code> is of length <code>k</code>, containing parameter values for \(\beta\)</p></dd>
+   $$f(\beta| y, X) = \prod_{i=1}^n \frac{e^{-e^{X_i\beta}}e^{y_iX_i\beta}}{y_i!}$$
+   with priors \(\beta \sim N(0, \sigma_\beta^2 I)\).
+   The input parameter vector \(theta\) is of length \(k\), containing parameter values for \(\beta\)</p></dd>
  
 </dl>
 
@@ -403,36 +343,38 @@ In addition, these functions can be used as templates to build custom models to 
     
 
 <dl>
-  <dt>`lmm_posterior(theta, y, X, Z, m, q = 1, A = 10000, nueps = 1, nulambda = 1, Aeps = 25, Alambda = 25, B = 0.001) `</dt><dd><p>The log posterior function for linear mixed effects regression
-   $$p(y | \beta, u, \sigma_\epsilon^2) \propto (\sigma_\epsilon^2)^{-n/2} e^{-\frac{1}{2\sigma_\epsilon^2}(y - X\beta - Zu)^T (y - X\beta - Zu)}$$
+  <dt>`lmm_posterior(theta, y, X, Z, n, d, nrandom = 1, nueps = 1, nuxi = 1, Aeps = 25, Axi = 25, sig2beta = 1e3) `</dt><dd><p>The log posterior function for linear mixed effects regression
+   $$f(y | \beta, u, \sigma_\epsilon) \propto (\sigma_\epsilon^2)^{-nd/2} e^{-\frac{1}{2\sigma_\epsilon^2}(y - X\beta - Zu)^T (y - X\beta - Zu)}$$
+   with priors \(\beta \sim N(0, \sigma_\beta^2 I)\), \(\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)\), \(\lambda \sim half-t\).
+   The vector \(\xi\) is the diagonal of the covariance \(G\) log transformed hyperprior where \(u \sim N(0, G\), \(\xi = \log\lambda\) and \(A_\xi, \nu_\xi\) are parameters for the transformed distribution
+   The standard deviation of the error is log transformed, where \(\gamma = \log \sigma_\epsilon\) and \(\sigma_\epsilon \sim half-t\). The parameters for \(\gamma\) are \(A_\gamma, \nu_\gamma\)
+   The input parameter vector \(theta\) is of length \(k\).  The order of parameters for the vector is \(\beta, \tau, \gamma, \xi\).</p></dd>
+  <dt>`g_lmm_posterior(theta, y, X, Z, n, d, nrandom = 1, nueps = 1, nuxi = 1, Aeps = 25, Axi = 25, sig2beta = 1e3)`</dt><dd><p>Gradient of the log posterior for a linear mixed effects regression model
+   $$f(y | \beta, u, \sigma_\epsilon) \propto (\sigma_\epsilon^2)^{-n/2} e^{-\frac{1}{2\sigma_\epsilon^2}(y - X\beta - Zu)^T (y - X\beta - Zu)}$$
+   with priors \(\beta \sim N(0, \sigma_\beta^2 I)\), \(\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)\), \(\lambda \sim half-t\).
+   The vector \(\xi\) is the diagonal of the covariance \(G\) log transformed hyperprior where \(u \sim N(0, G\), \(\xi = \log\lambda\) and \(A_\xi, \nu_\xi\) are parameters for the transformed distribution
+   The standard deviation of the error is log transformed, where \(\gamma = \log \sigma_\epsilon\) and \(\sigma_\epsilon \sim half-t\). The parameters for \(\gamma\) are \(A_\gamma, \nu_\gamma\)
+   The input parameter vector \(theta\) is of length \(k\).  The order of parameters for the vector is \(\beta, \tau, \gamma, \xi\)</p></dd>
+  <dt>`glmm_bin_posterior(theta, y, X, Z, n, nrandom = 1, nuxi = 1, Axi = 25, sig2beta=1e4)`</dt><dd><p>The log posterior function for logistic mixed effects regression
+   $$f(y | X, Z, \beta, u) = \prod_{i=1}^n\prod_{j=1}^d \left(\frac{1}{1 + e^{-X_{i}\beta - Z_{ij}u_i}}\right)^{y_{ij}} \left(\frac{e^{-X_i\beta - Z_{ij}u_i}}{1 + e^{-X_{i}\beta - Z_{ij}u_i}}\right)^{1-y_{ij}} $$
    with priors \(\beta \sim N(0, BI)\), \(\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)\), \(\lambda \sim half-t(A_\lambda, nu_\lambda )\).
-   The vector \(\lambda\) is the diagonal of the covariance <code>G</code> hyperprior where \(u \sim N(0, G\).  The off-diagonal hyperpriors are stored in a vector \(a \sim N(0, A\).  See Chan, Jeliazkov (2009) for details.
-   The input parameter vector <code>theta</code> is of length <code>k</code>.  The first <code>k-1</code> parameters are for \(\beta\), and the last parameter is \(\gamma\)</p></dd>
-  <dt>`g_lmm_posterior(theta, y, X, Z, m, q = 1, A = 10000, nueps = 1, nulambda = 1, Aeps = 25, Alambda = 25, B = 0.001)`</dt><dd><p>Gradient of the log posterior for a linear mixed effects regression model
-   $$p(y | \beta, u, \sigma_\epsilon^2) \propto (\sigma_\epsilon^2)^{-n/2} e^{-\frac{1}{2\sigma_\epsilon^2}(y - X\beta - Zu)^T (y - X\beta - Zu)}$$
+   The vector \(\lambda\) is the diagonal of the covariance \(G\) hyperprior where \(u \sim N(0, G\), \(\xi = \log\lambda\) and \(A_\xi, \nu_\xi\) are parameters for the transformed distribution
+   The input parameter vector \(theta\) is of length \(k\).  The order of parameters for the vector is \(\beta, \tau, \xi\)</p></dd>
+  <dt>`g_glmm_bin_posterior(theta, y, X, Z, n, nrandom = 1, nuxi = 1, Axi = 25, B = 1e4) `</dt><dd><p>Gradient of the log posterior function for logistic mixed effects regression
+   $$f(y | X, Z, \beta, u) = \prod_{i=1}^n\prod_{j=1}^m \left(\frac{1}{1 + e^{-X_{i}\beta - Z_{ij}u_i}}\right)^{y_{ij}} \left(\frac{e^{-X_i\beta - Z_{ij}u_i}}{1 + e^{-X_{i}\beta - Z_{ij}u_i}}\right)^{1-y_{ij}} $$
    with priors \(\beta \sim N(0, BI)\), \(\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)\), \(\lambda \sim half-t(A_\lambda, nu_\lambda )\).
-   The vector \(\lambda\) is the diagonal of the covariance <code>G</code> hyperprior where \(u \sim N(0, G\).  The off-diagonal hyperpriors are stored in a vector \(a \sim N(0, A\).  See Chan, Jeliazkov (2009) for details.
-   The input parameter vector <code>theta</code> is of length <code>k</code>.  The first <code>k-1</code> parameters are for \(\beta\), and the last parameter is \(\gamma\)</p></dd>
-  <dt>`glmm_bin_posterior(theta, y, X, Z, m, q = 1, A = 10000, nulambda = 1, Alambda = 25, B = 10000)`</dt><dd><p>The log posterior function for logistic mixed effects regression
-   $$p(y | X, Z, \beta, u) = \prod_{i=1}^n\prod_{j=1}^m \left(\frac{1}{1 + e^{-X_{i}\beta - Z_{ij}u_i}}\right)^{y_{ij}} \left(\frac{e^{-X_i\beta - Z_{ij}u_i}}{1 + e^{-X_{i}\beta - Z_{ij}u_i}}\right)^{1-y_{ij}} $$
+   The vector \(\lambda\) is the diagonal of the covariance \(G\) hyperprior where \(u \sim N(0, G\), \(\xi = \log\lambda\) and \(A_\xi, \nu_\xi\) are parameters for the transformed distribution
+   The input parameter vector \(theta\) is of length \(k\).  The order of parameters for the vector is \(\beta, \tau, \xi\)</p></dd>
+  <dt>`glmm_poisson_posterior(theta, y, X, Z, n, nrandom = 1, nuxi = 1, Axi = 25, sig2beta = 1e4) `</dt><dd><p>Log posterior for a Poisson mixed effect regression
+   $$f(y | X, Z, \beta, u) = \prod_{i=1}^n \prod_{j=1}^m \frac{e^{-e^{X_i\beta + Z_{ij}u_{ij}}}e^{y_i(X_i\beta + Z_{ij}u_{ij})}}{y_i!} $$
    with priors \(\beta \sim N(0, BI)\), \(\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)\), \(\lambda \sim half-t(A_\lambda, nu_\lambda )\).
-   The vector \(\lambda\) is the diagonal of the covariance <code>G</code> hyperprior where \(u \sim N(0, G\).  The off-diagonal hyperpriors are stored in a vector \(a \sim N(0, A\).  See Chan, Jeliazkov (2009) for details.
-   The input parameter vector <code>theta</code> is of length <code>k</code>.  The first <code>k-1</code> parameters are for \(\beta\), and the last parameter is \(\gamma\)</p></dd>
-  <dt>`g_glmm_bin_posterior(theta, y, X, Z, m, q = 1, A = 10000, nulambda = 1, Alambda = 25, B = 10000) `</dt><dd><p>Gradient of the log posterior function for logistic mixed effects regression
-   $$p(y | X, Z, \beta, u) = \prod_{i=1}^n\prod_{j=1}^m \left(\frac{1}{1 + e^{-X_{i}\beta - Z_{ij}u_i}}\right)^{y_{ij}} \left(\frac{e^{-X_i\beta - Z_{ij}u_i}}{1 + e^{-X_{i}\beta - Z_{ij}u_i}}\right)^{1-y_{ij}} $$
+   The vector \(\lambda\) is the diagonal of the covariance \(G\) hyperprior where \(u \sim N(0, G\), \(\xi = \log\lambda\) and \(A_\xi, \nu_\xi\) are parameters for the transformed distribution
+   The input parameter vector \(theta\) is of length \(k\).  The order of parameters for the vector is \(\beta, \tau, \xi\)</p></dd>
+  <dt>`g_glmm_poisson_posterior(theta, y, X, Z, n, nrandom = 1, nuxi = 1, Axi = 25, sig2beta = 1e4) `</dt><dd><p>Gradient of the log posterior for a Poisson mixed effect regression
+   $$f(y | X, Z, \beta, u) = \prod_{i=1}^n \prod_{j=1}^m \frac{e^{-e^{X_i\beta + Z_{ij}u_{ij}}}e^{y_i(X_i\beta + Z_{ij}u_{ij})}}{y_i!} $$
    with priors \(\beta \sim N(0, BI)\), \(\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)\), \(\lambda \sim half-t(A_\lambda, nu_\lambda )\).
-   The vector \(\lambda\) is the diagonal of the covariance <code>G</code> hyperprior where \(u \sim N(0, G\).  The off-diagonal hyperpriors are stored in a vector \(a \sim N(0, A\).  See Chan, Jeliazkov (2009) for details.
-   The input parameter vector <code>theta</code> is of length <code>k</code>.  The first <code>k-1</code> parameters are for \(\beta\), and the last parameter is \(\gamma\)</p></dd>
-  <dt>`glmm_poisson_posterior(theta, y, X, Z, m, q = 1, A = 10000, nulambda = 1, Alambda = 25, B = 10000) `</dt><dd><p>Log posterior for a Poisson mixed effect regression
-   $$L(\beta; y, X) = \prod_{i=1}^n \prod_{j=1}^m \frac{e^{-e^{X_i\beta + Z_{ij}u_{ij}}}e^{y_i(X_i\beta + Z_{ij}u_{ij})}}{y_i!} $$
-   with priors \(\beta \sim N(0, BI)\), \(\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)\), \(\lambda \sim half-t(A_\lambda, nu_\lambda )\).
-   The vector \(\lambda\) is the diagonal of the covariance <code>G</code> hyperprior where \(u \sim N(0, G\).  The off-diagonal hyperpriors are stored in a vector \(a \sim N(0, A\).  See Chan, Jeliazkov (2009) for details.
-   The input parameter vector <code>theta</code> is of length <code>k</code>.  The first <code>k-1</code> parameters are for \(\beta\), and the last parameter is \(\gamma\)</p></dd>
-  <dt>`g_glmm_poisson_posterior(theta, y, X, Z, m, q = 1, A = 10000, nulambda = 1, Alambda = 25, B = 10000) `</dt><dd><p>Gradient of the log posterior for a Poisson mixed effect regression
-   $$L(\beta; y, X) = \prod_{i=1}^n \prod_{j=1}^m \frac{e^{-e^{X_i\beta + Z_{ij}u_{ij}}}e^{y_i(X_i\beta + Z_{ij}u_{ij})}}{y_i!} $$
-   with priors \(\beta \sim N(0, BI)\), \(\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)\), \(\lambda \sim half-t(A_\lambda, nu_\lambda )\).
-   The vector \(\lambda\) is the diagonal of the covariance <code>G</code> hyperprior where \(u \sim N(0, G\).  The off-diagonal hyperpriors are stored in a vector \(a \sim N(0, A\).  See Chan, Jeliazkov (2009) for details.
-   The input parameter vector <code>theta</code> is of length <code>k</code>.  The first <code>k-1</code> parameters are for \(\beta\), and the last parameter is \(\gamma\)</p></dd>
+   The vector \(\lambda\) is the diagonal of the covariance \(G\) hyperprior where \(u \sim N(0, G\), \(\xi = \log\lambda\) and \(A_\xi, \nu_\xi\) are parameters for the transformed distribution
+   The input parameter vector \(theta\) is of length \(k\).  The order of parameters for the vector is \(\beta, \tau, \xi\)</p></dd>
  
 </dl>
 
