@@ -334,14 +334,15 @@ vnames <- c(colnames(X),
 epsvals <- c(5e-2, rep(1e-2, 4), rep(5e-2, 61))
 
 t1.hmc <- Sys.time()
-f_hmc <- hmc(N = N, theta.init = initvals, 
-          epsilon = epsvals, L = 10, 
-          logPOSTERIOR = glmm_bin_posterior, 
-          glogPOSTERIOR = g_glmm_bin_posterior, 
-          varnames = vnames, 
-          parallel=TRUE, chains=2, 
-          param=list(y = y, X=X2, Z=Z, m=60, q=1, sig2beta=5, 
-                     nulambda=4, Alambda=1)  )
+f_hmc <- hmc(N = N, theta.init = initvals,
+             epsilon = epsvals, L = 10,
+             logPOSTERIOR = glmm_bin_posterior,
+             glogPOSTERIOR = g_glmm_bin_posterior,
+             varnames = vnames,
+             parallel=TRUE, chains=2,
+             param=list(y = y, X=X2, Z=Z2, n=60, nrandom=1, sig2beta=5,
+                        nuxi=1, Axi=25)  )
+
 
 t2.hmc <- Sys.time()
 t2.hmc - t1.hmc

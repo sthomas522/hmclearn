@@ -34,13 +34,13 @@ lmm_posterior(
   y,
   X,
   Z,
-  m,
-  q = 1,
-  A = 10000,
-  nueps = 1,
-  nulambda = 1,
-  Aeps = 25,
-  Alambda = 25,
+  n,
+  d,
+  nrandom = 1,
+  nugamma = 1,
+  nuxi = 1,
+  Agamma = 25,
+  Axi = 25,
   sig2beta = 1000
 )
 
@@ -49,13 +49,13 @@ g_lmm_posterior(
   y,
   X,
   Z,
-  m,
-  q = 1,
-  A = 10000,
-  nueps = 1,
-  nulambda = 1,
-  Aeps = 25,
-  Alambda = 25,
+  n,
+  d,
+  nrandom = 1,
+  nugamma = 1,
+  nuxi = 1,
+  Agamma = 25,
+  Axi = 25,
   sig2beta = 1000
 )
 
@@ -64,11 +64,10 @@ glmm_bin_posterior(
   y,
   X,
   Z,
-  m,
-  q = 1,
-  A = 10000,
-  nulambda = 1,
-  Alambda = 25,
+  n,
+  nrandom = 1,
+  nuxi = 1,
+  Axi = 25,
   sig2beta = 10000
 )
 
@@ -77,11 +76,10 @@ g_glmm_bin_posterior(
   y,
   X,
   Z,
-  m,
-  q = 1,
-  A = 10000,
-  nulambda = 1,
-  Alambda = 25,
+  n,
+  nrandom = 1,
+  nuxi = 1,
+  Axi = 25,
   sig2beta = 10000
 )
 
@@ -126,19 +124,31 @@ g_glmm_poisson_posterior(
 
 \item{Z}{numeric design matrix of random effect parameters}
 
+\item{n}{number of subjects for mixed effect models, or number of observations for standard glm}
+
+\item{d}{number of observations per subject}
+
+\item{nugamma}{hyperprior \eqn{\nu} for the half-t prior of the log transformed error}
+
+\item{nuxi}{hyperprior \eqn{\nu} for the half-t prior of the random effects diagonal}
+
+\item{Agamma}{hyperprior \eqn{A} for the half-t prior of the log transformed error}
+
+\item{Axi}{hyperprior \eqn{A} for the half-t prior of the random effects diagonal}
+
 \item{m}{number of random effect linear parameters}
 
 \item{q}{number of random effects covariance parameters}
 
 \item{A}{hyperprior numeric vector for the random effects off-diagonal \code{a}}
 
-\item{nueps}{hyperprior for the half-t prior of the error parameter \eqn{\nu}}
+\item{nulambda}{hyperprior \eqn{\nu} for the half-t prior of the random effects diagonal}
 
-\item{nulambda}{hyperprior for the half-t prior of the random effects diagonal \eqn{\lambda}}
+\item{Alambda}{hyperprior \eqn{A} for the half-t prior of the random effects diagonal}
 
-\item{Aeps}{hyperprior for the half-t prior of the error parameter \eqn{A_\epsilon}}
+\item{nueps}{hyperprior \eqn{\nu} for the half-t prior of the error parameter}
 
-\item{Alambda}{hyperprior for the half-t prior of the random effects diagonal \eqn{A_\lambda}}
+\item{Aeps}{hyperprior \eqn{A} for the half-t prior of the error parameter}
 }
 \value{
 Numeric vector for the log posterior or gradient of the log posterior
@@ -147,6 +157,29 @@ Numeric vector for the log posterior or gradient of the log posterior
 These functions can be used to fit common generalized linear models and mixed effect models.
 See the accompanying vignettes for details on the derivations of the log posterior and gradient.
 In addition, these functions can be used as templates to build custom models to fit using HMC.
+
+# extract parameters from theta vector
+  beta_param <- as.numeric(theta[1:p])
+  tau_param <- theta[(p+1):(p+m*q)]
+
+# extract parameters from theta vector
+  beta_param <- as.numeric(theta[1:p])
+  tau_param <- theta[(p+1):(p+m*q)]
+
+# prior covariance for beta
+  Sig_inv_beta <- diag(1/sig2beta, p, p)
+
+# prior covariance for beta
+  Sig_inv_beta <- diag(1/sig2beta, p, p)
+}
+\details{
+
+
+
+
+
+
+
 }
 \section{Generalized Linear Models with available posterior and gradient functions}{
 

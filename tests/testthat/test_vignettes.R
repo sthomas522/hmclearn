@@ -140,7 +140,6 @@ test_that("vignette examples", {
   # new intercept from QR decomposition
   diagval <- X2[1,1]
 
-
   ##########
   # block diagonal
   Zi.lst <- split(rep(diagval, nrow(Contraception)), Contraception$district)
@@ -170,8 +169,8 @@ test_that("vignette examples", {
                glogPOSTERIOR = g_glmm_bin_posterior,
                varnames = vnames,
                parallel=FALSE, chains=1,
-               param=list(y = y, X=X2, Z=Z2, m=60, q=1, sig2beta=5,
-                          nulambda=1, Alambda=25)  )
+               param=list(y = y, X=X2, Z=Z2, n=60, nrandom=1, sig2beta=5,
+                          nuxi=1, Axi=25)  )
 
   # test values
   c4_hmc <- as.vector(round(coef(f_hmc), 6))
