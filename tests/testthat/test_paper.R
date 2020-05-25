@@ -122,8 +122,8 @@ test_that("paper examples", {
   fm3_hmc <- hmc(N = N, theta.init = initvals, epsilon = eps_vals, L = 10,
                  logPOSTERIOR  = glmm_poisson_posterior,
                  glogPOSTERIOR  = g_glmm_poisson_posterior,
-                 varnames=c(colnames(X), paste0("u", 1:ncol(Z)), "lambda"),
-                 param=list(y = y, X=X, Z=Z, m=10, nulambda=1, Alambda=25),
+                 varnames=c(colnames(X), paste0("u", 1:ncol(Z)), "xi"),
+                 param=list(y = y, X=X, Z=Z, n=10, nuxi=1, Axi=25),
                  chains=2, parallel=FALSE)
   t2.hmc <- Sys.time()
 
