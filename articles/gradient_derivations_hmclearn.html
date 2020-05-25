@@ -463,6 +463,134 @@ f(\mathbf{y} | \mathbf{X}, \mathbf{Z}, \boldsymbol\beta, \mathbf{u}, \sigma^2) =
 \end{aligned}
 \]</span></p>
 </div>
+<div id="logistic-mixed-effects-model" class="section level2">
+<h2 class="hasAnchor">
+<a href="#logistic-mixed-effects-model" class="anchor"></a>Logistic mixed effects model</h2>
+<p>Specify the model</p>
+<p><span class="math display">\[
+\begin{aligned}
+g[E(\mathbf{y} | \mathbf{u})] &amp;= \mathbf{X}\boldsymbol\beta + \mathbf{Z}\mathbf{u} \\
+E(\mathbf{y} | \mathbf{u}) &amp;= g^{-1}(\mathbf{X}\boldsymbol\beta + \mathbf{Z}\mathbf{u}) = \boldsymbol\mu
+\end{aligned}
+\]</span></p>
+<p>Link function for logistic regression</p>
+<p><span class="math display">\[
+\begin{aligned}
+g[E(\mathbf{y} | \mathbf{u}, \mathbf{X}, \mathbf{Z})] &amp;= \text{logit}[P(\mathbf{y} = \mathbf{1} | \mathbf{u}), \mathbf{X}, \mathbf{Z}] = \mathbf{X}\boldsymbol\beta + \mathbf{Z}\mathbf{u} \\
+p &amp;= P(\mathbf{y} = \mathbf{1} | \mathbf{u}, \mathbf{X}, \mathbf{Z}) = [1 + e^{-\mathbf{X}\boldsymbol\beta - \mathbf{Z}\mathbf{u}}]^{-1}
+\end{aligned}
+\]</span></p>
+<p>Response for each subject is a vector <span class="math inline">\(\mathbf{y} = (\mathbf{y}_1, ..., \mathbf{y}_n)\)</span> for <span class="math inline">\(n\)</span> subjects <span class="math inline">\(i= 1, ..., n\)</span>. Each subject has <span class="math inline">\(d\)</span> observations <span class="math inline">\(\mathbf{y}_i = (y_{i1}, ..., y_{id})\)</span> and we let <span class="math inline">\(j = 1, ..., d\)</span>. The fixed effect design matrix is composed of matrices for each subject, <span class="math inline">\(\mathbf{X} = (\mathbf{X}_1, ..., \mathbf{X}_n)\)</span>, and <span class="math inline">\(\mathbf{X}_i \in \mathbb{R}^{d\times (q+1)}\)</span> for the fixed effects parameters <span class="math inline">\(\boldsymbol\beta = (\beta_0, ..., \beta_q)\)</span>. The full fixed effects design matrix is therefore <span class="math inline">\(\mathbf{X} \in \mathbb{R}^{nd \times (q+1)}\)</span>.</p>
+<p>For random effects, <span class="math inline">\(\mathbf{Z} = \text{diag}(\mathbf{Z}_1, ..., \mathbf{Z}_n)\)</span>, with individual random effects matrices <span class="math inline">\(\mathbf{Z}_i\)</span> for each of the <span class="math inline">\(i\)</span> subjects. A random intercept model specifies <span class="math inline">\(\mathbf{Z}_i\)</span> as a column vector of ones where <span class="math inline">\(\mathbf{Z}_i = \mathbf{z}_i = \mathbf{1}_d\)</span>. The full random effects design matrix <span class="math inline">\(\mathbf{Z} \in \mathbb{R}^{nd\times n}\)</span>. The parameterization for random effects is <span class="math inline">\(\mathbf{u} = (\mathbf{u}_1, ..., \mathbf{u}_n)^T\)</span> with vectors <span class="math inline">\(\mathbf{u}_i\)</span> for each subject. A random intercept model is somewhat simplified where <span class="math inline">\(\mathbf{u}_i = u_i\)</span> denotes a single random intercept parameter for each subject <span class="math inline">\(i\)</span>, and <span class="math inline">\(\mathbf{u} = (u_1, ..., u_n)^T\)</span>.</p>
+<p>Prior for <span class="math inline">\(\mathbf{u}\)</span> <span class="math display">\[
+\mathbf{u} \sim N(0, \mathbf{G})
+\]</span></p>
+<p>We set <span class="math inline">\(\mathbf{u}\)</span> as one of our priors, following a multivariate normal distribution, <span class="math inline">\(\mathbf{u} \sim N(0, \mathbf{G})\)</span>. For our random intercept model, the specification of the covariance matrix <span class="math inline">\(\mathbf{G}\)</span> is expanded to facilitate efficient sampling using HMC. We let <span class="math inline">\(\mathbf{u} = \mathbf{G}^{1/2}\boldsymbol\tau\)</span> where <span class="math inline">\(\mathbf{G}^{1/2} = \lambda \mathbf{I}_n\)</span>. An additional parameter <span class="math inline">\(\boldsymbol\tau = (\tau_1, ..., \tau_n)^T\)</span> where each of these parameters is standard normal <span class="math inline">\(\tau_i \sim N(0, 1)\)</span>. The full covariance matrix is then <span class="math inline">\(\mathbf{G} = \lambda^2 \mathbf{I}_n \boldsymbol\tau\)</span>.</p>
+<p>Likelihood derivation</p>
+<p><span class="math display">\[
+\begin{aligned}
+f(\mathbf{y}|\mathbf{X}, \mathbf{Z}, \boldsymbol\beta, \mathbf{u}) &amp;= \prod_{i=1}^n \prod_{j=1}^d p(y_{ij})^{y_{ij}}(1-p(y_{ij}))^{1-y_{ij}} \\
+&amp;= \prod_{i=1}^n \prod_{j=1}^d \left(\frac{1}{1 + e^{-\mathbf{x}_{ij}\boldsymbol\beta - \mathbf{z}_{ij}\mathbf{u}_i}} \right)^{y_{ij}}  \left( \frac{e^{-\mathbf{x}_{ij}\boldsymbol\beta - \mathbf{z}_{ij}\mathbf{u}_i}}{1+e^{-\mathbf{x}_{ij}\boldsymbol\beta - \mathbf{z}_{ij}\mathbf{u}_i}}  \right)^{1-y_{ij}}
+\end{aligned}
+\]</span> Log likelihood</p>
+<p><span class="math display">\[
+\begin{aligned}
+\log f(\mathbf{y}|\mathbf{X}, \mathbf{Z}, \boldsymbol\beta, \mathbf{u}) &amp;= \sum_{i=1}^n \sum_{j=1}^d -y_{ij} \log\left(1+e^{-\mathbf{x}_{ij}\boldsymbol\beta - \mathbf{z}_{ij}\mathbf{u}_i} \right) + (1 - y_{ij})\log e^{-\mathbf{x}_{ij}\boldsymbol\beta - \mathbf{z}_{ij}\mathbf{u}_i} - (1 - y_{ij})\log\left(1+e^{-\mathbf{x}_{ij}\boldsymbol\beta - \mathbf{z}_{ij}\mathbf{u}_i} \right) \\
+&amp;= \sum_{i=1}^n\sum_{j=1}^d -y_{ij} \log\left(1+e^{-\mathbf{x}_{ij}\boldsymbol\beta - \mathbf{z}_{ij}\mathbf{u}_i} \right) -\mathbf{x}_{ij}\boldsymbol\beta -\mathbf{z}_{ij}\mathbf{u}_i + y_{ij}\mathbf{x}_{ij}\boldsymbol\beta + y_{ij}\mathbf{z}_{ij}\mathbf{u}_i - \\
+&amp;\qquad \log\left(1+e^{-\mathbf{x}_{ij}\boldsymbol\beta - \mathbf{z}_{ij}\mathbf{u}_i} \right) + y_{ij} \log\left(1+e^{-\mathbf{x}_{ij}\boldsymbol\beta - \mathbf{z}_{ij}\mathbf{u}_i} \right) \\
+&amp;= \sum_{i=1}^n \sum_{j=1}^d -\mathbf{x}_{ij}\boldsymbol\beta - \mathbf{z}_{ij}\mathbf{u}_i + y_{ij}\mathbf{x}_{ij}\boldsymbol\beta + y_{ij}\mathbf{z}_{ij}\mathbf{u}_i - \log\left(1+e^{-\mathbf{x}_{ij}\boldsymbol\beta - \mathbf{z}_{ij}\mathbf{u}_i} \right) \\
+&amp;= \sum_{i=1}^n \sum_{j=1}^d (y_{ij}-1 )(\mathbf{x}_{ij}\boldsymbol\beta + \mathbf{z}_{ij}\mathbf{u}_i) - \log\left(1+e^{-\mathbf{x}_{ij}\boldsymbol\beta - \mathbf{z}_{ij}\mathbf{u}_i} \right) \\
+&amp;= (\mathbf{y} - \mathbf{1}_{nd})^T (\mathbf{X}\boldsymbol\beta + \mathbf{Z}\mathbf{u}) - \mathbf{1}_{nd}\log (1 + e^{-\mathbf{X}\boldsymbol\beta - \mathbf{Z}\mathbf{u}})
+\end{aligned}
+\]</span></p>
+<p>Specify priors explicitly next. We let <span class="math inline">\(\lambda\)</span> follow a 2-parameter half-t distribution with hyperparameters <span class="math inline">\(\nu_\lambda\)</span>, <span class="math inline">\(A_\lambda\)</span>. Again, <span class="math inline">\(\boldsymbol\tau\)</span> are standard normal. We also let <span class="math inline">\(\epsilon\)</span> follow a 2-parameter half-t with hyperparameters <span class="math inline">\(\nu_\epsilon\)</span> and <span class="math inline">\(A_\epsilon\)</span>.</p>
+<p><span class="math display">\[
+\begin{aligned}
+\boldsymbol\beta &amp;\sim N(0, \sigma_\beta^2 \mathbf{I}_{q+1}) \\
+\lambda &amp;\sim \text{half-t}(\nu_\lambda, A_\lambda) \\
+\boldsymbol\tau &amp;\sim N(0, I_n)
+\end{aligned}
+\]</span></p>
+<p>Next, we specify the densities for the priors, omitting constants. We have a single <span class="math inline">\(\lambda\)</span> parameter for a random intercept model.</p>
+<p><span class="math display">\[
+\begin{aligned}
+\pi(\boldsymbol\beta) &amp;\propto e^{-\frac{1}{2}\boldsymbol\beta^T \mathbf{I}_{(q+1)}\boldsymbol\beta}, \qquad \boldsymbol\beta \in \mathbb{R}^{q+1} \\
+\pi(\lambda) &amp;\propto \left(1 + \frac{1}{\nu_\lambda}\left(\frac{\lambda}{A_\lambda} \right)^2 \right)^{-(\nu_\lambda + 1)/2}, \qquad \lambda \in (0, \infty)\\
+\pi(\boldsymbol\tau) &amp;\propto e^{-\frac{1}{2}\boldsymbol\tau^T \mathbf{I}_n \boldsymbol\tau}, \qquad \boldsymbol\tau \in \mathbb{R}^{n} 
+\end{aligned}
+\]</span></p>
+<p>Proposals for all parameters must be over <span class="math inline">\(\mathbb{R}\)</span>. However, <span class="math inline">\(\lambda\)</span> is restricted to strictly positive numbers. We apply a log transform such that the transformed parameter spans <span class="math inline">\(\mathbb{R}\)</span>.</p>
+<p><span class="math display">\[
+\xi = \log\lambda, \qquad \lambda = e^\xi
+\]</span> Apply the Jacobian to obtain the distribution of <span class="math inline">\(\xi\)</span>. <span class="math display">\[
+\begin{aligned}
+\pi_{\xi}(\xi) &amp;= \pi_{\lambda}(g^{-1}(\xi))\left | \frac{d\lambda}{d\xi} \right | \\
+&amp;= \pi_{\lambda}(e^\xi)|e^{\xi}| \\
+&amp;\propto \left( 1 + \frac{1}{\nu_\xi} \left( \frac{e^{\xi}}{A_\xi} \right)^2 \right)^{-(\nu_\xi + 1)/2} e^{\xi}
+\end{aligned}
+\]</span></p>
+<p>Next, the log priors that we use with transformations, again omitting constants. Note that the log densities of the priors with log densities include an additive term for the transformed distribution (i.e. <span class="math inline">\(\xi\)</span> and <span class="math inline">\(\gamma\)</span>).</p>
+<p><span class="math display">\[
+\begin{aligned}
+\log \pi(\beta) &amp;\propto -\frac{\boldsymbol\beta^T \mathbf{I}_{(q+1)}\boldsymbol\beta}{2\sigma_\beta^2} \\
+\log \pi(\xi) &amp;\propto -\frac{\nu_\xi + 1}{2} \log \left( 1 + \frac{1}{\nu_\xi} \left(\frac{e^\xi}{A_\xi} \right)^2 \right) + \xi \\
+\log \pi(\boldsymbol\tau) &amp;\propto -\frac{1}{2}\boldsymbol\tau^T \mathbf{I}_n \boldsymbol\tau 
+\end{aligned}
+\]</span></p>
+<p>Adjust log likelihood in terms of <span class="math inline">\(\lambda\)</span> and <span class="math inline">\(\boldsymbol\tau\)</span>.</p>
+<p><span class="math display">\[
+\begin{aligned}
+\log f(\mathbf{y}|\mathbf{X}, \mathbf{Z}, \boldsymbol\beta, \mathbf{u}) &amp;= (\mathbf{y} - \mathbf{1}_{nd})^T (\mathbf{X}\boldsymbol\beta + \mathbf{Z}\mathbf{u}) - \mathbf{1}_{nd}\log (1 + e^{-\mathbf{X}\boldsymbol\beta - \mathbf{Z}\mathbf{u}}) \\ 
+\log f(\mathbf{y}|\mathbf{X}, \mathbf{Z}, \boldsymbol\beta, \xi, \boldsymbol\tau) &amp;= (\mathbf{y} - \mathbf{1}_{nd})^T (\mathbf{X}\boldsymbol\beta + e^{\xi}\mathbf{Z}\boldsymbol\tau) - \mathbf{1}_{nd}\log (1 + e^{-\mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau})
+\end{aligned}
+\]</span></p>
+<p>Next the log posterior omitting constants</p>
+<p><span class="math display">\[
+\begin{aligned}
+\log f(\boldsymbol\beta, \xi, \boldsymbol\tau|\mathbf{y}, \mathbf{X}, \mathbf{Z}) &amp;\propto \log f(\mathbf{y}|\mathbf{X}, \mathbf{Z}, \boldsymbol\beta, \xi, \boldsymbol\tau) + \log f(\boldsymbol\beta, \xi, \boldsymbol\tau) \\
+&amp;\propto \log f(\mathbf{y}|\mathbf{X}, \mathbf{Z}, \boldsymbol\beta, \xi, \boldsymbol\tau) + \log f(\boldsymbol\beta) + \log f(\xi) + \log f(\boldsymbol\tau) \\
+&amp;\propto  (\mathbf{y} - \mathbf{1}_{nd})^T (\mathbf{X}\boldsymbol\beta + e^{\xi}\mathbf{Z}\boldsymbol\tau) - \mathbf{1}_{nd}^T\log (1 + e^{-\mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau})  - \\ &amp;\qquad \frac{\boldsymbol\beta^T \mathbf{I}_{(q+1)}\boldsymbol\beta}{2\sigma_\beta^2}-\frac{\nu_\xi + 1}{2} \log \left( 1 + \frac{1}{\nu_\xi} \left(\frac{e^\xi}{A_\xi} \right)^2 \right) + \xi-\frac{1}{2}\boldsymbol\tau^T \mathbf{I}_n \boldsymbol\tau 
+\end{aligned}
+\]</span></p>
+<p>Next, we compute the gradient of the log posterior</p>
+<p>First <span class="math inline">\(\nabla_\beta\)</span></p>
+<p><span class="math display">\[
+\begin{aligned}
+\nabla_\beta \log f(\boldsymbol\beta, \xi, \boldsymbol\tau | \mathbf{y}, \mathbf{X}, \mathbf{Z}) &amp;\propto \mathbf{X}^T (\mathbf{y} - \mathbf{1}_{nd})- \mathbf{X}^T \left[ 1 + e^{-\mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau } \right]^{-1}e^{-\mathbf{X}\boldsymbol\beta-e^{\xi}\mathbf{Z}\boldsymbol\tau} - \frac{1}{\sigma_\beta^2}\mathbf{I}_{(q+1)}\boldsymbol\beta \\
+&amp;\propto \mathbf{X}^T(\mathbf{y} - \mathbf{1}_{nd}) - \mathbf{X}^T \left(\frac{e^{-\mathbf{X}\boldsymbol\beta-e^{\xi}\mathbf{Z}\boldsymbol\tau}}{1 + e^{-\mathbf{X}\boldsymbol\beta-e^{\xi}\mathbf{Z}\boldsymbol\tau}} \right) - \frac{1}{\sigma_\beta^2}\mathbf{I}_{(q+1)}\boldsymbol\beta
+\end{aligned}
+\]</span></p>
+<p>Next <span class="math inline">\(\nabla_\xi\)</span></p>
+<p><span class="math display">\[
+\begin{aligned}
+\nabla_\xi \log f(\boldsymbol\beta, \xi, \boldsymbol\tau| \mathbf{y}, \mathbf{X}, \mathbf{Z}) 
+&amp;\propto e^{\xi} (\mathbf{y} - \mathbf{1}_{nd})^T\mathbf{Z}\boldsymbol\tau + e^{\xi}\boldsymbol\tau^T\mathbf{Z}^T\left[1 + e^{-\mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau} \right ]^{-1} e^{-\mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\beta}  
+- \frac{\nu_\xi + 1}{1 + \nu_\xi A_\xi^2 e^{-2\xi}} + 1 \\
+&amp;\propto e^{\xi} (\mathbf{y} - \mathbf{1}_{nd})^T\mathbf{Z}\boldsymbol\tau + e^{\xi}\boldsymbol\tau^T\mathbf{Z}^T \left ( \frac{e^{-\mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau} }{1 + e^{-\mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau}}  \right)
+- \frac{\nu_\xi + 1}{1 + \nu_\xi A_\xi^2 e^{-2\xi}} + 1 \\
+&amp;\propto e^{\xi} (\mathbf{y} - \mathbf{1}_{nd})^T\mathbf{Z}\boldsymbol\tau + e^{\xi}\boldsymbol\tau^T\mathbf{Z}^T \left ( \frac{1 }{1 + e^{\mathbf{X}\boldsymbol\beta + e^{\xi}\mathbf{Z}\boldsymbol\tau}}  \right)
+- \frac{\nu_\xi + 1}{1 + \nu_\xi A_\xi^2 e^{-2\xi}} + 1 
+\end{aligned}
+\]</span></p>
+<p>Next <span class="math inline">\(\nabla_\tau\)</span></p>
+<p><span class="math display">\[
+\begin{aligned}
+\nabla_\tau \log f(\boldsymbol\beta, \xi, \boldsymbol\tau | \mathbf{y}, \mathbf{X}, \mathbf{Z}) &amp;\propto e^{\xi}\mathbf{Z}^T (\mathbf{y} - \mathbf{1}_{nd})- e^{\xi}\mathbf{Z}^T \left[ 1 + e^{-\mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau } \right]^{-1}e^{-\mathbf{X}\boldsymbol\beta-e^{\xi}\mathbf{Z}\boldsymbol\tau} - \mathbf{I}_n\boldsymbol\tau\\
+&amp;\propto e^{\xi}\mathbf{Z}^T (\mathbf{y} - \mathbf{1}_{nd}) - e^{\xi}\mathbf{Z}^T \left( \frac{e^{-\mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau}}{1 + e^{-\mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau}} \right) - \tau
+\end{aligned}
+\]</span></p>
+<p>Full gradient of the log posterior specified</p>
+<p><span class="math display">\[
+\begin{aligned}
+\nabla_\beta \log f(\boldsymbol\beta, \xi, \boldsymbol\tau | \mathbf{y}, \mathbf{X}, \mathbf{Z})
+&amp;\propto \mathbf{X}^T(\mathbf{y} - \mathbf{1}_{nd}) - \mathbf{X}^T \left(\frac{1}{1 + e^{\mathbf{X}\boldsymbol\beta+e^{\xi}\mathbf{Z}\boldsymbol\tau}} \right) - \boldsymbol\beta / \sigma_\beta^2\\
+\nabla_\xi \log f(\boldsymbol\beta, \xi, \boldsymbol\tau | \mathbf{y}, \mathbf{X}, \mathbf{Z}) 
+&amp;\propto e^{\xi} (\mathbf{y} - \mathbf{1}_{nd})^T\mathbf{Z}\boldsymbol\tau + e^{\xi}\boldsymbol\tau^T\mathbf{Z}^T \left ( \frac{1 }{1 + e^{\mathbf{X}\boldsymbol\beta + e^{\xi}\mathbf{Z}\boldsymbol\tau}}  \right)
+- \frac{\nu_\xi + 1}{1 + \nu_\xi A_\xi^2 e^{-2\xi}} + 1  \\
+\nabla_\tau \log f(\boldsymbol\beta, \xi, \boldsymbol\tau | \mathbf{y}, \mathbf{X}, \mathbf{Z}) &amp;\propto e^{\xi}\mathbf{Z}^T (\mathbf{y} - \mathbf{1}_{nd}) - e^{\xi}\mathbf{Z}^T \left( \frac{1}{1 + e^{\mathbf{X}\boldsymbol\beta + e^{\xi}\mathbf{Z}\boldsymbol\tau}} \right) - \tau
+\end{aligned}
+\]</span></p>
+</div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

@@ -44,7 +44,17 @@ and mixed effect models — hmclearn-glm-posterior • hmclearn</title>
 and mixed effect models — hmclearn-glm-posterior" />
 <meta property="og:description" content="These functions can be used to fit common generalized linear models and mixed effect models.
 See the accompanying vignettes for details on the derivations of the log posterior and gradient.
-In addition, these functions can be used as templates to build custom models to fit using HMC." />
+In addition, these functions can be used as templates to build custom models to fit using HMC.
+# extract parameters from theta vector
+  beta_param &amp;lt;- as.numeric(theta[1:p])
+  tau_param &amp;lt;- theta[(p+1):(p+m*q)]
+# extract parameters from theta vector
+  beta_param &amp;lt;- as.numeric(theta[1:p])
+  tau_param &amp;lt;- theta[(p+1):(p+m*q)]
+# prior covariance for beta
+  Sig_inv_beta &amp;lt;- diag(1/sig2beta, p, p)
+# prior covariance for beta
+  Sig_inv_beta &amp;lt;- diag(1/sig2beta, p, p)" />
 
 
 
@@ -147,6 +157,16 @@ and mixed effect models</h1>
     <p>These functions can be used to fit common generalized linear models and mixed effect models.
 See the accompanying vignettes for details on the derivations of the log posterior and gradient.
 In addition, these functions can be used as templates to build custom models to fit using HMC.</p>
+<p># extract parameters from theta vector
+  beta_param &lt;- as.numeric(theta[1:p])
+  tau_param &lt;- theta[(p+1):(p+m*q)]</p>
+<p># extract parameters from theta vector
+  beta_param &lt;- as.numeric(theta[1:p])
+  tau_param &lt;- theta[(p+1):(p+m*q)]</p>
+<p># prior covariance for beta
+  Sig_inv_beta &lt;- diag(1/sig2beta, p, p)</p>
+<p># prior covariance for beta
+  Sig_inv_beta &lt;- diag(1/sig2beta, p, p)</p>
     </div>
 
     <pre class="usage"><span class='fu'>linear_posterior</span>(<span class='no'>theta</span>, <span class='no'>y</span>, <span class='no'>X</span>, <span class='kw'>a</span> <span class='kw'>=</span> <span class='fl'>1e-04</span>, <span class='kw'>b</span> <span class='kw'>=</span> <span class='fl'>1e-04</span>, <span class='kw'>sig2beta</span> <span class='kw'>=</span> <span class='fl'>1000</span>)
@@ -166,13 +186,13 @@ In addition, these functions can be used as templates to build custom models to 
   <span class='no'>y</span>,
   <span class='no'>X</span>,
   <span class='no'>Z</span>,
-  <span class='no'>m</span>,
-  <span class='kw'>q</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>A</span> <span class='kw'>=</span> <span class='fl'>10000</span>,
-  <span class='kw'>nueps</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>nulambda</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>Aeps</span> <span class='kw'>=</span> <span class='fl'>25</span>,
-  <span class='kw'>Alambda</span> <span class='kw'>=</span> <span class='fl'>25</span>,
+  <span class='no'>n</span>,
+  <span class='no'>d</span>,
+  <span class='kw'>nrandom</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>nugamma</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>nuxi</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>Agamma</span> <span class='kw'>=</span> <span class='fl'>25</span>,
+  <span class='kw'>Axi</span> <span class='kw'>=</span> <span class='fl'>25</span>,
   <span class='kw'>sig2beta</span> <span class='kw'>=</span> <span class='fl'>1000</span>
 )
 
@@ -181,13 +201,13 @@ In addition, these functions can be used as templates to build custom models to 
   <span class='no'>y</span>,
   <span class='no'>X</span>,
   <span class='no'>Z</span>,
-  <span class='no'>m</span>,
-  <span class='kw'>q</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>A</span> <span class='kw'>=</span> <span class='fl'>10000</span>,
-  <span class='kw'>nueps</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>nulambda</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>Aeps</span> <span class='kw'>=</span> <span class='fl'>25</span>,
-  <span class='kw'>Alambda</span> <span class='kw'>=</span> <span class='fl'>25</span>,
+  <span class='no'>n</span>,
+  <span class='no'>d</span>,
+  <span class='kw'>nrandom</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>nugamma</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>nuxi</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>Agamma</span> <span class='kw'>=</span> <span class='fl'>25</span>,
+  <span class='kw'>Axi</span> <span class='kw'>=</span> <span class='fl'>25</span>,
   <span class='kw'>sig2beta</span> <span class='kw'>=</span> <span class='fl'>1000</span>
 )
 
@@ -196,11 +216,10 @@ In addition, these functions can be used as templates to build custom models to 
   <span class='no'>y</span>,
   <span class='no'>X</span>,
   <span class='no'>Z</span>,
-  <span class='no'>m</span>,
-  <span class='kw'>q</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>A</span> <span class='kw'>=</span> <span class='fl'>10000</span>,
-  <span class='kw'>nulambda</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>Alambda</span> <span class='kw'>=</span> <span class='fl'>25</span>,
+  <span class='no'>n</span>,
+  <span class='kw'>nrandom</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>nuxi</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>Axi</span> <span class='kw'>=</span> <span class='fl'>25</span>,
   <span class='kw'>sig2beta</span> <span class='kw'>=</span> <span class='fl'>10000</span>
 )
 
@@ -209,11 +228,10 @@ In addition, these functions can be used as templates to build custom models to 
   <span class='no'>y</span>,
   <span class='no'>X</span>,
   <span class='no'>Z</span>,
-  <span class='no'>m</span>,
-  <span class='kw'>q</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>A</span> <span class='kw'>=</span> <span class='fl'>10000</span>,
-  <span class='kw'>nulambda</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>Alambda</span> <span class='kw'>=</span> <span class='fl'>25</span>,
+  <span class='no'>n</span>,
+  <span class='kw'>nrandom</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>nuxi</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>Axi</span> <span class='kw'>=</span> <span class='fl'>25</span>,
   <span class='kw'>sig2beta</span> <span class='kw'>=</span> <span class='fl'>10000</span>
 )
 
@@ -275,6 +293,30 @@ In addition, these functions can be used as templates to build custom models to 
       <td><p>numeric design matrix of random effect parameters</p></td>
     </tr>
     <tr>
+      <th>n</th>
+      <td><p>number of subjects for mixed effect models, or number of observations for standard glm</p></td>
+    </tr>
+    <tr>
+      <th>d</th>
+      <td><p>number of observations per subject</p></td>
+    </tr>
+    <tr>
+      <th>nugamma</th>
+      <td><p>hyperprior \(\nu\) for the half-t prior of the log transformed error</p></td>
+    </tr>
+    <tr>
+      <th>nuxi</th>
+      <td><p>hyperprior \(\nu\) for the half-t prior of the random effects diagonal</p></td>
+    </tr>
+    <tr>
+      <th>Agamma</th>
+      <td><p>hyperprior \(A\) for the half-t prior of the log transformed error</p></td>
+    </tr>
+    <tr>
+      <th>Axi</th>
+      <td><p>hyperprior \(A\) for the half-t prior of the random effects diagonal</p></td>
+    </tr>
+    <tr>
       <th>m</th>
       <td><p>number of random effect linear parameters</p></td>
     </tr>
@@ -287,26 +329,37 @@ In addition, these functions can be used as templates to build custom models to 
       <td><p>hyperprior numeric vector for the random effects off-diagonal <code>a</code></p></td>
     </tr>
     <tr>
-      <th>nueps</th>
-      <td><p>hyperprior for the half-t prior of the error parameter \(\nu\)</p></td>
-    </tr>
-    <tr>
       <th>nulambda</th>
-      <td><p>hyperprior for the half-t prior of the random effects diagonal \(\lambda\)</p></td>
-    </tr>
-    <tr>
-      <th>Aeps</th>
-      <td><p>hyperprior for the half-t prior of the error parameter \(A_\epsilon\)</p></td>
+      <td><p>hyperprior \(\nu\) for the half-t prior of the random effects diagonal</p></td>
     </tr>
     <tr>
       <th>Alambda</th>
-      <td><p>hyperprior for the half-t prior of the random effects diagonal \(A_\lambda\)</p></td>
+      <td><p>hyperprior \(A\) for the half-t prior of the random effects diagonal</p></td>
+    </tr>
+    <tr>
+      <th>nueps</th>
+      <td><p>hyperprior \(\nu\) for the half-t prior of the error parameter</p></td>
+    </tr>
+    <tr>
+      <th>Aeps</th>
+      <td><p>hyperprior \(A\) for the half-t prior of the error parameter</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>Numeric vector for the log posterior or gradient of the log posterior</p>
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    
+
+
+
+
+
+
+
+
     <h2 class="hasAnchor" id="generalized-linear-models-with-available-posterior-and-gradient-functions"><a class="anchor" href="#generalized-linear-models-with-available-posterior-and-gradient-functions"></a>Generalized Linear Models with available posterior and gradient functions</h2>
 
     

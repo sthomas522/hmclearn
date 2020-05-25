@@ -93,7 +93,7 @@
       <h1 data-toc-skip>hmclearn: Poisson Regression Example</h1>
                         <h4 class="author">Samuel Thomas</h4>
             
-            <h4 class="date">2020-05-23</h4>
+            <h4 class="date">2020-05-25</h4>
       
       
       <div class="hidden name"><code>poisson_regression_hmclearn.Rmd</code></div>
@@ -234,21 +234,21 @@ p(\beta | X, y) &amp;\propto p(y | X, \beta)  p(\beta) \\
                     <span class="kw">param</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="kw">y</span><span class="kw">=</span><span class="no">y</span>, <span class="kw">X</span><span class="kw">=</span><span class="no">X</span>))
 <span class="no">t2.hmc</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span>()
 <span class="no">t2.hmc</span> - <span class="no">t1.hmc</span>
-<span class="co">#&gt; Time difference of 38.92706 secs</span></pre></body></html></div>
+<span class="co">#&gt; Time difference of 32.55477 secs</span></pre></body></html></div>
 <p>The acceptance ratio for each of the HMC chains is sufficiently high for an efficient simulation.</p>
 <div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="no">f_hmc</span>$<span class="no">accept</span>/<span class="no">N</span>
-<span class="co">#&gt; [1] 0.9790 0.9809</span></pre></body></html></div>
+<span class="co">#&gt; [1] 0.9814 0.9820</span></pre></body></html></div>
 <p>The posterior quantiles are summarized after removing an initial <em>burnin</em> period.</p>
 <div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">3000</span>)
 <span class="co">#&gt; Summary of MCMC simulation</span>
-<span class="co">#&gt;                    5%        25%        50%        75%        95%      rhat</span>
-<span class="co">#&gt; (Intercept)  5.531717  5.5904873  5.6279852  5.6660334  5.7226269 0.9999448</span>
-<span class="co">#&gt; Ayes         0.377206  0.4452843  0.4918275  0.5385649  0.6118614 1.0013195</span>
-<span class="co">#&gt; Cyes        -2.144314 -1.9930238 -1.8926024 -1.7910020 -1.6534832 1.0005288</span>
-<span class="co">#&gt; Myes        -6.222201 -5.7705279 -5.4477850 -5.1431902 -4.6940259 1.0012000</span>
-<span class="co">#&gt; Ayes:Cyes    1.798140  1.9558290  2.0642276  2.1726414  2.3296844 1.0030885</span>
-<span class="co">#&gt; Ayes:Myes    2.392598  2.8401897  3.1486312  3.4720306  3.8664220 1.0071846</span>
-<span class="co">#&gt; Cyes:Myes    2.602026  2.7277304  2.8244066  2.9303026  3.0965436 1.0252168</span></pre></body></html></div>
+<span class="co">#&gt;                     5%        25%        50%        75%        95%      rhat</span>
+<span class="co">#&gt; (Intercept)  5.5254741  5.5854867  5.6265241  5.6665795  5.7216660 1.0002856</span>
+<span class="co">#&gt; Ayes         0.3695307  0.4446831  0.4950977  0.5459109  0.6210641 0.9999586</span>
+<span class="co">#&gt; Cyes        -2.1560784 -2.0060256 -1.8882715 -1.7758452 -1.6102403 1.0062125</span>
+<span class="co">#&gt; Myes        -6.1418546 -5.7022651 -5.3858420 -5.0595292 -4.5958396 1.0030448</span>
+<span class="co">#&gt; Ayes:Cyes    1.7532351  1.9327426  2.0558686  2.1856996  2.3510207 1.0037982</span>
+<span class="co">#&gt; Ayes:Myes    2.3386505  2.7336387  3.0574188  3.3834908  3.8205251 1.0011049</span>
+<span class="co">#&gt; Cyes:Myes    2.5878447  2.7368052  2.8386931  2.9439430  3.0926092 1.0059009</span></pre></body></html></div>
 <p>Trace plots provide a visual indication of stationarity. These plots indicate that the MCMC chains are reasonably stationary.</p>
 <div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="fu"><a href="../reference/hmclearn-plots.html">mcmc_trace</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">3000</span>)</pre></body></html></div>
 <p><img src="poisson_regression_hmclearn_files/figure-html/unnamed-chunk-7-1.png" width="576"></p>
