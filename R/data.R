@@ -10,7 +10,7 @@
 #'   \item{type}{fresh water}
 #'   \item{Area}{area of the site}
 #'   \item{density}{estimated tortoise density}
-#'   \item{prev}{Seroprevalence}
+#'   \item{prev}{Seroprevalence to Mycoplasma agassizii}
 #' }
 #' @references Fox, G. A., Negrete-Yankelevich, S., & Sosa, V. J. (Eds.). (2015). \emph{Ecological statistics: contemporary theory and application}. Oxford University Press, USA.
 #' @source Ozgul, A., Oli, M. K., Bolker, B. M., & Perez-Heydrich, C. (2009). \emph{Upper respiratory tract disease, force of infection, and effects on survival of gopher tortoises}. Ecological Applications, 19(3), 786–798

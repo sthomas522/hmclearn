@@ -13,7 +13,7 @@ A data frame with 30 rows and 7 variables:
   \item{type}{fresh water}
   \item{Area}{area of the site}
   \item{density}{estimated tortoise density}
-  \item{prev}{Seroprevalence}
+  \item{prev}{Seroprevalence to Mycoplasma agassizii}
 }
 }
 \source{
