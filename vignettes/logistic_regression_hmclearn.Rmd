@@ -133,11 +133,11 @@ N <- 1e4
 set.seed(412)
 t1.hmc <- Sys.time()
  f_hmc <- hmc(N = N, theta.init = rep(1, 4), 
-            epsilon = 1e-1, L = 20, 
+            epsilon = 0.1, L = 20, 
             logPOSTERIOR = logistic_posterior, 
             glogPOSTERIOR = g_logistic_posterior, 
             varnames = colnames(X),
-            param=list(y = y, X=X), 
+            param=list(y = y, X=X, sig2beta=10), 
             parallel=TRUE, chains=2)
 t2.hmc <- Sys.time()
 t2.hmc - t1.hmc

@@ -57,17 +57,17 @@ test_that("vignette examples", {
 
   set.seed(412)
   f_hmc <- hmc(N = N, theta.init = rep(1, 4),
-               epsilon = 1e-1, L = 20,
+               epsilon = 0.1, L = 20,
                logPOSTERIOR = logistic_posterior,
                glogPOSTERIOR = g_logistic_posterior,
                varnames = colnames(X),
-               param=list(y = y, X=X),
+               param=list(y = y, X=X, sig2beta=10),
                parallel=FALSE, chains=1)
 
   # test values
   c2_hmc <- as.vector(round(coef(f_hmc), 6))
 
-  test2 <- c(2.863059, -0.470963, -2.056498, 8.583746)
+  test2 <- c(0.630469, -0.409110, -2.104589, 3.817009)
 
   expect_equal(c2_hmc, test2)
 
@@ -101,8 +101,8 @@ test_that("vignette examples", {
   # test values
   c3_hmc <- as.vector(round(coef(f_hmc), 6))
 
-  test3 <- c(5.626207, 0.506781, -1.836631, -5.546411,
-             2.011448, 3.173740, 2.744448)
+  test3 <- c(5.626569, 0.506499, -1.836742, -5.566284,
+             2.011625, 3.194251, 2.745701)
 
   expect_equal(c3_hmc, test3)
 

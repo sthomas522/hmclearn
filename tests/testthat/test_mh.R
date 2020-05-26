@@ -42,7 +42,7 @@ test_that("mh testing", {
             qFUN = qfun,
             logPOSTERIOR = logistic_posterior,
             varnames = paste0("beta", 0:1),
-            param = list(y=y, X=X),
+            param = list(y=y, X=X, sig2beta=100),
             parallel=FALSE, chains=2)
 
   medparam2 <- as.vector(summary(f2, burnin=200)[, 3])
@@ -64,7 +64,7 @@ test_that("mh testing", {
             qFUN = qfun,
             logPOSTERIOR = poisson_posterior,
             varnames = paste0("beta", 0:2),
-            param = list(y=y, X=X),
+            param = list(y=y, X=X, sig2beta=100),
             parallel=FALSE, chains=2)
 
   medparam3 <- as.vector(summary(f3, burnin=1000)[, 3])

@@ -21,13 +21,13 @@ linear_posterior(theta, y, X, a = 1e-04, b = 1e-04, sig2beta = 1000)
 
 g_linear_posterior(theta, y, X, a = 1e-04, b = 1e-04, sig2beta = 1000)
 
-logistic_posterior(theta, y, X, sig2beta = 100)
+logistic_posterior(theta, y, X, sig2beta = 1000)
 
-g_logistic_posterior(theta, y, X, sig2beta = 100)
+g_logistic_posterior(theta, y, X, sig2beta = 1000)
 
-poisson_posterior(theta, y, X, sig2beta = 100)
+poisson_posterior(theta, y, X, sig2beta = 1000)
 
-g_poisson_posterior(theta, y, X, sig2beta = 100)
+g_poisson_posterior(theta, y, X, sig2beta = 1000)
 
 lmm_posterior(
   theta,
@@ -68,7 +68,7 @@ glmm_bin_posterior(
   nrandom = 1,
   nuxi = 1,
   Axi = 25,
-  sig2beta = 10000
+  sig2beta = 1000
 )
 
 g_glmm_bin_posterior(
@@ -80,7 +80,7 @@ g_glmm_bin_posterior(
   nrandom = 1,
   nuxi = 1,
   Axi = 25,
-  sig2beta = 10000
+  sig2beta = 1000
 )
 
 glmm_poisson_posterior(
@@ -92,7 +92,7 @@ glmm_poisson_posterior(
   nrandom = 1,
   nuxi = 1,
   Axi = 25,
-  sig2beta = 10000
+  sig2beta = 1000
 )
 
 g_glmm_poisson_posterior(
@@ -104,7 +104,7 @@ g_glmm_poisson_posterior(
   nrandom = 1,
   nuxi = 1,
   Axi = 25,
-  sig2beta = 10000
+  sig2beta = 1000
 )
 }
 \arguments{
@@ -161,28 +161,28 @@ In addition, these functions can be used as templates to build custom models to 
    The input parameter vector \eqn{theta} is of length \eqn{k}.  The first \eqn{k-1} parameters are for \eqn{\beta}, and the last parameter is \eqn{\gamma}
    Note that the Inverse Gamma prior can be problematic for certain applications with low variance, such as hierarchical models.  See Gelman (2006)
   }
-  \item{`logistic_posterior(theta, y, X, sig2beta=100) `}{
+  \item{`logistic_posterior(theta, y, X, sig2beta=1e3) `}{
    Log posterior for a logistic regression model with Normal prior for the linear parameters.
    The likelihood function for logistic regression
    \deqn{f(\beta| X, y) = \prod_{i=1}^{n} \left(\frac{1}{1+e^{-X_i\beta}}\right)^{y_i} \left(\frac{e^{-X_i\beta}}{1+e^{-X_i\beta}}\right)^{1-y_i}}
    with priors \eqn{\beta \sim N(0, \sigma_\beta^2 I)}.
    The input parameter vector \eqn{theta} is of length \eqn{k}, containing parameter values for \eqn{\beta}
   }
-  \item{`g_logistic_posterior(theta, y, X, sig2beta=100) `}{
+  \item{`g_logistic_posterior(theta, y, X, sig2beta=1e3) `}{
    Gradient of the log posterior for a logistic regression model with Normal prior for the linear parameters.
    The likelihood function for logistic regression
    \deqn{f(\beta| X, y) = \prod_{i=1}^{n} \left(\frac{1}{1+e^{-X_i\beta}}\right)^{y_i} \left(\frac{e^{-X_i\beta}}{1+e^{-X_i\beta}}\right)^{1-y_i}}
    with priors \eqn{\beta \sim N(0, \sigma_\beta^2 I)}.
    The input parameter vector \eqn{theta} is of length \eqn{k}, containing parameter values for \eqn{\beta}
   }
-  \item{`poisson_posterior(theta, y, X, sig2beta=100) `}{
+  \item{`poisson_posterior(theta, y, X, sig2beta=1e3) `}{
    Log posterior for a Poisson regression model with Normal prior for the linear parameters.
    The likelihood function for poisson regression
    \deqn{f(\beta| y, X) = \prod_{i=1}^n \frac{e^{-e^{X_i\beta}}e^{y_iX_i\beta}}{y_i!}}
    with priors \eqn{\beta \sim N(0, \sigma_\beta^2 I)}.
    The input parameter vector \eqn{theta} is of length \eqn{k}, containing parameter values for \eqn{\beta}
   }
-  \item{`g_poisson_posterior(theta, y, X, sig2beta=100) `}{
+  \item{`g_poisson_posterior(theta, y, X, sig2beta=1e3) `}{
    Gradient of the log posterior for a Poisson regression model with Normal prior for the linear parameters.
    The likelihood function for poisson regression
    \deqn{f(\beta| y, X) = \prod_{i=1}^n \frac{e^{-e^{X_i\beta}}e^{y_iX_i\beta}}{y_i!}}
@@ -211,31 +211,31 @@ In addition, these functions can be used as templates to build custom models to 
    The standard deviation of the error is log transformed, where \eqn{\gamma = \log \sigma_\epsilon} and \eqn{\sigma_\epsilon \sim half-t}. The parameters for \eqn{\gamma} are \eqn{A_\gamma, \nu_\gamma}
    The input parameter vector \eqn{theta} is of length \eqn{k}.  The order of parameters for the vector is \eqn{\beta, \tau, \gamma, \xi}
   }
-  \item{`glmm_bin_posterior(theta, y, X, Z, n, nrandom = 1, nuxi = 1, Axi = 25, sig2beta=1e4)`}{
+  \item{`glmm_bin_posterior(theta, y, X, Z, n, nrandom = 1, nuxi = 1, Axi = 25, sig2beta=1e3)`}{
    The log posterior function for logistic mixed effects regression
    \deqn{f(y | X, Z, \beta, u) = \prod_{i=1}^n\prod_{j=1}^d \left(\frac{1}{1 + e^{-X_{i}\beta - Z_{ij}u_i}}\right)^{y_{ij}} \left(\frac{e^{-X_i\beta - Z_{ij}u_i}}{1 + e^{-X_{i}\beta - Z_{ij}u_i}}\right)^{1-y_{ij}} }
-   with priors \eqn{\beta \sim N(0, BI)}, \eqn{\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)}, \eqn{\lambda \sim half-t(A_\lambda, nu_\lambda )}.
+   with priors \eqn{\beta \sim N(0, \sigma_\beta^2 I)}, \eqn{\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)}, \eqn{\lambda \sim half-t(A_\lambda, nu_\lambda )}.
    The vector \eqn{\lambda} is the diagonal of the covariance \eqn{G} hyperprior where \eqn{u \sim N(0, G}, \eqn{\xi = \log\lambda} and \eqn{A_\xi, \nu_\xi} are parameters for the transformed distribution
    The input parameter vector \eqn{theta} is of length \eqn{k}.  The order of parameters for the vector is \eqn{\beta, \tau, \xi}
   }
-  \item{`g_glmm_bin_posterior(theta, y, X, Z, n, nrandom = 1, nuxi = 1, Axi = 25, B = 1e4) `}{
+  \item{`g_glmm_bin_posterior(theta, y, X, Z, n, nrandom = 1, nuxi = 1, Axi = 25, sig2beta = 1e3) `}{
    Gradient of the log posterior function for logistic mixed effects regression
    \deqn{f(y | X, Z, \beta, u) = \prod_{i=1}^n\prod_{j=1}^m \left(\frac{1}{1 + e^{-X_{i}\beta - Z_{ij}u_i}}\right)^{y_{ij}} \left(\frac{e^{-X_i\beta - Z_{ij}u_i}}{1 + e^{-X_{i}\beta - Z_{ij}u_i}}\right)^{1-y_{ij}} }
-   with priors \eqn{\beta \sim N(0, BI)}, \eqn{\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)}, \eqn{\lambda \sim half-t(A_\lambda, nu_\lambda )}.
+   with priors \eqn{\beta \sim N(0, \sigma_\beta^2 I)}, \eqn{\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)}, \eqn{\lambda \sim half-t(A_\lambda, nu_\lambda )}.
    The vector \eqn{\lambda} is the diagonal of the covariance \eqn{G} hyperprior where \eqn{u \sim N(0, G}, \eqn{\xi = \log\lambda} and \eqn{A_\xi, \nu_\xi} are parameters for the transformed distribution
    The input parameter vector \eqn{theta} is of length \eqn{k}.  The order of parameters for the vector is \eqn{\beta, \tau, \xi}
   }
-  \item{`glmm_poisson_posterior(theta, y, X, Z, n, nrandom = 1, nuxi = 1, Axi = 25, sig2beta = 1e4) `}{
+  \item{`glmm_poisson_posterior(theta, y, X, Z, n, nrandom = 1, nuxi = 1, Axi = 25, sig2beta = 1e3) `}{
    Log posterior for a Poisson mixed effect regression
    \deqn{f(y | X, Z, \beta, u) = \prod_{i=1}^n \prod_{j=1}^m \frac{e^{-e^{X_i\beta + Z_{ij}u_{ij}}}e^{y_i(X_i\beta + Z_{ij}u_{ij})}}{y_i!} }
-   with priors \eqn{\beta \sim N(0, BI)}, \eqn{\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)}, \eqn{\lambda \sim half-t(A_\lambda, nu_\lambda )}.
+   with priors \eqn{\beta \sim N(0, \sigma_\beta^2 I)}, \eqn{\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)}, \eqn{\lambda \sim half-t(A_\lambda, nu_\lambda )}.
    The vector \eqn{\lambda} is the diagonal of the covariance \eqn{G} hyperprior where \eqn{u \sim N(0, G}, \eqn{\xi = \log\lambda} and \eqn{A_\xi, \nu_\xi} are parameters for the transformed distribution
    The input parameter vector \eqn{theta} is of length \eqn{k}.  The order of parameters for the vector is \eqn{\beta, \tau, \xi}
   }
-  \item{`g_glmm_poisson_posterior(theta, y, X, Z, n, nrandom = 1, nuxi = 1, Axi = 25, sig2beta = 1e4) `}{
+  \item{`g_glmm_poisson_posterior(theta, y, X, Z, n, nrandom = 1, nuxi = 1, Axi = 25, sig2beta = 1e3) `}{
    Gradient of the log posterior for a Poisson mixed effect regression
    \deqn{f(y | X, Z, \beta, u) = \prod_{i=1}^n \prod_{j=1}^m \frac{e^{-e^{X_i\beta + Z_{ij}u_{ij}}}e^{y_i(X_i\beta + Z_{ij}u_{ij})}}{y_i!} }
-   with priors \eqn{\beta \sim N(0, BI)}, \eqn{\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)}, \eqn{\lambda \sim half-t(A_\lambda, nu_\lambda )}.
+   with priors \eqn{\beta \sim N(0, \sigma_\beta^2 I)}, \eqn{\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)}, \eqn{\lambda \sim half-t(A_\lambda, nu_\lambda )}.
    The vector \eqn{\lambda} is the diagonal of the covariance \eqn{G} hyperprior where \eqn{u \sim N(0, G}, \eqn{\xi = \log\lambda} and \eqn{A_\xi, \nu_\xi} are parameters for the transformed distribution
    The input parameter vector \eqn{theta} is of length \eqn{k}.  The order of parameters for the vector is \eqn{\beta, \tau, \xi}
   }

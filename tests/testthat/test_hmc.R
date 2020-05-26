@@ -46,10 +46,9 @@ test_that("hmc testing", {
             parallel=FALSE, chains=1)
 
   medparam2 <- as.vector(summary(f2, burnin=100)[, 3])
-  medparam2
 
   expect_equal(round(medparam2, 7),
-               c(-0.8497155, 0.1892506))
+               c(-0.8504805, 0.1892643))
 
   # poisson regression example
   set.seed(7363)
@@ -69,10 +68,9 @@ test_that("hmc testing", {
             parallel=FALSE, chains=1)
 
   medparam3 <- as.vector(summary(f3, burnin=100)[, 3])
-  medparam3
 
   expect_equal(round(medparam3, 7),
-               c(0.7770322, -0.5192680, 1.2087953))
+               c(0.7756224, -0.5167261, 1.2088527))
 
   # linear regression
   data(warpbreaks)
@@ -128,15 +126,15 @@ test_that("hmc testing", {
   # test values
   c5_hmc <- as.vector(round(coef(f5_hmc), 6))
 
-  test5 <- c(-8.449720, 0.127226, 0.035747, -0.013896,
-             0.000827, -0.001213, 0.089504, 0.946391, 0.013745)
+  test5 <- c(-8.486601, 0.127246, 0.035835, -0.013833,
+             0.000857, -0.001223, 0.089886, 0.950046, 0.013887)
 
   expect_equal(c5_hmc, test5)
 
   p5_hmc <- as.vector(round(psrf(f5_hmc), 6))
 
-  test5b <- c(1.011416, 1.002366, 1.000338, 0.999599,
-              1.002537, 1.007680, 1.004142, 0.999600, 1.016217)
+  test5b <- c(1.011002, 1.002309, 1.000229, 0.999595,
+              1.002694, 1.007651, 1.003839, 0.999561, 1.017046)
 
   expect_equal(p5_hmc, test5b)
 
@@ -165,15 +163,15 @@ test_that("hmc testing", {
   # test values
   c6_hmc <- as.vector(round(coef(f6_hmc), 6))
 
-  test6 <- c(3.565288, 0.457447, 0.310964, -0.189868,
-             0.534825, -0.851930, 0.742973, -0.128753)
+  test6 <- c(3.564117, 0.457773, 0.311064, -0.189077,
+             0.535230, -0.850945, 0.743135, -0.128743)
 
   expect_equal(c6_hmc, test6)
 
   p6_hmc <- as.vector(round(psrf(f6_hmc), 6))
 
-  test6b <- c(1.008280, 1.012110, 1.022740, 1.006099,
-              1.017919, 1.003820, 1.013547, 1.000153)
+  test6b <- c(1.008097, 1.011127, 1.020937, 1.005485,
+              1.016524, 1.003393, 1.013869, 1.000225)
 
   expect_equal(p6_hmc, test6b)
 
