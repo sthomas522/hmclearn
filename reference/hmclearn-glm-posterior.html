@@ -150,13 +150,13 @@ In addition, these functions can be used as templates to build custom models to 
 
 <span class='fu'>g_linear_posterior</span>(<span class='no'>theta</span>, <span class='no'>y</span>, <span class='no'>X</span>, <span class='kw'>a</span> <span class='kw'>=</span> <span class='fl'>1e-04</span>, <span class='kw'>b</span> <span class='kw'>=</span> <span class='fl'>1e-04</span>, <span class='kw'>sig2beta</span> <span class='kw'>=</span> <span class='fl'>1000</span>)
 
-<span class='fu'>logistic_posterior</span>(<span class='no'>theta</span>, <span class='no'>y</span>, <span class='no'>X</span>, <span class='kw'>sig2beta</span> <span class='kw'>=</span> <span class='fl'>100</span>)
+<span class='fu'>logistic_posterior</span>(<span class='no'>theta</span>, <span class='no'>y</span>, <span class='no'>X</span>, <span class='kw'>sig2beta</span> <span class='kw'>=</span> <span class='fl'>1000</span>)
 
-<span class='fu'>g_logistic_posterior</span>(<span class='no'>theta</span>, <span class='no'>y</span>, <span class='no'>X</span>, <span class='kw'>sig2beta</span> <span class='kw'>=</span> <span class='fl'>100</span>)
+<span class='fu'>g_logistic_posterior</span>(<span class='no'>theta</span>, <span class='no'>y</span>, <span class='no'>X</span>, <span class='kw'>sig2beta</span> <span class='kw'>=</span> <span class='fl'>1000</span>)
 
-<span class='fu'>poisson_posterior</span>(<span class='no'>theta</span>, <span class='no'>y</span>, <span class='no'>X</span>, <span class='kw'>sig2beta</span> <span class='kw'>=</span> <span class='fl'>100</span>)
+<span class='fu'>poisson_posterior</span>(<span class='no'>theta</span>, <span class='no'>y</span>, <span class='no'>X</span>, <span class='kw'>sig2beta</span> <span class='kw'>=</span> <span class='fl'>1000</span>)
 
-<span class='fu'>g_poisson_posterior</span>(<span class='no'>theta</span>, <span class='no'>y</span>, <span class='no'>X</span>, <span class='kw'>sig2beta</span> <span class='kw'>=</span> <span class='fl'>100</span>)
+<span class='fu'>g_poisson_posterior</span>(<span class='no'>theta</span>, <span class='no'>y</span>, <span class='no'>X</span>, <span class='kw'>sig2beta</span> <span class='kw'>=</span> <span class='fl'>1000</span>)
 
 <span class='fu'>lmm_posterior</span>(
   <span class='no'>theta</span>,
@@ -197,7 +197,7 @@ In addition, these functions can be used as templates to build custom models to 
   <span class='kw'>nrandom</span> <span class='kw'>=</span> <span class='fl'>1</span>,
   <span class='kw'>nuxi</span> <span class='kw'>=</span> <span class='fl'>1</span>,
   <span class='kw'>Axi</span> <span class='kw'>=</span> <span class='fl'>25</span>,
-  <span class='kw'>sig2beta</span> <span class='kw'>=</span> <span class='fl'>10000</span>
+  <span class='kw'>sig2beta</span> <span class='kw'>=</span> <span class='fl'>1000</span>
 )
 
 <span class='fu'>g_glmm_bin_posterior</span>(
@@ -209,7 +209,7 @@ In addition, these functions can be used as templates to build custom models to 
   <span class='kw'>nrandom</span> <span class='kw'>=</span> <span class='fl'>1</span>,
   <span class='kw'>nuxi</span> <span class='kw'>=</span> <span class='fl'>1</span>,
   <span class='kw'>Axi</span> <span class='kw'>=</span> <span class='fl'>25</span>,
-  <span class='kw'>sig2beta</span> <span class='kw'>=</span> <span class='fl'>10000</span>
+  <span class='kw'>sig2beta</span> <span class='kw'>=</span> <span class='fl'>1000</span>
 )
 
 <span class='fu'>glmm_poisson_posterior</span>(
@@ -221,7 +221,7 @@ In addition, these functions can be used as templates to build custom models to 
   <span class='kw'>nrandom</span> <span class='kw'>=</span> <span class='fl'>1</span>,
   <span class='kw'>nuxi</span> <span class='kw'>=</span> <span class='fl'>1</span>,
   <span class='kw'>Axi</span> <span class='kw'>=</span> <span class='fl'>25</span>,
-  <span class='kw'>sig2beta</span> <span class='kw'>=</span> <span class='fl'>10000</span>
+  <span class='kw'>sig2beta</span> <span class='kw'>=</span> <span class='fl'>1000</span>
 )
 
 <span class='fu'>g_glmm_poisson_posterior</span>(
@@ -233,7 +233,7 @@ In addition, these functions can be used as templates to build custom models to 
   <span class='kw'>nrandom</span> <span class='kw'>=</span> <span class='fl'>1</span>,
   <span class='kw'>nuxi</span> <span class='kw'>=</span> <span class='fl'>1</span>,
   <span class='kw'>Axi</span> <span class='kw'>=</span> <span class='fl'>25</span>,
-  <span class='kw'>sig2beta</span> <span class='kw'>=</span> <span class='fl'>10000</span>
+  <span class='kw'>sig2beta</span> <span class='kw'>=</span> <span class='fl'>1000</span>
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -315,22 +315,22 @@ In addition, these functions can be used as templates to build custom models to 
    with priors \(p(\sigma^2) \sim IG(a, b)\) and \(\beta \sim N(0, \sigma_\beta^2 I)\).  The variance term is log transformed \(\gamma = \log\sigma\)
    The input parameter vector \(theta\) is of length \(k\).  The first \(k-1\) parameters are for \(\beta\), and the last parameter is \(\gamma\)
    Note that the Inverse Gamma prior can be problematic for certain applications with low variance, such as hierarchical models.  See Gelman (2006)</p></dd>
-  <dt>`logistic_posterior(theta, y, X, sig2beta=100) `</dt><dd><p>Log posterior for a logistic regression model with Normal prior for the linear parameters.
+  <dt>`logistic_posterior(theta, y, X, sig2beta=1e3) `</dt><dd><p>Log posterior for a logistic regression model with Normal prior for the linear parameters.
    The likelihood function for logistic regression
    $$f(\beta| X, y) = \prod_{i=1}^{n} \left(\frac{1}{1+e^{-X_i\beta}}\right)^{y_i} \left(\frac{e^{-X_i\beta}}{1+e^{-X_i\beta}}\right)^{1-y_i}$$
    with priors \(\beta \sim N(0, \sigma_\beta^2 I)\).
    The input parameter vector \(theta\) is of length \(k\), containing parameter values for \(\beta\)</p></dd>
-  <dt>`g_logistic_posterior(theta, y, X, sig2beta=100) `</dt><dd><p>Gradient of the log posterior for a logistic regression model with Normal prior for the linear parameters.
+  <dt>`g_logistic_posterior(theta, y, X, sig2beta=1e3) `</dt><dd><p>Gradient of the log posterior for a logistic regression model with Normal prior for the linear parameters.
    The likelihood function for logistic regression
    $$f(\beta| X, y) = \prod_{i=1}^{n} \left(\frac{1}{1+e^{-X_i\beta}}\right)^{y_i} \left(\frac{e^{-X_i\beta}}{1+e^{-X_i\beta}}\right)^{1-y_i}$$
    with priors \(\beta \sim N(0, \sigma_\beta^2 I)\).
    The input parameter vector \(theta\) is of length \(k\), containing parameter values for \(\beta\)</p></dd>
-  <dt>`poisson_posterior(theta, y, X, sig2beta=100) `</dt><dd><p>Log posterior for a Poisson regression model with Normal prior for the linear parameters.
+  <dt>`poisson_posterior(theta, y, X, sig2beta=1e3) `</dt><dd><p>Log posterior for a Poisson regression model with Normal prior for the linear parameters.
    The likelihood function for poisson regression
    $$f(\beta| y, X) = \prod_{i=1}^n \frac{e^{-e^{X_i\beta}}e^{y_iX_i\beta}}{y_i!}$$
    with priors \(\beta \sim N(0, \sigma_\beta^2 I)\).
    The input parameter vector \(theta\) is of length \(k\), containing parameter values for \(\beta\)</p></dd>
-  <dt>`g_poisson_posterior(theta, y, X, sig2beta=100) `</dt><dd><p>Gradient of the log posterior for a Poisson regression model with Normal prior for the linear parameters.
+  <dt>`g_poisson_posterior(theta, y, X, sig2beta=1e3) `</dt><dd><p>Gradient of the log posterior for a Poisson regression model with Normal prior for the linear parameters.
    The likelihood function for poisson regression
    $$f(\beta| y, X) = \prod_{i=1}^n \frac{e^{-e^{X_i\beta}}e^{y_iX_i\beta}}{y_i!}$$
    with priors \(\beta \sim N(0, \sigma_\beta^2 I)\).
@@ -355,24 +355,24 @@ In addition, these functions can be used as templates to build custom models to 
    The vector \(\xi\) is the diagonal of the covariance \(G\) log transformed hyperprior where \(u \sim N(0, G\), \(\xi = \log\lambda\) and \(A_\xi, \nu_\xi\) are parameters for the transformed distribution
    The standard deviation of the error is log transformed, where \(\gamma = \log \sigma_\epsilon\) and \(\sigma_\epsilon \sim half-t\). The parameters for \(\gamma\) are \(A_\gamma, \nu_\gamma\)
    The input parameter vector \(theta\) is of length \(k\).  The order of parameters for the vector is \(\beta, \tau, \gamma, \xi\)</p></dd>
-  <dt>`glmm_bin_posterior(theta, y, X, Z, n, nrandom = 1, nuxi = 1, Axi = 25, sig2beta=1e4)`</dt><dd><p>The log posterior function for logistic mixed effects regression
+  <dt>`glmm_bin_posterior(theta, y, X, Z, n, nrandom = 1, nuxi = 1, Axi = 25, sig2beta=1e3)`</dt><dd><p>The log posterior function for logistic mixed effects regression
    $$f(y | X, Z, \beta, u) = \prod_{i=1}^n\prod_{j=1}^d \left(\frac{1}{1 + e^{-X_{i}\beta - Z_{ij}u_i}}\right)^{y_{ij}} \left(\frac{e^{-X_i\beta - Z_{ij}u_i}}{1 + e^{-X_{i}\beta - Z_{ij}u_i}}\right)^{1-y_{ij}} $$
-   with priors \(\beta \sim N(0, BI)\), \(\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)\), \(\lambda \sim half-t(A_\lambda, nu_\lambda )\).
+   with priors \(\beta \sim N(0, \sigma_\beta^2 I)\), \(\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)\), \(\lambda \sim half-t(A_\lambda, nu_\lambda )\).
    The vector \(\lambda\) is the diagonal of the covariance \(G\) hyperprior where \(u \sim N(0, G\), \(\xi = \log\lambda\) and \(A_\xi, \nu_\xi\) are parameters for the transformed distribution
    The input parameter vector \(theta\) is of length \(k\).  The order of parameters for the vector is \(\beta, \tau, \xi\)</p></dd>
-  <dt>`g_glmm_bin_posterior(theta, y, X, Z, n, nrandom = 1, nuxi = 1, Axi = 25, B = 1e4) `</dt><dd><p>Gradient of the log posterior function for logistic mixed effects regression
+  <dt>`g_glmm_bin_posterior(theta, y, X, Z, n, nrandom = 1, nuxi = 1, Axi = 25, sig2beta = 1e3) `</dt><dd><p>Gradient of the log posterior function for logistic mixed effects regression
    $$f(y | X, Z, \beta, u) = \prod_{i=1}^n\prod_{j=1}^m \left(\frac{1}{1 + e^{-X_{i}\beta - Z_{ij}u_i}}\right)^{y_{ij}} \left(\frac{e^{-X_i\beta - Z_{ij}u_i}}{1 + e^{-X_{i}\beta - Z_{ij}u_i}}\right)^{1-y_{ij}} $$
-   with priors \(\beta \sim N(0, BI)\), \(\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)\), \(\lambda \sim half-t(A_\lambda, nu_\lambda )\).
+   with priors \(\beta \sim N(0, \sigma_\beta^2 I)\), \(\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)\), \(\lambda \sim half-t(A_\lambda, nu_\lambda )\).
    The vector \(\lambda\) is the diagonal of the covariance \(G\) hyperprior where \(u \sim N(0, G\), \(\xi = \log\lambda\) and \(A_\xi, \nu_\xi\) are parameters for the transformed distribution
    The input parameter vector \(theta\) is of length \(k\).  The order of parameters for the vector is \(\beta, \tau, \xi\)</p></dd>
-  <dt>`glmm_poisson_posterior(theta, y, X, Z, n, nrandom = 1, nuxi = 1, Axi = 25, sig2beta = 1e4) `</dt><dd><p>Log posterior for a Poisson mixed effect regression
+  <dt>`glmm_poisson_posterior(theta, y, X, Z, n, nrandom = 1, nuxi = 1, Axi = 25, sig2beta = 1e3) `</dt><dd><p>Log posterior for a Poisson mixed effect regression
    $$f(y | X, Z, \beta, u) = \prod_{i=1}^n \prod_{j=1}^m \frac{e^{-e^{X_i\beta + Z_{ij}u_{ij}}}e^{y_i(X_i\beta + Z_{ij}u_{ij})}}{y_i!} $$
-   with priors \(\beta \sim N(0, BI)\), \(\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)\), \(\lambda \sim half-t(A_\lambda, nu_\lambda )\).
+   with priors \(\beta \sim N(0, \sigma_\beta^2 I)\), \(\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)\), \(\lambda \sim half-t(A_\lambda, nu_\lambda )\).
    The vector \(\lambda\) is the diagonal of the covariance \(G\) hyperprior where \(u \sim N(0, G\), \(\xi = \log\lambda\) and \(A_\xi, \nu_\xi\) are parameters for the transformed distribution
    The input parameter vector \(theta\) is of length \(k\).  The order of parameters for the vector is \(\beta, \tau, \xi\)</p></dd>
-  <dt>`g_glmm_poisson_posterior(theta, y, X, Z, n, nrandom = 1, nuxi = 1, Axi = 25, sig2beta = 1e4) `</dt><dd><p>Gradient of the log posterior for a Poisson mixed effect regression
+  <dt>`g_glmm_poisson_posterior(theta, y, X, Z, n, nrandom = 1, nuxi = 1, Axi = 25, sig2beta = 1e3) `</dt><dd><p>Gradient of the log posterior for a Poisson mixed effect regression
    $$f(y | X, Z, \beta, u) = \prod_{i=1}^n \prod_{j=1}^m \frac{e^{-e^{X_i\beta + Z_{ij}u_{ij}}}e^{y_i(X_i\beta + Z_{ij}u_{ij})}}{y_i!} $$
-   with priors \(\beta \sim N(0, BI)\), \(\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)\), \(\lambda \sim half-t(A_\lambda, nu_\lambda )\).
+   with priors \(\beta \sim N(0, \sigma_\beta^2 I)\), \(\sigma_\epsilon \sim half-t(A_\epsilon, nu_\epsilon)\), \(\lambda \sim half-t(A_\lambda, nu_\lambda )\).
    The vector \(\lambda\) is the diagonal of the covariance \(G\) hyperprior where \(u \sim N(0, G\), \(\xi = \log\lambda\) and \(A_\xi, \nu_\xi\) are parameters for the transformed distribution
    The input parameter vector \(theta\) is of length \(k\).  The order of parameters for the vector is \(\beta, \tau, \xi\)</p></dd>
  
