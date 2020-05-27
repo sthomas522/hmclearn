@@ -184,12 +184,18 @@
           <span class='kw'>param</span><span class='kw'>=</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='kw'>y</span><span class='kw'>=</span><span class='no'>y</span>, <span class='kw'>X</span><span class='kw'>=</span><span class='no'>X</span>), <span class='kw'>parallel</span><span class='kw'>=</span><span class='fl'>FALSE</span>, <span class='kw'>chains</span><span class='kw'>=</span><span class='fl'>1</span>)
 
 <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='no'>f1</span>)</div><div class='output co'>#&gt; Summary of MCMC simulation
-#&gt; </div><div class='output co'>#&gt;                      5%        25%        50%        75%        95%
-#&gt; beta0         0.4648189  0.5155872  0.5325537  0.5497568  0.5781873
-#&gt; beta1        -1.0488209 -1.0281105 -1.0118904 -0.9965476 -0.9627243
-#&gt; beta2         1.8882191  1.9997614  2.0164956  2.0314843  2.0521531
-#&gt; beta3        -3.0154147 -2.9970442 -2.9807522 -2.9646554 -2.8305029
-#&gt; log_sigma_sq -3.2522864 -3.1503169 -3.0392322 -2.9052983 -0.4878351</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/stats/coef.html'>coef</a></span>(<span class='no'>f1</span>)</div><div class='output co'>#&gt;        beta0        beta1        beta2        beta3 log_sigma_sq 
+#&gt; </div><div class='output co'>#&gt;                    2.5%         5%        25%        50%        75%        95%
+#&gt; beta0         0.3761942  0.4648189  0.5155872  0.5325537  0.5497568  0.5781873
+#&gt; beta1        -1.0739748 -1.0488209 -1.0281105 -1.0118904 -0.9965476 -0.9627243
+#&gt; beta2         0.9617633  1.8882191  1.9997614  2.0164956  2.0314843  2.0521531
+#&gt; beta3        -3.0255286 -3.0154147 -2.9970442 -2.9807522 -2.9646554 -2.8305029
+#&gt; log_sigma_sq -3.2893269 -3.2522864 -3.1503169 -3.0392322 -2.9052983 -0.4878351
+#&gt;                   97.5%
+#&gt; beta0         0.5854330
+#&gt; beta1        -0.9602134
+#&gt; beta2         2.0591168
+#&gt; beta3        -1.8103326
+#&gt; log_sigma_sq  1.5343091</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/stats/coef.html'>coef</a></span>(<span class='no'>f1</span>)</div><div class='output co'>#&gt;        beta0        beta1        beta2        beta3 log_sigma_sq 
 #&gt;    0.5325537   -1.0118904    2.0164956   -2.9807522   -3.0392322 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

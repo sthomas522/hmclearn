@@ -231,21 +231,29 @@ p(\beta | X, y) &amp;\propto p(y | X, \beta)  p(\beta) \\
                     <span class="kw">param</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="kw">y</span><span class="kw">=</span><span class="no">y</span>, <span class="kw">X</span><span class="kw">=</span><span class="no">X</span>))
 <span class="no">t2.hmc</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span>()
 <span class="no">t2.hmc</span> - <span class="no">t1.hmc</span>
-<span class="co">#&gt; Time difference of 34.68111 secs</span></pre></body></html></div>
+<span class="co">#&gt; Time difference of 36.0408 secs</span></pre></body></html></div>
 <p>The acceptance ratio for each of the HMC chains is sufficiently high for an efficient simulation.</p>
 <div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="no">f_hmc</span>$<span class="no">accept</span>/<span class="no">N</span>
-<span class="co">#&gt; [1] 0.9799 0.9791</span></pre></body></html></div>
+<span class="co">#&gt; [1] 0.9800 0.9807</span></pre></body></html></div>
 <p>The posterior quantiles are summarized after removing an initial <em>burnin</em> period.</p>
 <div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">3000</span>)
 <span class="co">#&gt; Summary of MCMC simulation</span>
-<span class="co">#&gt;                     5%       25%        50%       75%        95%     rhat</span>
-<span class="co">#&gt; (Intercept)  5.5362944  5.595972  5.6368107  5.677592  5.7320512 1.001224</span>
-<span class="co">#&gt; Ayes         0.3550252  0.427391  0.4824341  0.535499  0.6105256 1.001361</span>
-<span class="co">#&gt; Cyes        -2.2082683 -2.019185 -1.9050441 -1.790235 -1.6341574 1.000448</span>
-<span class="co">#&gt; Myes        -6.2157117 -5.614911 -5.3010130 -5.004393 -4.5552092 1.013543</span>
-<span class="co">#&gt; Ayes:Cyes    1.7854307  1.947955  2.0752272  2.196674  2.3916782 1.000284</span>
-<span class="co">#&gt; Ayes:Myes    2.2463162  2.647265  2.9487951  3.279552  3.8199060 1.014767</span>
-<span class="co">#&gt; Cyes:Myes    2.5978555  2.767532  2.8780632  2.978096  3.1508977 0.999933</span></pre></body></html></div>
+<span class="co">#&gt;                  2.5%         5%       25%        50%        75%        95%</span>
+<span class="co">#&gt; (Intercept)  5.517143  5.5352392  5.591148  5.6294860  5.6679155  5.7235608</span>
+<span class="co">#&gt; Ayes         0.347717  0.3698609  0.444599  0.4956013  0.5436632  0.6134141</span>
+<span class="co">#&gt; Cyes        -2.212287 -2.1638713 -2.000836 -1.8901060 -1.7823438 -1.6380102</span>
+<span class="co">#&gt; Myes        -6.530988 -6.3249458 -5.697131 -5.3502122 -5.0294621 -4.6287639</span>
+<span class="co">#&gt; Ayes:Cyes    1.727352  1.7822201  1.939278  2.0529328  2.1725511  2.3436822</span>
+<span class="co">#&gt; Ayes:Myes    2.189968  2.3018803  2.705033  2.9938294  3.3256558  3.9455393</span>
+<span class="co">#&gt; Cyes:Myes    2.527316  2.5804119  2.767318  2.8840206  3.0020232  3.1535602</span>
+<span class="co">#&gt;                  97.5%     rhat</span>
+<span class="co">#&gt; (Intercept)  5.7430715 1.011278</span>
+<span class="co">#&gt; Ayes         0.6370473 1.012191</span>
+<span class="co">#&gt; Cyes        -1.5914049 1.001761</span>
+<span class="co">#&gt; Myes        -4.5162445 1.030878</span>
+<span class="co">#&gt; Ayes:Cyes    2.3983681 1.000747</span>
+<span class="co">#&gt; Ayes:Myes    4.1416252 1.037864</span>
+<span class="co">#&gt; Cyes:Myes    3.1885978 1.000652</span></pre></body></html></div>
 <p>Trace plots provide a visual indication of stationarity. These plots indicate that the MCMC chains are reasonably stationary.</p>
 <div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="fu"><a href="../reference/hmclearn-plots.html">mcmc_trace</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">3000</span>)</pre></body></html></div>
 <p><img src="poisson_regression_hmclearn_files/figure-html/unnamed-chunk-7-1.png" width="576"></p>

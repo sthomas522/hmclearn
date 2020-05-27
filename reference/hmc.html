@@ -296,12 +296,18 @@ Leapfrog algorithm.</p>
           <span class='kw'>param</span><span class='kw'>=</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='kw'>y</span><span class='kw'>=</span><span class='no'>y</span>, <span class='kw'>X</span><span class='kw'>=</span><span class='no'>X</span>), <span class='kw'>parallel</span><span class='kw'>=</span><span class='fl'>FALSE</span>, <span class='kw'>chains</span><span class='kw'>=</span><span class='fl'>1</span>)
 
 <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='no'>fm1_hmc</span>, <span class='kw'>burnin</span><span class='kw'>=</span><span class='fl'>100</span>)</div><div class='output co'>#&gt; Summary of MCMC simulation
-#&gt; </div><div class='output co'>#&gt;                      5%       25%        50%        75%        95%
-#&gt; beta0         0.4847789  0.518149  0.5321988  0.5474873  0.5726653
-#&gt; beta1        -1.0398451 -1.022090 -1.0099795 -0.9969146 -0.9695882
-#&gt; beta2         1.9834760  2.003620  2.0201366  2.0330953  2.0521270
-#&gt; beta3        -3.0146309 -2.996771 -2.9813806 -2.9668917 -2.9442674
-#&gt; log_sigma_sq -3.2522864 -3.150465 -3.0570739 -2.9441514 -2.8255475</div><div class='input'>
+#&gt; </div><div class='output co'>#&gt;                    2.5%         5%       25%        50%        75%        95%
+#&gt; beta0         0.4778379  0.4847789  0.518149  0.5321988  0.5474873  0.5726653
+#&gt; beta1        -1.0435956 -1.0398451 -1.022090 -1.0099795 -0.9969146 -0.9695882
+#&gt; beta2         1.9749648  1.9834760  2.003620  2.0201366  2.0330953  2.0521270
+#&gt; beta3        -3.0212212 -3.0146309 -2.996771 -2.9813806 -2.9668917 -2.9442674
+#&gt; log_sigma_sq -3.2887695 -3.2522864 -3.150465 -3.0570739 -2.9441514 -2.8255475
+#&gt;                   97.5%
+#&gt; beta0         0.5781760
+#&gt; beta1        -0.9622133
+#&gt; beta2         2.0554530
+#&gt; beta3        -2.9308313
+#&gt; log_sigma_sq -2.7737642</div><div class='input'>
 
 <span class='co'># poisson regression example</span>
 <span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span>(<span class='fl'>7363</span>)
@@ -321,10 +327,14 @@ Leapfrog algorithm.</p>
           <span class='kw'>parallel</span><span class='kw'>=</span><span class='fl'>FALSE</span>, <span class='kw'>chains</span><span class='kw'>=</span><span class='fl'>1</span>)
 
 <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='no'>fm2_hmc</span>, <span class='kw'>burnin</span><span class='kw'>=</span><span class='fl'>100</span>)</div><div class='output co'>#&gt; Summary of MCMC simulation
-#&gt; </div><div class='output co'>#&gt;               5%        25%        50%        75%        95%
-#&gt; beta0  0.5581553  0.6644147  0.7756224  0.8917828  1.0520828
-#&gt; beta1 -0.6505318 -0.5738573 -0.5167261 -0.4646123 -0.3867174
-#&gt; beta2  1.0541035  1.1469696  1.2088527  1.2757970  1.3789653</div><div class='input'>
+#&gt; </div><div class='output co'>#&gt;             2.5%         5%        25%        50%        75%        95%
+#&gt; beta0  0.5168403  0.5581553  0.6644147  0.7756224  0.8917828  1.0520828
+#&gt; beta1 -0.6815951 -0.6505318 -0.5738573 -0.5167261 -0.4646123 -0.3867174
+#&gt; beta2  1.0298809  1.0541035  1.1469696  1.2088527  1.2757970  1.3789653
+#&gt;            97.5%
+#&gt; beta0  1.1026491
+#&gt; beta1 -0.3636618
+#&gt; beta2  1.4163911</div><div class='input'>
 
 </div></pre>
   </div>

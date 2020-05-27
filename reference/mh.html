@@ -261,12 +261,18 @@ All parameters specified within the list <code>param</code> are passed to these 
          <span class='kw'>param</span><span class='kw'>=</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='kw'>y</span><span class='kw'>=</span><span class='no'>y</span>, <span class='kw'>X</span><span class='kw'>=</span><span class='no'>X</span>), <span class='kw'>parallel</span><span class='kw'>=</span><span class='fl'>FALSE</span>, <span class='kw'>chains</span><span class='kw'>=</span><span class='fl'>1</span>)
 
 <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='no'>f1_mh</span>, <span class='kw'>burnin</span><span class='kw'>=</span><span class='fl'>1000</span>)</div><div class='output co'>#&gt; Summary of MCMC simulation
-#&gt; </div><div class='output co'>#&gt;                      5%        25%        50%        75%        95%
-#&gt; beta0         0.5002949  0.5233041  0.5355716  0.5491311  0.5749760
-#&gt; beta1        -1.0366202 -1.0210319 -1.0069922 -0.9976423 -0.9784314
-#&gt; beta2         1.9846028  2.0037900  2.0183856  2.0312183  2.0589282
-#&gt; beta3        -3.0182092 -3.0008568 -2.9824039 -2.9648561 -2.9412003
-#&gt; log_sigma_sq -3.2437557 -3.1452192 -3.0795228 -2.9635472 -2.7779556</div><div class='input'>
+#&gt; </div><div class='output co'>#&gt;                    2.5%         5%        25%        50%        75%        95%
+#&gt; beta0         0.4927326  0.5002949  0.5233041  0.5355716  0.5491311  0.5749760
+#&gt; beta1        -1.0427050 -1.0366202 -1.0210319 -1.0069922 -0.9976423 -0.9784314
+#&gt; beta2         1.9825087  1.9846028  2.0037900  2.0183856  2.0312183  2.0589282
+#&gt; beta3        -3.0259491 -3.0182092 -3.0008568 -2.9824039 -2.9648561 -2.9412003
+#&gt; log_sigma_sq -3.2972533 -3.2437557 -3.1452192 -3.0795228 -2.9635472 -2.7779556
+#&gt;                   97.5%
+#&gt; beta0         0.5763848
+#&gt; beta1        -0.9715624
+#&gt; beta2         2.0653425
+#&gt; beta3        -2.9338422
+#&gt; log_sigma_sq -2.7132118</div><div class='input'>
 
 </div></pre>
   </div>

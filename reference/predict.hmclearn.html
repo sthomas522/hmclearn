@@ -209,12 +209,18 @@ This simulated data can be used for posterior predictive check diagnostics from 
           <span class='kw'>param</span><span class='kw'>=</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='kw'>y</span><span class='kw'>=</span><span class='no'>y</span>, <span class='kw'>X</span><span class='kw'>=</span><span class='no'>X</span>), <span class='kw'>parallel</span><span class='kw'>=</span><span class='fl'>FALSE</span>, <span class='kw'>chains</span><span class='kw'>=</span><span class='fl'>1</span>)
 
 <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='no'>f1</span>)</div><div class='output co'>#&gt; Summary of MCMC simulation
-#&gt; </div><div class='output co'>#&gt;                      5%        25%        50%        75%        95%
-#&gt; beta0         0.4648189  0.5155872  0.5325537  0.5497568  0.5781873
-#&gt; beta1        -1.0488209 -1.0281105 -1.0118904 -0.9965476 -0.9627243
-#&gt; beta2         1.8882191  1.9997614  2.0164956  2.0314843  2.0521531
-#&gt; beta3        -3.0154147 -2.9970442 -2.9807522 -2.9646554 -2.8305029
-#&gt; log_sigma_sq -3.2522864 -3.1503169 -3.0392322 -2.9052983 -0.4878351</div><div class='input'>
+#&gt; </div><div class='output co'>#&gt;                    2.5%         5%        25%        50%        75%        95%
+#&gt; beta0         0.3761942  0.4648189  0.5155872  0.5325537  0.5497568  0.5781873
+#&gt; beta1        -1.0739748 -1.0488209 -1.0281105 -1.0118904 -0.9965476 -0.9627243
+#&gt; beta2         0.9617633  1.8882191  1.9997614  2.0164956  2.0314843  2.0521531
+#&gt; beta3        -3.0255286 -3.0154147 -2.9970442 -2.9807522 -2.9646554 -2.8305029
+#&gt; log_sigma_sq -3.2893269 -3.2522864 -3.1503169 -3.0392322 -2.9052983 -0.4878351
+#&gt;                   97.5%
+#&gt; beta0         0.5854330
+#&gt; beta1        -0.9602134
+#&gt; beta2         2.0591168
+#&gt; beta3        -1.8103326
+#&gt; log_sigma_sq  1.5343091</div><div class='input'>
 <span class='no'>p</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/predict.html'>predict</a></span>(<span class='no'>f1</span>, <span class='no'>X</span>)
 <span class='no'>predvals</span> <span class='kw'>&lt;-</span> <span class='no'>p</span>$<span class='no'>y</span>
 <span class='fu'><a href='https://rdrr.io/r/base/plot.html'>plot</a></span>(<span class='no'>predvals</span>, <span class='no'>y</span>, <span class='kw'>xlab</span><span class='kw'>=</span><span class='st'>"predicted"</span>, <span class='kw'>ylab</span><span class='kw'>=</span><span class='st'>"actual"</span>)</div><div class='img'><img src='predict.hmclearn-1.png' alt='' width='700' height='433' /></div><div class='input'>
