@@ -40,7 +40,7 @@ combMatrix <- function(x, burnin) {
 #'           param=list(y=y, X=X), parallel=FALSE, chains=1)
 #'
 #' summary(f1)
-summary.hmclearn <- function(object, burnin=NULL, probs=c(0.05, 0.25, 0.5, 0.75, 0.95), ...) {
+summary.hmclearn <- function(object, burnin=NULL, probs=c(0.025, 0.05, 0.25, 0.5, 0.75, 0.95, 0.975), ...) {
   cat("Summary of MCMC simulation\n\n")
 
   # remove burnin

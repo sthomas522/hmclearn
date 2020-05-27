@@ -4,7 +4,12 @@
 \alias{summary.hmclearn}
 \title{Summarizing HMC Model Fits}
 \usage{
-\method{summary}{hmclearn}(object, burnin = NULL, probs = c(0.05, 0.25, 0.5, 0.75, 0.95), ...)
+\method{summary}{hmclearn}(
+  object,
+  burnin = NULL,
+  probs = c(0.025, 0.05, 0.25, 0.5, 0.75, 0.95, 0.975),
+  ...
+)
 }
 \arguments{
 \item{object}{an object of class \code{hmclearn}, usually a result of a call to \code{mh} or \code{hmc}}

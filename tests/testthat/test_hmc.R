@@ -14,7 +14,7 @@ test_that("hmc testing", {
             varnames = c(paste0("beta", 0:3), "log_sigma_sq"),
             param=list(y=y, X=X), parallel=FALSE, chains=1)
 
-  medparam1 <- as.vector(summary(f1)[, 3])
+  medparam1 <- as.vector(summary(f1)[, 4])
 
   expect_equal(round(medparam1, 8),
                c(0.5325537,
@@ -45,7 +45,7 @@ test_that("hmc testing", {
             param = list(y=y, X=X),
             parallel=FALSE, chains=1)
 
-  medparam2 <- as.vector(summary(f2, burnin=100)[, 3])
+  medparam2 <- as.vector(summary(f2, burnin=100)[, 4])
 
   expect_equal(round(medparam2, 7),
                c(-0.8504805, 0.1892643))
@@ -67,7 +67,7 @@ test_that("hmc testing", {
             param = list(y=y, X=X),
             parallel=FALSE, chains=1)
 
-  medparam3 <- as.vector(summary(f3, burnin=100)[, 3])
+  medparam3 <- as.vector(summary(f3, burnin=100)[, 4])
 
   expect_equal(round(medparam3, 7),
                c(0.7756224, -0.5167261, 1.2088527))
