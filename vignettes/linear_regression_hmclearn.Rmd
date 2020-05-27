@@ -197,7 +197,7 @@ Histograms of the posterior distribution show that Bayesian parameter estimates 
 
 
 ```{r, echo=TRUE, fig.width=6, fig.height=4}
-diagplots(f_hmc, actual.mu=theta.freq, burnin=2000)
+diagplots(f_hmc, comparison.theta=theta.freq, burnin=2000)
 
 
 ```

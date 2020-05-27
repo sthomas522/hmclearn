@@ -8,7 +8,7 @@ diagplots(
   object,
   burnin = NULL,
   plotfun = 2,
-  actual.mu = NULL,
+  comparison.theta = NULL,
   cols = NULL,
   ...
 )
@@ -20,7 +20,7 @@ diagplots(
 
 \item{plotfun}{integer 1 or 2 indicating which plots to display.  1 shows trace plots.  2 shows a histogram}
 
-\item{actual.mu}{optional numeric vector of true parameter values}
+\item{comparison.theta}{optional numeric vector of true parameter values}
 
 \item{cols}{optional integer index indicating which parameters to display}
 
@@ -49,6 +49,6 @@ f <- hmc(N = 1000,
           varnames = c(paste0("beta", 0:3), "log_sigma_sq"),
           param=list(y=y, X=X), parallel=FALSE, chains=1)
 
-diagplots(f, burnin=300, actual.mu=c(betavals, 2*log(.2)))
+diagplots(f, burnin=300, comparison.theta=c(betavals, 2*log(.2)))
 
 }

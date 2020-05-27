@@ -175,7 +175,7 @@ Histograms of the posterior distribution show that Bayesian parameter estimates 
 
 ```{r, echo=TRUE, fig.width=6, fig.height=4}
 beta.freq <- coef(f)
-diagplots(f_hmc, burnin=3000, actual.mu=beta.freq)
+diagplots(f_hmc, burnin=3000, comparison.theta=beta.freq)
 ```
 
 # Source

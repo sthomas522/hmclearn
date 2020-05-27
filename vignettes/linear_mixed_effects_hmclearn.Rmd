@@ -422,7 +422,7 @@ xi.freq <- 1/2*log(VarCorr(fm1)$Subject[1])
 sigeps.freq <- log(sigma(fm1))
 theta.freq <- c(beta.freq, sigeps.freq, xi.freq)
 diagplots(f_hmc, burnin=trunc(N*.3), 
-          actual.mu=theta.freq, cols=c(1:2, 21:22))
+          comparison.theta=theta.freq, cols=c(1:2, 21:22))
 ```
 
 # Source

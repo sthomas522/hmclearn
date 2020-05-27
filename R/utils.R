@@ -36,7 +36,7 @@ create_Uj <- function(uj, neg=TRUE) {
 #' @param object an object of class \code{hmclearn}, usually a result of a call to \code{mh} or \code{hmc}
 #' @param burnin optional numeric parameter for the number of initial MCMC samples to omit from the summary
 #' @param plotfun integer 1 or 2 indicating which plots to display.  1 shows trace plots.  2 shows a histogram
-#' @param actual.mu optional numeric vector of true parameter values
+#' @param comparison.theta optional numeric vector of true parameter values
 #' @param cols optional integer index indicating which parameters to display
 #' @param ... currently unused
 #' @return Returns a customized \code{ggplot} object
@@ -57,9 +57,9 @@ create_Uj <- function(uj, neg=TRUE) {
 #'           varnames = c(paste0("beta", 0:3), "log_sigma_sq"),
 #'           param=list(y=y, X=X), parallel=FALSE, chains=1)
 #'
-#' diagplots(f, burnin=300, actual.mu=c(betavals, 2*log(.2)))
+#' diagplots(f, burnin=300, comparison.theta=c(betavals, 2*log(.2)))
 #'
-diagplots <- function(object, burnin=NULL, plotfun=2, actual.mu=NULL, cols=NULL, ...) {
+diagplots <- function(object, burnin=NULL, plotfun=2, comparison.theta=NULL, cols=NULL, ...) {
   UseMethod("diagplots")
 }
 
@@ -71,7 +71,7 @@ diagplots <- function(object, burnin=NULL, plotfun=2, actual.mu=NULL, cols=NULL,
 #' @param object an object of class \code{hmclearn}, usually a result of a call to \code{mh} or \code{hmc}
 #' @param burnin optional numeric parameter for the number of initial MCMC samples to omit from the summary
 #' @param plotfun integer 1 or 2 indicating which plots to display.  1 shows trace plots.  2 shows a histogram
-#' @param actual.mu optional numeric vector of true parameter values
+#' @param comparison.theta optional numeric vector of parameter values to compare to the Bayesian estimates
 #' @param cols optional integer index indicating which parameters to display
 #' @param ... currently unused
 #' @return Returns a customized \code{ggplot} object
@@ -92,9 +92,9 @@ diagplots <- function(object, burnin=NULL, plotfun=2, actual.mu=NULL, cols=NULL,
 #'           varnames = c(paste0("beta", 0:3), "log_sigma_sq"),
 #'           param=list(y=y, X=X), parallel=FALSE, chains=1)
 #'
-#' diagplots(f, burnin=300, actual.mu=c(betavals, 2*log(.2)))
+#' diagplots(f, burnin=300, comparison.theta=c(betavals, 2*log(.2)))
 #'
-diagplots.hmclearn <- function(object, burnin=NULL, plotfun=2, actual.mu=NULL, cols=NULL, ...) {
+diagplots.hmclearn <- function(object, burnin=NULL, plotfun=2, comparison.theta=NULL, cols=NULL, ...) {
 
   data <- combMatrix(object$thetaCombined, burnin=burnin)
   data <- do.call(rbind, data)
@@ -120,7 +120,7 @@ diagplots.hmclearn <- function(object, burnin=NULL, plotfun=2, actual.mu=NULL, c
                    timevar = "coefficient",
                    times = colnames(pdata)[-ncol(pdata)],
                    direction = "long")
-  pdata$true.mu <- rep(actual.mu, each=nrow(thetaCombinedsubs))
+  pdata$true.mu <- rep(comparison.theta, each=nrow(thetaCombinedsubs))
   pdata$coefficient <- as.factor(pdata$coefficient)
 
   k <- ncol(data)
@@ -143,7 +143,7 @@ diagplots.hmclearn <- function(object, burnin=NULL, plotfun=2, actual.mu=NULL, c
                                               colour="coefficient")) +
       ggplot2::geom_histogram(bins=40)
 
-    if (!is.null(actual.mu)) {
+    if (!is.null(comparison.theta)) {
       p2 <- p2 + ggplot2::geom_vline(data=aggregate(pdata[4], pdata[2], mean),
                                      mapping=ggplot2::aes_string(xintercept = "true.mu"), colour="red")
     }
