@@ -254,11 +254,9 @@ logistic_posterior <- function(theta, y, X, sig2beta=1e3) {
 g_logistic_posterior <- function(theta, y, X, sig2beta=1e3) {
   n <- length(y)
   k <- length(theta)
-  beta <- as.numeric(theta)
+  beta_param <- as.numeric(theta)
 
-  inv.nu <- diag(1/sig2beta, k, k)
-
-  result <- t(X) %*% ( y - 1  + exp(-X %*% theta) / (1 + exp(-X %*% theta))) - inv.nu %*% theta
+  result <- t(X) %*% ( y - 1  + exp(-X %*% beta_param) / (1 + exp(-X %*% beta_param))) - beta_param/sig2beta
 
   return(result)
 }
