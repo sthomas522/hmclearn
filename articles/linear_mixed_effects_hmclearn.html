@@ -454,7 +454,7 @@ L D^{1/2}\tau = D^{1/2} \tau + \widetilde{T} a
                <span class="kw">parallel</span><span class="kw">=</span><span class="fl">FALSE</span>, <span class="kw">chains</span><span class="kw">=</span><span class="fl">2</span>)
 <span class="no">t2.hmc</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span>()
 <span class="no">t2.hmc</span> - <span class="no">t1.hmc</span>
-<span class="co">#&gt; Time difference of 1.221721 mins</span></pre></body></html></div>
+<span class="co">#&gt; Time difference of 1.245329 mins</span></pre></body></html></div>
 <p>The acceptance ratio for each of the HMC chains is sufficiently high for an efficient simulation.</p>
 <div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="no">f_hmc</span>$<span class="no">accept</span>/<span class="no">N</span>
 <span class="co">#&gt; [1] 0.814 0.805</span></pre></body></html></div>
@@ -516,7 +516,7 @@ L D^{1/2}\tau = D^{1/2} \tau + \widetilde{T} a
 <span class="no">sigeps.freq</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">log</a></span>(<span class="fu"><a href="https://rdrr.io/pkg/lme4/man/sigma.html">sigma</a></span>(<span class="no">fm1</span>))
 <span class="no">theta.freq</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="no">beta.freq</span>, <span class="no">sigeps.freq</span>, <span class="no">xi.freq</span>)
 <span class="fu"><a href="../reference/diagplots.html">diagplots</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html">trunc</a></span>(<span class="no">N</span>*<span class="fl">.3</span>),
-          <span class="kw">actual.mu</span><span class="kw">=</span><span class="no">theta.freq</span>, <span class="kw">cols</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">1</span>:<span class="fl">2</span>, <span class="fl">21</span>:<span class="fl">22</span>))
+          <span class="kw">comparison.theta</span><span class="kw">=</span><span class="no">theta.freq</span>, <span class="kw">cols</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">1</span>:<span class="fl">2</span>, <span class="fl">21</span>:<span class="fl">22</span>))
 <span class="co">#&gt; $histogram</span></pre></body></html></div>
 <p><img src="linear_mixed_effects_hmclearn_files/figure-html/unnamed-chunk-8-1.png" width="576"></p>
 </div>
