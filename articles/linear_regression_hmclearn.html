@@ -90,7 +90,7 @@
       <h1 data-toc-skip>hmclearn package: Linear Regression Example</h1>
                         <h4 class="author">Samuel Thomas</h4>
             
-            <h4 class="date">2020-05-27</h4>
+            <h4 class="date">2020-05-29</h4>
       
       
       <div class="hidden name"><code>linear_regression_hmclearn.Rmd</code></div>
@@ -105,8 +105,8 @@
 <p>This vignette demonstrates fitting a linear regression model via Hamiltonian Monte Carlo (HMC) using the <strong>hmclearn</strong> package.</p>
 <p><span class="math display">\[
 \begin{aligned}
-y &amp;= X\beta + \epsilon \\
-\epsilon &amp;\sim N(0, \sigma^2)
+\mathbf{y} &amp;= \mathbf{X}\boldsymbol\beta + \boldsymbol\epsilon \\
+\boldsymbol\epsilon &amp;\sim N(0, \sigma_\epsilon^2)
 \end{aligned}
 \]</span></p>
 </div>
@@ -136,7 +136,7 @@ y &amp;= X\beta + \epsilon \\
 <div id="frequentist-linear-model" class="section level1">
 <h1 class="hasAnchor">
 <a href="#frequentist-linear-model" class="anchor"></a>Frequentist linear model</h1>
-<p>To compare results, we first fit a standard linear model using the frequentist function <em>lm</em>.</p>
+<p>To compare results, we first fit a standard linear model using the frequentist function <em>lm</em>. This formula for the linear model omits the automatic inclusion of the intercept. We code the formula in this way since our design matrix already includes the intercept.</p>
 <div class="sourceCode" id="cb3"><html><body><pre class="r"><span class="no">f</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span>(<span class="no">y</span> ~ <span class="no">X</span>-<span class="fl">1</span>)
 <span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">f</span>)
 <span class="co">#&gt; </span>
@@ -171,63 +171,63 @@ y &amp;= X\beta + \epsilon \\
 <div id="log-posterior-and-gradient" class="section level2">
 <h2 class="hasAnchor">
 <a href="#log-posterior-and-gradient" class="anchor"></a>Log posterior and gradient</h2>
-<p>First, we specify the likelihood function for linear regression</p>
+<p>The vector of responses is <span class="math inline">\(\mathbf{y} = (y_1, ..., y_n)^T\)</span>. The covariate values for the th subject are <span class="math inline">\(\mathbf{x}_i^T = (x_{i0}, ..., x_{iq})\)</span> for <span class="math inline">\(q\)</span> covariates plus an intercept. We write the full design matrix as <span class="math inline">\(\mathbf{X} = (\mathbf{x}_1^T, ..., \mathbf{x}_n^T)^T \in \mathbb{R}^{n\times(q+1)}\)</span> for <span class="math inline">\(n\)</span> observations. The regression coefficients are a vector of length <span class="math inline">\(q + 1\)</span>, <span class="math inline">\(\boldsymbol\beta = (\beta_0, ..., \beta_q)^T\)</span>. The error term for each subject is <span class="math inline">\(\epsilon_i\)</span>. All error terms <span class="math inline">\(\boldsymbol\epsilon = (\epsilon_1, ..., \epsilon_n)^T\)</span> are assumed to be independent and normally distributed with mean zero and constant variance <span class="math inline">\(\sigma_\epsilon^2\)</span>.</p>
+<p>We specify the likelihood function for linear regression</p>
 <p><span class="math display">\[
-p(y | X, \beta; \sigma^2) = \frac{1}{(2\pi\sigma^2)^{n/2}}\exp{\left(-\frac{1}{2\sigma^2} (y - X\beta)^T(y-X\beta) \right)}
+f(\mathbf{y} | X, \boldsymbol\beta, \sigma_\epsilon^2) = \frac{1}{(2\pi\sigma_\epsilon^2)^{n/2}}\exp{\left(-\frac{1}{2\sigma_\epsilon^2} (\mathbf{y} - \mathbf{X}\boldsymbol\beta)^T(\mathbf{y}-\mathbf{X}\boldsymbol\beta) \right)}.
 \]</span></p>
-<p>The posterior is defined with priors for <span class="math inline">\(\beta\)</span> and <span class="math inline">\(\sigma^2\)</span>.</p>
+<p>The posterior is defined with priors for <span class="math inline">\(\boldsymbol\beta\)</span> and <span class="math inline">\(\sigma_\epsilon^2\)</span>, such that</p>
 <p><span class="math display">\[
 \begin{aligned}
-p(\beta, \sigma^2|y; X) &amp;\propto p(y|X, \beta, \sigma^2) p(\beta, \sigma^2) \\
-&amp;\propto p(y|X, \beta, \sigma^2)p(\beta)p(\sigma^2)
+f(\boldsymbol\beta, \sigma_\epsilon^2| \mathbf{y}, \mathbf{X}) &amp;\propto f(\mathbf{y} |\mathbf{X}, \boldsymbol\beta, \sigma_\epsilon^2) \pi(\boldsymbol\beta, \sigma_\epsilon^2), \\
+&amp;\propto f(\mathbf{y} | \mathbf{X}, \boldsymbol\beta, \sigma_\epsilon^2) \pi(\boldsymbol\beta) \pi(\sigma_\epsilon^2).
 \end{aligned}
 \]</span></p>
-<p>We specify a multivariate Normal prior for <span class="math inline">\(\beta\)</span> and Inverse Gamma for <span class="math inline">\(\sigma^2\)</span>. Note that Inverse Gamma can be problematic in certain models where the variance is low (Gelman 2006).</p>
+<p>We specify a multivariate normal prior for <span class="math inline">\(\boldsymbol\beta\)</span> and Inverse Gamma for <span class="math inline">\(\sigma_\epsilon^2\)</span>. Note that Inverse Gamma can be problematic in certain models where the variance is low (Gelman 2006). The prior distributions in this example are</p>
 <p><span class="math display">\[
 \begin{aligned}
-p(\beta) &amp;\propto N(0, BI) \\
-p(\sigma^2) &amp;\sim IG(a, b)
+\pi(\boldsymbol\beta) &amp;\propto N(0, \sigma_\beta^2 \mathbf{I}), \\
+\pi(\sigma_\epsilon^2) &amp;\sim IG(a, b).
 \end{aligned}
 \]</span></p>
-<p>The pdf for <span class="math inline">\(\sigma^2\)</span> prior</p>
+<p>The pdf for <span class="math inline">\(\sigma_\epsilon^2\)</span> prior is</p>
 <p><span class="math display">\[
-p(\sigma^2) = \frac{b^a}{\Gamma(a)} (\sigma^2)^{-a-1} \exp\left(-\frac{b}{\sigma^2} \right)
+f(\sigma_\epsilon^2) = \frac{b^a}{\Gamma(a)} (\sigma^2)^{-a-1} \exp\left(-\frac{b}{\sigma^2} \right).
 \]</span></p>
-<p>We perform a log-transformation of <span class="math inline">\(\sigma^2\)</span> to allow proposals across entire real number line. For unconstrained HMC simulations, all parameters must support all real numbers.</p>
+<p>We perform a log-transformation of <span class="math inline">\(\sigma^2\)</span> to allow proposals across entire real number line. For unconstrained HMC simulations, all parameters must support all real numbers. We provide details for the transformation of variable,</p>
 <p><span class="math display">\[
 \begin{aligned}
-\gamma &amp;= \log \sigma^2 \\
-\sigma^2 &amp;= g^{-1}(\gamma) = e^\gamma \\
-p_\gamma(\gamma) &amp;= p_{\sigma^2}(g^{-1}(\gamma))\left\lvert \frac{d\sigma^2}{d\gamma} \right\rvert \\
-&amp;= \frac{b^a}{\Gamma(a)}(e^\gamma)^{-a-1} \exp\left(-\frac{b}{\sigma^2} \right) \left\lvert e^\gamma  \right\rvert \\
+\gamma &amp;= \log \sigma_\epsilon^2, \\
+\sigma_\epsilon^2 &amp;= g^{-1}(\gamma) = e^\gamma, \\
+\pi_\gamma(\gamma) &amp;= p_{\sigma_\epsilon^2}(g^{-1}(\gamma))\left\lvert \frac{d\sigma_\epsilon^2}{d\gamma} \right\rvert, \\
+&amp;= \frac{b^a}{\Gamma(a)}(e^\gamma)^{-a-1} \exp\left(-\frac{b}{\sigma^2} \right) \left\lvert e^\gamma  \right\rvert, \\
 &amp;= \frac{b^a}{\Gamma(a)}e^{-a\gamma}\exp\left(-\frac{b}{e^\gamma} \right) \\
 &amp;\propto e^{-a\gamma}\exp\left(-\frac{b}{e
-^\gamma} \right) \\
-\log p(\gamma) &amp;\propto -a\gamma - be^{-\gamma}
+^\gamma} \right), \\
+\log \pi(\gamma) &amp;\propto -a\gamma - be^{-\gamma}.
 \end{aligned}
 \]</span></p>
 <p>The posterior and log posterior for linear regression, based on <span class="math inline">\(\beta\)</span> and <span class="math inline">\(\gamma\)</span>, can now be derived.</p>
 <p><span class="math display">\[
 \begin{aligned}
-p(\beta, \gamma|y, X) &amp;\propto p(y|X, \beta, \gamma) p(\beta, \gamma) \\
-&amp;\propto p(y|X, \beta, \gamma)p(\beta)p(\gamma) \\
-&amp;\propto \frac{1}{(2\pi e^\gamma)^{n/2}}\exp{\left(-\frac{1}{2 e^\gamma} (y - X\beta)^T(y-X\beta) \right)} e^{-a\gamma}\exp\left(-\frac{b}{e^\gamma} \right) \\
-&amp;\propto \frac{e^{-\gamma n/2}}{(2\pi)^{n/2}}\exp{\left(-\frac{e^{-\gamma}}{2} (y - X\beta)^T(y-X\beta) \right)} e^{-\frac{1}{2}\beta^T\Sigma_\beta^{-1}\beta} e^{-a\gamma} e^{-b e^{-\gamma}} \\
-\log p(\beta, \gamma | y, X) &amp;\propto -\frac{\gamma n}{2} -\frac{e^{-\gamma}}{2} (y - X\beta)^T(y-X\beta) - a\gamma - b e^{-\gamma}  \\
-&amp;\propto -\left(\frac{n}{2} + a \right)\gamma  -\frac{e^{-\gamma}}{2} (y - X\beta)^T(y-X\beta)- b e^{-\gamma} - \frac{1}{2}\beta^T \Sigma_\beta^{-1}\beta
+f(\boldsymbol\beta, \gamma| \mathbf{y}, \mathbf{X}) &amp;\propto f(\mathbf{y} | \mathbf{X}, \boldsymbol\beta, \gamma) \pi(\boldsymbol\beta, \gamma) \\
+&amp;\propto f(\mathbf{y}| \mathbf{X}, \boldsymbol\beta, \gamma) \pi(\boldsymbol\beta) \pi(\gamma) \\
+&amp;\propto \frac{e^{-\gamma n/2}}{(2\pi)^{n/2}}\exp{\left(-\frac{e^{-\gamma}}{2} (\mathbf{y} - \mathbf{X}\boldsymbol\beta)^T(\mathbf{y}-\mathbf{X}\boldsymbol\beta) \right)} e^{-\frac{1}{2}\boldsymbol\beta^T\boldsymbol\beta / \sigma_\beta^2} e^{-a\gamma} e^{-b e^{-\gamma}} \\
+\log p(\boldsymbol\beta, \gamma | \mathbf{y}, \mathbf{X}) &amp;\propto -\frac{\gamma n}{2} -\frac{e^{-\gamma}}{2} (\mathbf{y} - \mathbf{X}\boldsymbol\beta)^T(\mathbf{y}-\mathbf{X}\boldsymbol\beta) - a\gamma - b e^{-\gamma}- \frac{\boldsymbol\beta^T \boldsymbol\beta}{2\sigma_\beta^2}  \\
+&amp;\propto -\left(\frac{n}{2} + a \right)\gamma  -\frac{e^{-\gamma}}{2} (\mathbf{y} - \mathbf{X}\boldsymbol\beta)^T(\mathbf{y}-\mathbf{X}\boldsymbol\beta)- b e^{-\gamma} - \frac{\boldsymbol\beta^T \boldsymbol\beta}{2\sigma_\beta^2}
 \end{aligned}
 \]</span></p>
 <p>Next, we derive the gradient of the log posterior</p>
 <p><span class="math display">\[
 \begin{aligned}
-\log p(\beta, \gamma | y, X) &amp;\propto -\frac{\gamma n}{2} -\frac{e^{-\gamma}}{2} (y - X\beta)^T(y-X\beta) - a\gamma - b e^{-\gamma}  \\
-&amp;\propto -\left(\frac{n}{2} + a \right)\gamma  -\frac{e^{-\gamma}}{2} (y - X\beta)^T(y-X\beta)- b e^{-\gamma} \\
-\frac{\partial}{\partial \beta} \log p(\beta, \gamma | y, X) &amp;\propto -\frac{e^{-\gamma}}{2}(-2)X^T(y-X\beta) - \Sigma_\beta^{-1}\beta\\
-&amp;\propto e^{-\gamma} X^T(y-X\beta) \\
+\log f(\boldsymbol\beta, \gamma | \mathbf{y}, \mathbf{X}) &amp;\propto -\frac{\gamma n}{2} -\frac{e^{-\gamma}}{2} (\mathbf{y} - \mathbf{X}\boldsymbol\beta)^T(\mathbf{y}-\mathbf{X}\boldsymbol\beta) - a\gamma - b e^{-\gamma} - \frac{\boldsymbol\beta^T \boldsymbol\beta}{2\sigma_\beta^2} \\
+&amp;\propto -\left(\frac{n}{2} + a \right)\gamma  -\frac{e^{-\gamma}}{2} (y - X\beta)^T(y-X\beta)- b e^{-\gamma}- \frac{\boldsymbol\beta^T \boldsymbol\beta}{2\sigma_\beta^2} \\
+\frac{\partial}{\partial \beta} \log f(\boldsymbol\beta, \gamma | \mathbf{y}, \mathbf{X}) &amp;\propto -\frac{e^{-\gamma}}{2}(-2)\mathbf{X}^T(\mathbf{y}-\mathbf{X}\boldsymbol\beta) - \boldsymbol\beta/\sigma_\beta^2\\
+&amp;\propto e^{-\gamma} \mathbf{X}^T(\mathbf{y}-\mathbf{X}\boldsymbol\beta) - \boldsymbol\beta/\sigma_\beta^2\\
 \frac{\partial}{\partial\gamma}\log p(\beta, \gamma | y, X) &amp;\propto -\left(\frac{n}{2} + a \right) + \frac{e^{-\gamma}}{2} (y - X\beta)^T(y-X\beta)+ b e^{-\gamma}
 \end{aligned}
 \]</span></p>
-<p>The functions for the log posterior and its gradient are coded in the <em>linear_posterior</em> and <em>g_linear_posterior</em> functions, respectively, in <strong>hmclearn</strong>.</p>
+<p>The functions for the log posterior and its gradient are coded in the <em>linear_posterior</em> and <em>g_linear_posterior</em> functions, respectively, in <strong>hmclearn</strong>. We use the default hyperparameters in these functions for <span class="math inline">\(\sigma_\beta^2\)</span>, <span class="math inline">\(a\)</span>, and <span class="math inline">\(b\)</span>.</p>
 </div>
 </div>
 <div id="fit-model-using-hmc" class="section level1">
@@ -249,29 +249,29 @@ p(\beta, \gamma|y, X) &amp;\propto p(y|X, \beta, \gamma) p(\beta, \gamma) \\
                     <span class="kw">parallel</span><span class="kw">=</span><span class="fl">TRUE</span>, <span class="kw">chains</span><span class="kw">=</span><span class="fl">2</span>)
 <span class="no">t2.hmc</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span>()
 <span class="no">t2.hmc</span> - <span class="no">t1.hmc</span>
-<span class="co">#&gt; Time difference of 23.87742 secs</span></pre></body></html></div>
-<p>The acceptance ratio for each of the HMC chains is sufficiently high for an efficient simulation.</p>
+<span class="co">#&gt; Time difference of 20.7511 secs</span></pre></body></html></div>
+<p>The acceptance rate for each of the HMC chains is high for this simple example. More complex applications will often need lower acceptance rates (e.g. between 0.6 and 0.9) for optimal computational efficiency, particularly without an automated tuning algorithm such as NUTS (Hoffman, Gelman 2014).</p>
 <div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="no">f_hmc</span>$<span class="no">accept</span>/<span class="no">N</span>
-<span class="co">#&gt; [1] 0.9755 0.9765</span></pre></body></html></div>
-<p>The posterior quantiles are summarized after removing an initial <em>burnin</em> period.</p>
+<span class="co">#&gt; [1] 0.9748 0.9722</span></pre></body></html></div>
+<p>The posterior quantiles are summarized after removing an initial <em>burnin</em> period. The <span class="math inline">\(\hat{R}\)</span> statistics are close to one, indicating that both HMC chains converged to the same distribution.</p>
 <div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">2000</span>)
 <span class="co">#&gt; Summary of MCMC simulation</span>
 <span class="co">#&gt;                         2.5%            5%           25%           50%</span>
-<span class="co">#&gt; intercept      -4.5309575801 -1.8326216009  4.8778612860  9.3690693301</span>
-<span class="co">#&gt; dist            2.6590127383  2.8975185355  3.6251187403  4.1571777111</span>
-<span class="co">#&gt; climb          -0.0089689283 -0.0076488217 -0.0036936932 -0.0010464658</span>
-<span class="co">#&gt; climb_distance  0.0003719925  0.0004816396  0.0007856349  0.0009839803</span>
-<span class="co">#&gt; log_sigma2      4.6709209212  4.7524260365  4.9740125434  5.1353558143</span>
+<span class="co">#&gt; intercept      -4.2125378334 -2.3780382775  4.7203577241  9.4110573987</span>
+<span class="co">#&gt; dist            2.4487871793  2.7341015340  3.5856032315  4.1317888696</span>
+<span class="co">#&gt; climb          -0.0091141070 -0.0075707178 -0.0035854303 -0.0008520792</span>
+<span class="co">#&gt; climb_distance  0.0003713274  0.0004572194  0.0007739585  0.0009791905</span>
+<span class="co">#&gt; log_sigma2      4.6758481926  4.7501077845  4.9682620008  5.1402840990</span>
 <span class="co">#&gt;                         75%          95%        97.5%     rhat</span>
-<span class="co">#&gt; intercept      13.793846489 19.498571064 21.467137880 1.001405</span>
-<span class="co">#&gt; dist            4.723065541  5.569639822  5.853741200 1.000896</span>
-<span class="co">#&gt; climb           0.001663065  0.005827198  0.007396360 1.000691</span>
-<span class="co">#&gt; climb_distance  0.001178317  0.001455846  0.001539812 1.000782</span>
-<span class="co">#&gt; log_sigma2      5.318007239  5.585590307  5.651474834 1.003115</span></pre></body></html></div>
+<span class="co">#&gt; intercept      14.037039116 20.466711900 23.129894016 1.016535</span>
+<span class="co">#&gt; dist            4.681399649  5.481264351  5.756742745 1.021841</span>
+<span class="co">#&gt; climb           0.001962078  0.006331843  0.007789790 1.014061</span>
+<span class="co">#&gt; climb_distance  0.001178505  0.001485873  0.001612705 1.023370</span>
+<span class="co">#&gt; log_sigma2      5.320246959  5.581202091  5.667164575 1.000388</span></pre></body></html></div>
 <p>Trace plots provide a visual indication of stationarity. These plots indicate that the MCMC chains are reasonably stationary.</p>
 <div class="sourceCode" id="cb8"><html><body><pre class="r"><span class="fu"><a href="../reference/hmclearn-plots.html">mcmc_trace</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">2000</span>)</pre></body></html></div>
 <p><img src="linear_regression_hmclearn_files/figure-html/unnamed-chunk-8-1.png" width="576"></p>
-<p>Histograms of the posterior distribution show that Bayesian parameter estimates align with Frequentist estimates for this example.</p>
+<p>Histograms of the posterior distribution show that Bayesian parameter estimates align with frequentist estimates for this example.</p>
 <div class="sourceCode" id="cb9"><html><body><pre class="r"><span class="fu"><a href="../reference/diagplots.html">diagplots</a></span>(<span class="no">f_hmc</span>, <span class="kw">comparison.theta</span><span class="kw">=</span><span class="no">theta.freq</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">2000</span>)
 <span class="co">#&gt; $histogram</span></pre></body></html></div>
 <p><img src="linear_regression_hmclearn_files/figure-html/unnamed-chunk-9-1.png" width="576"></p>
@@ -287,6 +287,7 @@ p(\beta, \gamma|y, X) &amp;\propto p(y|X, \beta, \gamma) p(\beta, \gamma) \\
 <p>Venables, W. N. and Ripley, B. D. (2002) <em>Modern Applied Statistics with S</em>. Fourth edition. Springer. ISBN 0-387-95457-0</p>
 <p>Gelman, Andrew. (2006) “Prior distributions for variance parameters in hierarchical models (comment on article by Browne and Draper).” <em>Bayesian analysis</em> 1.3: 515-534.</p>
 <p>Agresti, A. (2015). <em>Foundations of linear and generalized linear models</em>. John Wiley &amp; Sons. ISBN: 978-1-118-73003-4</p>
+<p>Hoffman, M. D., &amp; Gelman, A. (2014). The No-U-Turn sampler: adaptively setting path lengths in Hamiltonian Monte Carlo. <em>Journal of Machine Learning Research</em>, 15(1), 1593-1623.</p>
 </div>
   </div>
 
