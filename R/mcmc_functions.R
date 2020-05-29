@@ -769,7 +769,8 @@ hmc <- function(N=10000, theta.init, epsilon=1e-2, L=10, logPOSTERIOR, glogPOSTE
                      Mdiag=Mdiag,
                      constrain=constrain,
                      verbose=verbose,
-                     varnames=varnames),
+                     varnames=varnames,
+                     ... = ...),
                 param)
 
   if (parallel) {

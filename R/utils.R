@@ -1,4 +1,7 @@
 
+# get pre-stored logistic regression MCMCpack data
+
+
 #' @importFrom stats aggregate
 #' @importFrom stats quantile
 #' @importFrom stats rbinom

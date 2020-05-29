@@ -27,7 +27,8 @@ Suggests:
     mlbench,
     ggplot2,
     mlmRev,
-    testthat (>= 2.1.0)
+    testthat (>= 2.1.0),
+    MCMCpack
 RoxygenNote: 7.1.0
 Imports: 
     bayesplot,

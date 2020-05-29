@@ -6,22 +6,11 @@ pfun_logistic <- function(PARAM, ...) {
   logistic_posterior(theta=theta, ...)
 }
 
-log_lik_bin <- function(beta_param, y, X) {
-  result <- X %*% beta_param * (y - 1) - log(1 + exp(-X %*% beta_param))
-  sum(result)
-}
-
 # proposal function in form expected by mh
 pfun_poisson <- function(PARAM, ...) {
   d <- length(PARAM)
   theta <- PARAM
   poisson_posterior(theta=theta, ...)
-}
-
-# loglikelihood poisson regression
-# note that factorial omitted
-log_lik_poisson <- function(beta_param, y, X) {
-  y %*% X %*% beta_param - sum(exp( X %*% beta_param)) # - sum(lfactorial(y))
 }
 
 # proposal function in form expected by mh
@@ -211,11 +200,9 @@ linear_posterior <- function(theta, y, X, a=1e-4, b=1e-4, sig2beta=1e3) {
   beta_param <- as.numeric(theta[1:(k-1)])
   gamma_param <- theta[k]
 
-  inv.nu <- diag(1/sig2beta, k-1, k-1)
-
   n <- nrow(X)
   result <- -(n/2+a)*gamma_param - exp(-gamma_param)/2 * t(y - X%*%beta_param) %*%
-    (y - X%*%beta_param) - b*exp(-gamma_param) - 1/2* t(beta_param) %*% inv.nu %*% beta_param
+    (y - X%*%beta_param) - b*exp(-gamma_param) - 1/2* t(beta_param) %*% beta_param / sig2beta
   return(result)
 }
 
@@ -227,9 +214,7 @@ g_linear_posterior <- function(theta, y, X, a=1e-4, b=1e-4, sig2beta=1e3) {
   gamma_param <- theta[k]
   n <- nrow(X)
 
-  inv.nu <- diag(1/sig2beta, k-1, k-1)
-
-  grad_beta <- exp(-gamma_param)  * t(X) %*% (y - X%*%beta_param)  - (inv.nu %*% beta_param)
+  grad_beta <- exp(-gamma_param)  * t(X) %*% (y - X%*%beta_param)  - beta_param / sig2beta
   grad_gamma <- -(n/2 + a) + exp(-gamma_param)/2 * t(y - X%*%beta_param) %*%
     (y - X%*%beta_param) + b*exp(-gamma_param)
   c(as.numeric(grad_beta), as.numeric(grad_gamma))
@@ -240,11 +225,12 @@ g_linear_posterior <- function(theta, y, X, a=1e-4, b=1e-4, sig2beta=1e3) {
 logistic_posterior <- function(theta, y, X, sig2beta=1e3) {
   k <- length(theta)
   beta_param <- as.numeric(theta)
+  onev <- rep(1, length(y))
 
-  inv.nu <- diag(1/sig2beta, k, k)
+  ll_bin <- t(beta_param) %*% t(X) %*% (y - 1) -
+    t(onev) %*% log(1 + exp(-X %*% beta_param))
 
-  result <- log_lik_bin(beta_param=beta_param, y=y, X=X) +
-    - 1/2* t(beta_param) %*% inv.nu %*% beta_param
+  result <- ll_bin - 1/2* t(beta_param) %*% beta_param / sig2beta
 
   return(result)
 }
@@ -256,7 +242,8 @@ g_logistic_posterior <- function(theta, y, X, sig2beta=1e3) {
   k <- length(theta)
   beta_param <- as.numeric(theta)
 
-  result <- t(X) %*% ( y - 1  + exp(-X %*% beta_param) / (1 + exp(-X %*% beta_param))) - beta_param/sig2beta
+  result <- t(X) %*% ( y - 1  + exp(-X %*% beta_param) /
+                         (1 + exp(-X %*% beta_param))) -beta_param/sig2beta
 
   return(result)
 }
@@ -266,11 +253,11 @@ g_logistic_posterior <- function(theta, y, X, sig2beta=1e3) {
 poisson_posterior <- function(theta, y, X, sig2beta=1e3) {
   k <- length(theta)
   beta_param <- theta
+  onev <- rep(1, length(y))
 
-  inv.nu <- diag(1/sig2beta, k, k)
+  ll_pois <- y %*% X %*% beta_param - onev %*% exp( X %*% beta_param)
 
-  result <- log_lik_poisson(beta_param=beta_param, y=y, X=X) -
-    - 1/2* t(beta_param) %*% inv.nu %*% beta_param
+  result <- ll_pois - 1/2* t(beta_param) %*% beta_param / sig2beta
 
   return(result)
 }
@@ -281,12 +268,7 @@ g_poisson_posterior <- function(theta, y, X, sig2beta=1e3) {
   n <- length(y)
   k <- length(theta)
 
-  inv.nu <- diag(1/sig2beta, k, k)
-
-  #y %*% X - crossprod(exp(X %*% theta), X) - crossprod(theta, inv.nu)
-  crossprod(y - exp(X %*% theta), X) - crossprod(theta, inv.nu)
-  # t(y - exp(X %*% theta)) %*% X - t(theta) %*% inv.nu
-  # t(X) %*% (y - exp(X %*% theta)) - inv.nu %*% theta
+  t(X) %*% (y - exp(X %*% theta)) - theta / sig2beta
 }
 
 #' @rdname hmclearn-glm-posterior
@@ -320,7 +302,8 @@ lmm_posterior <- function(theta, y, X, Z, n, d, nrandom=1,
   log_gamma_prior <- -(nugamma + 1)/2 * log(1 + 1/nugamma*exp(2*gamma_param)/Agamma^2) + gamma_param
   log_xi_prior <- -(nuxi+1)/2 * log(1 + 1/nuxi*exp(2*xi_param)/Axi^2) + xi_param
 
-  result <- log_likelihood + log_beta_prior + log_tau_prior + log_gamma_prior + sum(log_xi_prior)
+  result <- log_likelihood + log_beta_prior + log_tau_prior +
+    log_gamma_prior + sum(log_xi_prior)
   return(as.numeric(result))
 }
 
@@ -357,7 +340,8 @@ g_lmm_posterior <- function(theta, y, X, Z, n, d, nrandom=1,
   u_param <- LDhalf_block %*% tau_param
 
   # gradient
-  g_beta <- exp(-2*gamma_param) * t(X) %*% (y - X%*%beta_param - Z%*%u_param) - beta_param / sig2beta
+  g_beta <- exp(-2*gamma_param) * t(X) %*% (y - X%*%beta_param - Z%*%u_param) -
+    beta_param / sig2beta
   g_tau <- exp(-2*gamma_param) * Dhalf_block %*% t(L_block) %*% t(Z) %*%
     (y - X%*%beta_param - Z%*%u_param) - tau_param
   g_gamma <- -n*d + exp(-2*gamma_param) * t(y - X%*%beta_param - Z%*%u_param) %*%
@@ -504,7 +488,9 @@ glmm_poisson_posterior <- function(theta, y, X, Z, n, nrandom=1,
 
   XZbetau <- X %*% beta_param + Z %*% u_param
 
-  log_likelihood <- -sum(exp(XZbetau)) + y %*% XZbetau
+  # log_likelihood <- -sum(exp(XZbetau)) + y %*% XZbetau
+  onev <- rep(1, length(y))
+  log_likelihood <- -t(onev) %*% exp(XZbetau) + y %*% XZbetau
   log_beta_prior <- - 1/2*t(beta_param)%*% beta_param/sig2beta
   log_tau_prior <- -1/2 * t(tau_param) %*% tau_param
   log_xi_prior <- -(nuxi + 1)/2 * log(1 + 1/nuxi * exp(2*xi_param) / Axi^2)
@@ -545,10 +531,10 @@ g_glmm_poisson_posterior <- function(theta, y, X, Z, n, nrandom=1,
   Dhalf_block <- kronecker(diag(n), Dhalf)
 
   # gradient
-  g_beta <- -t(exp(XZbetau) - y) %*% X - t(beta_param)/sig2beta
+  g_beta <- t(X) %*% (-exp(XZbetau) + y)- (beta_param)/sig2beta
 
   # tau gradient
-  g_tau <- -t(exp(XZbetau) - y) %*% Z %*% LDhalf_block - tau_param
+  g_tau <- t(LDhalf_block) %*% t(Z) %*% (-exp(XZbetau) + y) - tau_param
 
   # gradient for xi using matrix algebra
   zero_v <- rep(0, nrandom)
@@ -556,7 +542,7 @@ g_glmm_poisson_posterior <- function(theta, y, X, Z, n, nrandom=1,
     zv <- zero_v
     zv[jj] <- 1
     bd <- kronecker(diag(n), diag(zv, nrandom, nrandom))
-    -t(exp(XZbetau) - y) %*% Z %*% L_block %*% bd %*% Dhalf_block %*% tau_param
+      t(L_block %*% bd %*% Dhalf_block %*% tau_param) %*% t(Z) %*% (-exp(XZbetau) + y)
   })
   g_xi <- g_xi - (nuxi + 1) / (1 + nuxi*Axi^2 * exp(-2*xi_param)) + 1
 

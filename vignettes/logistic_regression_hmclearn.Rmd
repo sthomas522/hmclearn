@@ -21,8 +21,9 @@ knitr::opts_chunk$set(
 
 This vignette demonstrates fitting a logistic regression model via Hamiltonian Monte Carlo (HMC) using the **hmclearn** package. 
 
-```{r setup}
+```{r setup, message=FALSE}
 library(hmclearn)
+library(MCMCpack)
 ```
 
 
@@ -31,64 +32,59 @@ library(hmclearn)
 For binary response, we let
 
 $$
-p = Pr(Y = 1 | X) = [1 + e^{-X\beta}]^{-1}
+p = Pr(\mathbf{y} = 1 | \mathbf{X}) = [1 + e^{-\mathbf{X}\boldsymbol\beta}]^{-1}.
 $$
 
+The vector of responses is  $\mathbf{y} = (y_1, ..., y_n)^T$. The covariate values for the \textit{i}th subject are $\mathbf{x}_i^T = (x_{i0}, ..., x_{iq})$ for $q$ covariates plus an intercept. We write the full design matrix as $\mathbf{X} = (\mathbf{x}_1^T, ..., \mathbf{x}_n^T)^T \in \mathbb{R}^{n\times(q+1)}$ for $n$ observations. The regression coefficients are a vector of length $q + 1$, $\boldsymbol\beta = (\beta_0, ..., \beta_q)^T$.  The error term for each subject is $\epsilon_i$. 
 
 With likelihood and log-likelihood
 
 $$
 \begin{aligned}
-L(\beta; X, y) &= \prod_{i=1}^n p^{y_i} (1-p)^{1-y_i} \\
-&= \prod_{i=1}^{n} \left(\frac{1}{1+e^{-X_i\beta}}\right)^{y_i} 
-\left(\frac{e^{-X_i\beta}}{1+e^{-X_i\beta}}\right)^{1-y_i}  \\
-l(\beta;X,y) &= \sum_{i=1}^n -y_i\log(1+e^{-X_i\beta}) + (1-y_i)(-X_i\beta - \log(1+e^{-X_i\beta})) \\
-&= \sum_{i=1}^n -\log(1+e^{-X_i\beta}) - X_i\beta(1 - y_i) \\
-&= \sum_{i=1}^n X_i\beta(y_i - 1) - \log(1 + e^{-X_i\beta})
+f(\mathbf{y} | \mathbf{X},\boldsymbol\beta) &= \prod_{i=1}^n p^{y_i} (1-p)^{1-y_i}, \\
+&= \prod_{i=1}^{n} \left(\frac{1}{1+e^{-\mathbf{x}_i^T\boldsymbol\beta}}\right)^{y_i} 
+\left(\frac{e^{-\mathbf{x}_i^T\boldsymbol\beta}}{1+e^{-\mathbf{x}_i^T\boldsymbol\beta}}\right)^{1-y_i},   \\
+\log f(\mathbf{y} | \mathbf{X}, \boldsymbol\beta) &= \sum_{i=1}^n -y_i\log(1+e^{-\mathbf{x}_i^T\boldsymbol\beta}) + (1-y_i)(-\mathbf{x}_i\boldsymbol\beta - \log(1+e^{-\mathbf{x}_i^T\boldsymbol\beta})),  \\
+&= \sum_{i=1}^n -\log(1+e^{-\mathbf{x}_i\boldsymbol\beta}) - \mathbf{x}_i^T\boldsymbol\beta(1 - y_i),  \\
+&= \sum_{i=1}^n \mathbf{x}_i^T\boldsymbol\beta(y_i - 1) - \log(1 + e^{-\mathbf{x}_i^T\boldsymbol\beta}),  \\
+&= \boldsymbol\beta^T\mathbf{X}^T(\mathbf{y} - \mathbf{1}_n) - \mathbf{1}_n^T [ \log( 1 + e^{-\mathbf{X}\boldsymbol\beta})]. 
 \end{aligned}
 $$
 
-We set a multivariate Normal prior for $\beta$
+We set a multivariate normal prior for $\boldsymbol\beta$
 
 $$
 \begin{aligned}
-\beta &\sim N(0, \Sigma_\beta) \\
-&\sim N(0, \sigma_\beta^2I)
+\beta &\sim N(0, \sigma_\beta^2 \mathbf{I}), 
 \end{aligned}
 $$
 
-With pdf
+with pdf, omitting constants
 
 $$
 \begin{aligned}
-p(\beta) &= \frac{1}{\sqrt{\lvert 2\pi \Sigma_\beta \rvert }}e^{-\frac{1}{2}\beta^T \Sigma_\beta^{-1}\beta} \\
-\log p(\beta) &= -\frac{1}{2}\log(2\pi \lvert \Sigma_\beta \rvert) - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta \\
-&\propto -\frac{1}{2}\log \lvert\Sigma_\beta\rvert - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta
+\pi(\boldsymbol\beta) &= \frac{1}{\sqrt{\lvert 2\pi \sigma_\beta^2 \rvert }}e^{-\frac{1}{2}\boldsymbol\beta^T \boldsymbol\beta / \sigma_\beta^2},  \\
+\log \pi(\boldsymbol\beta) &= -\frac{1}{2}\log(2\pi \sigma_\beta^2) - \frac{1}{2}\boldsymbol\beta^T \boldsymbol\beta / \sigma_\beta^2, \\
+&\propto -\frac{1}{2}\log \sigma_\beta^2 - \frac{\boldsymbol\beta^T\boldsymbol\beta}{2\sigma_\beta^2}.
 \end{aligned}
 $$
 
-Let $B = 1e3$ for instance, as a relatively uninformative prior.
-
-Now derive the log posterior
+Next, we derive the log posterior, omitting constants
 
 $$
 \begin{aligned}
-p(\beta | X, y) &\propto p(y | X, \beta)  p(\beta) \\
-\log p(\beta | X, y) & \propto \log p(y | X, \beta) + \log p(\beta) \\
-&\propto \sum_{i=1}^n X_i\beta(y_i - 1) - \log(1 + e^{-X_i\beta}) -\frac{1}{2}\log \lvert\Sigma_\beta\rvert - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta 
+f(\boldsymbol\beta | \mathbf{X}, \mathbf{y}) &\propto f(\mathbf{y} | \mathbf{X}, \boldsymbol\beta)  \pi(\boldsymbol\beta), \\
+\log f(\boldsymbol\beta | \mathbf{X}, \mathbf{y}) & \propto \log f(\mathbf{y} | \mathbf{X}, \boldsymbol\beta) + \log \pi(\boldsymbol\beta), \\
+&\propto \sum_{i=1}^n \mathbf{x}_i^T\boldsymbol\beta(y_i - 1) - \log(1 + e^{-\mathbf{x}_i^T\boldsymbol\beta}) - \frac{1}{2}\boldsymbol\beta^T\boldsymbol\beta / \sigma_\beta^2,  \\
+&\propto \boldsymbol\beta^T\mathbf{X}^T(\mathbf{y} - \mathbf{1}_n) - \mathbf{1}_n^T[\log( 1 + e^{-\mathbf{X}\boldsymbol\beta})] - \frac{\boldsymbol\beta^T\boldsymbol\beta}{2\sigma_\beta^2}.
 \end{aligned}
 $$
-
-The log posterior is the sum of the log likelihood and the log of the prior for $\beta$.  
 
 Next, we need to derive the gradient of the log posterior for the leapfrog function
 
 $$
 \begin{aligned}
-p(\beta | X, y) &\propto p(y | X, \beta)  p(\beta) \\
-\log p(\beta | X, y) & \propto \log p(y | X, \beta) + \log p(\beta) \\
-&\propto \sum_{i=1}^n X_i\beta(y_i - 1) - \log(1 + e^{-X_i\beta}) -\frac{1}{2}\log \lvert\Sigma_\beta\rvert - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta \\
-\frac{\partial\log p(\beta | X, y) }{\partial\beta} &\propto X(y - 1)+ \frac{e^{-X\beta}}{1 + e^{-X\beta}}X - \Sigma_\beta^{-1} \beta^T
+\frac{\partial\log f(\boldsymbol\beta | \mathbf{X}, \mathbf{y}) }{\partial\boldsymbol\beta} &\propto \mathbf{X}^T \left ( y - \mathbf{1}_n+ \frac{e^{-\mathbf{X}\boldsymbol\beta}}{1 + e^{-\mathbf{X}\boldsymbol\beta}}\right) - \boldsymbol\beta / \sigma_\beta^2
 \end{aligned}
 $$
 
@@ -106,7 +102,8 @@ Endometrial$PI2 <- with(Endometrial, (PI - mean(PI)) / sd(PI))
 Endometrial$EH2 <- with(Endometrial, (EH - mean(EH)) / sd(EH))
 Endometrial$NV2 <- Endometrial$NV - 0.5
 
-X <- cbind(1, as.matrix(Endometrial[, which(colnames(Endometrial) %in% c("PI2", "EH2", "NV2"))]))
+X <- cbind(1, as.matrix(Endometrial[, which(colnames(Endometrial)
+            %in% c("PI2", "EH2", "NV2"))]))
 y <- Endometrial$HG
 
 colnames(X) <- c("(Intercept)", "PI2", "EH2", "NV2")
@@ -115,7 +112,7 @@ colnames(X) <- c("(Intercept)", "PI2", "EH2", "NV2")
 
 # Frequentist model
 
-To compare results, we first fit a standard linear model using the frequentist function *glm*.  Note the high standard error estimates for the Intercept and NV2.  
+To compare results, we first fit a standard linear model using the frequentist function *glm*.  Note the high standard error estimates for the Intercept and NV2. This occurs because all 13 subjects with neovasculation present also have $y_i = 1$. See section 11.1.8 of Agresti (2015). 
 
 ```{r, echo=TRUE}
 f <- glm(y ~ X-1, family = binomial())
@@ -123,9 +120,45 @@ summary(f)
 
 ```
 
+Agresti (2015) in section 10.3.2 also fits this logistic regression model using a random walk Metropolis algorithm from the \texttt{MCMCpack} package (Martin, Quinn, Park 2011). This model also assigns a normal prior for $\boldsymbol\beta$ where $\sigma_\beta^2 = 100$. \texttt{MCMCpack} uses a precision parameterization, where $B0 = 1/\sigma_\beta^2$. The mean hyperparameter is 0 as specified in $b0$.  
+
+Note the high number of Metropolis iterations specified in \textit{mcmc} and the time required to fit, even with optimized compiled code. Our abbreviation MH refers to the general Metropolis-Hastings algorithm.
+
+```{r, echo=TRUE, eval=FALSE}
+set.seed(921)
+t1.mh <- Sys.time()
+fitMH <- MCMCpack::MCMClogit(HG ~ NV2 + PI2 + EH2, data=Endometrial, 
+                   mcmc=10000000, b0=0, B0=0.01)
+t2.mh <- Sys.time()
+```
+
+```{r, echo=FALSE, eval=TRUE}
+# load internal data, too long to run in vignette
+t1.mh <- hmclearn:::t1.mh
+t2.mh <- hmclearn:::t2.mh
+summMH <- hmclearn:::summMH
+
+```
+
+The time to fit the logistic regression using MH is
+
+```{r, echo=TRUE}
+t2.mh - t1.mh
+```
+
+We store the Metropolis parameter estimates in \textit{summMH}. 
+
+```{r, echo=TRUE, eval=FALSE}
+(summMH <- summary(fitMH))
+```
+
+```{r, echo=FALSE, eval=TRUE}
+summMH
+```
+
 # Fit model using hmc
 
-Next, we fit the logistic regression model using HMC.  
+Next, we fit the logistic regression model using HMC with the same hyperprior for $\sigma_\beta^2$ as in Agresti's example.  
 
 ```{r, echo=TRUE}
 N <- 1e4
@@ -137,9 +170,14 @@ t1.hmc <- Sys.time()
             logPOSTERIOR = logistic_posterior, 
             glogPOSTERIOR = g_logistic_posterior, 
             varnames = colnames(X),
-            param=list(y = y, X=X, sig2beta=10), 
+            param=list(y = y, X=X, sig2beta=100), 
             parallel=TRUE, chains=2)
 t2.hmc <- Sys.time()
+```
+
+HMC requires fewer iterations and lower computation time than MH in this example.
+
+```{r, echo=TRUE}
 t2.hmc - t1.hmc
 ```
 
@@ -161,11 +199,11 @@ Trace plots provide a visual indication of stationarity.  These plots indicate t
 mcmc_trace(f_hmc, burnin=3000)
 ```
 
-Histograms of the posterior distribution show that Bayesian parameter estimates align with Frequentist estimates for parameters PI2 and EH2.  The posterior distributions are skewed for the Intercept and NV2 based on the likelihood and priors provided in this example.  
+Histograms of the posterior distribution show that HMC parameter estimates align with Metropolis estimates from \texttt{MCMCpack}. 
 
 ```{r, echo=TRUE, fig.width=6, fig.height=4}
-beta.freq <- coef(f)
-diagplots(f_hmc, burnin=3000, comparison.theta=beta.freq)
+beta.mh <- summMH$quantiles[, "50%"][colnames(X)]
+diagplots(f_hmc, burnin=3000, comparison.theta=beta.mh)
 ```
 
 # Source
@@ -176,5 +214,5 @@ Heinze, G., & Schemper, M. (2002). *A solution to the problem of separation in l
 
 Agresti, A. (2015). *Foundations of linear and generalized linear models*. John Wiley & Sons.  ISBN: 978-1-118-73003-4
 
-
+Martin AD, Quinn KM, Park JH (2011). “MCMCpack: Markov Chain Monte Carlo in R.” *Journal of Statistical* Software, 42(9), 22. http://www.jstatsoft.org/v42/i09/.
 

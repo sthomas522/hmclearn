@@ -70,7 +70,7 @@ test_that("mh testing", {
   medparam3 <- as.vector(summary(f3, burnin=1000)[, 4])
 
   expect_equal(round(medparam3, 6),
-               c(0.824951, -0.515598, 1.183672))
+               c(0.809711, -0.515971, 1.190307))
 
 })
 

@@ -22,8 +22,8 @@ This vignette demonstrates fitting a linear regression model via Hamiltonian Mon
 
 $$
 \begin{aligned}
-y &= X\beta + \epsilon \\
-\epsilon &\sim N(0, \sigma^2)
+\mathbf{y} &= \mathbf{X}\boldsymbol\beta + \boldsymbol\epsilon \\
+\boldsymbol\epsilon &\sim N(0, \sigma_\epsilon^2)
 \end{aligned}
 $$
 
@@ -55,7 +55,7 @@ head(X, 3)
 
 # Frequentist linear model
 
-To compare results, we first fit a standard linear model using the frequentist function *lm*.
+To compare results, we first fit a standard linear model using the frequentist function *lm*. This formula for the linear model omits the automatic inclusion of the intercept. We code the formula in this way since our design matrix already includes the intercept.
 
 ```{r, echo=TRUE}
 f <- lm(y ~ X-1)
@@ -78,48 +78,50 @@ HMC requires the specification of the log posterior to a proportional constant. 
 
 ## Log posterior and gradient
 
-First, we specify the likelihood function for linear regression
+The vector of responses is  $\mathbf{y} = (y_1, ..., y_n)^T$. The covariate values for the \textit{i}th subject are $\mathbf{x}_i^T = (x_{i0}, ..., x_{iq})$ for $q$ covariates plus an intercept. We write the full design matrix as $\mathbf{X} = (\mathbf{x}_1^T, ..., \mathbf{x}_n^T)^T \in \mathbb{R}^{n\times(q+1)}$ for $n$ observations. The regression coefficients are a vector of length $q + 1$, $\boldsymbol\beta = (\beta_0, ..., \beta_q)^T$.  The error term for each subject is $\epsilon_i$. All error terms $\boldsymbol\epsilon = (\epsilon_1, ..., \epsilon_n)^T$ are assumed to be independent and normally distributed with mean zero and constant variance $\sigma_\epsilon^2$. 
+
+We specify the likelihood function for linear regression
 
 $$
-p(y | X, \beta; \sigma^2) = \frac{1}{(2\pi\sigma^2)^{n/2}}\exp{\left(-\frac{1}{2\sigma^2} (y - X\beta)^T(y-X\beta) \right)}
+f(\mathbf{y} | X, \boldsymbol\beta, \sigma_\epsilon^2) = \frac{1}{(2\pi\sigma_\epsilon^2)^{n/2}}\exp{\left(-\frac{1}{2\sigma_\epsilon^2} (\mathbf{y} - \mathbf{X}\boldsymbol\beta)^T(\mathbf{y}-\mathbf{X}\boldsymbol\beta) \right)}.
 $$
 
-The posterior is defined with priors for $\beta$ and $\sigma^2$.  
+The posterior is defined with priors for $\boldsymbol\beta$ and $\sigma_\epsilon^2$, such that  
 
 $$
 \begin{aligned}
-p(\beta, \sigma^2|y; X) &\propto p(y|X, \beta, \sigma^2) p(\beta, \sigma^2) \\
-&\propto p(y|X, \beta, \sigma^2)p(\beta)p(\sigma^2)
+f(\boldsymbol\beta, \sigma_\epsilon^2| \mathbf{y}, \mathbf{X}) &\propto f(\mathbf{y} |\mathbf{X}, \boldsymbol\beta, \sigma_\epsilon^2) \pi(\boldsymbol\beta, \sigma_\epsilon^2), \\
+&\propto f(\mathbf{y} | \mathbf{X}, \boldsymbol\beta, \sigma_\epsilon^2) \pi(\boldsymbol\beta) \pi(\sigma_\epsilon^2).
 \end{aligned}
 $$
 
-We specify a multivariate Normal prior for $\beta$ and Inverse Gamma for $\sigma^2$.  Note that Inverse Gamma can be problematic in certain models where the variance is low (Gelman 2006).  
+We specify a multivariate normal prior for $\boldsymbol\beta$ and Inverse Gamma for $\sigma_\epsilon^2$.  Note that Inverse Gamma can be problematic in certain models where the variance is low (Gelman 2006).  The prior distributions in this example are
 
 $$
 \begin{aligned}
-p(\beta) &\propto N(0, BI) \\
-p(\sigma^2) &\sim IG(a, b)
+\pi(\boldsymbol\beta) &\propto N(0, \sigma_\beta^2 \mathbf{I}), \\
+\pi(\sigma_\epsilon^2) &\sim IG(a, b).
 \end{aligned}
 $$
 
-The pdf for $\sigma^2$ prior
+The pdf for $\sigma_\epsilon^2$ prior is
 
 $$
-p(\sigma^2) = \frac{b^a}{\Gamma(a)} (\sigma^2)^{-a-1} \exp\left(-\frac{b}{\sigma^2} \right)
+f(\sigma_\epsilon^2) = \frac{b^a}{\Gamma(a)} (\sigma^2)^{-a-1} \exp\left(-\frac{b}{\sigma^2} \right).
 $$
 
-We perform a log-transformation of $\sigma^2$ to allow proposals across entire real number line.  For unconstrained HMC simulations, all parameters must support all real numbers.  
+We perform a log-transformation of $\sigma^2$ to allow proposals across entire real number line.  For unconstrained HMC simulations, all parameters must support all real numbers. We provide details for the transformation of variable, 
 
 $$
 \begin{aligned}
-\gamma &= \log \sigma^2 \\
-\sigma^2 &= g^{-1}(\gamma) = e^\gamma \\
-p_\gamma(\gamma) &= p_{\sigma^2}(g^{-1}(\gamma))\left\lvert \frac{d\sigma^2}{d\gamma} \right\rvert \\
-&= \frac{b^a}{\Gamma(a)}(e^\gamma)^{-a-1} \exp\left(-\frac{b}{\sigma^2} \right) \left\lvert e^\gamma  \right\rvert \\
+\gamma &= \log \sigma_\epsilon^2, \\
+\sigma_\epsilon^2 &= g^{-1}(\gamma) = e^\gamma, \\
+\pi_\gamma(\gamma) &= p_{\sigma_\epsilon^2}(g^{-1}(\gamma))\left\lvert \frac{d\sigma_\epsilon^2}{d\gamma} \right\rvert, \\
+&= \frac{b^a}{\Gamma(a)}(e^\gamma)^{-a-1} \exp\left(-\frac{b}{\sigma^2} \right) \left\lvert e^\gamma  \right\rvert, \\
 &= \frac{b^a}{\Gamma(a)}e^{-a\gamma}\exp\left(-\frac{b}{e^\gamma} \right) \\
 &\propto e^{-a\gamma}\exp\left(-\frac{b}{e
-^\gamma} \right) \\
-\log p(\gamma) &\propto -a\gamma - be^{-\gamma}
+^\gamma} \right), \\
+\log \pi(\gamma) &\propto -a\gamma - be^{-\gamma}.
 \end{aligned}
 $$
 
@@ -127,12 +129,11 @@ The posterior and log posterior for linear regression, based on $\beta$ and $\ga
 
 $$
 \begin{aligned}
-p(\beta, \gamma|y, X) &\propto p(y|X, \beta, \gamma) p(\beta, \gamma) \\
-&\propto p(y|X, \beta, \gamma)p(\beta)p(\gamma) \\
-&\propto \frac{1}{(2\pi e^\gamma)^{n/2}}\exp{\left(-\frac{1}{2 e^\gamma} (y - X\beta)^T(y-X\beta) \right)} e^{-a\gamma}\exp\left(-\frac{b}{e^\gamma} \right) \\
-&\propto \frac{e^{-\gamma n/2}}{(2\pi)^{n/2}}\exp{\left(-\frac{e^{-\gamma}}{2} (y - X\beta)^T(y-X\beta) \right)} e^{-\frac{1}{2}\beta^T\Sigma_\beta^{-1}\beta} e^{-a\gamma} e^{-b e^{-\gamma}} \\
-\log p(\beta, \gamma | y, X) &\propto -\frac{\gamma n}{2} -\frac{e^{-\gamma}}{2} (y - X\beta)^T(y-X\beta) - a\gamma - b e^{-\gamma}  \\
-&\propto -\left(\frac{n}{2} + a \right)\gamma  -\frac{e^{-\gamma}}{2} (y - X\beta)^T(y-X\beta)- b e^{-\gamma} - \frac{1}{2}\beta^T \Sigma_\beta^{-1}\beta
+f(\boldsymbol\beta, \gamma| \mathbf{y}, \mathbf{X}) &\propto f(\mathbf{y} | \mathbf{X}, \boldsymbol\beta, \gamma) \pi(\boldsymbol\beta, \gamma) \\
+&\propto f(\mathbf{y}| \mathbf{X}, \boldsymbol\beta, \gamma) \pi(\boldsymbol\beta) \pi(\gamma) \\
+&\propto \frac{e^{-\gamma n/2}}{(2\pi)^{n/2}}\exp{\left(-\frac{e^{-\gamma}}{2} (\mathbf{y} - \mathbf{X}\boldsymbol\beta)^T(\mathbf{y}-\mathbf{X}\boldsymbol\beta) \right)} e^{-\frac{1}{2}\boldsymbol\beta^T\boldsymbol\beta / \sigma_\beta^2} e^{-a\gamma} e^{-b e^{-\gamma}} \\
+\log p(\boldsymbol\beta, \gamma | \mathbf{y}, \mathbf{X}) &\propto -\frac{\gamma n}{2} -\frac{e^{-\gamma}}{2} (\mathbf{y} - \mathbf{X}\boldsymbol\beta)^T(\mathbf{y}-\mathbf{X}\boldsymbol\beta) - a\gamma - b e^{-\gamma}- \frac{\boldsymbol\beta^T \boldsymbol\beta}{2\sigma_\beta^2}  \\
+&\propto -\left(\frac{n}{2} + a \right)\gamma  -\frac{e^{-\gamma}}{2} (\mathbf{y} - \mathbf{X}\boldsymbol\beta)^T(\mathbf{y}-\mathbf{X}\boldsymbol\beta)- b e^{-\gamma} - \frac{\boldsymbol\beta^T \boldsymbol\beta}{2\sigma_\beta^2}
 \end{aligned}
 $$
 
@@ -141,15 +142,15 @@ Next, we derive the gradient of the log posterior
 
 $$
 \begin{aligned}
-\log p(\beta, \gamma | y, X) &\propto -\frac{\gamma n}{2} -\frac{e^{-\gamma}}{2} (y - X\beta)^T(y-X\beta) - a\gamma - b e^{-\gamma}  \\
-&\propto -\left(\frac{n}{2} + a \right)\gamma  -\frac{e^{-\gamma}}{2} (y - X\beta)^T(y-X\beta)- b e^{-\gamma} \\
-\frac{\partial}{\partial \beta} \log p(\beta, \gamma | y, X) &\propto -\frac{e^{-\gamma}}{2}(-2)X^T(y-X\beta) - \Sigma_\beta^{-1}\beta\\
-&\propto e^{-\gamma} X^T(y-X\beta) \\
+\log f(\boldsymbol\beta, \gamma | \mathbf{y}, \mathbf{X}) &\propto -\frac{\gamma n}{2} -\frac{e^{-\gamma}}{2} (\mathbf{y} - \mathbf{X}\boldsymbol\beta)^T(\mathbf{y}-\mathbf{X}\boldsymbol\beta) - a\gamma - b e^{-\gamma} - \frac{\boldsymbol\beta^T \boldsymbol\beta}{2\sigma_\beta^2} \\
+&\propto -\left(\frac{n}{2} + a \right)\gamma  -\frac{e^{-\gamma}}{2} (y - X\beta)^T(y-X\beta)- b e^{-\gamma}- \frac{\boldsymbol\beta^T \boldsymbol\beta}{2\sigma_\beta^2} \\
+\frac{\partial}{\partial \beta} \log f(\boldsymbol\beta, \gamma | \mathbf{y}, \mathbf{X}) &\propto -\frac{e^{-\gamma}}{2}(-2)\mathbf{X}^T(\mathbf{y}-\mathbf{X}\boldsymbol\beta) - \boldsymbol\beta/\sigma_\beta^2\\
+&\propto e^{-\gamma} \mathbf{X}^T(\mathbf{y}-\mathbf{X}\boldsymbol\beta) - \boldsymbol\beta/\sigma_\beta^2\\
 \frac{\partial}{\partial\gamma}\log p(\beta, \gamma | y, X) &\propto -\left(\frac{n}{2} + a \right) + \frac{e^{-\gamma}}{2} (y - X\beta)^T(y-X\beta)+ b e^{-\gamma}
 \end{aligned}
 $$
 
-The functions for the log posterior and its gradient are coded in the *linear_posterior* and *g_linear_posterior* functions, respectively, in **hmclearn**.
+The functions for the log posterior and its gradient are coded in the *linear_posterior* and *g_linear_posterior* functions, respectively, in **hmclearn**. We use the default hyperparameters in these functions for $\sigma_\beta^2$, $a$, and $b$.
 
 # Fit model using hmc
 
@@ -174,13 +175,13 @@ t2.hmc - t1.hmc
 
 ```
 
-The acceptance ratio for each of the HMC chains is sufficiently high for an efficient simulation.  
+The acceptance rate for each of the HMC chains is high for this simple example. More complex applications will often need lower acceptance rates (e.g. between 0.6 and 0.9) for optimal computational efficiency, particularly without an automated tuning algorithm such as NUTS (Hoffman, Gelman 2014). 
 
 ```{r, echo=TRUE}
 f_hmc$accept/N
 ```
 
-The posterior quantiles are summarized after removing an initial *burnin* period.  
+The posterior quantiles are summarized after removing an initial *burnin* period. The $\hat{R}$ statistics are close to one, indicating that both HMC chains converged to the same distribution. 
 
 ```{r, echo=TRUE}
 summary(f_hmc, burnin=2000)
@@ -188,18 +189,14 @@ summary(f_hmc, burnin=2000)
 
 Trace plots provide a visual indication of stationarity.  These plots indicate that the MCMC chains are reasonably stationary.  
 
-
 ```{r, echo=TRUE, fig.width=6, fig.height=4}
 mcmc_trace(f_hmc, burnin=2000)
 ```
 
-Histograms of the posterior distribution show that Bayesian parameter estimates align with Frequentist estimates for this example. 
-
+Histograms of the posterior distribution show that Bayesian parameter estimates align with frequentist estimates for this example. 
 
 ```{r, echo=TRUE, fig.width=6, fig.height=4}
 diagplots(f_hmc, comparison.theta=theta.freq, burnin=2000)
-
-
 ```
 
 # Source
@@ -214,4 +211,5 @@ Gelman, Andrew. (2006) "Prior distributions for variance parameters in hierarchi
 
 Agresti, A. (2015). *Foundations of linear and generalized linear models*. John Wiley & Sons.  ISBN: 978-1-118-73003-4
 
+Hoffman, M. D., & Gelman, A. (2014). The No-U-Turn sampler: adaptively setting path lengths in Hamiltonian Monte Carlo. *Journal of Machine Learning Research*, 15(1), 1593-1623.
 
