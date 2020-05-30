@@ -90,7 +90,7 @@
       <h1 data-toc-skip>hmclearn: Poisson Regression Example</h1>
                         <h4 class="author">Samuel Thomas</h4>
             
-            <h4 class="date">2020-05-29</h4>
+            <h4 class="date">2020-05-30</h4>
       
       
       <div class="hidden name"><code>poisson_regression_hmclearn.Rmd</code></div>
@@ -99,77 +99,76 @@
 
     
     
-<div id="introduction" class="section level1">
-<h1 class="hasAnchor">
-<a href="#introduction" class="anchor"></a>Introduction</h1>
+<div id="introduction" class="section level2">
+<h2 class="hasAnchor">
+<a href="#introduction" class="anchor"></a>Introduction</h2>
 <p>This vignette demonstrates fitting a Poisson regression model via Hamiltonian Monte Carlo (HMC) using the <strong>hmclearn</strong> package.</p>
 <div class="sourceCode" id="cb1"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">hmclearn</span>)</pre></body></html></div>
-</div>
-<div id="glm---poisson-regression" class="section level1">
-<h1 class="hasAnchor">
-<a href="#glm---poisson-regression" class="anchor"></a>GLM - Poisson Regression</h1>
 <p>For a count response, we let</p>
 <p><span class="math display">\[
-p(y; \mu) = \frac{e^{-\mu}\mu^y}{y!}
+p(y | \mu) = \frac{e^{-\mu}\mu^y}{y!},
 \]</span></p>
 <p>with a log-link function</p>
 <p><span class="math display">\[
 \begin{aligned}
-\mu &amp;:= E(Y | x) = e^{X\beta} \\
-\log \mu &amp;= X\beta.
+\boldsymbol\mu &amp;:= E(\mathbf{y} | \mathbf{X}) = e^{\mathbf{X}\boldsymbol\beta}, \\
+\log \boldsymbol\mu &amp;= \mathbf{X}\boldsymbol\beta.
 \end{aligned}
-\]</span></p>
-<p>Next, we develop the likelihood</p>
+\]</span> The vector of responses is <span class="math inline">\(\mathbf{y} = (y_1, ..., y_n)^T\)</span>. The covariate values for the th subject are <span class="math inline">\(\mathbf{x}_i^T = (x_{i0}, ..., x_{iq})\)</span> for <span class="math inline">\(q\)</span> covariates plus an intercept. We write the full design matrix as <span class="math inline">\(\mathbf{X} = (\mathbf{x}_1^T, ..., \mathbf{x}_n^T)^T \in \mathbb{R}^{n\times(q+1)}\)</span> for <span class="math inline">\(n\)</span> observations. The regression coefficients are a vector of length <span class="math inline">\(q + 1\)</span>, <span class="math inline">\(\boldsymbol\beta = (\beta_0, ..., \beta_q)^T\)</span>.</p>
+</div>
+<div id="derive-log-posterior-and-gradient-for-hmc" class="section level2">
+<h2 class="hasAnchor">
+<a href="#derive-log-posterior-and-gradient-for-hmc" class="anchor"></a>Derive log posterior and gradient for HMC</h2>
+<p>We develop the likelihood</p>
 <p><span class="math display">\[
 \begin{aligned}
-L(\mu; y) &amp;= \prod_{i=1}^n \frac{e^{-\mu_i}\mu_i^{y_i}}{y_i!} \\
-L(\beta; y, X) &amp;= \prod_{i=1}^n \frac{e^{-e^{X_i\beta}}e^{y_iX_i\beta}}{y_i!} \\
+f(\mathbf{y} | \boldsymbol\mu) &amp;= \prod_{i=1}^n \frac{e^{-\mu_i}\mu_i^{y_i}}{y_i!}, \\
+f(\mathbf{y} | \mathbf{X}, \boldsymbol\beta) &amp;= \prod_{i=1}^n \frac{e^{-e^{\mathbf{x}_i^T\boldsymbol\beta}}e^{y_i\mathbf{x}_i^T\boldsymbol\beta}}{y_i!}, \\
 \end{aligned}
 \]</span></p>
-<p>with log-likelihood</p>
+<p>and log-likelihood</p>
 <p><span class="math display">\[
 \begin{aligned}
-l(\beta; y, X) &amp;= \sum_{i=1}^n -e^{X_i\beta} + y_i X_i \beta - \log y_i! \\
-&amp;\propto \sum_{i=1}^n -e^{X_i\beta} + y_i X_i \beta.
+f(\mathbf{y} | \mathbf{X}, \boldsymbol\beta) &amp;= \sum_{i=1}^n -e^{\mathbf{x}_i^T\boldsymbol\beta} + y_i \mathbf{x}_i^T \boldsymbol\beta - \log y_i!,  \\
+&amp;\propto \sum_{i=1}^n -e^{\mathbf{x}_i^T\boldsymbol\beta} + y_i \mathbf{x}_i^T \boldsymbol\beta.
 \end{aligned}
 \]</span></p>
-<p>We set a multivariate Normal prior for <span class="math inline">\(\beta\)</span></p>
+<p>We set a multivariate normal prior for <span class="math inline">\(\boldsymbol\beta\)</span></p>
 <p><span class="math display">\[
 \begin{aligned}
-\beta &amp;\sim N(0, \Sigma_\beta) \\
-&amp;\sim N(0, \sigma_\beta^2I)
+\boldsymbol\beta &amp;\sim N(0, \sigma_\beta^2 \mathbf{I}), 
 \end{aligned}
 \]</span></p>
-<p>with pdf</p>
+<p>with pdf, omitting constants</p>
 <p><span class="math display">\[
 \begin{aligned}
-p(\beta) &amp;= \frac{1}{\sqrt{\lvert 2\pi \Sigma_\beta \rvert }}e^{-\frac{1}{2}\beta^T \Sigma_\beta^{-1}\beta} \\
-\log p(\beta) &amp;= -\frac{1}{2}\log(2\pi \lvert \Sigma_\beta \rvert) - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta \\
-&amp;\propto -\frac{1}{2}\log \lvert\Sigma_\beta\rvert - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta.
+\pi(\boldsymbol\beta | \sigma_\beta^2) &amp;= \frac{1}{\sqrt{\lvert 2\pi \sigma_\beta^2 \rvert }}e^{-\frac{1}{2}\boldsymbol\beta^T \boldsymbol\beta / \sigma_\beta^2},  \\
+\log \pi(\boldsymbol\beta | \sigma_\beta^2) &amp;= -\frac{1}{2}\log(2\pi \sigma_\beta^2) - \frac{1}{2}\boldsymbol\beta^T \boldsymbol\beta / \sigma_\beta^2, \\
+&amp;\propto -\frac{1}{2}\log \sigma_\beta^2 - \frac{\boldsymbol\beta^T\boldsymbol\beta}{2\sigma_\beta^2}.
 \end{aligned}
 \]</span></p>
-<p>Let <span class="math inline">\(B = 1e3\)</span> for instance, as a relatively uninformative prior.</p>
-<p>Next, we derive the log posterior. The log posterior is the sum of the log likelihood and the log of the prior for <span class="math inline">\(\beta\)</span>.</p>
+<p>Next, we derive the log posterior, omitting constants,</p>
 <p><span class="math display">\[
 \begin{aligned}
-p(\beta | X, y) &amp;\propto p(y | X, \beta)  p(\beta) \\
-\log p(\beta | X, y) &amp; \propto \log p(y | X, \beta) + \log p(\beta) \\
-&amp;\propto \sum_{i=1}^n \left( -e^{X_i\beta} + y_i X_i \beta\right) -\frac{1}{2}\log \lvert\Sigma_\beta\rvert - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta \\
-&amp;\propto \sum_{i=1}^n \left( -e^{X_i\beta} + y_i X_i \beta\right) - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta
+f(\boldsymbol\beta | \mathbf{X}, \mathbf{y}, \sigma_\beta^2) &amp;\propto f(\mathbf{y} | \mathbf{X}, \boldsymbol\beta) \pi(\boldsymbol\beta | \sigma_\beta^2), \\
+\log f(\boldsymbol\beta | \mathbf{X}, \mathbf{y}, \sigma_\beta^2) &amp; \propto \log f(\mathbf{y} | \mathbf{X}, \boldsymbol\beta) + \log \pi(\beta | \sigma_\beta^2), \\
+&amp;\propto \sum_{i=1}^n \left( -e^{\mathbf{x}_i^T\boldsymbol\beta} + y_i \mathbf{x}_i^T \boldsymbol\beta\right) - \frac{1}{2}\beta^T\beta/\sigma_\beta^2, \\
+&amp;\propto \sum_{i=1}^n \left( -e^{\mathbf{x}_i^T\boldsymbol\beta} + y_i \mathbf{x}_i^T \boldsymbol\beta\right) - \frac{\boldsymbol\beta^T\boldsymbol\beta}{2\sigma_\beta^2}, \\
+&amp;\propto \mathbf{y}^T\mathbf{X}\boldsymbol\beta - \mathbf{1}_n^T e^{\mathbf{X}\boldsymbol\beta} - \frac{\boldsymbol\beta^T\boldsymbol\beta}{2\sigma_\beta^2}.
 \end{aligned}
 \]</span></p>
 <p>We need to derive the gradient of the log posterior for the leapfrog function in HMC.</p>
 <p><span class="math display">\[
 \begin{aligned}
-\log p(\beta | X, y) &amp; \propto \log p(y | X, \beta) + \log p(\beta) \\
-&amp;\propto \sum_{i=1}^n \left( -e^{X_i\beta} + y_i X_i \beta\right) - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta \\
-\frac{\partial}{\partial \beta}\log p(\beta|X, y) &amp;\propto \sum_{i=1}^n\left( -e^{X_i\beta}X_i + y_iX_i\right) - \Sigma_\beta^{-1} \beta
+\nabla_{\boldsymbol\beta}\log f(\boldsymbol\beta|\mathbf{X}, \mathbf{y}, \sigma_\beta^2) &amp;\propto \sum_{i=1}^n\left( -e^{\mathbf{x}_i^T\boldsymbol\beta}\mathbf{x}_i + y_i\mathbf{x}_i\right) - \boldsymbol\beta / \sigma_\beta^2, \\
+&amp;\propto \sum_{i=1}^n \mathbf{x}_i\left( -e^{\mathbf{x}_i^T\boldsymbol\beta} + y_i\right) - \boldsymbol\beta / \sigma_\beta^2, \\
+&amp;\propto \mathbf{X}^T (\mathbf{y} - e^{\mathbf{X}\boldsymbol\beta}) - \boldsymbol\beta/ \sigma_\beta^2.
 \end{aligned}
 \]</span></p>
 </div>
-<div id="poisson-regression-example-data" class="section level1">
-<h1 class="hasAnchor">
-<a href="#poisson-regression-example-data" class="anchor"></a>Poisson Regression Example Data</h1>
+<div id="poisson-regression-example-data" class="section level2">
+<h2 class="hasAnchor">
+<a href="#poisson-regression-example-data" class="anchor"></a>Poisson Regression Example Data</h2>
 <p>The user must define provide the design matrix directly for use in <strong>hmclearn</strong>. Our first step is to load the data and store the design matrix <span class="math inline">\(X\)</span> and dependent variable vector <span class="math inline">\(y\)</span>.</p>
 <p>We load drug usage data and create the design matrix <span class="math inline">\(X\)</span> and dependent vector <span class="math inline">\(y\)</span>. This example also appears in Agresti (2015), and we compare results to his.</p>
 <div class="sourceCode" id="cb2"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span>(<span class="no">Drugs</span>)
@@ -180,6 +179,10 @@ p(\beta | X, y) &amp;\propto p(y | X, \beta)  p(\beta) \\
 
 <span class="co"># independent variable is count data</span>
 <span class="no">y</span> <span class="kw">&lt;-</span> <span class="no">Drugs</span>$<span class="no">count</span></pre></body></html></div>
+</div>
+<div id="comparison-model---frequentist" class="section level2">
+<h2 class="hasAnchor">
+<a href="#comparison-model---frequentist" class="anchor"></a>Comparison model - Frequentist</h2>
 <p>To compare results, we first fit a standard linear model using the frequentist function <em>glm</em>.</p>
 <div class="sourceCode" id="cb3"><html><body><pre class="r"><span class="co"># matrix representation</span>
 <span class="no">f</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html">glm</a></span>(<span class="no">y</span> ~ <span class="no">X</span>-<span class="fl">1</span>, <span class="kw">family</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/stats/family.html">poisson</a></span>(<span class="kw">link</span><span class="kw">=</span><span class="no">log</span>))
@@ -212,10 +215,11 @@ p(\beta | X, y) &amp;\propto p(y | X, \beta)  p(\beta) \\
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Number of Fisher Scoring iterations: 4</span></pre></body></html></div>
 </div>
-<div id="hmc-poisson-regression" class="section level1">
-<h1 class="hasAnchor">
-<a href="#hmc-poisson-regression" class="anchor"></a>HMC poisson regression</h1>
-<p>Run HMC for poisson regression model</p>
+<div id="fit-model-using-hmc" class="section level2">
+<h2 class="hasAnchor">
+<a href="#fit-model-using-hmc" class="anchor"></a>Fit model using <em>hmc</em>
+</h2>
+<p>Next, we fit the poisson regression model using HMC. A vector of <span class="math inline">\(\epsilon\)</span> values are specified to align with the data.</p>
 <div class="sourceCode" id="cb4"><html><body><pre class="r"><span class="no">N</span> <span class="kw">&lt;-</span> <span class="fl">1e4</span>
 
 <span class="no">eps_vals</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span>(<span class="fl">5e-4</span>, <span class="fl">2</span>), <span class="fl">1e-3</span>, <span class="fl">2e-3</span>, <span class="fl">1e-3</span>, <span class="fl">2e-3</span>, <span class="fl">5e-4</span>)
@@ -231,29 +235,33 @@ p(\beta | X, y) &amp;\propto p(y | X, \beta)  p(\beta) \\
                     <span class="kw">param</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="kw">y</span><span class="kw">=</span><span class="no">y</span>, <span class="kw">X</span><span class="kw">=</span><span class="no">X</span>))
 <span class="no">t2.hmc</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span>()
 <span class="no">t2.hmc</span> - <span class="no">t1.hmc</span>
-<span class="co">#&gt; Time difference of 29.93805 secs</span></pre></body></html></div>
+<span class="co">#&gt; Time difference of 28.09901 secs</span></pre></body></html></div>
+</div>
+<div id="mcmc-summary-and-diagnostics" class="section level2">
+<h2 class="hasAnchor">
+<a href="#mcmc-summary-and-diagnostics" class="anchor"></a>MCMC summary and diagnostics</h2>
 <p>The acceptance ratio for each of the HMC chains is sufficiently high for an efficient simulation.</p>
 <div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="no">f_hmc</span>$<span class="no">accept</span>/<span class="no">N</span>
-<span class="co">#&gt; [1] 0.9802 0.9837</span></pre></body></html></div>
-<p>The posterior quantiles are summarized after removing an initial <em>burnin</em> period.</p>
+<span class="co">#&gt; [1] 0.9823 0.9793</span></pre></body></html></div>
+<p>The posterior quantiles are summarized after removing an initial <em>burnin</em> period. The <span class="math inline">\(\hat{R}\)</span> statistics provide an indication of convergence. Values close to one indicate that the multiple MCMC chains coverged to the same distribution, while values above 1.1 indicate possible convergence problems. All <span class="math inline">\(\hat{R}\)</span> values in our example are close to one.</p>
 <div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">3000</span>)
 <span class="co">#&gt; Summary of MCMC simulation</span>
 <span class="co">#&gt;                   2.5%         5%        25%        50%        75%        95%</span>
-<span class="co">#&gt; (Intercept)  5.5159777  5.5352679  5.5918636  5.6316844  5.6719841  5.7287128</span>
-<span class="co">#&gt; Ayes         0.3395876  0.3652222  0.4387778  0.4877637  0.5367736  0.6079246</span>
-<span class="co">#&gt; Cyes        -2.2471025 -2.1942820 -2.0031296 -1.8957834 -1.7956017 -1.6358838</span>
-<span class="co">#&gt; Myes        -6.4006511 -6.2295337 -5.6927203 -5.3575152 -5.0505807 -4.6493893</span>
-<span class="co">#&gt; Ayes:Cyes    1.7254268  1.7805844  1.9608806  2.0665085  2.1820975  2.3720661</span>
-<span class="co">#&gt; Ayes:Myes    2.2003128  2.3467399  2.7319539  3.0270344  3.3542297  3.9283099</span>
-<span class="co">#&gt; Cyes:Myes    2.5604674  2.6024087  2.7337046  2.8398326  2.9512463  3.1318425</span>
-<span class="co">#&gt;                  97.5%     rhat</span>
-<span class="co">#&gt; (Intercept)  5.7485057 1.003979</span>
-<span class="co">#&gt; Ayes         0.6329297 1.001844</span>
-<span class="co">#&gt; Cyes        -1.5871690 1.008946</span>
-<span class="co">#&gt; Myes        -4.5271199 1.032509</span>
-<span class="co">#&gt; Ayes:Cyes    2.4302794 1.007340</span>
-<span class="co">#&gt; Ayes:Myes    4.0844536 1.039393</span>
-<span class="co">#&gt; Cyes:Myes    3.1920614 1.002048</span></pre></body></html></div>
+<span class="co">#&gt; (Intercept)  5.5158420  5.5349794  5.5948527  5.6339987  5.6732366  5.7310370</span>
+<span class="co">#&gt; Ayes         0.3348983  0.3602725  0.4371407  0.4825137  0.5314591  0.6089518</span>
+<span class="co">#&gt; Cyes        -2.2682914 -2.2070862 -2.0142450 -1.8953642 -1.7836033 -1.6298455</span>
+<span class="co">#&gt; Myes        -6.6620389 -6.3627098 -5.7787057 -5.4120353 -5.1141071 -4.6272008</span>
+<span class="co">#&gt; Ayes:Cyes    1.7293363  1.7822327  1.9434297  2.0665121  2.1922597  2.3957700</span>
+<span class="co">#&gt; Ayes:Myes    2.1937035  2.3165053  2.7828917  3.0965756  3.4154871  3.9978395</span>
+<span class="co">#&gt; Cyes:Myes    2.5358134  2.5855125  2.7585011  2.8626974  2.9642782  3.0935496</span>
+<span class="co">#&gt;                  97.5%      rhat</span>
+<span class="co">#&gt; (Intercept)  5.7487952 1.0003825</span>
+<span class="co">#&gt; Ayes         0.6344678 1.0006200</span>
+<span class="co">#&gt; Cyes        -1.5802700 1.0005485</span>
+<span class="co">#&gt; Myes        -4.4751450 1.0011519</span>
+<span class="co">#&gt; Ayes:Cyes    2.4575890 1.0000860</span>
+<span class="co">#&gt; Ayes:Myes    4.3412481 0.9999333</span>
+<span class="co">#&gt; Cyes:Myes    3.1432891 1.0205176</span></pre></body></html></div>
 <p>Trace plots provide a visual indication of stationarity. These plots indicate that the MCMC chains are reasonably stationary.</p>
 <div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="fu"><a href="../reference/hmclearn-plots.html">mcmc_trace</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">3000</span>)</pre></body></html></div>
 <p><img src="poisson_regression_hmclearn_files/figure-html/unnamed-chunk-7-1.png" width="576"></p>
@@ -263,14 +271,14 @@ p(\beta | X, y) &amp;\propto p(y | X, \beta)  p(\beta) \\
 <span class="co">#&gt; $histogram</span></pre></body></html></div>
 <p><img src="poisson_regression_hmclearn_files/figure-html/unnamed-chunk-8-1.png" width="576"></p>
 </div>
-<div id="source" class="section level1">
-<h1 class="hasAnchor">
-<a href="#source" class="anchor"></a>Source</h1>
+<div id="source" class="section level2">
+<h2 class="hasAnchor">
+<a href="#source" class="anchor"></a>Source</h2>
 <p>Data originally provided by Harry Khamis, Wright State University</p>
 </div>
-<div id="references" class="section level1">
-<h1 class="hasAnchor">
-<a href="#references" class="anchor"></a>References</h1>
+<div id="references" class="section level2">
+<h2 class="hasAnchor">
+<a href="#references" class="anchor"></a>References</h2>
 <p>Agresti, A. (2015). <em>Foundations of linear and generalized linear models</em>. John Wiley &amp; Sons. ISBN: 978-1-118-73003-4</p>
 </div>
   </div>

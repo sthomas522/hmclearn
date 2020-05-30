@@ -90,7 +90,7 @@
       <h1 data-toc-skip>hmclearn: Logistic Regression Example</h1>
                         <h4 class="author">Samuel Thomas</h4>
             
-            <h4 class="date">2020-05-29</h4>
+            <h4 class="date">2020-05-30</h4>
       
       
       <div class="hidden name"><code>logistic_regression_hmclearn.Rmd</code></div>
@@ -99,22 +99,22 @@
 
     
     
-<div id="introduction" class="section level1">
-<h1 class="hasAnchor">
-<a href="#introduction" class="anchor"></a>Introduction</h1>
+<div id="introduction" class="section level2">
+<h2 class="hasAnchor">
+<a href="#introduction" class="anchor"></a>Introduction</h2>
 <p>This vignette demonstrates fitting a logistic regression model via Hamiltonian Monte Carlo (HMC) using the <strong>hmclearn</strong> package.</p>
 <div class="sourceCode" id="cb1"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">hmclearn</span>)
 <span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">MCMCpack</span>)</pre></body></html></div>
-</div>
-<div id="glm---logistic-regression" class="section level1">
-<h1 class="hasAnchor">
-<a href="#glm---logistic-regression" class="anchor"></a>GLM - Logistic Regression</h1>
 <p>For binary response, we let</p>
 <p><span class="math display">\[
 p = Pr(\mathbf{y} = 1 | \mathbf{X}) = [1 + e^{-\mathbf{X}\boldsymbol\beta}]^{-1}.
 \]</span></p>
-<p>The vector of responses is <span class="math inline">\(\mathbf{y} = (y_1, ..., y_n)^T\)</span>. The covariate values for the th subject are <span class="math inline">\(\mathbf{x}_i^T = (x_{i0}, ..., x_{iq})\)</span> for <span class="math inline">\(q\)</span> covariates plus an intercept. We write the full design matrix as <span class="math inline">\(\mathbf{X} = (\mathbf{x}_1^T, ..., \mathbf{x}_n^T)^T \in \mathbb{R}^{n\times(q+1)}\)</span> for <span class="math inline">\(n\)</span> observations. The regression coefficients are a vector of length <span class="math inline">\(q + 1\)</span>, <span class="math inline">\(\boldsymbol\beta = (\beta_0, ..., \beta_q)^T\)</span>. The error term for each subject is <span class="math inline">\(\epsilon_i\)</span>.</p>
-<p>With likelihood and log-likelihood</p>
+<p>The vector of responses is <span class="math inline">\(\mathbf{y} = (y_1, ..., y_n)^T\)</span>. The covariate values for the th subject are <span class="math inline">\(\mathbf{x}_i^T = (x_{i0}, ..., x_{iq})\)</span> for <span class="math inline">\(q\)</span> covariates plus an intercept. We write the full design matrix as <span class="math inline">\(\mathbf{X} = (\mathbf{x}_1^T, ..., \mathbf{x}_n^T)^T \in \mathbb{R}^{n\times(q+1)}\)</span> for <span class="math inline">\(n\)</span> observations. The regression coefficients are a vector of length <span class="math inline">\(q + 1\)</span>, <span class="math inline">\(\boldsymbol\beta = (\beta_0, ..., \beta_q)^T\)</span>.</p>
+</div>
+<div id="derive-log-posterior-and-gradient-for-hmc" class="section level2">
+<h2 class="hasAnchor">
+<a href="#derive-log-posterior-and-gradient-for-hmc" class="anchor"></a>Derive log posterior and gradient for HMC</h2>
+<p>We develop the likelihood and log likelihood,</p>
 <p><span class="math display">\[
 \begin{aligned}
 f(\mathbf{y} | \mathbf{X},\boldsymbol\beta) &amp;= \prod_{i=1}^n p^{y_i} (1-p)^{1-y_i}, \\
@@ -129,22 +129,22 @@ f(\mathbf{y} | \mathbf{X},\boldsymbol\beta) &amp;= \prod_{i=1}^n p^{y_i} (1-p)^{
 <p>We set a multivariate normal prior for <span class="math inline">\(\boldsymbol\beta\)</span></p>
 <p><span class="math display">\[
 \begin{aligned}
-\beta &amp;\sim N(0, \sigma_\beta^2 \mathbf{I}), 
+\boldsymbol\beta &amp;\sim N(0, \sigma_\beta^2 \mathbf{I}), 
 \end{aligned}
 \]</span></p>
 <p>with pdf, omitting constants</p>
 <p><span class="math display">\[
 \begin{aligned}
-\pi(\boldsymbol\beta) &amp;= \frac{1}{\sqrt{\lvert 2\pi \sigma_\beta^2 \rvert }}e^{-\frac{1}{2}\boldsymbol\beta^T \boldsymbol\beta / \sigma_\beta^2},  \\
-\log \pi(\boldsymbol\beta) &amp;= -\frac{1}{2}\log(2\pi \sigma_\beta^2) - \frac{1}{2}\boldsymbol\beta^T \boldsymbol\beta / \sigma_\beta^2, \\
+\pi(\boldsymbol\beta | \sigma_\beta^2) &amp;= \frac{1}{\sqrt{\lvert 2\pi \sigma_\beta^2 \rvert }}e^{-\frac{1}{2}\boldsymbol\beta^T \boldsymbol\beta / \sigma_\beta^2},  \\
+\log \pi(\boldsymbol\beta | \sigma_\beta^2) &amp;= -\frac{1}{2}\log(2\pi \sigma_\beta^2) - \frac{1}{2}\boldsymbol\beta^T \boldsymbol\beta / \sigma_\beta^2, \\
 &amp;\propto -\frac{1}{2}\log \sigma_\beta^2 - \frac{\boldsymbol\beta^T\boldsymbol\beta}{2\sigma_\beta^2}.
 \end{aligned}
 \]</span></p>
-<p>Next, we derive the log posterior, omitting constants</p>
+<p>Next, we derive the log posterior, omitting constants,</p>
 <p><span class="math display">\[
 \begin{aligned}
-f(\boldsymbol\beta | \mathbf{X}, \mathbf{y}) &amp;\propto f(\mathbf{y} | \mathbf{X}, \boldsymbol\beta)  \pi(\boldsymbol\beta), \\
-\log f(\boldsymbol\beta | \mathbf{X}, \mathbf{y}) &amp; \propto \log f(\mathbf{y} | \mathbf{X}, \boldsymbol\beta) + \log \pi(\boldsymbol\beta), \\
+f(\boldsymbol\beta | \mathbf{X}, \mathbf{y}, \sigma_\beta^2) &amp;\propto f(\mathbf{y} | \mathbf{X}, \boldsymbol\beta)  \pi(\boldsymbol\beta | \sigma_\beta^2), \\
+\log f(\boldsymbol\beta | \mathbf{X}, \mathbf{y}, \sigma_\beta^2) &amp; \propto \log f(\mathbf{y} | \mathbf{X}, \boldsymbol\beta) + \log \pi(\boldsymbol\beta|\sigma_\beta^2), \\
 &amp;\propto \sum_{i=1}^n \mathbf{x}_i^T\boldsymbol\beta(y_i - 1) - \log(1 + e^{-\mathbf{x}_i^T\boldsymbol\beta}) - \frac{1}{2}\boldsymbol\beta^T\boldsymbol\beta / \sigma_\beta^2,  \\
 &amp;\propto \boldsymbol\beta^T\mathbf{X}^T(\mathbf{y} - \mathbf{1}_n) - \mathbf{1}_n^T[\log( 1 + e^{-\mathbf{X}\boldsymbol\beta})] - \frac{\boldsymbol\beta^T\boldsymbol\beta}{2\sigma_\beta^2}.
 \end{aligned}
@@ -152,13 +152,13 @@ f(\boldsymbol\beta | \mathbf{X}, \mathbf{y}) &amp;\propto f(\mathbf{y} | \mathbf
 <p>Next, we need to derive the gradient of the log posterior for the leapfrog function</p>
 <p><span class="math display">\[
 \begin{aligned}
-\frac{\partial\log f(\boldsymbol\beta | \mathbf{X}, \mathbf{y}) }{\partial\boldsymbol\beta} &amp;\propto \mathbf{X}^T \left ( y - \mathbf{1}_n+ \frac{e^{-\mathbf{X}\boldsymbol\beta}}{1 + e^{-\mathbf{X}\boldsymbol\beta}}\right) - \boldsymbol\beta / \sigma_\beta^2
+\nabla_{\boldsymbol\beta} \log f(\boldsymbol\beta, \mathbf{X}, \mathbf{y}, \sigma_\beta^2)  &amp;\propto \mathbf{X}^T \left ( \mathbf{y} - \mathbf{1}_n+ \frac{e^{-\mathbf{X}\boldsymbol\beta}}{1 + e^{-\mathbf{X}\boldsymbol\beta}}\right) - \boldsymbol\beta / \sigma_\beta^2
 \end{aligned}
 \]</span></p>
 </div>
-<div id="logistic-regression-example-data" class="section level1">
-<h1 class="hasAnchor">
-<a href="#logistic-regression-example-data" class="anchor"></a>Logistic Regression Example Data</h1>
+<div id="logistic-regression-example-data" class="section level2">
+<h2 class="hasAnchor">
+<a href="#logistic-regression-example-data" class="anchor"></a>Logistic Regression Example Data</h2>
 <p>The user must define provide the design matrix directly for use in <strong>hmclearn</strong>. Our first step is to load the data and store the design matrix <span class="math inline">\(X\)</span> and dependent variable vector <span class="math inline">\(y\)</span>.</p>
 <p>First, we load the Endometrial cancer data set (Heinze and Schember 2002) and create <span class="math inline">\(X\)</span> and <span class="math inline">\(y\)</span>. This example also appears in Agresti (2015), and we compare results to his.</p>
 <div class="sourceCode" id="cb2"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span>(<span class="no">Endometrial</span>)
@@ -174,9 +174,9 @@ f(\boldsymbol\beta | \mathbf{X}, \mathbf{y}) &amp;\propto f(\mathbf{y} | \mathbf
 
 <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span>(<span class="no">X</span>) <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"(Intercept)"</span>, <span class="st">"PI2"</span>, <span class="st">"EH2"</span>, <span class="st">"NV2"</span>)</pre></body></html></div>
 </div>
-<div id="frequentist-model" class="section level1">
-<h1 class="hasAnchor">
-<a href="#frequentist-model" class="anchor"></a>Frequentist model</h1>
+<div id="comparison-models---frequentist-and-metropolis-hastings" class="section level2">
+<h2 class="hasAnchor">
+<a href="#comparison-models---frequentist-and-metropolis-hastings" class="anchor"></a>Comparison models - Frequentist and Metropolis-Hastings</h2>
 <p>To compare results, we first fit a standard linear model using the frequentist function <em>glm</em>. Note the high standard error estimates for the Intercept and NV2. This occurs because all 13 subjects with neovasculation present also have <span class="math inline">\(y_i = 1\)</span>. See section 11.1.8 of Agresti (2015).</p>
 <div class="sourceCode" id="cb3"><html><body><pre class="r"><span class="no">f</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html">glm</a></span>(<span class="no">y</span> ~ <span class="no">X</span>-<span class="fl">1</span>, <span class="kw">family</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html">binomial</a></span>())
 <span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">f</span>)
@@ -204,7 +204,8 @@ f(\boldsymbol\beta | \mathbf{X}, \mathbf{y}) &amp;\propto f(\mathbf{y} | \mathbf
 <span class="co">#&gt; AIC: 63.393</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Number of Fisher Scoring iterations: 17</span></pre></body></html></div>
-<p>Agresti (2015) in section 10.3.2 also fits this logistic regression model using a random walk Metropolis algorithm from the  package (Martin, Quinn, Park 2011). This model also assigns a normal prior for <span class="math inline">\(\boldsymbol\beta\)</span> where <span class="math inline">\(\sigma_\beta^2 = 100\)</span>.  uses a precision parameterization, where <span class="math inline">\(B0 = 1/\sigma_\beta^2\)</span>. The mean hyperparameter is 0 as specified in <span class="math inline">\(b0\)</span>.</p>
+<p>As a result of challenges with the frequentist fit, Agresti (2015) in section 10.3.2 also fits this logistic regression model using a random walk Metropolis algorithm from the  package (Martin, Quinn, Park 2011). We fit the model with the same number of MCMC iterations, prior distributions, and hyperparameters as in the text.</p>
+<p>This model also assigns a normal prior for <span class="math inline">\(\boldsymbol\beta\)</span> where <span class="math inline">\(\sigma_\beta^2 = 100\)</span>.  uses a precision parameterization, where <span class="math inline">\(B0 = 1/\sigma_\beta^2\)</span>. The mean hyperparameter is 0 as specified in <span class="math inline">\(b0\)</span>.</p>
 <p>Note the high number of Metropolis iterations specified in  and the time required to fit, even with optimized compiled code. Our abbreviation MH refers to the general Metropolis-Hastings algorithm.</p>
 <div class="sourceCode" id="cb4"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span>(<span class="fl">921</span>)
 <span class="no">t1.mh</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span>()
@@ -239,9 +240,10 @@ f(\boldsymbol\beta | \mathbf{X}, \mathbf{y}) &amp;\propto f(\mathbf{y} | \mathbf
 #&gt; PI2         -1.4132 -0.7664 -0.4545 -0.1584  0.3664
 #&gt; EH2         -3.4015 -2.5152 -2.1004 -1.7222 -1.0815</code></pre>
 </div>
-<div id="fit-model-using-hmc" class="section level1">
-<h1 class="hasAnchor">
-<a href="#fit-model-using-hmc" class="anchor"></a>Fit model using hmc</h1>
+<div id="fit-model-using-hmc" class="section level2">
+<h2 class="hasAnchor">
+<a href="#fit-model-using-hmc" class="anchor"></a>Fit model using <em>hmc</em>
+</h2>
 <p>Next, we fit the logistic regression model using HMC with the same hyperprior for <span class="math inline">\(\sigma_\beta^2\)</span> as in Agresti’s example.</p>
 <div class="sourceCode" id="cb8"><html><body><pre class="r"><span class="no">N</span> <span class="kw">&lt;-</span> <span class="fl">1e4</span>
 
@@ -257,40 +259,44 @@ f(\boldsymbol\beta | \mathbf{X}, \mathbf{y}) &amp;\propto f(\mathbf{y} | \mathbf
 <span class="no">t2.hmc</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span>()</pre></body></html></div>
 <p>HMC requires fewer iterations and lower computation time than MH in this example.</p>
 <div class="sourceCode" id="cb9"><html><body><pre class="r"><span class="no">t2.hmc</span> - <span class="no">t1.hmc</span>
-<span class="co">#&gt; Time difference of 24.26983 secs</span></pre></body></html></div>
+<span class="co">#&gt; Time difference of 19.46265 secs</span></pre></body></html></div>
+</div>
+<div id="mcmc-summary-and-diagnostics" class="section level2">
+<h2 class="hasAnchor">
+<a href="#mcmc-summary-and-diagnostics" class="anchor"></a>MCMC summary and diagnostics</h2>
 <p>The acceptance ratio for each of the HMC chains is sufficiently high for an efficient simulation.</p>
 <div class="sourceCode" id="cb10"><html><body><pre class="r"><span class="no">f_hmc</span>$<span class="no">accept</span>/<span class="no">N</span>
-<span class="co">#&gt; [1] 0.9082 0.9146</span></pre></body></html></div>
-<p>The posterior quantiles are summarized after removing an initial <em>burnin</em> period.</p>
+<span class="co">#&gt; [1] 0.9126 0.9092</span></pre></body></html></div>
+<p>The posterior quantiles are summarized after removing an initial <em>burnin</em> period. The <span class="math inline">\(\hat{R}\)</span> statistics provide an indication of convergence. Values close to one indicate that the multiple MCMC chains coverged to the same distribution, while values above 1.1 indicate possible convergence problems. All <span class="math inline">\(\hat{R}\)</span> values in our example are close to one.</p>
 <div class="sourceCode" id="cb11"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">3000</span>)
 <span class="co">#&gt; Summary of MCMC simulation</span>
-<span class="co">#&gt;                   2.5%            5%        25%        50%       75%        95%</span>
-<span class="co">#&gt; (Intercept) -0.2722464 -0.0004107775  1.2609288  2.6881850  4.768894  8.3176411</span>
-<span class="co">#&gt; PI2         -1.4043883 -1.2335718218 -0.7674016 -0.4643448 -0.172295  0.2224629</span>
-<span class="co">#&gt; EH2         -3.3656664 -3.1554869470 -2.5078642 -2.1024948 -1.734823 -1.2529509</span>
-<span class="co">#&gt; NV2          2.1641120  2.7600876794  5.2210235  8.0414610 12.171060 19.2570103</span>
+<span class="co">#&gt;                   2.5%         5%        25%        50%        75%        95%</span>
+<span class="co">#&gt; (Intercept) -0.4026382 -0.1144146  1.1232286  2.4672481  4.4129282  7.7556345</span>
+<span class="co">#&gt; PI2         -1.4172534 -1.2348198 -0.7700089 -0.4529102 -0.1583382  0.2467875</span>
+<span class="co">#&gt; EH2         -3.4868179 -3.2171302 -2.5236960 -2.1096867 -1.7302356 -1.2271453</span>
+<span class="co">#&gt; NV2          1.9388251  2.5297091  4.9947514  7.6820705 11.4832854 18.1589402</span>
 <span class="co">#&gt;                  97.5%      rhat</span>
-<span class="co">#&gt; (Intercept)  9.4250465 1.0070244</span>
-<span class="co">#&gt; PI2          0.3550081 0.9999624</span>
-<span class="co">#&gt; EH2         -1.1003003 0.9999370</span>
-<span class="co">#&gt; NV2         21.4175517 1.0069369</span></pre></body></html></div>
+<span class="co">#&gt; (Intercept)  8.9605115 1.0045268</span>
+<span class="co">#&gt; PI2          0.3616866 0.9999603</span>
+<span class="co">#&gt; EH2         -1.0672815 0.9999476</span>
+<span class="co">#&gt; NV2         20.5301423 1.0042573</span></pre></body></html></div>
 <p>Trace plots provide a visual indication of stationarity. These plots indicate that the MCMC chains are reasonably stationary.</p>
 <div class="sourceCode" id="cb12"><html><body><pre class="r"><span class="fu"><a href="../reference/hmclearn-plots.html">mcmc_trace</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">3000</span>)</pre></body></html></div>
 <p><img src="logistic_regression_hmclearn_files/figure-html/unnamed-chunk-13-1.png" width="576"></p>
-<p>Histograms of the posterior distribution show that HMC parameter estimates align with Metropolis estimates from .</p>
+<p>Histograms of the posterior distribution show that HMC parameter estimates align with Metropolis estimates from <strong>MCMCpack</strong>.</p>
 <div class="sourceCode" id="cb13"><html><body><pre class="r"><span class="no">beta.mh</span> <span class="kw">&lt;-</span> <span class="no">summMH</span>$<span class="no">quantiles</span>[, <span class="st">"50%"</span>][<span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span>(<span class="no">X</span>)]
 <span class="fu"><a href="../reference/diagplots.html">diagplots</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">3000</span>, <span class="kw">comparison.theta</span><span class="kw">=</span><span class="no">beta.mh</span>)
 <span class="co">#&gt; $histogram</span></pre></body></html></div>
 <p><img src="logistic_regression_hmclearn_files/figure-html/unnamed-chunk-14-1.png" width="576"></p>
 </div>
-<div id="source" class="section level1">
-<h1 class="hasAnchor">
-<a href="#source" class="anchor"></a>Source</h1>
+<div id="source" class="section level2">
+<h2 class="hasAnchor">
+<a href="#source" class="anchor"></a>Source</h2>
 <p>Heinze, G., &amp; Schemper, M. (2002). <em>A solution to the problem of separation in logistic regression</em>. Statistics in medicine, 21(16), 2409-2419.</p>
 </div>
-<div id="reference" class="section level1">
-<h1 class="hasAnchor">
-<a href="#reference" class="anchor"></a>Reference</h1>
+<div id="reference" class="section level2">
+<h2 class="hasAnchor">
+<a href="#reference" class="anchor"></a>Reference</h2>
 <p>Agresti, A. (2015). <em>Foundations of linear and generalized linear models</em>. John Wiley &amp; Sons. ISBN: 978-1-118-73003-4</p>
 <p>Martin AD, Quinn KM, Park JH (2011). “MCMCpack: Markov Chain Monte Carlo in R.” <em>Journal of Statistical</em> Software, 42(9), 22. <a href="http://www.jstatsoft.org/v42/i09/" class="uri">http://www.jstatsoft.org/v42/i09/</a>.</p>
 </div>

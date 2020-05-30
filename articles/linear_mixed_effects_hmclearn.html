@@ -90,7 +90,7 @@
       <h1 data-toc-skip>hmclearn package: Linear Mixed Effects Regression Example</h1>
                         <h4 class="author">Samuel Thomas</h4>
             
-            <h4 class="date">2020-05-29</h4>
+            <h4 class="date">2020-05-30</h4>
       
       
       <div class="hidden name"><code>linear_mixed_effects_hmclearn.Rmd</code></div>
@@ -99,24 +99,185 @@
 
     
     
-<div id="introduction" class="section level1">
-<h1 class="hasAnchor">
-<a href="#introduction" class="anchor"></a>Introduction</h1>
-<p>This vignette demonstrates fitting a Linear mixed effects regression model via Hamiltonian Monte Carlo (HMC) using the <strong>hmclearn</strong> package.</p>
-<p><span class="math display">\[
-\begin{aligned}
-y &amp;= X\beta + Zu + \epsilon \\
-u &amp;\sim N(0, G) \\
-\epsilon &amp;\sim N(0, \sigma^2)
-\end{aligned}
-\]</span></p>
+<div id="introduction" class="section level2">
+<h2 class="hasAnchor">
+<a href="#introduction" class="anchor"></a>Introduction</h2>
+<p>This vignette demonstrates fitting a Linear mixed effects regression model via Hamiltonian Monte Carlo (HMC) using the <strong>hmclearn</strong> package,</p>
 <div class="sourceCode" id="cb1"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">hmclearn</span>)</pre></body></html></div>
 </div>
-<div id="linear-mixed-effects-model-example-data" class="section level1">
-<h1 class="hasAnchor">
-<a href="#linear-mixed-effects-model-example-data" class="anchor"></a>Linear Mixed Effects Model Example Data</h1>
-<p>The user must define provide the design matrix directly for use in <strong>hmclearn</strong>. Our first step is to load the data and store the fixed effect design matrix <span class="math inline">\(X\)</span>, random effects design matrix <span class="math inline">\(Z\)</span>, and dependent variable vector <span class="math inline">\(y\)</span>.</p>
-<p>We load drug sleepstudy data (Belenky et. al. 2003) and create the design matrices <span class="math inline">\(X\)</span> and <span class="math inline">\(Z\)</span> and dependent vector <span class="math inline">\(y\)</span>. For this model, the random effects design matrix <span class="math inline">\(Z\)</span> is specified for a random intercept model.</p>
+<div id="linear-mixed-effects-model" class="section level2">
+<h2 class="hasAnchor">
+<a href="#linear-mixed-effects-model" class="anchor"></a>Linear Mixed Effects Model</h2>
+<p>We specify the model and prior distributions for <span class="math inline">\(\mathbf{u}\)</span> and <span class="math inline">\(\boldsymbol\epsilon\)</span>,</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf{y} &amp;= \mathbf{X}\boldsymbol\beta + \mathbf{Z}\mathbf{u} + \boldsymbol\epsilon, \\
+\mathbf{u} &amp;\sim N(0, \mathbf{G}),  \\
+\boldsymbol\epsilon &amp;\sim N(0, \sigma_\epsilon^2).
+\end{aligned}
+\]</span></p>
+<p>The response for each subject is a vector <span class="math inline">\(\mathbf{y} = (\mathbf{y}_1, ..., \mathbf{y}_n)\)</span> for <span class="math inline">\(n\)</span> subjects <span class="math inline">\(i= 1, ..., n\)</span>. Each subject has <span class="math inline">\(d\)</span> observations <span class="math inline">\(\mathbf{y}_i = (y_{i1}, ..., y_{id})\)</span> and we let <span class="math inline">\(j = 1, ..., d\)</span>. The fixed effect design matrix is composed of matrices for each subject, <span class="math inline">\(\mathbf{X} = (\mathbf{X}_1, ..., \mathbf{X}_n)\)</span>, and <span class="math inline">\(\mathbf{X}_i \in \mathbb{R}^{d\times (q+1)}\)</span> for the fixed effects parameters <span class="math inline">\(\boldsymbol\beta = (\beta_0, ..., \beta_q)\)</span>. The full fixed effects design matrix is therefore <span class="math inline">\(\mathbf{X} \in \mathbb{R}^{nd \times (q+1)}\)</span>.</p>
+<p>For random effects, <span class="math inline">\(\mathbf{Z} = \text{diag}(\mathbf{Z}_1, ..., \mathbf{Z}_n)\)</span>, with individual random effects matrices <span class="math inline">\(\mathbf{Z}_i\)</span> for each of the <span class="math inline">\(i\)</span> subjects. A random intercept model specifies <span class="math inline">\(\mathbf{Z}_i\)</span> as a column vector of ones where <span class="math inline">\(\mathbf{Z}_i = \mathbf{z}_i = \mathbf{1}_d\)</span>. The full random effects design matrix <span class="math inline">\(\mathbf{Z} \in \mathbb{R}^{nd\times n}\)</span>. The parameterization for random effects is <span class="math inline">\(\mathbf{u} = (\mathbf{u}_1, ..., \mathbf{u}_n)^T\)</span> with vectors <span class="math inline">\(\mathbf{u}_i\)</span> for each subject. A random intercept model is somewhat simplified where <span class="math inline">\(\mathbf{u}_i = u_i\)</span> denotes a single random intercept parameter for each subject <span class="math inline">\(i\)</span>, and <span class="math inline">\(\mathbf{u} = (u_1, ..., u_n)^T\)</span>.</p>
+<p>We set <span class="math inline">\(\mathbf{u}\)</span> as one of our priors, following a multivariate normal distribution, <span class="math inline">\(\mathbf{u} \sim N(0, \mathbf{G})\)</span>. For our random intercept model, the specification of the covariance matrix <span class="math inline">\(\mathbf{G}\)</span> is expanded to facilitate efficient sampling using HMC. We let <span class="math inline">\(\mathbf{u} = \mathbf{G}^{1/2}\boldsymbol\tau\)</span> where <span class="math inline">\(\mathbf{G}^{1/2} = \lambda \mathbf{I}_n\)</span>. An additional parameter <span class="math inline">\(\boldsymbol\tau = (\tau_1, ..., \tau_n)^T\)</span> where each of these parameters is standard normal <span class="math inline">\(\tau_i \sim N(0, 1)\)</span>. The full covariance matrix is then <span class="math inline">\(\mathbf{G} = \lambda^2 \mathbf{I}_n \boldsymbol\tau\)</span>.</p>
+<p>The error for each subject <span class="math inline">\(i\)</span> is <span class="math inline">\(\boldsymbol\epsilon_i \sim N(0, \sigma_{\epsilon}^2 \mathbf{I}_d)\)</span>. Since the error distribution is constant for each observations,</p>
+<p><span class="math display">\[
+\boldsymbol\epsilon \sim N(0, \sigma_{\epsilon}^2 \mathbf{I}_{nd}).
+\]</span></p>
+<p>The parameterization approach for this model uses a strategy recommended by Betancourt, Girolami (2013) to facilitate more efficient sampling in HMC.</p>
+<p>Further, we select a half-t family of distributions appropriate for hierarchical models per Gelman (2006). This parameterization is well-behaved around 0, in contrast to inverse gamma, and provides flexibility for informed priors.</p>
+<p>We select a parameterization of <span class="math inline">\(\mathbf{G}\)</span> such that the likelihood and its gradient can be derived for HMC. To this end, we uses LDL decomposition of <span class="math inline">\(\mathbf{G}\)</span> to form a flexibile parameterization that can easily handle restrictions (Chan, Jelizkov 2009).</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf{u} &amp;\sim N(0, \mathbf{G}),  \\
+\mathbf{G} &amp;= \mathbf{L} \mathbf{D} \mathbf{L}^T,  \\
+&amp;= \mathbf{L} \mathbf{D}^{1/2} \mathbf{D}^{1/2} \mathbf{L}^T. \\
+\end{aligned}
+\]</span></p>
+<p>Let <span class="math inline">\(\boldsymbol{\lambda} = (\lambda_1, ..., \lambda_p)\)</span> denote the diagonal elements of <span class="math inline">\(\mathbf{D}^{1/2}\)</span> where <span class="math inline">\(p\)</span> indicates the number of random effect parameters, specified as <em>nrandom</em> in <strong>hmclearn</strong>. A future release of <strong>hmclearn</strong> will allow prior specification for the off-diagonal elements of <span class="math inline">\(L\)</span>. For the current version, we let <span class="math inline">\(L = I_{p}\)</span>.</p>
+<p><span class="math display">\[
+\mathbf{D}^{1/2} := 
+\begin{pmatrix}
+\lambda_1 &amp; 0 &amp; ... &amp; 0 \\
+0 &amp; \lambda_2 &amp; 0 ... &amp; 0 \\
+... &amp; ... &amp; ... &amp; ... \\
+0 &amp; 0 &amp; ... &amp; \lambda_p
+\end{pmatrix}, \quad
+\mathbf{L} :=
+\begin{pmatrix}
+1 &amp; 0 &amp; 0 &amp; ... &amp; 0 \\
+0 &amp; 1 &amp; 0 &amp; ... &amp; 0 \\
+0 &amp; 0 &amp; 1 &amp; ... &amp; ... \\
+... &amp; ... &amp; ... &amp; ... &amp; ... \\
+0 &amp; 0 &amp; ... &amp; ... &amp; 1 \\
+\end{pmatrix}.
+\]</span></p>
+<p>Consider priors where <span class="math inline">\(jj = 1...p\)</span>. The priors for <span class="math inline">\(\boldsymbol\lambda = (\lambda_1, \lambda_p)^T\)</span> is half-t per Gelman (2006).</p>
+<p><span class="math display">\[
+\begin{aligned}
+\pi(\boldsymbol\beta | \sigma_\beta^2) &amp;\propto N(0, \sigma_\beta^2 \mathbf{I}), \\
+\pi(\sigma_\epsilon) &amp;\sim  \left(1 + \frac{1}{\nu_\epsilon}\left(\frac{\sigma_\epsilon}{A_\epsilon} \right)^2 \right)^{-(\nu_\epsilon+1)/2},  \\
+\pi(\boldsymbol\lambda) &amp;\sim  \left(1 + \frac{1}{\nu_\lambda}\left(\frac{\boldsymbol\lambda}{A_\lambda} \right)^2 \right)^{-(\nu+1)/2}.
+\end{aligned}
+\]</span></p>
+<p>We want proposals of <span class="math inline">\(\sigma_\epsilon^2\)</span> over the real number line. Therfore we derive the distribution of the transformed parameter <span class="math inline">\(\gamma\)</span> based on a change of variable</p>
+<p><span class="math display">\[
+\begin{aligned}
+\gamma &amp;:= \log \sigma_\epsilon, \\
+e^\gamma &amp;= \sigma_\epsilon.
+\end{aligned}
+\]</span></p>
+<p>We need to compute the Jacobian of the transformation</p>
+<p><span class="math display">\[
+\begin{aligned}
+\pi_{\gamma}(\gamma | \nu_\gamma, A_\gamma) &amp;= \pi_{\sigma_\epsilon}(g^{-1}(\gamma))\left\lvert \frac{d\sigma_\epsilon}{d\gamma} \right\rvert, \\
+&amp;= \left(1 + \frac{1}{\nu_\gamma} \left(\frac{e^\gamma}{A_\gamma} \right)^2 \right)^{-\frac{\nu_\gamma +1}{2}} e^{\gamma}, \\
+&amp;= \left(1 + \frac{1}{\nu_\gamma} \frac{e^{2\gamma}}{A_\gamma^2} \right)^{-\frac{\nu_\gamma +1}{2}} e^{\gamma}, \\
+\log \pi(\gamma | \nu_\gamma, A_\gamma) &amp;\propto -\frac{\nu_\gamma+1}{2}\log\left(1 + \frac{1}{\nu_\gamma} \frac{e^{2\gamma}}{A_\gamma^2} \right) + \gamma.
+\end{aligned}
+\]</span></p>
+<p>We want proposals of <span class="math inline">\(\boldsymbol\lambda\)</span> over the real number line. Therfore we derive the distribution of the transformed parameter <span class="math inline">\(\boldsymbol\xi\)</span> based on a change of variable</p>
+<p><span class="math display">\[
+\begin{aligned}
+\boldsymbol\xi &amp;:= \log\boldsymbol\lambda,  \\
+\boldsymbol\lambda &amp;:= e^{\boldsymbol\xi}. 
+\end{aligned}
+\]</span></p>
+<p>We need to compute the Jacobian of the transformation</p>
+<p><span class="math display">\[
+\begin{aligned}
+\pi_{\boldsymbol\xi}(\boldsymbol\xi) &amp;= \pi_{\boldsymbol\xi}(g^{-1}(\boldsymbol\xi)) \left\lvert \frac{d\boldsymbol\lambda}{d\boldsymbol\xi}  \right\rvert, \\
+&amp;= \pi_{\boldsymbol\lambda} (e^{\boldsymbol\xi})\lvert e^{\boldsymbol\xi}\rvert, \\
+&amp;= \left(1 + \frac{1}{\nu_\xi} \frac{e^{2\boldsymbol\xi}}{A_{\xi}^2}\right)^{-\frac{\nu_{\xi}+1}{2}}e^{\boldsymbol\xi}, \\
+\log \pi(\boldsymbol\xi) &amp;\propto -\frac{\nu_{\xi}+1}{2}\log\left(1 + \frac{1}{\nu_{\xi}} \frac{e^{2\boldsymbol\xi}}{A_{\xi}^2}\right)+ \boldsymbol\xi.
+\end{aligned}
+\]</span></p>
+</div>
+<div id="derive-log-posterior-and-gradient-for-hmc" class="section level2">
+<h2 class="hasAnchor">
+<a href="#derive-log-posterior-and-gradient-for-hmc" class="anchor"></a>Derive log posterior and gradient for HMC</h2>
+<p>First, we specify the likelihood and log-likelihood</p>
+<p><span class="math display">\[
+\begin{aligned}
+f(\mathbf{y} | \boldsymbol\beta, \mathbf{u}, \sigma_\epsilon^2) &amp;\propto (\sigma_\epsilon^2)^{-n/2} e^{-\frac{1}{2\sigma_\epsilon^2}(\mathbf{y} - \mathbf{X}\boldsymbol\beta - \mathbf{Z}\mathbf{u})^T (\mathbf{y} - \mathbf{X}\boldsymbol\beta - \mathbf{Z}\mathbf{u})}, \\
+\log f(\mathbf{y} | \boldsymbol\beta, \mathbf{u}, \sigma_\epsilon^2) &amp;\propto -{n}\log(\sigma_\epsilon) -\frac{1}{2\sigma_\epsilon^2}(\mathbf{y} - \mathbf{X}\boldsymbol\beta - \mathbf{Z}\mathbf{u})^T (\mathbf{y} - \mathbf{X}\boldsymbol\beta - \mathbf{Z}\mathbf{u}).
+\end{aligned}
+\]</span></p>
+<p>The posterior is defined for priors on <span class="math inline">\(\boldsymbol\beta\)</span>, <span class="math inline">\(\mathbf{u}\)</span>, <span class="math inline">\(\sigma_\epsilon^2\)</span>, and <span class="math inline">\(\mathbf{G}\)</span>, with dependent vector <span class="math inline">\(\mathbf{y}\)</span> and design matrices <span class="math inline">\(\mathbf{X}\)</span> and <span class="math inline">\(\mathbf{Z}\)</span>.</p>
+<p><span class="math display">\[
+\begin{aligned}
+f(\boldsymbol\beta, \mathbf{u}, \sigma_\epsilon^2, \mathbf{G} | \mathbf{y}, \mathbf{X}, \mathbf{Z}, \sigma_\beta^2) &amp;\propto f(\mathbf{y} | \boldsymbol\beta, \mathbf{u}, \sigma_\epsilon^2, \mathbf{G})  \pi(\boldsymbol\beta, \mathbf{u}, \sigma_\epsilon^2, \mathbf{G} | \sigma_\beta^2),  \\
+&amp;\propto f(\mathbf{y} | \boldsymbol\beta, \mathbf{u}, \sigma_\epsilon^2, \mathbf{G}) \pi(\boldsymbol\beta | \sigma_\beta^2) \pi(\sigma_\epsilon^2) \pi(\mathbf{u}, \mathbf{G}), \\
+&amp;\propto f(\mathbf{y} | \boldsymbol\beta, \mathbf{u}, \sigma_\epsilon^2, \mathbf{G}) \pi(\boldsymbol\beta | \sigma_\beta^2) \pi(\sigma_\epsilon^2) \pi(\mathbf{u} | \mathbf{G}) \pi(\mathbf{G}), \\
+\log f(\boldsymbol\beta, \mathbf{u}, \sigma_\epsilon^2, \mathbf{G} | \mathbf{y}, \mathbf{X}, \mathbf{Z}, \sigma_\beta^2) &amp;\propto \log f(\mathbf{y} | \boldsymbol\beta, \mathbf{u}, \sigma_\epsilon^2, G) + \log \pi(\boldsymbol\beta | \sigma_\beta^2) + \log \pi(\sigma_\epsilon^2)+ \log \pi(\mathbf{u}|\mathbf{G}) + \log \pi(\mathbf{G}), \\
+\log f(\boldsymbol\beta,\boldsymbol\tau, \gamma, \boldsymbol\xi | y, X, Z, \sigma_\beta^2, \nu_\gamma, A_\gamma, \nu_\xi, A_\xi) &amp;\propto \log f(\mathbf{y} | \boldsymbol\beta, \boldsymbol\tau, \gamma, \boldsymbol\xi) + \log \pi(\boldsymbol\beta | \sigma_\beta^2) + \log \pi(\gamma | \nu_\gamma, A_\gamma)+ \\
+&amp;\qquad\log \pi(\tau) + \log \pi(\boldsymbol\xi | \nu_\xi, A_\xi).
+\end{aligned}
+\]</span></p>
+<p>We write the re-parameterized log likelihood,</p>
+<p><span class="math display">\[
+\begin{aligned}
+\log f(\mathbf{y}|\mathbf{X}, \mathbf{Z}, \boldsymbol\beta, \boldsymbol\tau, \boldsymbol\xi, \gamma) = -nd\log\gamma - \frac{e^{-2\gamma}}{2} (\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau)^T(\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau).
+\end{aligned}
+\]</span></p>
+<p>Next, the log priors that we use with transformations, omitting constants. Note that the log densities of the priors with log densities include an additive term for the transformed distribution (i.e. <span class="math inline">\(\xi\)</span> and <span class="math inline">\(\gamma\)</span>),</p>
+<p><span class="math display">\[
+\begin{aligned}
+\log \pi(\boldsymbol\beta | \sigma_\beta^2) &amp;\propto -\frac{\boldsymbol\beta^T \boldsymbol\beta}{2\sigma_\beta^2}, \\
+\log \pi(\boldsymbol\xi | \nu_\xi, A_\xi) &amp;\propto -\frac{\nu_\xi + 1}{2} \log \left( 1 + \frac{1}{\nu_\xi} \left(\frac{e^\boldsymbol\xi}{A_\xi} \right)^2 \right) + \boldsymbol\xi, \\
+\log \pi(\boldsymbol\tau) &amp;\propto -\frac{1}{2}\boldsymbol\tau^T \boldsymbol\tau, \\
+\log \pi(\gamma | \nu_\gamma, A_\gamma) &amp;\propto -\frac{\nu_\gamma + 1}{2} \log \left( 1 + \frac{1}{\nu_\gamma} \left(\frac{e^\gamma}{A_\gamma} \right)^2 \right) + \gamma.
+\end{aligned}
+\]</span></p>
+<p>The full log posterior with transformed variables is the log likelihood plus the log prior,</p>
+<p><span class="math display">\[
+\begin{aligned}
+\log f(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z}, \sigma_\beta^2, \nu_\gamma, A_\gamma, \nu_\xi, A_\xi) &amp;\propto \log f(\mathbf{y} | \mathbf{X}, \mathbf{Z}, \boldsymbol\beta, \xi, \boldsymbol\tau, \gamma)  + \log \pi(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \sigma_\beta^2, \nu_\gamma, A_\gamma, \nu_\xi, A_\gamma), \\ 
+&amp;\propto \log f(\mathbf{y} | \mathbf{X}, \mathbf{Z}, \boldsymbol\beta, \xi, \boldsymbol\tau, \gamma) + \log \pi(\boldsymbol\beta | \sigma_\beta^2) + \log \pi(\xi | \nu_\xi, A_\xi) + \\
+&amp;\qquad \log\pi(\boldsymbol\tau) + \log\pi(\gamma | \nu_\gamma, A_\gamma),  \\
+&amp;\propto -nd\gamma - \frac{1}{2 e^{2\gamma}} (\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau)^T(\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau) - \\
+&amp;\quad \frac{\boldsymbol\beta^T \boldsymbol\beta}{2\sigma_\beta^2} -\frac{\nu_\xi + 1}{2} \sum_{jj = 1}^p \log \left( 1 + \frac{1}{\nu_{\xi_{jj}}} \left(\frac{e^{\xi_{jj}}}{A_\xi} \right)^2 \right) + \xi - \\
+&amp;\quad \frac{1}{2}\boldsymbol\tau^T \boldsymbol\tau -\frac{\nu_\gamma + 1}{2} \log \left( 1 + \frac{1}{\nu_\gamma} \left(\frac{e^\gamma}{A_\gamma} \right)^2 \right) + \gamma.
+\end{aligned}
+\]</span></p>
+<p>Next we derive the gradient of the log posterior, comprised of partial derivatives for each of our parameters.</p>
+<p>We derive the partial derivative of <span class="math inline">\(\boldsymbol\beta\)</span>,</p>
+<p><span class="math display">\[
+\begin{aligned}
+\nabla_\beta \log f(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z}, \sigma_\beta^2, \nu_\gamma, A_\gamma, \nu_\xi, A_\xi) &amp;\propto -\frac{1}{2e^{2\gamma}} (-2) \sum_{\boldsymbol\xi = (\xi_1, ..., \xi_p)} \mathbf{X}^T(y-\mathbf{X}\boldsymbol\beta - e^{\boldsymbol\xi}\mathbf{Z}\boldsymbol\tau)- \frac{1}{\sigma_\beta^2}\boldsymbol\beta, \\
+&amp;\propto e^{-2\gamma}\mathbf{X}^T(y-\mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau)- \boldsymbol\beta / \sigma_\beta^2.
+\end{aligned}
+\]</span></p>
+<p>Next we derive the partial derivative of each parameter <span class="math inline">\(\xi_1, ..., \xi_p\)</span> where <span class="math inline">\(jj = 1, ..., p\)</span>,</p>
+<p><span class="math display">\[
+\begin{aligned}
+\nabla_{\xi_{jj} }\log f(\boldsymbol\beta, \boldsymbol\xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z}, \sigma_\beta^2, \nu_\gamma, A_\gamma, \nu_\xi, A_\xi) &amp;\propto -\frac{e^{-2\gamma}}{2}(-2)(\mathbf{Z}\boldsymbol\tau)^T e^{\xi_{jj}} (\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi_{jj}}\mathbf{Z}\boldsymbol\tau) - \frac{\nu_\xi + 1}{2}\left( 1 + \frac{1}{\nu_\xi} \left(\frac{e^\xi_{jj}}{A_\xi} \right)^2 \right)^{-1}\frac{2\xi_{jj}}{\nu_\xi A_\xi^2} + 1, \\
+&amp;\propto e^{-2\gamma + \xi_{jj}} \boldsymbol\tau^T \mathbf{Z}^T (\mathbf{y}-\mathbf{X}\boldsymbol\beta -e^{\xi_{jj}}\mathbf{Z}\boldsymbol\tau) - \frac{\nu_\xi + 1}{1 + \nu_\xi A_\xi^2 e^{-2\xi_{jj}}} + 1.
+\end{aligned}
+\]</span></p>
+<p>Next, we derive the partial derivative of <span class="math inline">\(\boldsymbol\tau\)</span>,</p>
+<p><span class="math display">\[
+\begin{aligned}
+\nabla_\tau \log f(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z}, \sigma_\beta^2, \nu_\gamma, A_\gamma, \nu_\xi, A_\xi) &amp;\propto -\frac{e^{-2\gamma}}{2}(-2)(\mathbf{Z}\boldsymbol)^T e^{\xi}(\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau) - \frac{1}{2}\boldsymbol\tau, \\
+&amp;\propto e^{-2\gamma} \mathbf{Z}^T(\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau) -  \boldsymbol\tau.
+\end{aligned}
+\]</span></p>
+<p>The gradient of full log posterior can now be specified</p>
+<p><span class="math display">\[
+\begin{aligned}
+\nabla_{\boldsymbol\beta} \log f(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z}, \sigma_\beta^2, \nu_\gamma, A_\gamma, \nu_\xi, A_\xi), 
+&amp;\propto e^{-2\gamma}\mathbf{X}^T(y-\mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau)-  \boldsymbol\beta / \sigma_\beta^2, \\
+\nabla_{\xi_{jj}} \log f(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z}, \sigma_\beta^2, \nu_\gamma, A_\gamma, \nu_\xi, A_\xi) &amp;\propto e^{-2\gamma + \xi_{jj}} \boldsymbol\tau^T \mathbf{Z}^T (\mathbf{y}-\mathbf{X}\boldsymbol\beta -e^{\xi_{jj}}\mathbf{Z}\boldsymbol\tau) - \frac{\nu_\xi + 1}{1 + \nu_\xi A_\xi^2 e^{-2\xi_{jj}}} + 1, \quad \forall (\xi_1, ..., \xi_p) \in \boldsymbol\xi, \\
+\nabla_{\boldsymbol\tau} \log f(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z}, \sigma_\beta^2, \nu_\gamma, A_\gamma, \nu_\xi, A_\xi) &amp;\propto e^{-2\gamma} \mathbf{Z}^T(\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau) - \boldsymbol\tau, \\
+\nabla_\gamma \log f(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z}, \sigma_\beta^2, \nu_\gamma, A_\gamma, \nu_\xi, A_\xi) &amp;\propto  -nd + e^{-2\gamma}(\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau)^T (\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau) - \frac{\nu_\gamma + 1}{1 + \nu_\gamma A_\gamma^2 e^{-2\gamma}} + 1.
+\end{aligned}
+\]</span></p>
+<p>Note that a random intercept model only has a single <span class="math inline">\(\xi\)</span> parameter, which simplifies the log posterior and gradient formulations.</p>
+</div>
+<div id="linear-mixed-effecgts-model-example-data" class="section level2">
+<h2 class="hasAnchor">
+<a href="#linear-mixed-effecgts-model-example-data" class="anchor"></a>Linear mixed effecgts model example data</h2>
+<p>The user must define provide the design matrix directly for use in <strong>hmclearn</strong>. Our first step is to load the data and store the fixed effect design matrix <span class="math inline">\(\mathbf{X}\)</span>, random effects design matrix <span class="math inline">\(\mathbf{Z}\)</span>, and dependent variable vector <span class="math inline">\(\mathbf{y}\)</span>.</p>
+<p>We load drug sleepstudy data (Belenky et. al. 2003) and create the design matrices <span class="math inline">\(\mathbf{X}\)</span> and <span class="math inline">\(\mathbf{Z}\)</span> and dependent vector <span class="math inline">\(\mathbf{y}\)</span>. For this model, the random effects design matrix <span class="math inline">\(\mathbf{Z}\)</span> is specified for a random intercept model.</p>
 <div class="sourceCode" id="cb2"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">lme4</span>)
 <span class="co">#&gt; Loading required package: Matrix</span>
 <span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">Matrix</span>)
@@ -145,24 +306,15 @@ u &amp;\sim N(0, G) \\
 <span class="co">##########</span>
 <span class="co"># intercept</span>
 <span class="no">Z</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/kronecker.html">kronecker</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/diag.html">diag</a></span>(<span class="no">n</span>), <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span>(<span class="fl">1</span>, <span class="no">d</span>), <span class="kw">ncol</span><span class="kw">=</span><span class="fl">1</span>))</pre></body></html></div>
+</div>
+<div id="comparison-model---frequentist" class="section level2">
+<h2 class="hasAnchor">
+<a href="#comparison-model---frequentist" class="anchor"></a>Comparison model - Frequentist</h2>
 <p>To compare results, we first fit a linear mixed effects model using the frequentist package <strong>lme4</strong> (Bates et. al. 2015).</p>
 <div class="sourceCode" id="cb3"><html><body><pre class="r"><span class="co"># random intercept </span>
 
 <span class="co">## linear mixed models - reference values from older code</span>
-(<span class="no">fm1</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lme4/man/lmer.html">lmer</a></span>(<span class="no">Reaction</span> ~ <span class="no">Days</span> + (<span class="fl">1</span> <span class="kw">|</span> <span class="no">Subject</span>), <span class="no">sleepstudy</span>, <span class="kw">REML</span> <span class="kw">=</span> <span class="fl">FALSE</span>))
-<span class="co">#&gt; Linear mixed model fit by maximum likelihood  ['lmerMod']</span>
-<span class="co">#&gt; Formula: Reaction ~ Days + (1 | Subject)</span>
-<span class="co">#&gt;    Data: sleepstudy</span>
-<span class="co">#&gt;       AIC       BIC    logLik  deviance  df.resid </span>
-<span class="co">#&gt; 1802.0786 1814.8505 -897.0393 1794.0786       176 </span>
-<span class="co">#&gt; Random effects:</span>
-<span class="co">#&gt;  Groups   Name        Std.Dev.</span>
-<span class="co">#&gt;  Subject  (Intercept) 36.01   </span>
-<span class="co">#&gt;  Residual             30.90   </span>
-<span class="co">#&gt; Number of obs: 180, groups:  Subject, 18</span>
-<span class="co">#&gt; Fixed Effects:</span>
-<span class="co">#&gt; (Intercept)         Days  </span>
-<span class="co">#&gt;      251.41        10.47</span>
+<span class="no">fm1</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lme4/man/lmer.html">lmer</a></span>(<span class="no">Reaction</span> ~ <span class="no">Days</span> + (<span class="fl">1</span> <span class="kw">|</span> <span class="no">Subject</span>), <span class="no">sleepstudy</span>, <span class="kw">REML</span> <span class="kw">=</span> <span class="fl">FALSE</span>)
 <span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">fm1</span>)
 <span class="co">#&gt; Linear mixed model fit by maximum likelihood  ['lmerMod']</span>
 <span class="co">#&gt; Formula: Reaction ~ Days + (1 | Subject)</span>
@@ -190,241 +342,11 @@ u &amp;\sim N(0, G) \\
 <span class="co">#&gt;      (Intr)</span>
 <span class="co">#&gt; Days -0.380</span></pre></body></html></div>
 </div>
-<div id="parameterization-for-g" class="section level1">
-<h1 class="hasAnchor">
-<a href="#parameterization-for-g" class="anchor"></a>Parameterization for <span class="math inline">\(G\)</span>
-</h1>
-<p>The parameterization approach for this model uses a strategy recommended by Betancourt, Girolami (2013) to facilitate more efficient sampling in HMC.</p>
-<p>Further, the uniform parameterization of the variance parameters is replaced by a half-t family of distributions per Gelman (2006), Prior distributions for Variance parameters in hierarchical models. This parameterization is well-behaved around 0, in contrast to inverse gamma, and provides flexibility for more informed priors than a uniform distribution.</p>
-<p>We select a parameterization of <span class="math inline">\(G\)</span> such that the likelihood and its gradient can be derived for HMC. To this end, we uses LDL decomposition of <span class="math inline">\(G\)</span> to form a flexibile parameterization that can easily handle restrictions (Chan, Jelizkov 2009).</p>
-<p><span class="math display">\[
-\begin{aligned}
-u &amp;\sim N(0, G)  \\
-G &amp;= L D L^T \\
-&amp;= L D^{1/2} D^{1/2} L^T \\
-\end{aligned}
-\]</span></p>
-<p>Let <span class="math inline">\(\lambda_k\)</span> where <span class="math inline">\(k = 1, ... p\)</span> denote the diagonal entries of <span class="math inline">\(D^{1/2}\)</span> and let <span class="math inline">\(a_{kj}\)</span> where <span class="math inline">\(1 \leq j &lt; k \leq p\)</span> denote free elements of lower unitrangular matrix <span class="math inline">\(L\)</span></p>
-<p><span class="math display">\[
-D^{1/2} := 
-\begin{pmatrix}
-\lambda_1 &amp; 0 &amp; ... &amp; 0 \\
-0 &amp; \lambda_2 &amp; 0 ... &amp; 0 \\
-... &amp; ... &amp; ... &amp; ... \\
-0 &amp; 0 &amp; ... &amp; \lambda_p
-\end{pmatrix}, 
-L :=
-\begin{pmatrix}
-1 &amp; 0 &amp; 0 &amp; ... &amp; 0 \\
-a_{21} &amp; 1 &amp; 0 &amp; ... &amp; 0 \\
-a_{31} &amp; a_{32} &amp; 1 &amp; ... &amp; ... \\
-... &amp; ... &amp; ... &amp; ... &amp; ... \\
-a_{p1} &amp; a_{p2} &amp; ... &amp; ... &amp; 1 \\
-\end{pmatrix}
-\]</span></p>
-<p>Also define <span class="math inline">\(\lambda := (\lambda_1, ..., \lambda_p)^T\)</span> and <span class="math inline">\(a_k := (a_{k1}, ..., a_{k, k-1})^T\)</span> and <span class="math inline">\(a := (a_2^T, ..., a_p^T)^T\)</span></p>
-<p>Consider priors where <span class="math inline">\(k = 1...p\)</span>. The prior for <span class="math inline">\(\lambda_k\)</span> is half-t per Gelman (2006).</p>
-<p><span class="math display">\[
-\begin{aligned}
-p(\lambda_k) &amp;\sim \left(1 + \frac{1}{\nu}\left(\frac{\lambda_k}{A} \right)^2 \right)^{-(\nu+1)/2} \\
-a|\lambda &amp;\sim N(a_0, A_0)
-\end{aligned}
-\]</span></p>
-<p>The hyperparameter <span class="math inline">\(a_0\)</span> does not need to be zero, and <span class="math inline">\(A_0\)</span> can be correlated and may depend on <span class="math inline">\(\lambda\)</span>. In this model, we define <span class="math inline">\(a\)</span> independent of <span class="math inline">\(\lambda\)</span>.</p>
-<p>Per Betancourt, Girolami (2013), we re-parameterize <span class="math inline">\(u\)</span> using a standard normal parameterization we define as <span class="math inline">\(\tau = (\tau_1, ..., \tau_q)\)</span>. Here, <span class="math inline">\(u\)</span> is a deterministic function of <span class="math inline">\(G\)</span> and <span class="math inline">\(\tau\)</span>.</p>
-<p><span class="math display">\[
-\begin{aligned}
-\tau &amp;\sim N(0, I_q) \\
-u &amp;:= L D^{1/2} \tau \\
-&amp;\sim N(0, LD^{1/2} I (L D^{1/2})^T) \\
-&amp;\sim N(0, L D^{1/2} D^{1/2} L^T) \\
-&amp;\sim N(0, G)
-\end{aligned}
-\]</span></p>
-<p>The distribution of <span class="math inline">\(u\)</span> therefore does not change with this parameterization. The intent of our re-parameterization is to allow <span class="math inline">\(G\)</span> and <span class="math inline">\(\tau\)</span> to be largely independent in the MCMC sampling.</p>
-</div>
-<div id="derive-the-log-posterior-and-gradient" class="section level1">
-<h1 class="hasAnchor">
-<a href="#derive-the-log-posterior-and-gradient" class="anchor"></a>Derive the log posterior and gradient</h1>
-<p>First, we specify the likelihood and log-likelihood</p>
-<p><span class="math display">\[
-\begin{aligned}
-p(y | \beta, u_1, ..., u_c, \sigma_\epsilon^2) &amp;\propto (\sigma_\epsilon^2)^{-n/2} e^{-\frac{1}{2\sigma_\epsilon^2}(y - X\beta - Zu)^T (y - X\beta - Zu)} \\
-\log p(y | \beta, u_1, ..., u_c, \sigma_\epsilon^2) &amp;\propto -{n}\log(\sigma_\epsilon) -\frac{1}{2\sigma_\epsilon^2}(y - X\beta - Zu)^T (y - X\beta - Zu)
-\end{aligned}
-\]</span></p>
-<p>The posterior is defined for priors on <span class="math inline">\(\beta\)</span>, <span class="math inline">\(u\)</span>, <span class="math inline">\(\sigma_\epsilon^2\)</span>, and <span class="math inline">\(G\)</span>, with dependent vector <span class="math inline">\(y\)</span> and design matrices <span class="math inline">\(X\)</span> and <span class="math inline">\(Z\)</span>.</p>
-<p><span class="math display">\[
-\begin{aligned}
-p(\beta, u, \sigma_\epsilon^2, G | y, X, Z) &amp;\propto p(y | \beta, u, \sigma_\epsilon^2, G)  p(\beta, u, \sigma_\epsilon^2, G) \\
-&amp;\propto p(y | \beta, u, \sigma_\epsilon^2, G) p(\beta) p(\sigma_\epsilon^2) p(u, G) \\
-&amp;\propto p(y | \beta, u, \sigma_\epsilon^2, G) p(\beta) p(\sigma_\epsilon^2) p(u | G) p(G) \\
-\log p(\beta, u, \sigma_\epsilon^2, G | y, X, Z) &amp;\propto \log p(y | \beta, u, \sigma_\epsilon^2, G) + \log p(\beta) + \log p(\sigma_\epsilon^2)+ \log p(u|G) + \log p(G) \\
-\log p(\beta, \sigma_\epsilon, \tau, \lambda_1...\lambda_q,a | y, X, Z) &amp;\propto \log p(y | \beta, \tau, \sigma_\epsilon, \lambda, a) + \log p(\beta) + \log p(\sigma_\epsilon)+ \log p(\tau) + \log p(\lambda) + \log p(a)
-\end{aligned}
-\]</span></p>
-<p>We parameterize all standard deviations from the half-t family.</p>
-<p><span class="math display">\[
-\begin{aligned}
-p(\beta) &amp;\propto N(0, BI) \\
-p(\sigma_\epsilon) &amp;\sim  \left(1 + \frac{1}{\nu_\epsilon}\left(\frac{\sigma_\epsilon}{A_\epsilon} \right)^2 \right)^{-(\nu_\epsilon+1)/2}  \\
-p(\lambda_k) &amp;\sim  \left(1 + \frac{1}{\nu_{\lambda_k}}\left(\frac{\lambda_k}{A_{\lambda_k}} \right)^2 \right)^{-(\nu_{\lambda_k}+1)/2}  \\
-a &amp;\sim N(0, A_a)
-\end{aligned}
-\]</span></p>
-<p>We want proposals of <span class="math inline">\(\sigma_\epsilon^2\)</span> over the real number line. Therfore we derive the distribution of the transformed parameter <span class="math inline">\(\gamma\)</span> based on a change of variable</p>
-<p><span class="math display">\[
-\begin{aligned}
-\gamma &amp;:= \log \sigma_\epsilon \\
-e^\gamma &amp;= \sigma_\epsilon 
-\end{aligned}
-\]</span></p>
-<p>We need to compute the Jacobian of the transformation</p>
-<p><span class="math display">\[
-\begin{aligned}
-p_{\gamma}(\gamma) &amp;= p_{\sigma_\epsilon}(g^{-1}(\gamma))\lvert \frac{d\sigma_\epsilon}{d\gamma} \rvert \\
-&amp;= \left(1 + \frac{1}{\nu_\epsilon} \left(\frac{e^\gamma}{A_\epsilon} \right)^2 \right)^{-\frac{\nu_\epsilon +1}{2}} e^{\gamma} \\
-&amp;= \left(1 + \frac{1}{\nu_\epsilon} \frac{e^{2\gamma}}{A_\epsilon^2} \right)^{-\frac{\nu_\epsilon +1}{2}} e^{\gamma} \\
-\log p_{\gamma}(\gamma) &amp;\propto -\frac{\nu_\epsilon+1}{2}\log\left(1 + \frac{1}{\nu_\epsilon} \frac{e^{2\gamma}}{A_\epsilon^2} \right) + \gamma
-\end{aligned}
-\]</span></p>
-<p>We have hyperpriors <span class="math inline">\(\lambda\)</span> and <span class="math inline">\(a\)</span> for <span class="math inline">\(G\)</span>.</p>
-<p>Re-parameterize <span class="math inline">\(\xi_k = \log \lambda_k\)</span> and <span class="math inline">\(e^{\xi_k} = \lambda_k\)</span></p>
-<p>Recall that we parameterized <span class="math inline">\(\lambda_k\)</span> as uniform</p>
-<p><span class="math display">\[
-\begin{aligned}
-\lambda_k &amp;\sim \text{half-t}(\nu_{\lambda_k}, A_{\lambda_k}) \\
-p_{\xi_k}(\xi_k) &amp;= p_{\lambda_k}(g^{-1}(\xi_k)) \left\lvert \frac{d\lambda_k}{d\xi_k}  \right\rvert \\
-&amp;= p_{\lambda_k} (e^{\xi_k})\lvert e^{\xi_k}\rvert \\
-&amp;= \left(1 + \frac{1}{\nu_{\lambda_k}} \frac{e^{2\xi_k}}{A_{\lambda_k}^2}\right)^{-\frac{\nu_{\lambda_k}+1}{2}}e^{\xi_k} \\
-\log p(\xi_k) &amp;\propto -\frac{\nu_{\lambda_k}+1}{2}\log\left(1 + \frac{1}{\nu_{\lambda_k}} \frac{e^{2\xi_k}}{A_{\lambda_k}^2}\right)+ \xi_k
-\end{aligned}
-\]</span></p>
-<p>Leveraging an idea from Chan, Jeliazkov (2009) MCMC estimation of restricted covariance matrices</p>
-<p>We write the matrix form of <span class="math inline">\(u = L D^{1/2} \tau\)</span> in a form with a parameter vector <span class="math inline">\(a\)</span> by which the gradient can be computed directly</p>
-<p><span class="math display">\[
-\begin{aligned}
-u &amp;= L D^{1/2} \tau \\
-&amp;= \widetilde{\tau} + \widetilde{T}a \\
-&amp;=\begin{pmatrix}
-e^\xi_1\tau_1 \\
-e^\xi_2\tau_2 \\
-e^\xi_3\tau_3 \\
-... \\
-... \\
-e^\xi_q\tau_q
-\end{pmatrix} + 
-\begin{pmatrix}
-0 &amp; ... &amp; &amp; &amp; &amp; &amp; &amp; ... &amp; 0 \\
-e^{\xi_1}\tau_1 &amp; 0 &amp; ... &amp; &amp; &amp; &amp; &amp; &amp; ... \\
-0 &amp; e^{\xi_1}\tau_1 &amp; e^{\xi_2}\tau_2 &amp; 0 &amp; ... &amp; &amp; &amp; &amp; 0 \\
-0 &amp; ... &amp; 0 &amp; e^{\xi_1}\tau_1 &amp; e^{\xi_2}\tau_2 &amp; e^{\xi_3}\tau_3 &amp; 0 &amp; ... &amp; ... \\
-... &amp; ... &amp; ... &amp; ... &amp; ... &amp; ... &amp; ... &amp; ... &amp; ... \\
-0 &amp; ... &amp; ... &amp; 0 &amp; ... &amp; ... &amp; e^{\xi_1}\tau_1 &amp; ... &amp; e^{\xi_q}\tau_q \\
-\end{pmatrix}
-\begin{pmatrix}
-a_{21} \\
-a_{31} \\
-a_{32} \\
-... \\
-... \\
-a_{q,q-1}
-\end{pmatrix}
-\end{aligned}
-\]</span></p>
-<p>Since we decompose <span class="math inline">\(G\)</span> using <span class="math inline">\(L D L^T\)</span>. We make use of the determinant property of a square matrix, where the determinant of a square matrix is equal to the determinant of its transpose. Also, from above <span class="math inline">\(\lvert L \rvert = 1\)</span></p>
-<p><span class="math display">\[
-\begin{aligned}
-\lvert G \rvert &amp;= \lvert L D L^T \rvert \\
-&amp;= \lvert L \rvert \lvert D \rvert \lvert L^T \rvert \\
-&amp;= \lvert D \rvert \\
-&amp;= \prod_{k=1}^q e^{2\xi_k} \\
-&amp;= e^{2\sum_{k=1}^q \xi_k} \\
-\log \lvert G \rvert &amp;= 2\sum_{k=1}^q \xi_k
-\end{aligned}
-\]</span></p>
-<p>Assign relatively uniformative prior for <span class="math inline">\(a\)</span></p>
-<p><span class="math display">\[
-\begin{aligned}
-a_k &amp;\sim N(0, A) \\
-p(a_k) &amp;\propto \lvert A  \rvert^{-1/2} e^{-\frac{1}{2} a_k^T A^{-1} a_k} \\
-\log p(a_k) &amp;\propto -\frac{1}{2}a_k^T A^{-1} a_k
-\end{aligned}
-\]</span></p>
-<p>Recall that the prior for <span class="math inline">\(\tau\)</span> is standard Normal (multivariate)</p>
-<p><span class="math display">\[
-\begin{aligned}
-\tau &amp;\sim N(0, I) \\
-p(\tau) &amp;\sim e^{-\frac{1}{2}\tau^T I \tau} \\
-\log p(\tau) &amp;\sim -\frac{1}{2} \tau^T \tau
-\end{aligned}
-\]</span></p>
-<p>Finally, we write the full log posterior</p>
-<p><span class="math display">\[
-\begin{aligned}
-\log p(\beta, \sigma_\epsilon, \tau, \lambda_1...\lambda_q,a | y, X, Z) &amp;\propto \log p(y | \beta, \tau, \sigma_\epsilon, \lambda, a) + \log p(\beta) + \log p(\sigma_\epsilon)+ \log p(\tau) + \log p(\lambda) + \log p(a) \\
-\log p(\beta, \gamma, \tau, \xi_1...\xi_q,a | y, X, Z) &amp;\propto \log p(y | \beta, \tau, \gamma, \xi, a) + \log p(\beta) + \log p(\gamma)+ \log p(\tau) + \log p(\xi) + \log p(a) \\
-&amp;\propto  -n\gamma -\frac{e^{-2\gamma}}{2}(y - X\beta - Zu)^T (y - X\beta - Zu)  - \frac{1}{2}\beta^T\Sigma_\beta^{-1}\beta \\
-&amp;-\frac{\nu_\epsilon+1}{2}\log\left(1 + \frac{1}{\nu_\epsilon} \frac{e^{2\gamma}}{A_\epsilon^2} \right) + \gamma  -\frac{1}{2} a^T A^{-1} a -\frac{1}{2} \tau^T \tau\\
-&amp;-\sum_{k=1}^q \left(\frac{\nu_{\lambda_k}+1}{2}\log\left(1 + \frac{1}{\nu_{\lambda_k}} \frac{e^{2\xi_k}}{A_{\lambda_k}^2}\right)+ \xi_k\right)\\
-&amp;\propto  -n\gamma -\frac{e^{-2\gamma}}{2}(y - X\beta - ZL D^{1/2}\tau)^T (y - X\beta - ZL D^{1/2}\tau) - \frac{1}{2}\beta^T\Sigma_\beta^{-1}\beta \\
-&amp;-\frac{\nu_\epsilon+1}{2}\log\left(1 + \frac{1}{\nu_\epsilon} \frac{e^{2\gamma}}{A_\epsilon^2} \right) + \gamma  -\frac{1}{2} a^T A^{-1} a -\frac{1}{2} \tau^T \tau\\
-&amp;-\sum_{k=1}^q \left(\frac{\nu_{\lambda_k}+1}{2}\log\left(1 + \frac{1}{\nu_{\lambda_k}} \frac{e^{2\xi_k}}{A_{\lambda_k}^2}\right)+ \xi_k\right)\\
-\end{aligned}
-\]</span></p>
-<div id="derive-the-gradient-of-the-log-posterior" class="section level2">
+<div id="fit-model-using-hmc" class="section level2">
 <h2 class="hasAnchor">
-<a href="#derive-the-gradient-of-the-log-posterior" class="anchor"></a>Derive the gradient of the log posterior</h2>
-<p>Derive the partial derivative of <span class="math inline">\(\tau\)</span></p>
-<p><span class="math display">\[
-\begin{aligned}
-\frac{\partial l}{\partial\tau} &amp;\propto \frac{\partial}{\partial\tau}\left(-\frac{e^{-2\gamma}}{2}(y-X\beta-ZLD^{1/2}\tau)^T(y-X\beta-ZLD^{1/2}\tau) - \frac{1}{2}\tau^T\tau\right) \\
-&amp;\propto e^{-2\gamma}(ZLD^{1/2})^T (y-X\beta-ZLD^{1/2}\tau) - \tau \\
-&amp;\propto e^{-2\gamma} D^{1/2}L^T Z^T(y - X\beta - ZLD^{1/2}\tau) - 1
-\end{aligned}
-\]</span></p>
-<p>Derive the partial derivative of <span class="math inline">\(\xi_k\)</span>. Here <span class="math inline">\(J^{kk}\)</span> is the singular entry matrix of <span class="math inline">\(e^{\xi_k}\)</span> at <span class="math inline">\(kk\)</span>, with the remaining matrix elements zero.</p>
-<p><span class="math display">\[
-\begin{aligned}
-\frac{\partial l}{\partial\xi_k} &amp;\propto \frac{\partial}{\partial\xi_k}\left(-\frac{e^{-2\gamma}}{2}(y-X\beta-ZLD^{1/2}\tau)^T(y - X\beta-ZLD^{1/2}\tau) - \frac{\nu_{\lambda_k}+1}{2}\log\left(1 + \frac{1}{\nu_{\lambda_k}}\frac{e^{2\xi_k}}{A_{\lambda_k}^2} \right) +\xi_k\right) \\
-&amp;\propto e^{-2\gamma} \text{tr}\left((y - X\beta - ZLD^{1/2}\tau) (Z L J^{kk} \tau)^T\right) - (\nu_{\lambda_k}+1)\frac{1}{1 + \nu_{\lambda_k}A_{\lambda_k}^2 e^{-2\xi_k}}+1
-\end{aligned}
-\]</span></p>
-<p>Derive the partial derivative with respect to <span class="math inline">\(a\)</span>.</p>
-<p>Note that the following are equivalent</p>
-<p><span class="math display">\[
-\begin{aligned}
-L D^{1/2}\tau = D^{1/2} \tau + \widetilde{T} a
-\end{aligned}
-\]</span></p>
-<p>Therefore, the portion of the log likelihood dependent on <span class="math inline">\(a\)</span> becomes</p>
-<p><span class="math display">\[
-\begin{aligned}
-\frac{\partial l}{\partial a} &amp;\propto \frac{\partial}{\partial a}\left(-\frac{e^{-2\gamma}}{2}(y-X\beta - \widetilde\tau - \widetilde{T}a)^T(y-X\beta - \widetilde\tau - \widetilde{T}a) -\frac{1}{2}a^T A^{-1} a \right) \\
-&amp;\propto e^{-2\gamma} \widetilde{T}^T(y-X\beta-\widetilde\tau - \widetilde{T}a) - A^{-1}a 
-\end{aligned}
-\]</span></p>
-<p>The gradient of full log posterior can now be specified</p>
-<p><span class="math display">\[
-\begin{aligned}
-\log p(\beta, \gamma, \tau, \xi_1...\xi_q,a | y, X, Z) &amp;\propto \log p(y | \beta, \tau, \gamma, \xi, a) + \log p(\beta) + \log p(\gamma)+ \log p(\tau) + \log p(\xi) + \log p(a) \\
-&amp;\propto  -n\gamma -\frac{e^{-2\gamma}}{2}(y - X\beta - ZLD^{1/2}\tau)^T (y - X\beta - ZLD^{1/2}\tau)  -\frac{1}{2}\beta^T\Sigma_\beta^{-1}\beta\\
-&amp;-\frac{\nu_\epsilon+1}{2}\log\left(1 + \frac{1}{\nu_\epsilon} \frac{e^{2\gamma}}{A_\epsilon^2} \right) + \gamma  -\frac{1}{2} a^T A^{-1} a -\frac{1}{2} \tau^T \tau\\
-&amp;-\sum_{k=1}^q \left(\frac{\nu_{\lambda_k}+1}{2}\log\left(1 + \frac{1}{\nu_{\lambda_k}} \frac{e^{2\xi_k}}{A_{\lambda_k}^2}\right)+ \xi_k\right)\\
-\frac{\partial l}{\partial\beta} &amp;= e^{-2\gamma}X^T(y-X\beta-ZLD^{1/2}\tau)-\Sigma_\beta^{-1}\beta \\
-\frac{\partial l}{\partial\gamma} &amp;= -(n-1)+e^{-2\gamma}(y-X\beta-ZLD^{1/2}\tau)^T(y-X\beta-ZLD^{1/2}\tau) \\
-&amp;-(\nu_\epsilon + 1) \frac{1}{1 + \nu_\epsilon A_\epsilon^2 e^{-2\gamma}} \\
-\frac{\partial l}{\partial\tau} &amp;=  e^{-2\gamma} D^{1/2}L^T Z^T(y - X\beta - ZLD^{1/2}\tau) - \tau\\
-\frac{\partial l}{\partial\xi_k} &amp;=  e^{-2\gamma}\text{tr}\left((y - X\beta - ZLD^{1/2}\tau) (Z L J^{kk} \tau)^T\right) - (\nu_{\lambda_k}+1)\frac{1}{1 + \nu_{\lambda_k}A_{\lambda_k}^2 e^{-2\xi_k}}+1  \\
-\frac{\partial l}{\partial a} &amp;= e^{-2\gamma}\widetilde{T}^T Z^T(y - X\beta-ZD^{1/2}\tau - Z\widetilde{T}a) - A^{-1}a 
-\end{aligned}
-\]</span></p>
-</div>
-</div>
-<div id="hamiltonian-monte-carlo" class="section level1">
-<h1 class="hasAnchor">
-<a href="#hamiltonian-monte-carlo" class="anchor"></a>Hamiltonian Monte Carlo</h1>
-<p>Run HMC for linear mixed effects regression model</p>
+<a href="#fit-model-using-hmc" class="anchor"></a>Fit model using <em>hmc</em>
+</h2>
+<p>Next, we fit the linear mixed effects regression model using HMC. A vector of <em>tuning parameter</em> <span class="math inline">\(\epsilon\)</span> values are specified to align with the data. The hyperparameters for <span class="math inline">\(\nu_\gamma\)</span>, <span class="math inline">\(A_\gamma\)</span>, <span class="math inline">\(\nu_\xi\)</span>, and <span class="math inline">\(A_\xi\)</span> are set to values more appropriate for hierarchical models (Gelman 2006). The hyperprior <span class="math inline">\(\sigma_\beta^2\)</span> is set higher than the default based on the range of the dependent variable.</p>
 <div class="sourceCode" id="cb4"><html><body><pre class="r"><span class="no">N</span> <span class="kw">&lt;-</span> <span class="fl">2e3</span>
 
 <span class="no">theta.init</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0</span>, <span class="fl">1</span>, <span class="co"># beta </span>
@@ -454,7 +376,7 @@ L D^{1/2}\tau = D^{1/2} \tau + \widetilde{T} a
                <span class="kw">parallel</span><span class="kw">=</span><span class="fl">FALSE</span>, <span class="kw">chains</span><span class="kw">=</span><span class="fl">2</span>)
 <span class="no">t2.hmc</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span>()
 <span class="no">t2.hmc</span> - <span class="no">t1.hmc</span>
-<span class="co">#&gt; Time difference of 1.125177 mins</span></pre></body></html></div>
+<span class="co">#&gt; Time difference of 1.283095 mins</span></pre></body></html></div>
 <p>The acceptance ratio for each of the HMC chains is sufficiently high for an efficient simulation.</p>
 <div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="no">f_hmc</span>$<span class="no">accept</span>/<span class="no">N</span>
 <span class="co">#&gt; [1] 0.814 0.805</span></pre></body></html></div>
@@ -515,19 +437,43 @@ L D^{1/2}\tau = D^{1/2} \tau + \widetilde{T} a
 <span class="no">xi.freq</span> <span class="kw">&lt;-</span> <span class="fl">1</span>/<span class="fl">2</span>*<span class="fu"><a href="https://rdrr.io/r/base/Log.html">log</a></span>(<span class="fu"><a href="https://rdrr.io/pkg/lme4/man/VarCorr.html">VarCorr</a></span>(<span class="no">fm1</span>)$<span class="no">Subject</span>[<span class="fl">1</span>])
 <span class="no">sigeps.freq</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">log</a></span>(<span class="fu"><a href="https://rdrr.io/pkg/lme4/man/sigma.html">sigma</a></span>(<span class="no">fm1</span>))
 <span class="no">theta.freq</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="no">beta.freq</span>, <span class="no">sigeps.freq</span>, <span class="no">xi.freq</span>)
+
+<span class="co"># histograms with lines for frequentist estimates</span>
 <span class="fu"><a href="../reference/diagplots.html">diagplots</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html">trunc</a></span>(<span class="no">N</span>*<span class="fl">.3</span>),
           <span class="kw">comparison.theta</span><span class="kw">=</span><span class="no">theta.freq</span>, <span class="kw">cols</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">1</span>:<span class="fl">2</span>, <span class="fl">21</span>:<span class="fl">22</span>))
 <span class="co">#&gt; $histogram</span></pre></body></html></div>
-<p><img src="linear_mixed_effects_hmclearn_files/figure-html/unnamed-chunk-8-1.png" width="576"></p>
+<p><img src="linear_mixed_effects_hmclearn_files/figure-html/unnamed-chunk-8-1.png" width="768"></p>
+<p>We also compare the random effects parameter estimates with <strong>lme4</strong>. The random effects parameters align with</p>
+<div class="sourceCode" id="cb9"><html><body><pre class="r"><span class="no">u.freq</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lme4/man/ranef.html">ranef</a></span>(<span class="no">fm1</span>)$<span class="no">Subject</span>[, <span class="fl">1</span>]
+<span class="no">lambda.freq</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span>(<span class="fu"><a href="https://rdrr.io/pkg/lme4/man/VarCorr.html">VarCorr</a></span>(<span class="no">fm1</span>)$<span class="no">Subject</span>[<span class="fl">1</span>])
+
+<span class="co"># transform parameters back to original scale</span>
+<span class="no">f_hmc</span>$<span class="no">thetaCombined</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span>(<span class="no">f_hmc</span>$<span class="no">thetaCombined</span>, <span class="kw">function</span>(<span class="no">xx</span>) {
+  <span class="no">tau_mx</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span>(<span class="no">xx</span>[, <span class="fu"><a href="https://rdrr.io/r/base/grep.html">grepl</a></span>(<span class="st">"tau"</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span>(<span class="no">xx</span>))])
+  <span class="no">u_mx</span> <span class="kw">&lt;-</span> <span class="no">tau_mx</span> * <span class="fu"><a href="https://rdrr.io/r/base/Log.html">exp</a></span>(<span class="no">xx</span>[, <span class="st">"xi"</span>])
+  <span class="no">u_df</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span>(<span class="no">u_mx</span>)
+  <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span>(<span class="no">u_df</span>) <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span>(<span class="st">"u"</span>, <span class="fl">1</span>:<span class="fu"><a href="https://rdrr.io/r/base/nrow.html">ncol</a></span>(<span class="no">u_df</span>))
+  <span class="no">xx</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span>(<span class="no">xx</span>, <span class="no">u_df</span>, <span class="fu"><a href="https://rdrr.io/r/base/Log.html">exp</a></span>(<span class="no">xx</span>[, <span class="st">"xi"</span>]))
+  <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span>(<span class="no">xx</span>)[<span class="fu"><a href="https://rdrr.io/r/base/nrow.html">ncol</a></span>(<span class="no">xx</span>)] <span class="kw">&lt;-</span> <span class="st">"lambda"</span>
+  <span class="no">xx</span>
+})
+
+<span class="co"># histograms with lines for frequentist estimates</span>
+<span class="no">ucols</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/grep.html">grepl</a></span>(<span class="st">"^u"</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span>(<span class="no">f_hmc</span>$<span class="no">thetaCombined</span><span class="kw">[[</span><span class="fl">1</span>]])))
+<span class="no">lambdacol</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/grep.html">grepl</a></span>(<span class="st">"^lambda"</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span>(<span class="no">f_hmc</span>$<span class="no">thetaCombined</span><span class="kw">[[</span><span class="fl">1</span>]])))
+<span class="fu"><a href="../reference/diagplots.html">diagplots</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html">trunc</a></span>(<span class="no">N</span>*<span class="fl">.3</span>),
+          <span class="kw">comparison.theta</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="no">u.freq</span>, <span class="no">lambda.freq</span>), <span class="kw">cols</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="no">ucols</span>, <span class="no">lambdacol</span>))
+<span class="co">#&gt; $histogram</span></pre></body></html></div>
+<p><img src="linear_mixed_effects_hmclearn_files/figure-html/unnamed-chunk-9-1.png" width="768"></p>
 </div>
-<div id="source" class="section level1">
-<h1 class="hasAnchor">
-<a href="#source" class="anchor"></a>Source</h1>
+<div id="source" class="section level2">
+<h2 class="hasAnchor">
+<a href="#source" class="anchor"></a>Source</h2>
 <p>Gregory Belenky, Nancy J. Wesensten, David R. Thorne, Maria L. Thomas, Helen C. Sing, Daniel P. Redmond, Michael B. Russo and Thomas J. Balkin (2003) Patterns of performance degradation and restoration during sleep restriction and subsequent recovery: a sleep dose-response study. <em>Journal of Sleep Research</em> 12, 1–12.</p>
 </div>
-<div id="references" class="section level1">
-<h1 class="hasAnchor">
-<a href="#references" class="anchor"></a>References</h1>
+<div id="references" class="section level2">
+<h2 class="hasAnchor">
+<a href="#references" class="anchor"></a>References</h2>
 <p>Bates, D., M"{a}chler, M., Bolker, B., &amp; Walker, S. (2015). Fitting linear mixed-effects models using lme4. <em>Journal of Statistical Software</em> 67(1)</p>
 <p>Betancourt, M., &amp; Girolami, M. (2015). Hamiltonian Monte Carlo for hierarchical models. <em>Current trends in Bayesian methodology with applications</em>, 79(30), 2-4.</p>
 <p>Gelman, Andrew. (2006) “Prior distributions for variance parameters in hierarchical models (comment on article by Browne and Draper).” <em>Bayesian analysis</em> 1.3: 515-534.</p>
