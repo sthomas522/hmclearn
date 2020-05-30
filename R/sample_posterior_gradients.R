@@ -255,7 +255,7 @@ poisson_posterior <- function(theta, y, X, sig2beta=1e3) {
   beta_param <- theta
   onev <- rep(1, length(y))
 
-  ll_pois <- y %*% X %*% beta_param - onev %*% exp( X %*% beta_param)
+  ll_pois <- t(y) %*% X %*% beta_param - onev %*% exp( X %*% beta_param)
 
   result <- ll_pois - 1/2* t(beta_param) %*% beta_param / sig2beta
 

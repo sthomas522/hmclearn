@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Introduction
+## Introduction
 
 This vignette demonstrates fitting a Poisson regression model via Hamiltonian Monte Carlo (HMC) using the **hmclearn** package. 
 
@@ -24,86 +24,83 @@ This vignette demonstrates fitting a Poisson regression model via Hamiltonian Mo
 library(hmclearn)
 ```
 
-# GLM - Poisson Regression
-
 For a count response, we let
 
 $$
-p(y; \mu) = \frac{e^{-\mu}\mu^y}{y!}
+p(y | \mu) = \frac{e^{-\mu}\mu^y}{y!},
 $$
 
 with a log-link function
 
 $$
 \begin{aligned}
-\mu &:= E(Y | x) = e^{X\beta} \\
-\log \mu &= X\beta.
+\boldsymbol\mu &:= E(\mathbf{y} | \mathbf{X}) = e^{\mathbf{X}\boldsymbol\beta}, \\
+\log \boldsymbol\mu &= \mathbf{X}\boldsymbol\beta.
 \end{aligned}
 $$
+The vector of responses is  $\mathbf{y} = (y_1, ..., y_n)^T$. The covariate values for the \textit{i}th subject are $\mathbf{x}_i^T = (x_{i0}, ..., x_{iq})$ for $q$ covariates plus an intercept. We write the full design matrix as $\mathbf{X} = (\mathbf{x}_1^T, ..., \mathbf{x}_n^T)^T \in \mathbb{R}^{n\times(q+1)}$ for $n$ observations. The regression coefficients are a vector of length $q + 1$, $\boldsymbol\beta = (\beta_0, ..., \beta_q)^T$.
 
-Next, we develop the likelihood
+## Derive log posterior and gradient for HMC
+
+We develop the likelihood
 
 $$
 \begin{aligned}
-L(\mu; y) &= \prod_{i=1}^n \frac{e^{-\mu_i}\mu_i^{y_i}}{y_i!} \\
-L(\beta; y, X) &= \prod_{i=1}^n \frac{e^{-e^{X_i\beta}}e^{y_iX_i\beta}}{y_i!} \\
+f(\mathbf{y} | \boldsymbol\mu) &= \prod_{i=1}^n \frac{e^{-\mu_i}\mu_i^{y_i}}{y_i!}, \\
+f(\mathbf{y} | \mathbf{X}, \boldsymbol\beta) &= \prod_{i=1}^n \frac{e^{-e^{\mathbf{x}_i^T\boldsymbol\beta}}e^{y_i\mathbf{x}_i^T\boldsymbol\beta}}{y_i!}, \\
 \end{aligned}
 $$
 
-with log-likelihood
+and log-likelihood
 
 $$
 \begin{aligned}
-l(\beta; y, X) &= \sum_{i=1}^n -e^{X_i\beta} + y_i X_i \beta - \log y_i! \\
-&\propto \sum_{i=1}^n -e^{X_i\beta} + y_i X_i \beta.
+f(\mathbf{y} | \mathbf{X}, \boldsymbol\beta) &= \sum_{i=1}^n -e^{\mathbf{x}_i^T\boldsymbol\beta} + y_i \mathbf{x}_i^T \boldsymbol\beta - \log y_i!,  \\
+&\propto \sum_{i=1}^n -e^{\mathbf{x}_i^T\boldsymbol\beta} + y_i \mathbf{x}_i^T \boldsymbol\beta.
 \end{aligned}
 $$
 
-We set a multivariate Normal prior for $\beta$
+We set a multivariate normal prior for $\boldsymbol\beta$
 
 $$
 \begin{aligned}
-\beta &\sim N(0, \Sigma_\beta) \\
-&\sim N(0, \sigma_\beta^2I)
+\boldsymbol\beta &\sim N(0, \sigma_\beta^2 \mathbf{I}), 
 \end{aligned}
 $$
 
-
-with pdf
+with pdf, omitting constants
 
 $$
 \begin{aligned}
-p(\beta) &= \frac{1}{\sqrt{\lvert 2\pi \Sigma_\beta \rvert }}e^{-\frac{1}{2}\beta^T \Sigma_\beta^{-1}\beta} \\
-\log p(\beta) &= -\frac{1}{2}\log(2\pi \lvert \Sigma_\beta \rvert) - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta \\
-&\propto -\frac{1}{2}\log \lvert\Sigma_\beta\rvert - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta.
+\pi(\boldsymbol\beta | \sigma_\beta^2) &= \frac{1}{\sqrt{\lvert 2\pi \sigma_\beta^2 \rvert }}e^{-\frac{1}{2}\boldsymbol\beta^T \boldsymbol\beta / \sigma_\beta^2},  \\
+\log \pi(\boldsymbol\beta | \sigma_\beta^2) &= -\frac{1}{2}\log(2\pi \sigma_\beta^2) - \frac{1}{2}\boldsymbol\beta^T \boldsymbol\beta / \sigma_\beta^2, \\
+&\propto -\frac{1}{2}\log \sigma_\beta^2 - \frac{\boldsymbol\beta^T\boldsymbol\beta}{2\sigma_\beta^2}.
 \end{aligned}
 $$
 
-Let $B = 1e3$ for instance, as a relatively uninformative prior.
-
-Next, we derive the log posterior.  The log posterior is the sum of the log likelihood and the log of the prior for $\beta$.  
+Next, we derive the log posterior, omitting constants, 
 
 $$
 \begin{aligned}
-p(\beta | X, y) &\propto p(y | X, \beta)  p(\beta) \\
-\log p(\beta | X, y) & \propto \log p(y | X, \beta) + \log p(\beta) \\
-&\propto \sum_{i=1}^n \left( -e^{X_i\beta} + y_i X_i \beta\right) -\frac{1}{2}\log \lvert\Sigma_\beta\rvert - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta \\
-&\propto \sum_{i=1}^n \left( -e^{X_i\beta} + y_i X_i \beta\right) - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta
+f(\boldsymbol\beta | \mathbf{X}, \mathbf{y}, \sigma_\beta^2) &\propto f(\mathbf{y} | \mathbf{X}, \boldsymbol\beta) \pi(\boldsymbol\beta | \sigma_\beta^2), \\
+\log f(\boldsymbol\beta | \mathbf{X}, \mathbf{y}, \sigma_\beta^2) & \propto \log f(\mathbf{y} | \mathbf{X}, \boldsymbol\beta) + \log \pi(\beta | \sigma_\beta^2), \\
+&\propto \sum_{i=1}^n \left( -e^{\mathbf{x}_i^T\boldsymbol\beta} + y_i \mathbf{x}_i^T \boldsymbol\beta\right) - \frac{1}{2}\beta^T\beta/\sigma_\beta^2, \\
+&\propto \sum_{i=1}^n \left( -e^{\mathbf{x}_i^T\boldsymbol\beta} + y_i \mathbf{x}_i^T \boldsymbol\beta\right) - \frac{\boldsymbol\beta^T\boldsymbol\beta}{2\sigma_\beta^2}, \\
+&\propto \mathbf{y}^T\mathbf{X}\boldsymbol\beta - \mathbf{1}_n^T e^{\mathbf{X}\boldsymbol\beta} - \frac{\boldsymbol\beta^T\boldsymbol\beta}{2\sigma_\beta^2}.
 \end{aligned}
 $$
-
 
 We need to derive the gradient of the log posterior for the leapfrog function in HMC.  
 
 $$
 \begin{aligned}
-\log p(\beta | X, y) & \propto \log p(y | X, \beta) + \log p(\beta) \\
-&\propto \sum_{i=1}^n \left( -e^{X_i\beta} + y_i X_i \beta\right) - \frac{1}{2}\beta^T \Sigma_\beta^{-1} \beta \\
-\frac{\partial}{\partial \beta}\log p(\beta|X, y) &\propto \sum_{i=1}^n\left( -e^{X_i\beta}X_i + y_iX_i\right) - \Sigma_\beta^{-1} \beta
+\nabla_{\boldsymbol\beta}\log f(\boldsymbol\beta|\mathbf{X}, \mathbf{y}, \sigma_\beta^2) &\propto \sum_{i=1}^n\left( -e^{\mathbf{x}_i^T\boldsymbol\beta}\mathbf{x}_i + y_i\mathbf{x}_i\right) - \boldsymbol\beta / \sigma_\beta^2, \\
+&\propto \sum_{i=1}^n \mathbf{x}_i\left( -e^{\mathbf{x}_i^T\boldsymbol\beta} + y_i\right) - \boldsymbol\beta / \sigma_\beta^2, \\
+&\propto \mathbf{X}^T (\mathbf{y} - e^{\mathbf{X}\boldsymbol\beta}) - \boldsymbol\beta/ \sigma_\beta^2.
 \end{aligned}
 $$
 
-# Poisson Regression Example Data
+## Poisson Regression Example Data
 
 The user must define provide the design matrix directly for use in **hmclearn**.  Our first step is to load the data and store the design matrix $X$ and dependent variable vector $y$. 
 
@@ -118,8 +115,9 @@ X <- X[, 1:ncol(X)]
 
 # independent variable is count data
 y <- Drugs$count
-
 ```
+
+## Comparison model - Frequentist
 
 To compare results, we first fit a standard linear model using the frequentist function *glm*.  
 
@@ -127,12 +125,11 @@ To compare results, we first fit a standard linear model using the frequentist f
 # matrix representation
 f <- glm(y ~ X-1, family=poisson(link=log))
 summary(f)
-
 ```
 
-# HMC poisson regression
+## Fit model using *hmc*
 
-Run HMC for poisson regression model
+Next, we fit the poisson regression model using HMC.  A vector of $\epsilon$ values are specified to align with the data.  
 
 ```{r, echo=TRUE}
 N <- 1e4
@@ -152,18 +149,21 @@ t2.hmc <- Sys.time()
 t2.hmc - t1.hmc
 ```
 
+
+## MCMC summary and diagnostics
+
 The acceptance ratio for each of the HMC chains is sufficiently high for an efficient simulation.  
 
 ```{r, echo=TRUE}
 f_hmc$accept/N
 ```
 
-The posterior quantiles are summarized after removing an initial *burnin* period.  
+The posterior quantiles are summarized after removing an initial *burnin* period. The $\hat{R}$ statistics provide an indication of convergence. Values close to one indicate that the multiple MCMC chains coverged to the same distribution, while values above 1.1 indicate possible convergence problems. All $\hat{R}$ values in our example are close to one. 
+
 
 ```{r, echo=TRUE}
 summary(f_hmc, burnin=3000)
 ```
-
 
 Trace plots provide a visual indication of stationarity.  These plots indicate that the MCMC chains are reasonably stationary.  
 
@@ -178,11 +178,11 @@ beta.freq <- coef(f)
 diagplots(f_hmc, burnin=3000, comparison.theta=beta.freq)
 ```
 
-# Source
+## Source
 
 Data originally provided by Harry Khamis, Wright State University
 
-# References
+## References
 
 Agresti, A. (2015). *Foundations of linear and generalized linear models*. John Wiley & Sons.  ISBN: 978-1-118-73003-4
 
