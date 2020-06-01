@@ -126,7 +126,8 @@ diagplots.hmclearn <- function(object, burnin=NULL, plotfun=2, comparison.theta=
   pdata$true.mu <- rep(comparison.theta, each=nrow(thetaCombinedsubs))
   pdata$coefficient <- as.factor(pdata$coefficient)
 
-  k <- ncol(data)
+  # k <- ncol(data)
+  k <- length(cols)
 
   # return list
 

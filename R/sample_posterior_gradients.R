@@ -395,7 +395,7 @@ glmm_bin_posterior <- function(theta, y, X, Z, n, nrandom=1,
 
   XZbetau <- X %*% beta_param + Z %*% u_param
 
-  log_likelihood <- sum( -(1-y) * XZbetau - log(1 + exp(-XZbetau)))
+  log_likelihood <- t(y-1) %*% XZbetau - t(rep(1, length(y))) %*% log(1 + exp(-XZbetau))
   log_beta_prior <- - 1/2*t(beta_param) %*% beta_param/sig2beta
   log_tau_prior <- -1/2 * t(tau_param) %*% tau_param
   log_xi_prior <- -(nuxi + 1)/2 * log(1 + 1/nuxi * exp(2*xi_param) / Axi^2)
@@ -439,10 +439,12 @@ g_glmm_bin_posterior <- function(theta, y, X, Z, n, nrandom=1,
   # gradient
   gradprop <- 1 / (1 + exp(X %*% beta_param + Z %*% u_param))
 
-  g_beta <- -t(1 - y) %*% X + t(gradprop) %*% X - t(beta_param/sig2beta)
+  # g_beta <- -t(1 - y) %*% X + t(gradprop) %*% X - t(beta_param/sig2beta)
+  g_beta <- t(X) %*% (y - 1 + gradprop) - beta_param/sig2beta
 
   # tau gradient
-  g_tau <- (-t(1-y) + t(gradprop)) %*% Z %*% LDhalf_block - tau_param
+  # g_tau <- (-t(1-y) + t(gradprop)) %*% Z %*% LDhalf_block - tau_param
+  g_tau <- LDhalf_block %*% t(Z) %*% (y - 1 + gradprop) - tau_param
 
   # gradient for xi using matrix algebra
   zero_v <- rep(0, nrandom)
@@ -450,7 +452,8 @@ g_glmm_bin_posterior <- function(theta, y, X, Z, n, nrandom=1,
     zv <- zero_v
     zv[jj] <- 1
     bd <- kronecker(diag(n), diag(zv, nrandom, nrandom))
-    (-t(1-y) + t(gradprop)) %*% Z %*% L_block %*% bd %*% Dhalf_block %*% tau_param
+    # (-t(1-y) + t(gradprop)) %*% Z %*% L_block %*% bd %*% Dhalf_block %*% tau_param
+    t(tau_param) %*% Dhalf_block %*% bd %*% L_block %*% t(Z) %*% (y - 1 + gradprop)
   })
   g_xi <- g_xi - (nuxi + 1) / (1 + nuxi*Axi^2 * exp(-2*xi_param))
 
@@ -458,7 +461,6 @@ g_glmm_bin_posterior <- function(theta, y, X, Z, n, nrandom=1,
              as.numeric(g_tau),
              g_xi)
 
-  return(g_all)
 }
 
 #' @rdname hmclearn-glm-posterior
