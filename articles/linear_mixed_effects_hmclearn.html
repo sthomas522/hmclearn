@@ -90,7 +90,7 @@
       <h1 data-toc-skip>hmclearn package: Linear Mixed Effects Regression Example</h1>
                         <h4 class="author">Samuel Thomas</h4>
             
-            <h4 class="date">2020-05-30</h4>
+            <h4 class="date">2020-06-01</h4>
       
       
       <div class="hidden name"><code>linear_mixed_effects_hmclearn.Rmd</code></div>
@@ -102,12 +102,8 @@
 <div id="introduction" class="section level2">
 <h2 class="hasAnchor">
 <a href="#introduction" class="anchor"></a>Introduction</h2>
-<p>This vignette demonstrates fitting a Linear mixed effects regression model via Hamiltonian Monte Carlo (HMC) using the <strong>hmclearn</strong> package,</p>
+<p>This vignette demonstrates fitting a linear mixed effects regression model via Hamiltonian Monte Carlo (HMC) using the <strong>hmclearn</strong> package,</p>
 <div class="sourceCode" id="cb1"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">hmclearn</span>)</pre></body></html></div>
-</div>
-<div id="linear-mixed-effects-model" class="section level2">
-<h2 class="hasAnchor">
-<a href="#linear-mixed-effects-model" class="anchor"></a>Linear Mixed Effects Model</h2>
 <p>We specify the model and prior distributions for <span class="math inline">\(\mathbf{u}\)</span> and <span class="math inline">\(\boldsymbol\epsilon\)</span>,</p>
 <p><span class="math display">\[
 \begin{aligned}
@@ -151,7 +147,7 @@
 0 &amp; 0 &amp; ... &amp; ... &amp; 1 \\
 \end{pmatrix}.
 \]</span></p>
-<p>Consider priors where <span class="math inline">\(jj = 1...p\)</span>. The priors for <span class="math inline">\(\boldsymbol\lambda = (\lambda_1, \lambda_p)^T\)</span> is half-t per Gelman (2006).</p>
+<p>We set the prior for <span class="math inline">\(\boldsymbol\beta\)</span> as multivariate normal with variance <span class="math inline">\(\sigma_\beta^2\)</span>, a hyperparameter set by the analyst. The priors for <span class="math inline">\(\sigma_\epsilon\)</span> and <span class="math inline">\(\boldsymbol\lambda\)</span> are half-t per Gelman (2006) on hierarchical models.</p>
 <p><span class="math display">\[
 \begin{aligned}
 \pi(\boldsymbol\beta | \sigma_\beta^2) &amp;\propto N(0, \sigma_\beta^2 \mathbf{I}), \\
@@ -208,43 +204,44 @@ f(\mathbf{y} | \boldsymbol\beta, \mathbf{u}, \sigma_\epsilon^2) &amp;\propto (\s
 f(\boldsymbol\beta, \mathbf{u}, \sigma_\epsilon^2, \mathbf{G} | \mathbf{y}, \mathbf{X}, \mathbf{Z}, \sigma_\beta^2) &amp;\propto f(\mathbf{y} | \boldsymbol\beta, \mathbf{u}, \sigma_\epsilon^2, \mathbf{G})  \pi(\boldsymbol\beta, \mathbf{u}, \sigma_\epsilon^2, \mathbf{G} | \sigma_\beta^2),  \\
 &amp;\propto f(\mathbf{y} | \boldsymbol\beta, \mathbf{u}, \sigma_\epsilon^2, \mathbf{G}) \pi(\boldsymbol\beta | \sigma_\beta^2) \pi(\sigma_\epsilon^2) \pi(\mathbf{u}, \mathbf{G}), \\
 &amp;\propto f(\mathbf{y} | \boldsymbol\beta, \mathbf{u}, \sigma_\epsilon^2, \mathbf{G}) \pi(\boldsymbol\beta | \sigma_\beta^2) \pi(\sigma_\epsilon^2) \pi(\mathbf{u} | \mathbf{G}) \pi(\mathbf{G}), \\
-\log f(\boldsymbol\beta, \mathbf{u}, \sigma_\epsilon^2, \mathbf{G} | \mathbf{y}, \mathbf{X}, \mathbf{Z}, \sigma_\beta^2) &amp;\propto \log f(\mathbf{y} | \boldsymbol\beta, \mathbf{u}, \sigma_\epsilon^2, G) + \log \pi(\boldsymbol\beta | \sigma_\beta^2) + \log \pi(\sigma_\epsilon^2)+ \log \pi(\mathbf{u}|\mathbf{G}) + \log \pi(\mathbf{G}), \\
+\log f(\boldsymbol\beta, \mathbf{u}, \sigma_\epsilon^2, \mathbf{G} | \mathbf{y}, \mathbf{X}, \mathbf{Z}, \sigma_\beta^2) &amp;\propto \log f(\mathbf{y} | \boldsymbol\beta, \mathbf{u}, \sigma_\epsilon^2, \mathbf{G}) + \log \pi(\boldsymbol\beta | \sigma_\beta^2) + \log \pi(\sigma_\epsilon^2)+ \log \pi(\mathbf{u}|\mathbf{G}) + \log \pi(\mathbf{G}), \\
 \log f(\boldsymbol\beta,\boldsymbol\tau, \gamma, \boldsymbol\xi | y, X, Z, \sigma_\beta^2, \nu_\gamma, A_\gamma, \nu_\xi, A_\xi) &amp;\propto \log f(\mathbf{y} | \boldsymbol\beta, \boldsymbol\tau, \gamma, \boldsymbol\xi) + \log \pi(\boldsymbol\beta | \sigma_\beta^2) + \log \pi(\gamma | \nu_\gamma, A_\gamma)+ \\
 &amp;\qquad\log \pi(\tau) + \log \pi(\boldsymbol\xi | \nu_\xi, A_\xi).
 \end{aligned}
 \]</span></p>
-<p>We write the re-parameterized log likelihood,</p>
+<p>One additional notation is added to simplify the log likelihood, log posterior, and gradient formulations, <span class="math inline">\(\widetilde{\mathbf{D}}^{1/2} = \mathbf{I}_n \otimes \mathbf{D}^{1/2}\)</span>. Note that <span class="math inline">\(\widetilde{\mathbf{D}}^{1/2} = \left(\widetilde{\mathbf{D}}^{1/2}\right ) ^T\)</span> due to symmetry. We omit <span class="math inline">\(\mathbf{L}\)</span> since this is currently defined as the identity matrix.</p>
+<p>We write the re-parameterized log likelihood omitting constants,</p>
 <p><span class="math display">\[
 \begin{aligned}
-\log f(\mathbf{y}|\mathbf{X}, \mathbf{Z}, \boldsymbol\beta, \boldsymbol\tau, \boldsymbol\xi, \gamma) = -nd\log\gamma - \frac{e^{-2\gamma}}{2} (\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau)^T(\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau).
+\log f(\mathbf{y}|\mathbf{X}, \mathbf{Z}, \boldsymbol\beta, \boldsymbol\tau, \boldsymbol\xi, \gamma) \propto -nd\log\gamma - \frac{e^{-2\gamma}}{2} (\mathbf{y} - \mathbf{X}\boldsymbol\beta - \mathbf{Z}\widetilde{\mathbf{D}}^{1/2}\boldsymbol\tau)^T(\mathbf{y} - \mathbf{X}\boldsymbol\beta - \mathbf{Z}\widetilde{\mathbf{D}}^{1/2}\boldsymbol\tau).
 \end{aligned}
 \]</span></p>
-<p>Next, the log priors that we use with transformations, omitting constants. Note that the log densities of the priors with log densities include an additive term for the transformed distribution (i.e. <span class="math inline">\(\xi\)</span> and <span class="math inline">\(\gamma\)</span>),</p>
+<p>Next, we express the log priors that we use with transformations, omitting constants. Note that the log densities of the priors with log densities include an additive term for the transformed distribution (i.e. <span class="math inline">\(\xi\)</span> and <span class="math inline">\(\gamma\)</span>),</p>
 <p><span class="math display">\[
 \begin{aligned}
 \log \pi(\boldsymbol\beta | \sigma_\beta^2) &amp;\propto -\frac{\boldsymbol\beta^T \boldsymbol\beta}{2\sigma_\beta^2}, \\
-\log \pi(\boldsymbol\xi | \nu_\xi, A_\xi) &amp;\propto -\frac{\nu_\xi + 1}{2} \log \left( 1 + \frac{1}{\nu_\xi} \left(\frac{e^\boldsymbol\xi}{A_\xi} \right)^2 \right) + \boldsymbol\xi, \\
+\log \pi(\xi_{jj} | \nu_\xi, A_\xi) &amp;\propto -\frac{\nu_\xi + 1}{2} \log \left( 1 + \frac{1}{\nu_\xi} \left(\frac{e^\xi_{jj}}{A_\xi} \right)^2 \right) + \xi_{jj}, \quad \forall (\xi_1, ..., \xi_p) \in \boldsymbol\xi, \\
 \log \pi(\boldsymbol\tau) &amp;\propto -\frac{1}{2}\boldsymbol\tau^T \boldsymbol\tau, \\
 \log \pi(\gamma | \nu_\gamma, A_\gamma) &amp;\propto -\frac{\nu_\gamma + 1}{2} \log \left( 1 + \frac{1}{\nu_\gamma} \left(\frac{e^\gamma}{A_\gamma} \right)^2 \right) + \gamma.
 \end{aligned}
 \]</span></p>
-<p>The full log posterior with transformed variables is the log likelihood plus the log prior,</p>
+<p>The full log posterior with transformed variables is the log likelihood plus the log prior. We develop the log posterior omitting constants,</p>
 <p><span class="math display">\[
 \begin{aligned}
 \log f(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z}, \sigma_\beta^2, \nu_\gamma, A_\gamma, \nu_\xi, A_\xi) &amp;\propto \log f(\mathbf{y} | \mathbf{X}, \mathbf{Z}, \boldsymbol\beta, \xi, \boldsymbol\tau, \gamma)  + \log \pi(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \sigma_\beta^2, \nu_\gamma, A_\gamma, \nu_\xi, A_\gamma), \\ 
 &amp;\propto \log f(\mathbf{y} | \mathbf{X}, \mathbf{Z}, \boldsymbol\beta, \xi, \boldsymbol\tau, \gamma) + \log \pi(\boldsymbol\beta | \sigma_\beta^2) + \log \pi(\xi | \nu_\xi, A_\xi) + \\
 &amp;\qquad \log\pi(\boldsymbol\tau) + \log\pi(\gamma | \nu_\gamma, A_\gamma),  \\
-&amp;\propto -nd\gamma - \frac{1}{2 e^{2\gamma}} (\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau)^T(\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau) - \\
-&amp;\quad \frac{\boldsymbol\beta^T \boldsymbol\beta}{2\sigma_\beta^2} -\frac{\nu_\xi + 1}{2} \sum_{jj = 1}^p \log \left( 1 + \frac{1}{\nu_{\xi_{jj}}} \left(\frac{e^{\xi_{jj}}}{A_\xi} \right)^2 \right) + \xi - \\
+&amp;\propto -nd\gamma - \frac{1}{2 e^{2\gamma}} (\mathbf{y} - \mathbf{X}\boldsymbol\beta - \mathbf{Z}\widetilde{\mathbf{D}}^{1/2}\boldsymbol\tau)^T(\mathbf{y} - \mathbf{X}\boldsymbol\beta - \mathbf{Z}\widetilde{\mathbf{D}}^{1/2}\boldsymbol\tau) - \\
+&amp;\quad \frac{\boldsymbol\beta^T \boldsymbol\beta}{2\sigma_\beta^2} -\frac{\nu_\xi + 1}{2} \sum_{jj = 1}^p \left  [ \log \left( 1 + \frac{1}{\nu_{\xi_{jj}}} \left(\frac{e^{\xi_{jj}}}{A_\xi} \right)^2 \right) + \xi_{jj}\right ] - \\
 &amp;\quad \frac{1}{2}\boldsymbol\tau^T \boldsymbol\tau -\frac{\nu_\gamma + 1}{2} \log \left( 1 + \frac{1}{\nu_\gamma} \left(\frac{e^\gamma}{A_\gamma} \right)^2 \right) + \gamma.
 \end{aligned}
 \]</span></p>
-<p>Next we derive the gradient of the log posterior, comprised of partial derivatives for each of our parameters.</p>
+<p>Next we derive the gradient of the log posterior, comprised of partial derivatives for each of our parameters</p>
 <p>We derive the partial derivative of <span class="math inline">\(\boldsymbol\beta\)</span>,</p>
 <p><span class="math display">\[
 \begin{aligned}
-\nabla_\beta \log f(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z}, \sigma_\beta^2, \nu_\gamma, A_\gamma, \nu_\xi, A_\xi) &amp;\propto -\frac{1}{2e^{2\gamma}} (-2) \sum_{\boldsymbol\xi = (\xi_1, ..., \xi_p)} \mathbf{X}^T(y-\mathbf{X}\boldsymbol\beta - e^{\boldsymbol\xi}\mathbf{Z}\boldsymbol\tau)- \frac{1}{\sigma_\beta^2}\boldsymbol\beta, \\
-&amp;\propto e^{-2\gamma}\mathbf{X}^T(y-\mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau)- \boldsymbol\beta / \sigma_\beta^2.
+\nabla_\beta \log f(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z}, \sigma_\beta^2, \nu_\gamma, A_\gamma, \nu_\xi, A_\xi) &amp;\propto -\frac{1}{2e^{2\gamma}} (-2) \mathbf{X}^T(y-\mathbf{X}\boldsymbol\beta - \mathbf{Z}\widetilde{\mathbf{D}}^{1/2}\boldsymbol\tau)- \boldsymbol\beta / \sigma_\beta^2, \\
+&amp;\propto e^{-2\gamma}\mathbf{X}^T(y-\mathbf{X}\boldsymbol\beta - \mathbf{Z}\widetilde{\mathbf{D}}^{1/2}\boldsymbol\tau)- \boldsymbol\beta / \sigma_\beta^2.
 \end{aligned}
 \]</span></p>
 <p>Next we derive the partial derivative of each parameter <span class="math inline">\(\xi_1, ..., \xi_p\)</span> where <span class="math inline">\(jj = 1, ..., p\)</span>,</p>
@@ -257,21 +254,28 @@ f(\boldsymbol\beta, \mathbf{u}, \sigma_\epsilon^2, \mathbf{G} | \mathbf{y}, \mat
 <p>Next, we derive the partial derivative of <span class="math inline">\(\boldsymbol\tau\)</span>,</p>
 <p><span class="math display">\[
 \begin{aligned}
-\nabla_\tau \log f(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z}, \sigma_\beta^2, \nu_\gamma, A_\gamma, \nu_\xi, A_\xi) &amp;\propto -\frac{e^{-2\gamma}}{2}(-2)(\mathbf{Z}\boldsymbol)^T e^{\xi}(\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau) - \frac{1}{2}\boldsymbol\tau, \\
-&amp;\propto e^{-2\gamma} \mathbf{Z}^T(\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau) -  \boldsymbol\tau.
+\nabla_\tau \log f(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z}, \sigma_\beta^2, \nu_\gamma, A_\gamma, \nu_\xi, A_\xi) &amp;\propto -\frac{e^{-2\gamma}}{2}(-2)\widetilde{\mathbf{D}}^{1/2}\mathbf{Z}^T (\mathbf{y} - \mathbf{X}\boldsymbol\beta - \mathbf{Z}\widetilde{\mathbf{D}}^{1/2}\boldsymbol\tau) - \boldsymbol\tau, \\
+&amp;\propto e^{-2\gamma} \widetilde{\mathbf{D}}^{1/2}\mathbf{Z}^T(\mathbf{y} - \mathbf{X}\boldsymbol\beta - \mathbf{Z}\widetilde{\mathbf{D}}^{1/2}\boldsymbol\tau) -  \boldsymbol\tau.
 \end{aligned}
 \]</span></p>
-<p>The gradient of full log posterior can now be specified</p>
+<p>Next, we derive the partial derivative for <span class="math inline">\(\gamma\)</span>,</p>
+<p><span class="math display">\[
+\begin{aligned}
+\nabla_\gamma \log f(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z}) &amp;\propto -nd + e^{-2\gamma}(\mathbf{y} - \mathbf{X}\boldsymbol\beta - \mathbf{Z}\widetilde{\mathbf{D}}^{1/2}\boldsymbol\tau)^T (\mathbf{y} - \mathbf{X}\boldsymbol\beta - \mathbf{Z}\widetilde{\mathbf{D}}^{1/2}\boldsymbol\tau) - \frac{\nu_\gamma + 1}{2}\left( 1 + \frac{1}{\nu_\gamma} \left(\frac{e^\gamma}{A_\gamma} \right)^2 \right)^{-1}\frac{2\gamma}{\nu_\gamma A_\gamma^2} + 1, \\ 
+&amp;\propto -nd + e^{-2\gamma}(\mathbf{y} - \mathbf{X}\boldsymbol\beta - \mathbf{Z}\widetilde{\mathbf{D}}^{1/2}\boldsymbol\tau)^T (\mathbf{y} - \mathbf{X}\boldsymbol\beta - \mathbf{Z}\widetilde{\mathbf{D}}^{1/2}\boldsymbol\tau) - \frac{\nu_\gamma + 1}{1 + \nu_\gamma A_\gamma^2 e^{-2\gamma}} + 1.
+\end{aligned}
+\]</span></p>
+<p>The gradient of full log posterior can now be specified,</p>
 <p><span class="math display">\[
 \begin{aligned}
 \nabla_{\boldsymbol\beta} \log f(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z}, \sigma_\beta^2, \nu_\gamma, A_\gamma, \nu_\xi, A_\xi), 
-&amp;\propto e^{-2\gamma}\mathbf{X}^T(y-\mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau)-  \boldsymbol\beta / \sigma_\beta^2, \\
+&amp;\propto e^{-2\gamma}\mathbf{X}^T(y-\mathbf{X}\boldsymbol\beta - \mathbf{Z}\widetilde{\mathbf{D}}^{1/2}\boldsymbol\tau)- \boldsymbol\beta / \sigma_\beta^2, \\
 \nabla_{\xi_{jj}} \log f(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z}, \sigma_\beta^2, \nu_\gamma, A_\gamma, \nu_\xi, A_\xi) &amp;\propto e^{-2\gamma + \xi_{jj}} \boldsymbol\tau^T \mathbf{Z}^T (\mathbf{y}-\mathbf{X}\boldsymbol\beta -e^{\xi_{jj}}\mathbf{Z}\boldsymbol\tau) - \frac{\nu_\xi + 1}{1 + \nu_\xi A_\xi^2 e^{-2\xi_{jj}}} + 1, \quad \forall (\xi_1, ..., \xi_p) \in \boldsymbol\xi, \\
-\nabla_{\boldsymbol\tau} \log f(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z}, \sigma_\beta^2, \nu_\gamma, A_\gamma, \nu_\xi, A_\xi) &amp;\propto e^{-2\gamma} \mathbf{Z}^T(\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau) - \boldsymbol\tau, \\
-\nabla_\gamma \log f(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z}, \sigma_\beta^2, \nu_\gamma, A_\gamma, \nu_\xi, A_\xi) &amp;\propto  -nd + e^{-2\gamma}(\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau)^T (\mathbf{y} - \mathbf{X}\boldsymbol\beta - e^{\xi}\mathbf{Z}\boldsymbol\tau) - \frac{\nu_\gamma + 1}{1 + \nu_\gamma A_\gamma^2 e^{-2\gamma}} + 1.
+\nabla_{\boldsymbol\tau} \log f(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z}, \sigma_\beta^2, \nu_\gamma, A_\gamma, \nu_\xi, A_\xi) &amp;\propto e^{-2\gamma} \widetilde{\mathbf{D}}^{1/2}\mathbf{Z}^T(\mathbf{y} - \mathbf{X}\boldsymbol\beta - \mathbf{Z}\widetilde{\mathbf{D}}^{1/2}\boldsymbol\tau) -  \boldsymbol\tau, \\
+\nabla_\gamma \log f(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z}, \sigma_\beta^2, \nu_\gamma, A_\gamma, \nu_\xi, A_\xi) &amp;\propto  -nd + e^{-2\gamma}(\mathbf{y} - \mathbf{X}\boldsymbol\beta - \mathbf{Z}\widetilde{\mathbf{D}}^{1/2}\boldsymbol\tau)^T (\mathbf{y} - \mathbf{X}\boldsymbol\beta - \mathbf{Z}\widetilde{\mathbf{D}}^{1/2}\boldsymbol\tau) - \frac{\nu_\gamma + 1}{1 + \nu_\gamma A_\gamma^2 e^{-2\gamma}} + 1.
 \end{aligned}
 \]</span></p>
-<p>Note that a random intercept model only has a single <span class="math inline">\(\xi\)</span> parameter, which simplifies the log posterior and gradient formulations.</p>
+<p>Note that a random intercept model only has a single <span class="math inline">\(\xi\)</span> parameter, which simplifies the log posterior and gradient formulations. For a random intercept model, <span class="math inline">\(\widetilde{\mathbf{D}}^{1/2} = e^{\xi}\mathbf{I}_n\)</span>.</p>
 </div>
 <div id="linear-mixed-effecgts-model-example-data" class="section level2">
 <h2 class="hasAnchor">
@@ -376,14 +380,14 @@ f(\boldsymbol\beta, \mathbf{u}, \sigma_\epsilon^2, \mathbf{G} | \mathbf{y}, \mat
                <span class="kw">parallel</span><span class="kw">=</span><span class="fl">FALSE</span>, <span class="kw">chains</span><span class="kw">=</span><span class="fl">2</span>)
 <span class="no">t2.hmc</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span>()
 <span class="no">t2.hmc</span> - <span class="no">t1.hmc</span>
-<span class="co">#&gt; Time difference of 1.283095 mins</span></pre></body></html></div>
+<span class="co">#&gt; Time difference of 1.140408 mins</span></pre></body></html></div>
 <p>The acceptance ratio for each of the HMC chains is sufficiently high for an efficient simulation.</p>
 <div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="no">f_hmc</span>$<span class="no">accept</span>/<span class="no">N</span>
 <span class="co">#&gt; [1] 0.814 0.805</span></pre></body></html></div>
 <p>Trace plots provide a visual indication of stationarity. These plots indicate that the MCMC chains are reasonably stationary.</p>
 <div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="fu"><a href="../reference/hmclearn-plots.html">mcmc_trace</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html">trunc</a></span>(<span class="no">N</span>*<span class="fl">.3</span>), <span class="kw">pars</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"beta0"</span>, <span class="st">"beta1"</span>, <span class="st">"sigeps"</span>, <span class="st">"xi"</span>))</pre></body></html></div>
 <p><img src="linear_mixed_effects_hmclearn_files/figure-html/unnamed-chunk-6-1.png" width="576"></p>
-<p>The posterior quantiles are summarized after removing an initial <em>burnin</em> period.</p>
+<p>The posterior quantiles are summarized after removing an initial <em>burnin</em> period. The <span class="math inline">\(\hat{R}\)</span> statistics are close to one, indicating that both HMC chains converged to the same distribution. The <span class="math inline">\(\hat{R}\)</span> statistics provide an indication of convergence. Values close to one indicate that the multiple MCMC chains converged to the same distribution, while values above 1.1 indicate possible convergence problems. All <span class="math inline">\(\hat{R}\)</span> values in our example are close to one.</p>
 <div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html">trunc</a></span>(<span class="no">N</span>*<span class="fl">.3</span>))
 <span class="co">#&gt; Summary of MCMC simulation</span>
 <span class="co">#&gt;                   2.5%            5%          25%           50%         75%</span>
@@ -443,7 +447,7 @@ f(\boldsymbol\beta, \mathbf{u}, \sigma_\epsilon^2, \mathbf{G} | \mathbf{y}, \mat
           <span class="kw">comparison.theta</span><span class="kw">=</span><span class="no">theta.freq</span>, <span class="kw">cols</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">1</span>:<span class="fl">2</span>, <span class="fl">21</span>:<span class="fl">22</span>))
 <span class="co">#&gt; $histogram</span></pre></body></html></div>
 <p><img src="linear_mixed_effects_hmclearn_files/figure-html/unnamed-chunk-8-1.png" width="768"></p>
-<p>We also compare the random effects parameter estimates with <strong>lme4</strong>. The random effects parameters align with</p>
+<p>We also compare the random effects parameter estimates with <strong>lme4</strong>. The random effects parameters align with frequentist estimates.</p>
 <div class="sourceCode" id="cb9"><html><body><pre class="r"><span class="no">u.freq</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lme4/man/ranef.html">ranef</a></span>(<span class="no">fm1</span>)$<span class="no">Subject</span>[, <span class="fl">1</span>]
 <span class="no">lambda.freq</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span>(<span class="fu"><a href="https://rdrr.io/pkg/lme4/man/VarCorr.html">VarCorr</a></span>(<span class="no">fm1</span>)$<span class="no">Subject</span>[<span class="fl">1</span>])
 
