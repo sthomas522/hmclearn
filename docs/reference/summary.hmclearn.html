@@ -95,9 +95,6 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/gradient_derivations_hmclearn.html">Gradient Derivations for HMC</a>
-    </li>
-    <li>
       <a href="../articles/linear_mixed_effects_hmclearn.html">hmclearn package:  Linear Mixed Effects Regression Example</a>
     </li>
     <li>
@@ -143,7 +140,12 @@
     </div>
 
     <pre class="usage"><span class='co'># S3 method for hmclearn</span>
-<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='no'>object</span>, <span class='kw'>burnin</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>probs</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>0.05</span>, <span class='fl'>0.25</span>, <span class='fl'>0.5</span>, <span class='fl'>0.75</span>, <span class='fl'>0.95</span>), <span class='no'>...</span>)</pre>
+<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(
+  <span class='no'>object</span>,
+  <span class='kw'>burnin</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>probs</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>0.025</span>, <span class='fl'>0.05</span>, <span class='fl'>0.25</span>, <span class='fl'>0.5</span>, <span class='fl'>0.75</span>, <span class='fl'>0.95</span>, <span class='fl'>0.975</span>),
+  <span class='no'>...</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -191,12 +193,18 @@
           <span class='kw'>param</span><span class='kw'>=</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='kw'>y</span><span class='kw'>=</span><span class='no'>y</span>, <span class='kw'>X</span><span class='kw'>=</span><span class='no'>X</span>), <span class='kw'>parallel</span><span class='kw'>=</span><span class='fl'>FALSE</span>, <span class='kw'>chains</span><span class='kw'>=</span><span class='fl'>1</span>)
 
 <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='no'>f1</span>)</div><div class='output co'>#&gt; Summary of MCMC simulation
-#&gt; </div><div class='output co'>#&gt;                      5%        25%        50%        75%        95%
-#&gt; beta0         0.4648189  0.5155872  0.5325537  0.5497568  0.5781873
-#&gt; beta1        -1.0488209 -1.0281105 -1.0118904 -0.9965476 -0.9627243
-#&gt; beta2         1.8882191  1.9997614  2.0164956  2.0314843  2.0521531
-#&gt; beta3        -3.0154147 -2.9970442 -2.9807522 -2.9646554 -2.8305029
-#&gt; log_sigma_sq -3.2522864 -3.1503169 -3.0392322 -2.9052983 -0.4878351</div></pre>
+#&gt; </div><div class='output co'>#&gt;                    2.5%         5%        25%        50%        75%        95%
+#&gt; beta0         0.3761942  0.4648189  0.5155872  0.5325537  0.5497568  0.5781873
+#&gt; beta1        -1.0739748 -1.0488209 -1.0281105 -1.0118904 -0.9965476 -0.9627243
+#&gt; beta2         0.9617633  1.8882191  1.9997614  2.0164956  2.0314843  2.0521531
+#&gt; beta3        -3.0255286 -3.0154147 -2.9970442 -2.9807522 -2.9646554 -2.8305029
+#&gt; log_sigma_sq -3.2893269 -3.2522864 -3.1503169 -3.0392322 -2.9052983 -0.4878351
+#&gt;                   97.5%
+#&gt; beta0         0.5854330
+#&gt; beta1        -0.9602134
+#&gt; beta2         2.0591168
+#&gt; beta3        -1.8103326
+#&gt; log_sigma_sq  1.5343091</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

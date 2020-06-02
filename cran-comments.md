@@ -15,6 +15,8 @@ Revised per feedback from CRAN volunteer, version 0.0.2
 
 * Included references for theoretical background in DESCRIPTION
 
+* Alan Agresti is included as a theoretical reference, but not the cph
+
 * Added small examples to all exported functions.  Removed dontrun sections
 
 * Added 5 vignettes with additional examples
@@ -22,3 +24,5 @@ Revised per feedback from CRAN volunteer, version 0.0.2
 * Added a number of tests using the testthat package
 
 * Added \value to all .Rd files
+
+* Changed some of the parameters to match a paper in development

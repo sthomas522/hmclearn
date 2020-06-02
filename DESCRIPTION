@@ -13,7 +13,7 @@ Description: Provide users with a framework to learn the intricacies of the Hami
     Gelman, A., Carlin, J. B., Stern, H. S., Dunson, D. B., Vehtari, A., & Rubin, D. B. (2013) "Bayesian Data Analysis" ISBN: 978-1439840955, 
     Agresti, Alan (2015) "Foundations of Linear and Generalized Linear Models ISBN: 978-1118730034, 
     Pinheiro, J., Bates, D. (2006) "Mixed-effects Models in S and S-Plus" ISBN: 978-1441903174.
-Depends: R (>= 3.6.0)
+Depends: R (>= 3.6)
 License: GPL-3
 Encoding: UTF-8
 Language: en-US
@@ -27,12 +27,12 @@ Suggests:
     mlbench,
     ggplot2,
     mlmRev,
-    testthat (>= 2.1.0),
+    testthat,
     MCMCpack
 RoxygenNote: 7.1.0
 Imports: 
     bayesplot,
     parallel,
-    mvtnorm,
-    MASS
+    MASS,
+    mvtnorm
 VignetteBuilder: knitr

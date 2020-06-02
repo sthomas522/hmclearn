@@ -1,5 +1,5 @@
 ---
-title: "hmclearn package:  Linear Regression Example"
+title: "hmclearn:  Linear Regression Example"
 author: "Samuel Thomas"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette

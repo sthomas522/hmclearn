@@ -96,9 +96,6 @@ values given a simulated dataset." />
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/gradient_derivations_hmclearn.html">Gradient Derivations for HMC</a>
-    </li>
-    <li>
       <a href="../articles/linear_mixed_effects_hmclearn.html">hmclearn package:  Linear Mixed Effects Regression Example</a>
     </li>
     <li>
@@ -148,7 +145,7 @@ values given a simulated dataset.</p>
   <span class='no'>object</span>,
   <span class='kw'>burnin</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>plotfun</span> <span class='kw'>=</span> <span class='fl'>2</span>,
-  <span class='kw'>actual.mu</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>comparison.theta</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>cols</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='no'>...</span>
 )</pre>
@@ -169,7 +166,7 @@ values given a simulated dataset.</p>
       <td><p>integer 1 or 2 indicating which plots to display.  1 shows trace plots.  2 shows a histogram</p></td>
     </tr>
     <tr>
-      <th>actual.mu</th>
+      <th>comparison.theta</th>
       <td><p>optional numeric vector of true parameter values</p></td>
     </tr>
     <tr>
@@ -202,7 +199,7 @@ values given a simulated dataset.</p>
           <span class='kw'>varnames</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste0</a></span>(<span class='st'>"beta"</span>, <span class='fl'>0</span>:<span class='fl'>3</span>), <span class='st'>"log_sigma_sq"</span>),
           <span class='kw'>param</span><span class='kw'>=</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='kw'>y</span><span class='kw'>=</span><span class='no'>y</span>, <span class='kw'>X</span><span class='kw'>=</span><span class='no'>X</span>), <span class='kw'>parallel</span><span class='kw'>=</span><span class='fl'>FALSE</span>, <span class='kw'>chains</span><span class='kw'>=</span><span class='fl'>1</span>)
 
-<span class='fu'>diagplots</span>(<span class='no'>f</span>, <span class='kw'>burnin</span><span class='kw'>=</span><span class='fl'>300</span>, <span class='kw'>actual.mu</span><span class='kw'>=</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='no'>betavals</span>, <span class='fl'>2</span>*<span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span>(<span class='fl'>.2</span>)))</div><div class='output co'>#&gt; $histogram</div><div class='img'><img src='diagplots-1.png' alt='' width='700' height='433' /></div><div class='output co'>#&gt; </div><div class='input'>
+<span class='fu'>diagplots</span>(<span class='no'>f</span>, <span class='kw'>burnin</span><span class='kw'>=</span><span class='fl'>300</span>, <span class='kw'>comparison.theta</span><span class='kw'>=</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='no'>betavals</span>, <span class='fl'>2</span>*<span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span>(<span class='fl'>.2</span>)))</div><div class='output co'>#&gt; $histogram</div><div class='img'><img src='diagplots-1.png' alt='' width='700' height='433' /></div><div class='output co'>#&gt; </div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
