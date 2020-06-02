@@ -54,13 +54,13 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/linear_mixed_effects_hmclearn.html">hmclearn package:  Linear Mixed Effects Regression Example</a>
+      <a href="../articles/linear_mixed_effects_hmclearn.html">hmclearn:  Linear Mixed Effects Regression Example</a>
     </li>
     <li>
-      <a href="../articles/linear_regression_hmclearn.html">hmclearn package:  Linear Regression Example</a>
+      <a href="../articles/linear_regression_hmclearn.html">hmclearn:  Linear Regression Example</a>
     </li>
     <li>
-      <a href="../articles/logistic_mixed_effects_hmclearn.html">hmclearn package:  Logistic Mixed Effects Regression Example</a>
+      <a href="../articles/logistic_mixed_effects_hmclearn.html">hmclearn:  Logistic Mixed Effects Regression Example</a>
     </li>
     <li>
       <a href="../articles/logistic_regression_hmclearn.html">hmclearn:  Logistic Regression Example</a>
@@ -90,7 +90,7 @@
       <h1 data-toc-skip>hmclearn: Logistic Regression Example</h1>
                         <h4 class="author">Samuel Thomas</h4>
             
-            <h4 class="date">2020-06-01</h4>
+            <h4 class="date">2020-06-02</h4>
       
       
       <div class="hidden name"><code>logistic_regression_hmclearn.Rmd</code></div>
@@ -259,27 +259,27 @@ f(\boldsymbol\beta | \mathbf{X}, \mathbf{y}, \sigma_\beta^2) &amp;\propto f(\mat
 <span class="no">t2.hmc</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span>()</pre></body></html></div>
 <p>HMC requires fewer iterations and lower computation time than MH in this example.</p>
 <div class="sourceCode" id="cb9"><html><body><pre class="r"><span class="no">t2.hmc</span> - <span class="no">t1.hmc</span>
-<span class="co">#&gt; Time difference of 20.86428 secs</span></pre></body></html></div>
+<span class="co">#&gt; Time difference of 20.65877 secs</span></pre></body></html></div>
 </div>
 <div id="mcmc-summary-and-diagnostics" class="section level2">
 <h2 class="hasAnchor">
 <a href="#mcmc-summary-and-diagnostics" class="anchor"></a>MCMC summary and diagnostics</h2>
 <p>The acceptance ratio for each of the HMC chains is sufficiently high for an efficient simulation.</p>
 <div class="sourceCode" id="cb10"><html><body><pre class="r"><span class="no">f_hmc</span>$<span class="no">accept</span>/<span class="no">N</span>
-<span class="co">#&gt; [1] 0.9146 0.9146</span></pre></body></html></div>
+<span class="co">#&gt; [1] 0.9125 0.9143</span></pre></body></html></div>
 <p>The posterior quantiles are summarized after removing an initial <em>burnin</em> period. The <span class="math inline">\(\hat{R}\)</span> statistics provide an indication of convergence. Values close to one indicate that the multiple MCMC chains coverged to the same distribution, while values above 1.1 indicate possible convergence problems. All <span class="math inline">\(\hat{R}\)</span> values in our example are close to one.</p>
 <div class="sourceCode" id="cb11"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">3000</span>)
 <span class="co">#&gt; Summary of MCMC simulation</span>
 <span class="co">#&gt;                   2.5%          5%        25%        50%        75%        95%</span>
-<span class="co">#&gt; (Intercept) -0.2645921  0.02147774  1.3244583  2.7577075  4.7992480  8.2841060</span>
-<span class="co">#&gt; PI2         -1.4059372 -1.24097522 -0.7638183 -0.4528914 -0.1579203  0.2442943</span>
-<span class="co">#&gt; EH2         -3.3530985 -3.12640123 -2.4929665 -2.1053279 -1.7434915 -1.2579158</span>
-<span class="co">#&gt; NV2          2.1983120  2.75626705  5.3178016  8.2415809 12.2350676 19.2036987</span>
+<span class="co">#&gt; (Intercept) -0.3278053 -0.02156462  1.1927509  2.5199906  4.4117913  7.4548174</span>
+<span class="co">#&gt; PI2         -1.4111554 -1.25130520 -0.7660436 -0.4531036 -0.1572527  0.2479637</span>
+<span class="co">#&gt; EH2         -3.3694559 -3.14225935 -2.5168274 -2.1097866 -1.7291071 -1.2465409</span>
+<span class="co">#&gt; NV2          2.0880853  2.67994307  5.1073010  7.7272838 11.5288397 17.4681846</span>
 <span class="co">#&gt;                  97.5%      rhat</span>
-<span class="co">#&gt; (Intercept)  9.3313458 1.0005140</span>
-<span class="co">#&gt; PI2          0.3602307 1.0004793</span>
-<span class="co">#&gt; EH2         -1.1191300 0.9999407</span>
-<span class="co">#&gt; NV2         21.3986388 1.0003607</span></pre></body></html></div>
+<span class="co">#&gt; (Intercept)  8.5386441 1.0063103</span>
+<span class="co">#&gt; PI2          0.3660845 0.9999405</span>
+<span class="co">#&gt; EH2         -1.1103522 0.9999653</span>
+<span class="co">#&gt; NV2         19.6927395 1.0064476</span></pre></body></html></div>
 <p>Trace plots provide a visual indication of stationarity. These plots indicate that the MCMC chains are reasonably stationary.</p>
 <div class="sourceCode" id="cb12"><html><body><pre class="r"><span class="fu"><a href="../reference/hmclearn-plots.html">mcmc_trace</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">3000</span>)</pre></body></html></div>
 <p><img src="logistic_regression_hmclearn_files/figure-html/unnamed-chunk-13-1.png" width="576"></p>
