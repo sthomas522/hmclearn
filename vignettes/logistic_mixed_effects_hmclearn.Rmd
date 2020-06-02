@@ -14,6 +14,9 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+is_check <- ("CheckExEnv" %in% search()) || any(c("_R_CHECK_TIMINGS_",
+             "_R_CHECK_LICENSE_") %in% names(Sys.getenv()))
+knitr::opts_chunk$set(eval = !is_check)
 ```
 
 ## Introduction
@@ -369,7 +372,7 @@ diagplots(f_hmc2, burnin=1000,
 
 We also compare the random effects parameter estimates with **lme4**. We apply the linear transformtion back to $\mathbf{u}$ for comparison. 
 
-```{r, echo=TRUE, eval=TRUE, fig.width=8, fig.height=12}
+```{r, echo=TRUE, fig.width=8, fig.height=12}
 u.freq <- ranef(fm1)$district[, 1]
 lambda.freq <- sqrt(VarCorr(fm1)$district[1])
 

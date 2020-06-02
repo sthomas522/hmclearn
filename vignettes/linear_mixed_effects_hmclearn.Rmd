@@ -14,6 +14,9 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+is_check <- ("CheckExEnv" %in% search()) || any(c("_R_CHECK_TIMINGS_",
+             "_R_CHECK_LICENSE_") %in% names(Sys.getenv()))
+knitr::opts_chunk$set(eval = !is_check)
 ```
 
 ## Introduction
@@ -294,7 +297,7 @@ summary(fm1)
 
 Next, we fit the linear mixed effects regression model using HMC.  A vector of *tuning parameter* $\epsilon$ values are specified to align with the data. The hyperparameters for $\nu_\gamma$, $A_\gamma$, $\nu_\xi$, and $A_\xi$ are set to values more appropriate for hierarchical models (Gelman 2006). The hyperprior $\sigma_\beta^2$ is set higher than the default based on the range of the dependent variable. 
 
-```{r, echo=TRUE, eval=T}
+```{r, echo=TRUE}
 N <- 2e3
 
 theta.init <- c(0, 1, # beta 

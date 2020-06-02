@@ -15,6 +15,9 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+is_check <- ("CheckExEnv" %in% search()) || any(c("_R_CHECK_TIMINGS_",
+             "_R_CHECK_LICENSE_") %in% names(Sys.getenv()))
+knitr::opts_chunk$set(eval = !is_check)
 ```
 
 ## Introduction
@@ -125,20 +128,12 @@ This model also assigns a normal prior for $\boldsymbol\beta$ where $\sigma_\bet
 
 Note the high number of Metropolis iterations specified in \textit{mcmc} and the time required to fit, even with optimized compiled code. Our abbreviation MH refers to the general Metropolis-Hastings algorithm.
 
-```{r, echo=TRUE, eval=FALSE}
+```{r, echo=TRUE}
 set.seed(921)
 t1.mh <- Sys.time()
 fitMH <- MCMCpack::MCMClogit(HG ~ NV2 + PI2 + EH2, data=Endometrial, 
                    mcmc=10000000, b0=0, B0=0.01)
 t2.mh <- Sys.time()
-```
-
-```{r, echo=FALSE, eval=TRUE}
-# load internal data, too long to run in vignette
-t1.mh <- hmclearn:::t1.mh
-t2.mh <- hmclearn:::t2.mh
-summMH <- hmclearn:::summMH
-
 ```
 
 The time to fit the logistic regression using MH is
@@ -149,12 +144,8 @@ t2.mh - t1.mh
 
 We store the Metropolis parameter estimates in \textit{summMH}. 
 
-```{r, echo=TRUE, eval=FALSE}
+```{r, echo=TRUE}
 (summMH <- summary(fitMH))
-```
-
-```{r, echo=FALSE, eval=TRUE}
-summMH
 ```
 
 ## Fit model using *hmc*

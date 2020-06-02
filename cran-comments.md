@@ -13,16 +13,18 @@
 
 Revised per feedback from CRAN volunteer, version 0.0.2
 
-* Included references for theoretical background in DESCRIPTION
+* Included references for theoretical background in DESCRIPTION.
 
-* Alan Agresti is included as a theoretical reference, but not the cph
+* Alan Agresti is included as a theoretical reference, but not the cph.
 
-* Added small examples to all exported functions.  Removed dontrun sections
+* Added small examples to all exported functions.  Removed dontrun sections.
 
-* Added 5 vignettes with additional examples
+* Added 5 vignettes with additional examples. Tests are included for all of these vignettes to ensure accuracy. 
 
-* Added a number of tests using the testthat package
+* Added tests using the testthat package for the examples, vignettes, paper (in process), and utility functions.
 
-* Added \value to all .Rd files
+* Added \value to all .Rd files.
 
-* Changed some of the parameters to match a paper in development
+* Changed some of the parameters to match a paper in development. These changes are primarily in sample_posterior_gradients.R.
+
+* First package submission to CRAN was on 4/1/2020, commit cc48b5283a
