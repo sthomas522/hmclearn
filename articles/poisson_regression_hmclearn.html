@@ -235,33 +235,33 @@ f(\boldsymbol\beta | \mathbf{X}, \mathbf{y}, \sigma_\beta^2) &amp;\propto f(\mat
                     <span class="kw">param</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="kw">y</span><span class="kw">=</span><span class="no">y</span>, <span class="kw">X</span><span class="kw">=</span><span class="no">X</span>))
 <span class="no">t2.hmc</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span>()
 <span class="no">t2.hmc</span> - <span class="no">t1.hmc</span>
-<span class="co">#&gt; Time difference of 28.59985 secs</span></pre></body></html></div>
+<span class="co">#&gt; Time difference of 30.1124 secs</span></pre></body></html></div>
 </div>
 <div id="mcmc-summary-and-diagnostics" class="section level2">
 <h2 class="hasAnchor">
 <a href="#mcmc-summary-and-diagnostics" class="anchor"></a>MCMC summary and diagnostics</h2>
 <p>The acceptance ratio for each of the HMC chains is sufficiently high for an efficient simulation.</p>
 <div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="no">f_hmc</span>$<span class="no">accept</span>/<span class="no">N</span>
-<span class="co">#&gt; [1] 0.9824 0.9812</span></pre></body></html></div>
+<span class="co">#&gt; [1] 0.9824 0.9797</span></pre></body></html></div>
 <p>The posterior quantiles are summarized after removing an initial <em>burnin</em> period. The <span class="math inline">\(\hat{R}\)</span> statistics provide an indication of convergence. Values close to one indicate that the multiple MCMC chains coverged to the same distribution, while values above 1.1 indicate possible convergence problems. All <span class="math inline">\(\hat{R}\)</span> values in our example are close to one.</p>
 <div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">3000</span>)
 <span class="co">#&gt; Summary of MCMC simulation</span>
-<span class="co">#&gt;                   2.5%         5%        25%        50%        75%        95%</span>
-<span class="co">#&gt; (Intercept)  5.5245694  5.5435786  5.6012734  5.6399469  5.6782892  5.7357897</span>
-<span class="co">#&gt; Ayes         0.3314244  0.3524907  0.4254467  0.4766978  0.5273992  0.5996998</span>
-<span class="co">#&gt; Cyes        -2.2489323 -2.1982504 -2.0277131 -1.9184605 -1.8033107 -1.6585027</span>
-<span class="co">#&gt; Myes        -6.7677235 -6.4969106 -5.8204689 -5.4437111 -5.1005081 -4.6429276</span>
-<span class="co">#&gt; Ayes:Cyes    1.7632474  1.8077563  1.9719014  2.0914646  2.2062044  2.3986761</span>
-<span class="co">#&gt; Ayes:Myes    2.2457345  2.3638376  2.8126920  3.1376301  3.4640020  4.1347513</span>
-<span class="co">#&gt; Cyes:Myes    2.5046127  2.5573601  2.7267965  2.8418562  2.9488965  3.0838678</span>
+<span class="co">#&gt;                   2.5%        5%        25%        50%        75%        95%</span>
+<span class="co">#&gt; (Intercept)  5.5111035  5.530115  5.5869336  5.6281799  5.6680765  5.7287955</span>
+<span class="co">#&gt; Ayes         0.3321988  0.362494  0.4433943  0.4933017  0.5440792  0.6143651</span>
+<span class="co">#&gt; Cyes        -2.2547479 -2.177960 -1.9960810 -1.8848929 -1.7867300 -1.6449844</span>
+<span class="co">#&gt; Myes        -6.3167516 -6.173156 -5.7073179 -5.3758726 -5.0966111 -4.7340933</span>
+<span class="co">#&gt; Ayes:Cyes    1.7537488  1.801412  1.9482864  2.0526500  2.1700653  2.3644039</span>
+<span class="co">#&gt; Ayes:Myes    2.3146176  2.420726  2.7631741  3.0558695  3.3739266  3.8323978</span>
+<span class="co">#&gt; Cyes:Myes    2.5671966  2.606209  2.7495439  2.8484364  2.9457300  3.1020471</span>
 <span class="co">#&gt;                  97.5%     rhat</span>
-<span class="co">#&gt; (Intercept)  5.7535834 1.007733</span>
-<span class="co">#&gt; Ayes         0.6199842 1.001098</span>
-<span class="co">#&gt; Cyes        -1.6201507 1.000194</span>
-<span class="co">#&gt; Myes        -4.5017343 1.005234</span>
-<span class="co">#&gt; Ayes:Cyes    2.4666583 1.002514</span>
-<span class="co">#&gt; Ayes:Myes    4.4464192 1.000000</span>
-<span class="co">#&gt; Cyes:Myes    3.1236342 1.071124</span></pre></body></html></div>
+<span class="co">#&gt; (Intercept)  5.7490109 1.001306</span>
+<span class="co">#&gt; Ayes         0.6393422 1.002094</span>
+<span class="co">#&gt; Cyes        -1.6052507 1.000312</span>
+<span class="co">#&gt; Myes        -4.6194364 1.033831</span>
+<span class="co">#&gt; Ayes:Cyes    2.4487332 1.000207</span>
+<span class="co">#&gt; Ayes:Myes    3.9849128 1.026870</span>
+<span class="co">#&gt; Cyes:Myes    3.1521015 1.005440</span></pre></body></html></div>
 <p>Trace plots provide a visual indication of stationarity. These plots indicate that the MCMC chains are reasonably stationary.</p>
 <div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="fu"><a href="../reference/hmclearn-plots.html">mcmc_trace</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">3000</span>)</pre></body></html></div>
 <p><img src="poisson_regression_hmclearn_files/figure-html/unnamed-chunk-7-1.png" width="576"></p>

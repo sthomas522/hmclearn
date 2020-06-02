@@ -246,29 +246,29 @@ f(\boldsymbol\beta, \gamma| \mathbf{y}, \mathbf{X}, \sigma_\beta^2, a, b) &amp;\
                     <span class="kw">parallel</span><span class="kw">=</span><span class="fl">TRUE</span>, <span class="kw">chains</span><span class="kw">=</span><span class="fl">2</span>)
 <span class="no">t2.hmc</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span>()
 <span class="no">t2.hmc</span> - <span class="no">t1.hmc</span>
-<span class="co">#&gt; Time difference of 20.21388 secs</span></pre></body></html></div>
+<span class="co">#&gt; Time difference of 27.22547 secs</span></pre></body></html></div>
 </div>
 <div id="mcmc-summary-and-diagnostics" class="section level2">
 <h2 class="hasAnchor">
 <a href="#mcmc-summary-and-diagnostics" class="anchor"></a>MCMC summary and diagnostics</h2>
 <p>The acceptance rate for each of the HMC chains is high for this simple example. More complex applications will often need lower acceptance rates (e.g. between 0.6 and 0.9) for optimal computational efficiency, particularly without an automated tuning algorithm such as NUTS (Hoffman, Gelman 2014).</p>
 <div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="no">f_hmc</span>$<span class="no">accept</span>/<span class="no">N</span>
-<span class="co">#&gt; [1] 0.9732 0.9731</span></pre></body></html></div>
+<span class="co">#&gt; [1] 0.9715 0.9761</span></pre></body></html></div>
 <p>The posterior quantiles are summarized after removing an initial <em>burnin</em> period. The <span class="math inline">\(\hat{R}\)</span> statistics are close to one, indicating that both HMC chains converged to the same distribution. The <span class="math inline">\(\hat{R}\)</span> statistics provide an indication of convergence. Values close to one indicate that the multiple MCMC chains coverged to the same distribution, while values above 1.1 indicate possible convergence problems. All <span class="math inline">\(\hat{R}\)</span> values in our example are close to one.</p>
 <div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">2000</span>)
 <span class="co">#&gt; Summary of MCMC simulation</span>
-<span class="co">#&gt;                         2.5%           5%           25%           50%</span>
-<span class="co">#&gt; intercept      -7.3637013610 -4.248958318  2.8730255182  7.5532867450</span>
-<span class="co">#&gt; dist            2.6818656750  3.018876449  3.8576469922  4.3737394916</span>
-<span class="co">#&gt; climb          -0.0084526049 -0.006909722 -0.0029704811 -0.0001557609</span>
-<span class="co">#&gt; climb_distance  0.0002038748  0.000351382  0.0006952659  0.0009112079</span>
-<span class="co">#&gt; log_sigma2      4.6834044015  4.747661721  4.9522490629  5.1062253397</span>
+<span class="co">#&gt;                         2.5%            5%          25%           50%</span>
+<span class="co">#&gt; intercept      -5.3369740127 -2.8512554875  4.171363308  8.4663913581</span>
+<span class="co">#&gt; dist            2.7592663966  3.0030336319  3.714802797  4.2572314751</span>
+<span class="co">#&gt; climb          -0.0083466750 -0.0071760280 -0.003305355 -0.0006457976</span>
+<span class="co">#&gt; climb_distance  0.0003445965  0.0004549979  0.000758214  0.0009479859</span>
+<span class="co">#&gt; log_sigma2      4.7071597510  4.7693179199  5.004009213  5.1907744185</span>
 <span class="co">#&gt;                         75%          95%        97.5%     rhat</span>
-<span class="co">#&gt; intercept      11.991261842 18.851940452 21.492061208 1.067372</span>
-<span class="co">#&gt; dist            4.940145748  5.853875726  6.228335359 1.073809</span>
-<span class="co">#&gt; climb           0.002679267  0.007318108  0.008885682 1.044656</span>
-<span class="co">#&gt; climb_distance  0.001112619  0.001407744  0.001523146 1.068515</span>
-<span class="co">#&gt; log_sigma2      5.285243074  5.596840675  5.693076224 1.003919</span></pre></body></html></div>
+<span class="co">#&gt; intercept      12.710363020 19.075016359 21.433626830 1.026644</span>
+<span class="co">#&gt; dist            4.810243719  5.688776376  5.991566299 1.025314</span>
+<span class="co">#&gt; climb           0.002031235  0.006030775  0.007410526 1.011847</span>
+<span class="co">#&gt; climb_distance  0.001146128  0.001414834  0.001495812 1.018332</span>
+<span class="co">#&gt; log_sigma2      5.367797198  5.633318926  5.721667431 1.057372</span></pre></body></html></div>
 <p>Trace plots provide a visual indication of stationarity. These plots indicate that the MCMC chains are reasonably stationary.</p>
 <div class="sourceCode" id="cb8"><html><body><pre class="r"><span class="fu"><a href="../reference/hmclearn-plots.html">mcmc_trace</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">2000</span>)</pre></body></html></div>
 <p><img src="linear_regression_hmclearn_files/figure-html/unnamed-chunk-8-1.png" width="576"></p>
