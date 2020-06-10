@@ -1,7 +1,7 @@
 ---
 title: "hmclearn:  Linear Regression Example"
 author: "Samuel Thomas"
-date: "2020-06-09"
+date: "`r Sys.Date()`"
 output:
   rmarkdown::html_vignette:
     fig_caption: false
@@ -11,7 +11,12 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
 
 ## Introduction
 
@@ -101,8 +106,7 @@ $$
 
 ## Linear Regression Example Data
 
-
-```r
+```{r setup}
 library(hmclearn)
 ```
 
@@ -110,8 +114,7 @@ The user must define provide the design matrix directly for use in **hmclearn**.
 
 Load Scots Race data (Atkinson 1986, Venables and Ripley 2002) and display the first few rows of the design matrix $X$.  This example also appears in Agresti (2015), and we compare results to his.
 
-
-```r
+```{r, echo=TRUE}
 ScotsRaces <- MASS::hills
 
 X <- cbind(1, as.matrix(ScotsRaces[, -which(colnames(ScotsRaces) == "time")]))
@@ -124,46 +127,21 @@ colnames(X)[1] <- "intercept"
 y <- ScotsRaces$time
 
 head(X, 3)
-#>              intercept dist climb climb_distance
-#> Greenmantle          1  2.5   650           1625
-#> Carnethy             1  6.0  2500          15000
-#> Craig Dunain         1  6.0   900           5400
 ```
 
 ## Comparison model - Frequentist
 
 To compare results, we first fit a standard linear model using the frequentist function *lm*. This formula for the linear model omits the automatic inclusion of the intercept. We code the formula in this way since our design matrix already includes the intercept.
 
-
-```r
+```{r, echo=TRUE}
 f <- lm(y ~ X-1)
 summary(f)
-#> 
-#> Call:
-#> lm(formula = y ~ X - 1)
-#> 
-#> Residuals:
-#>     Min      1Q  Median      3Q     Max 
-#> -25.994  -4.968  -2.220   2.381  56.115 
-#> 
-#> Coefficients:
-#>                   Estimate Std. Error t value Pr(>|t|)    
-#> Xintercept       9.3954374  6.8790233   1.366  0.18183    
-#> Xdist            4.1489201  0.8352489   4.967 2.36e-05 ***
-#> Xclimb          -0.0009710  0.0041648  -0.233  0.81718    
-#> Xclimb_distance  0.0009831  0.0003070   3.203  0.00314 ** 
-#> ---
-#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#> 
-#> Residual standard error: 12.92 on 31 degrees of freedom
-#> Multiple R-squared:  0.9744,	Adjusted R-squared:  0.9711 
-#> F-statistic: 295.1 on 4 and 31 DF,  p-value: < 2.2e-16
+
 ```
 
 Next, we store the parameter values from the Frequentist fit.
 
-
-```r
+```{r, echo=TRUE}
 beta.freq <- as.numeric(coefficients(f))
 sigma2.freq <- sigma(f)^2
 theta.freq <- c(beta.freq, log(sigma2.freq))
@@ -175,8 +153,7 @@ The functions for the log posterior and its gradient are coded in the *linear_po
 
 Next, we fit the linear regression model using HMC.  A vector of *tuning parameter* $\epsilon$ values are specified to align with the data.
 
-
-```r
+```{r, echo=TRUE}
 N <- 1e4
 
 eps_vals <- c(1e-1, 1e-2, 1e-4, 5e-6, 3e-3)
@@ -192,52 +169,35 @@ t1.hmc <- Sys.time()
                     parallel=FALSE, chains=2)
 t2.hmc <- Sys.time()
 t2.hmc - t1.hmc
-#> Time difference of 36.65226 secs
+
 ```
 
 ## MCMC summary and diagnostics
 
 The acceptance rate for each of the HMC chains is high for this simple example. More complex applications will often need lower acceptance rates (e.g. between 0.6 and 0.9) for optimal computational efficiency, particularly without an automated tuning algorithm such as NUTS (Hoffman, Gelman 2014).
 
-
-```r
+```{r, echo=TRUE}
 f_hmc$accept/N
-#> [1] 0.9754 0.9739
 ```
 
 The posterior quantiles are summarized after removing an initial *burnin* period. The $\hat{R}$ statistics are close to one, indicating that both HMC chains converged to the same distribution. The $\hat{R}$ statistics provide an indication of convergence. Values close to one indicate that the multiple MCMC chains coverged to the same distribution, while values above 1.1 indicate possible convergence problems. All $\hat{R}$ values in our example are close to one.
 
 
-
-```r
+```{r, echo=TRUE}
 summary(f_hmc, burnin=2000, probs=c(0.025, 0.5, 0.975))
-#> Summary of MCMC simulation
-#>                         2.5%           50%        97.5%     rhat
-#> intercept      -5.7142329771  8.9049258856 23.723775456 1.001586
-#> dist            2.3501882118  4.2514043301  6.005448911 1.000097
-#> climb          -0.0097779405 -0.0008269856  0.007966189 1.004726
-#> climb_distance  0.0002976812  0.0009675666  0.001647897 1.002775
-#> log_sigma2      4.6565425078  5.1499951245  5.726026622 1.002336
 ```
 
 Trace plots provide a visual indication of stationarity.  These plots indicate that the MCMC chains are reasonably stationary.
 
-
-```r
+```{r figlm, echo=TRUE, fig.width=6, fig.height=4}
 mcmc_trace(f_hmc, burnin=2000)
 ```
 
-![plot of chunk figlm](figlm-1.png)
-
 Histograms of the posterior distribution show that Bayesian parameter estimates align with frequentist estimates for this example.
 
-
-```r
+```{r fig2lm, echo=TRUE, fig.width=6, fig.height=4}
 diagplots(f_hmc, comparison.theta=theta.freq, burnin=2000)
-#> $histogram
 ```
-
-![plot of chunk fig2lm](fig2lm-1.png)
 
 ## Source
 

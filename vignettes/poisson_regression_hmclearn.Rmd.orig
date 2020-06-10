@@ -1,7 +1,7 @@
 ---
 title: "hmclearn:  Poisson Regression Example"
 author: "Samuel Thomas"
-date: "2020-06-09"
+date: "`r Sys.Date()`"
 output:
   rmarkdown::html_vignette:
     fig_caption: false
@@ -11,14 +11,18 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
 
 ## Introduction
 
 This vignette demonstrates fitting a Poisson regression model via Hamiltonian Monte Carlo (HMC) using the **hmclearn** package.
 
-
-```r
+```{r setup}
 library(hmclearn)
 ```
 
@@ -104,8 +108,7 @@ The user must define provide the design matrix directly for use in **hmclearn**.
 
 We load drug usage data and create the design matrix $X$ and dependent vector $y$.  This example also appears in Agresti (2015), and we compare results to his.
 
-
-```r
+```{r, echo=TRUE}
 data(Drugs)
 
 # design matrix
@@ -120,46 +123,17 @@ y <- Drugs$count
 
 To compare results, we first fit a standard linear model using the frequentist function *glm*.
 
-
-```r
+```{r, echo=TRUE}
 # matrix representation
 f <- glm(y ~ X-1, family=poisson(link=log))
 summary(f)
-#> 
-#> Call:
-#> glm(formula = y ~ X - 1, family = poisson(link = log))
-#> 
-#> Deviance Residuals: 
-#>        1         2         3         4         5         6         7         8  
-#>  0.02044  -0.02658  -0.09256   0.02890  -0.33428   0.09452   0.49134  -0.03690  
-#> 
-#> Coefficients:
-#>              Estimate Std. Error z value Pr(>|z|)    
-#> X(Intercept)  5.63342    0.05970  94.361  < 2e-16 ***
-#> XAyes         0.48772    0.07577   6.437 1.22e-10 ***
-#> XCyes        -1.88667    0.16270 -11.596  < 2e-16 ***
-#> XMyes        -5.30904    0.47520 -11.172  < 2e-16 ***
-#> XAyes:Cyes    2.05453    0.17406  11.803  < 2e-16 ***
-#> XAyes:Myes    2.98601    0.46468   6.426 1.31e-10 ***
-#> XCyes:Myes    2.84789    0.16384  17.382  < 2e-16 ***
-#> ---
-#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#> 
-#> (Dispersion parameter for poisson family taken to be 1)
-#> 
-#>     Null deviance: 2.4038e+04  on 8  degrees of freedom
-#> Residual deviance: 3.7399e-01  on 1  degrees of freedom
-#> AIC: 63.417
-#> 
-#> Number of Fisher Scoring iterations: 4
 ```
 
 ## Fit model using *hmc*
 
 Next, we fit the poisson regression model using HMC.  A vector of $\epsilon$ values are specified to align with the data.
 
-
-```r
+```{r, echo=TRUE}
 N <- 1e4
 
 eps_vals <- c(rep(5e-4, 2), 1e-3, 2e-3, 1e-3, 2e-3, 5e-4)
@@ -175,7 +149,6 @@ t1.hmc <- Sys.time()
                     param=list(y=y, X=X))
 t2.hmc <- Sys.time()
 t2.hmc - t1.hmc
-#> Time difference of 45.84692 secs
 ```
 
 
@@ -183,48 +156,29 @@ t2.hmc - t1.hmc
 
 The acceptance ratio for each of the HMC chains is sufficiently high for an efficient simulation.
 
-
-```r
+```{r, echo=TRUE}
 f_hmc$accept/N
-#> [1] 0.9804 0.9829
 ```
 
 The posterior quantiles are summarized after removing an initial *burnin* period. The $\hat{R}$ statistics provide an indication of convergence. Values close to one indicate that the multiple MCMC chains coverged to the same distribution, while values above 1.1 indicate possible convergence problems. All $\hat{R}$ values in our example are close to one.
 
 
-
-```r
+```{r, echo=TRUE}
 summary(f_hmc, burnin=3000, probs=c(0.025, 0.5, 0.975))
-#> Summary of MCMC simulation
-#>                   2.5%        50%      97.5%     rhat
-#> (Intercept)  5.5238199  5.6327435  5.7521131 1.001527
-#> Ayes         0.3379506  0.4875867  0.6251244 1.006951
-#> Cyes        -2.2176007 -1.8992300 -1.6078705 1.001525
-#> Myes        -6.3840770 -5.3643129 -4.4945189 1.007716
-#> Ayes:Cyes    1.7495447  2.0670083  2.4061751 1.005151
-#> Ayes:Myes    2.1572253  3.0200944  4.1225859 1.018774
-#> Cyes:Myes    2.5174705  2.8574315  3.1983475 1.026709
 ```
 
 Trace plots provide a visual indication of stationarity.  These plots indicate that the MCMC chains are reasonably stationary.
 
-
-```r
+```{r fig1poisson, echo=TRUE, fig.width=6, fig.height=4}
 mcmc_trace(f_hmc, burnin=3000)
 ```
 
-![plot of chunk fig1poisson](fig1poisson-1.png)
-
 Histograms of the posterior distribution show that Bayesian parameter estimates align with Frequentist estimates.
 
-
-```r
+```{r fit2poisson, echo=TRUE, fig.width=6, fig.height=4}
 beta.freq <- coef(f)
 diagplots(f_hmc, burnin=3000, comparison.theta=beta.freq)
-#> $histogram
 ```
-
-![plot of chunk fit2poisson](fit2poisson-1.png)
 
 ## Source
 

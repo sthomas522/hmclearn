@@ -1,7 +1,7 @@
 ---
 title: "hmclearn:  Logistic Mixed Effects Regression Example"
 author: "Samuel Thomas"
-date: "2020-06-09"
+date: "`r Sys.Date()`"
 output:
   rmarkdown::html_vignette:
     fig_caption: false
@@ -11,7 +11,12 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
 
 ## Introduction
 
@@ -31,8 +36,7 @@ $$
 \end{aligned}
 $$
 
-
-```r
+```{r setup}
 library(hmclearn)
 ```
 
@@ -214,8 +218,7 @@ The user must define provide the design matrix directly for use in **hmclearn**.
 
 We load drug Contraception data (Bates, et. al. 2014) and create the design matrices $\mathbf{X}$ and $\mathbf{Z}$ and dependent vector $\mathbf{y}$.  For this model, the random effects design matrix $\mathbf{Z}$ is specified for a random intercept model.
 
-
-```r
+```{r, echo=TRUE}
 Contraception <- mlmRev::Contraception
 
 Contraception$liv2 <- ifelse(Contraception$livch == "0", 0, 1)
@@ -232,6 +235,7 @@ urban <- ifelse(Contraception$urban == "Y", 1, 0)
 X <- cbind(1, Contraception$age, Contraception$age^2, urban, Contraception$liv2)
 colnames(X) <- c("int", "age", "age_sq", "urban", "liv2")
 y <- ifelse(Contraception$use == "Y", 1, 0)
+
 ```
 
 ## QR decomposition of design matrix
@@ -250,8 +254,7 @@ $$
 
 We use the *qr* function from base **R** for our parameter transformation,
 
-
-```r
+```{r, echo=TRUE}
 xqr <- qr(X)
 Q <- qr.Q(xqr)
 R <- qr.R(xqr)
@@ -261,6 +264,7 @@ X2 <- Q * sqrt(n-1)
 Rstar <- R / sqrt(n-1)
 Rstar_inv <- solve(Rstar)
 colnames(X2) <- c("int", "age", "age_sq", "urban", "liv2")
+
 ```
 
 We could also apply QR decomposition to $\mathbf{Z}$, but this is not necessary for a random intercept model where all elements of $\mathbf{Z}$ are 0 or 1.
@@ -269,8 +273,7 @@ We could also apply QR decomposition to $\mathbf{Z}$, but this is not necessary 
 
 Next, we fit the linear mixed effects regression model using HMC.  A vector of *tuning parameter* $\epsilon$ values are specified to align with the data. The hyperparameters for $\nu_\xi$ and $A_\xi$ are set to defaults in **hmclearn** (Gelman 2006). The hyperprior $\sigma_\beta^2$ is set lower than the default based on the dependent variable variance for this hierarchical model.
 
-
-```r
+```{r, echo=TRUE}
 N <- 2e3
 
 set.seed(412)
@@ -297,21 +300,17 @@ f_hmc <- hmc(N = N, theta.init = initvals,
 
 t2.hmc <- Sys.time()
 t2.hmc - t1.hmc
-#> Time difference of 11.57773 mins
 ```
 
 The acceptance ratio for each of the HMC chains is sufficiently high for an efficient simulation.
 
-
-```r
+```{r, echo=TRUE}
 f_hmc$accept/N
-#> [1] 0.670 0.672
 ```
 
 Since we used QR decomposition to transform $\beta$ prior to fitting via HMC, we need to reverse the transformation to obtain the original parameter scale.
 
-
-```r
+```{r, echo=TRUE}
 # restore beta from Rstar in QR decomposition
 calc_beta <- function(beta_tilde_param, Rstarinv) {
   as.numeric(Rstarinv %*% beta_tilde_param)
@@ -323,148 +322,35 @@ f_hmc2$thetaCombined <- lapply(f_hmc$thetaCombined, function(xx) {
   xx[, 1:5] <- t(apply(xx[, 1:5], 1, calc_beta, Rstarinv=Rstar_inv))
   xx
 })
+
 ```
 
 The posterior quantiles are summarized after removing an initial *burnin* period. The $\hat{R}$ statistics are close to one, indicating that both HMC chains converged to the same distribution. The $\hat{R}$ statistics provide an indication of convergence. Values close to one indicate that the multiple MCMC chains converged to the same distribution, while values above 1.1 indicate possible convergence problems. All $\hat{R}$ values in our example are close to one.
 
-
-```r
+```{r, echo=TRUE}
 summary(f_hmc2, burnin=1000, probs=c(0.025, 0.5, 0.975))
-#> Summary of MCMC simulation
-#>                   2.5%          50%        97.5%      rhat
-#> int       -1.347499845 -1.002604446 -0.659497972 1.0014634
-#> age       -0.009255767  0.006563724  0.020626589 1.0003654
-#> age_sq    -0.006148684 -0.004683696 -0.003223872 1.0000839
-#> urban      0.452351900  0.683275458  0.929803088 1.0076632
-#> liv2       0.572722550  0.862870463  1.179121304 0.9997327
-#> tau_int1  -2.465594898 -1.504566068 -0.660800597 1.0021200
-#> tau_int2  -1.405244265 -0.046077600  1.353882998 0.9995182
-#> tau_int3  -1.168076289  0.654959461  2.470604063 1.0133501
-#> tau_int4  -0.784816167  0.369202243  1.513985214 0.9998724
-#> tau_int5  -0.928682332  0.183618830  1.251809351 1.0080292
-#> tau_int6  -1.481844791 -0.476888752  0.431850829 0.9995249
-#> tau_int7  -1.747265505 -0.370917817  0.905435106 1.0076276
-#> tau_int8  -0.854870796  0.292412315  1.482049428 1.0110102
-#> tau_int9  -1.644541148 -0.378372534  0.913598514 1.0005747
-#> tau_int10 -2.491775084 -0.682888192  0.954067631 1.0043927
-#> tau_int11 -3.182466810 -1.658293490 -0.215434474 1.0022619
-#> tau_int12 -1.600677101 -0.231618403  0.975786439 1.0017680
-#> tau_int13 -1.170293314  0.169942826  1.320548092 1.0056639
-#> tau_int14  0.486206193  1.315717615  2.241188249 1.0000029
-#> tau_int15 -1.325409211 -0.120115440  1.102520071 1.0000940
-#> tau_int16  0.074031338  1.309742660  2.663588823 1.0212303
-#> tau_int17 -1.744419658 -0.351410830  0.881922589 1.0369249
-#> tau_int18 -1.157279994 -0.065710778  1.011665802 1.0059568
-#> tau_int19 -1.245115805  0.122116020  1.394560353 1.0158353
-#> tau_int20 -1.027153714  0.426563713  1.849936129 1.0071624
-#> tau_int21 -1.254942685  0.017976116  1.351423801 1.0192542
-#> tau_int22 -2.332778090 -0.888691670  0.431605057 0.9998864
-#> tau_int23 -2.000875433 -0.385289018  1.042722201 1.0026830
-#> tau_int24 -2.646888057 -1.094847369  0.434614968 1.0117203
-#> tau_int25 -0.667098400  0.277855404  1.127194544 0.9995049
-#> tau_int26 -1.445290053  0.002781515  1.478335030 1.0561882
-#> tau_int27 -2.132949357 -0.941302524  0.196168094 1.0019260
-#> tau_int28 -1.734535718 -0.632972869  0.451512898 1.0019482
-#> tau_int29 -1.569143502 -0.345303107  0.857115138 1.0011194
-#> tau_int30 -0.131177086  0.875944519  1.882620898 1.0001374
-#> tau_int31 -0.377730313  0.733064073  1.872115600 1.0141730
-#> tau_int32 -2.258770246 -0.946487116  0.344841171 0.9995009
-#> tau_int33 -1.574454654 -0.093608793  1.469875984 1.0019248
-#> tau_int34  0.232098236  1.403767991  2.698852531 1.0184362
-#> tau_int35 -0.477469395  0.513052067  1.514391502 0.9995147
-#> tau_int36 -1.811149118 -0.297759332  1.178609170 1.0004970
-#> tau_int37 -0.652864004  0.633495509  1.949085951 1.0026299
-#> tau_int38 -1.575129436 -0.124136610  1.308530565 1.0231211
-#> tau_int39 -0.303975919  1.037111743  2.273527703 1.0011847
-#> tau_int40 -0.819018408  0.223307506  1.206773302 0.9997188
-#> tau_int41 -0.757190334  0.427436139  1.556769074 0.9998307
-#> tau_int42 -1.119880954  0.573428964  2.067500829 1.0195341
-#> tau_int43  0.067577505  1.075004927  2.100332841 1.0016600
-#> tau_int44 -1.894670996 -0.613922594  0.507643758 1.0057337
-#> tau_int45 -1.414879962 -0.245333852  0.919593280 1.0018127
-#> tau_int46  0.251684442  1.101175417  2.027513018 1.0094651
-#> tau_int47 -1.007326126  0.377783628  1.784483404 1.0095375
-#> tau_int48 -0.144092330  0.862074276  1.879188549 1.0107926
-#> tau_int49 -2.130213651 -0.376494856  1.278222364 1.0118307
-#> tau_int50 -0.827109771  0.472012275  1.807589669 0.9998834
-#> tau_int51 -0.911076928  0.229237417  1.434753593 1.0006495
-#> tau_int52 -0.433086014  0.453052678  1.325939296 1.0033275
-#> tau_int53 -1.615030500 -0.315416767  1.109049230 1.0003612
-#> tau_int54 -2.532241593 -0.956410434  0.605607306 0.9997552
-#> tau_int55  0.156492872  1.202533184  2.291453242 0.9995593
-#> tau_int56 -2.350742836 -1.025277907  0.234839832 0.9996233
-#> tau_int57 -0.653381781  0.583648022  1.781793202 1.0052080
-#> tau_int58 -2.448971701 -0.709517372  0.857475449 1.0001395
-#> tau_int59 -2.231796487 -0.838218291  0.315858751 1.0011856
-#> tau_int60 -2.319355056 -1.042270086  0.124104647 0.9997774
-#> xi        -1.033553459 -0.662905154 -0.343340191 1.0022953
 ```
 
 We create trace plots on the transformed simulation data.
 
-
-```r
+```{r fig1glmm, echo=TRUE, fig.width=6, fig.height=4}
 mcmc_trace(f_hmc2, burnin=1000, pars=colnames(X))
 ```
-
-![plot of chunk fig1glmm](fig1glmm-1.png)
 
 ## Comparison model - Frequentist
 
 To compare results, we first fit a logistic mixed effects model using the frequentist package **lme4** (Bates et. al. 2015).
 
-
-```r
+```{r, echo=TRUE}
 library(lme4)
 
 fm1 <- glmer(use ~ age + I(age^2) + urban + liv2 + (1 | district),
            data=Contraception, family=binomial,
            control=glmerControl(optCtrl=list(maxfun=20000)))
-#> Warning in checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv, : Model is nearly unidentifiable: very large eigenvalue
-#>  - Rescale variables?
 summary(fm1)
-#> Generalized linear mixed model fit by maximum likelihood (Laplace
-#>   Approximation) [glmerMod]
-#>  Family: binomial  ( logit )
-#> Formula: use ~ age + I(age^2) + urban + liv2 + (1 | district)
-#>    Data: Contraception
-#> Control: glmerControl(optCtrl = list(maxfun = 20000))
-#> 
-#>      AIC      BIC   logLik deviance df.resid 
-#>   2385.2   2418.6  -1186.6   2373.2     1928 
-#> 
-#> Scaled residuals: 
-#>     Min      1Q  Median      3Q     Max 
-#> -1.8151 -0.7620 -0.4619  0.9518  3.1033 
-#> 
-#> Random effects:
-#>  Groups   Name        Variance Std.Dev.
-#>  district (Intercept) 0.2247   0.474   
-#> Number of obs: 1934, groups:  district, 60
-#> 
-#> Fixed effects:
-#>               Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept) -1.0063737  0.1691107  -5.951 2.67e-09 ***
-#> age          0.0062561  0.0078848   0.793    0.428    
-#> I(age^2)    -0.0046353  0.0007207  -6.432 1.26e-10 ***
-#> urbanY       0.6929220  0.1206566   5.743 9.31e-09 ***
-#> liv2         0.8603821  0.1483014   5.802 6.57e-09 ***
-#> ---
-#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#> 
-#> Correlation of Fixed Effects:
-#>          (Intr) age    I(g^2) urbanY
-#> age       0.529                     
-#> I(age^2) -0.533 -0.506              
-#> urbanY   -0.259 -0.032  0.020       
-#> liv2     -0.801 -0.565  0.345  0.094
-#> convergence code: 0
-#> Model is nearly unidentifiable: very large eigenvalue
-#>  - Rescale variables?
 ```
 
-
-```r
+```{r, echo=TRUE}
 
 freqvals <- c(as.numeric(fixef(fm1)),
               as.numeric(ranef(fm1)$district[, 1]),
@@ -474,22 +360,18 @@ freqvals <- c(as.numeric(fixef(fm1)),
 
 Histograms of the posterior distribution show that Bayesian parameter estimates align with frequentist estimates.  The *cols* parameter specifies the parameters to be displayed in *diagplots*, based on the order provided to the *hmc* function.
 
-
-```r
+```{r fig2glmm, echo=TRUE, fig.width=6, fig.height=4}
 diagplots(f_hmc2, burnin=1000,
           comparison.theta=c(freqvals[1:ncol(X)],
                              freqvals[length(freqvals)]),
           cols=c(1:ncol(X), length(initvals)))
-#> $histogram
-```
 
-![plot of chunk fig2glmm](fig2glmm-1.png)
+```
 
 
 We also compare the random effects parameter estimates with **lme4**. We apply the linear transformtion back to $\mathbf{u}$ for comparison.
 
-
-```r
+```{r, echo=TRUE, fig.width=8, fig.height=12}
 u.freq <- ranef(fm1)$district[, 1]
 lambda.freq <- sqrt(VarCorr(fm1)$district[1])
 
@@ -507,45 +389,33 @@ f_hmc$thetaCombined <- lapply(f_hmc$thetaCombined, function(xx) {
 
 Since we have 60 random effect parameters plus $\lambda$, we split the plots into more manageable chunks. The random effects parameters align with frequentist estimates.
 
-
-```r
+```{r fig3glmm, echo=TRUE, fig.width=8, fig.height=8}
 # histograms with lines for frequentist estimates
 ucols <- which(grepl("^[u](?:[1-9]|0[1-9]|1[0-9]|20)$",
                      colnames(f_hmc$thetaCombined[[1]])))
 lambdacol <- which(grepl("^lambda", colnames(f_hmc$thetaCombined[[1]])))
 diagplots(f_hmc, burnin=1000,
           comparison.theta = u.freq[1:20], cols = ucols)
-#> $histogram
 ```
 
-![plot of chunk fig3glmm](fig3glmm-1.png)
-
-
-```r
+```{r fig4glmm, echo=TRUE, fig.width=8, fig.height=8}
 # histograms with lines for frequentist estimates
 ucols <- which(grepl("^[u](?:2[1-9]|3[0-9]|40)$",
                      colnames(f_hmc$thetaCombined[[1]])))
 lambdacol <- which(grepl("^lambda", colnames(f_hmc$thetaCombined[[1]])))
 diagplots(f_hmc, burnin=1000,
           comparison.theta = u.freq[21:40], cols = ucols)
-#> $histogram
 ```
 
-![plot of chunk fig4glmm](fig4glmm-1.png)
 
-
-
-```r
+```{r fig5glmm, echo=TRUE, fig.width=8, fig.height=12}
 # histograms with lines for frequentist estimates
 ucols <- which(grepl("^[u](?:4[1-9]|5[0-9]|60)$",
                      colnames(f_hmc$thetaCombined[[1]])))
 lambdacol <- which(grepl("^lambda", colnames(f_hmc$thetaCombined[[1]])))
 diagplots(f_hmc, burnin=1000,
           comparison.theta = c(u.freq[41:60], lambda.freq), cols = c(ucols, lambdacol))
-#> $histogram
 ```
-
-![plot of chunk fig5glmm](fig5glmm-1.png)
 
 
 
