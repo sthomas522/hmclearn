@@ -40,7 +40,7 @@ $$
 \log \boldsymbol\mu &= \mathbf{X}\boldsymbol\beta.
 \end{aligned}
 $$
-The vector of responses is  $\mathbf{y} = (y_1, ..., y_n)^T$. The covariate values for the \textit{i}th subject are $\mathbf{x}_i^T = (x_{i0}, ..., x_{iq})$ for $q$ covariates plus an intercept. We write the full design matrix as $\mathbf{X} = (\mathbf{x}_1^T, ..., \mathbf{x}_n^T)^T \in \mathbb{R}^{n\times(q+1)}$ for $n$ observations. The regression coefficients are a vector of length $q + 1$, $\boldsymbol\beta = (\beta_0, ..., \beta_q)^T$.
+The vector of responses is  $\mathbf{y} = (y_1, ..., y_n)^T$. The covariate values for subject $i$ are $\mathbf{x}_i^T = (x_{i0}, ..., x_{iq})$ for $q$ covariates plus an intercept. We write the full design matrix as $\mathbf{X} = (\mathbf{x}_1^T, ..., \mathbf{x}_n^T)^T \in \mathbb{R}^{n\times(q+1)}$ for $n$ observations. The regression coefficients are a vector of length $q + 1$, $\boldsymbol\beta = (\beta_0, ..., \beta_q)^T$.
 
 ## Derive log posterior and gradient for HMC
 

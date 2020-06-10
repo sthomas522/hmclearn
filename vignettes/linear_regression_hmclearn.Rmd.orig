@@ -31,7 +31,7 @@ $$
 
 HMC requires the specification of the log posterior to a proportional constant.  In addition, HMC uses the gradient of the log posterior to guide simulations.  The full derivations are provided here.
 
-The vector of responses is  $\mathbf{y} = (y_1, ..., y_n)^T$. The covariate values for the \textit{i}th subject are $\mathbf{x}_i^T = (x_{i0}, ..., x_{iq})$ for $q$ covariates plus an intercept. We write the full design matrix as $\mathbf{X} = (\mathbf{x}_1^T, ..., \mathbf{x}_n^T)^T \in \mathbb{R}^{n\times(q+1)}$ for $n$ observations. The regression coefficients are a vector of length $q + 1$, $\boldsymbol\beta = (\beta_0, ..., \beta_q)^T$.  The error term for each subject is $\epsilon_i$. All error terms $\boldsymbol\epsilon = (\epsilon_1, ..., \epsilon_n)^T$ are assumed to be independent and normally distributed with mean zero and constant variance $\sigma_\epsilon^2$.
+The vector of responses is  $\mathbf{y} = (y_1, ..., y_n)^T$. The covariate values for subject $i$ are $\mathbf{x}_i^T = (x_{i0}, ..., x_{iq})$ for $q$ covariates plus an intercept. We write the full design matrix as $\mathbf{X} = (\mathbf{x}_1^T, ..., \mathbf{x}_n^T)^T \in \mathbb{R}^{n\times(q+1)}$ for $n$ observations. The regression coefficients are a vector of length $q + 1$, $\boldsymbol\beta = (\beta_0, ..., \beta_q)^T$.  The error term for each subject is $\epsilon_i$. All error terms $\boldsymbol\epsilon = (\epsilon_1, ..., \epsilon_n)^T$ are assumed to be independent and normally distributed with mean zero and constant variance $\sigma_\epsilon^2$.
 
 ## Derive log posterior and gradient for HMC
 
@@ -180,7 +180,7 @@ The acceptance rate for each of the HMC chains is high for this simple example. 
 f_hmc$accept/N
 ```
 
-The posterior quantiles are summarized after removing an initial *burnin* period. The $\hat{R}$ statistics are close to one, indicating that both HMC chains converged to the same distribution. The $\hat{R}$ statistics provide an indication of convergence. Values close to one indicate that the multiple MCMC chains coverged to the same distribution, while values above 1.1 indicate possible convergence problems. All $\hat{R}$ values in our example are close to one.
+The posterior quantiles are summarized after removing an initial *burnin* period. The $\hat{R}$ statistics are close to one, indicating that both HMC chains converged to the same distribution. The $\hat{R}$ statistics provide an indication of convergence. Values close to one indicate that the multiple MCMC chains converged to the same distribution, while values above 1.1 indicate possible convergence problems. All $\hat{R}$ values in our example are close to one.
 
 
 ```{r, echo=TRUE}

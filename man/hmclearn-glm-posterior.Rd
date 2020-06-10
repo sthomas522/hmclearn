@@ -114,9 +114,9 @@ g_glmm_poisson_posterior(
 
 \item{X}{numeric design matrix of fixed effect parameters for all models}
 
-\item{a}{hyperprior for the Inverse Gamma shape parameter for \eqn{\sigma_\epsilon} in linear regression models}
+\item{a}{hyperparameter for the Inverse Gamma shape parameter for \eqn{\sigma_\epsilon} in linear regression models}
 
-\item{b}{hyperprior for the Inverse Gamma scale parameter for \eqn{\sigma_\epsilon} in linear regression models}
+\item{b}{hyperparameter for the Inverse Gamma scale parameter for \eqn{\sigma_\epsilon} in linear regression models}
 
 \item{sig2beta}{diagonal covariance of prior for linear predictors is multivariate normal with mean 0 for linear regression and linear mixed effect models.}
 
@@ -128,13 +128,13 @@ g_glmm_poisson_posterior(
 
 \item{nrandom}{number of random effects covariance parameters for all mixed effects models}
 
-\item{nugamma}{hyperprior \eqn{\nu} for the half-t prior of the log transformed error for linear mixed effects model \eqn{\gamma}}
+\item{nugamma}{hyperparameter \eqn{\nu} for the half-t prior of the log transformed error for linear mixed effects model \eqn{\gamma}}
 
-\item{nuxi}{hyperprior \eqn{\nu} for the half-t prior of the random effects diagonal for all mixed effects models \eqn{\xi}}
+\item{nuxi}{hyperparameter \eqn{\nu} for the half-t prior of the random effects diagonal for all mixed effects models \eqn{\xi}}
 
-\item{Agamma}{hyperprior \eqn{A} for the half-t prior of the log transformed error for linear mixed effects model \eqn{\gamma}}
+\item{Agamma}{hyperparameter \eqn{A} for the half-t prior of the log transformed error for linear mixed effects model \eqn{\gamma}}
 
-\item{Axi}{hyperprior \eqn{A} for the half-t prior of the random effects diagonal for all mixed effects models\eqn{\xi}}
+\item{Axi}{hyperparameter \eqn{A} for the half-t prior of the random effects diagonal for all mixed effects models\eqn{\xi}}
 }
 \value{
 Numeric vector for the log posterior or gradient of the log posterior

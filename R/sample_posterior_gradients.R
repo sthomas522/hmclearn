@@ -47,18 +47,18 @@ pfun_glmm_poisson <- function(PARAM, ...) {
 #' @param y numeric vector for the dependent variable for all models
 #' @param X numeric design matrix of fixed effect parameters for all models
 #' @param Z numeric design matrix of random effect parameters for all mixed effects models
-#' @param a hyperprior for the Inverse Gamma shape parameter for \eqn{\sigma_\epsilon} in linear regression models
-#' @param b hyperprior for the Inverse Gamma scale parameter for \eqn{\sigma_\epsilon} in linear regression models
+#' @param a hyperparameter for the Inverse Gamma shape parameter for \eqn{\sigma_\epsilon} in linear regression models
+#' @param b hyperparameter for the Inverse Gamma scale parameter for \eqn{\sigma_\epsilon} in linear regression models
 #' @param sig2beta diagonal covariance of prior for linear predictors is multivariate normal with mean 0 for linear regression and linear mixed effect models.
 #' @param n number of observations for standard glm models, or number of subjects for all mixed effect models
 #' @param nrandom number of random effects covariance parameters for all mixed effects models
 #' @param d number of observations per subject for mixed effects models, but an input for linear mixed effect models only.
-# #' @param nueps hyperprior \eqn{\nu} for the half-t prior of the error parameter for linear mixed effects model \eqn{\sigma_\epsilon}
-#' @param nuxi hyperprior \eqn{\nu} for the half-t prior of the random effects diagonal for all mixed effects models \eqn{\xi}
-#' @param nugamma hyperprior \eqn{\nu} for the half-t prior of the log transformed error for linear mixed effects model \eqn{\gamma}
-# #' @param Aeps hyperprior \eqn{A} for the half-t prior of the error parameter for linear mixed effects model \eqn{\sigma_\epsilon}
-#' @param Axi hyperprior \eqn{A} for the half-t prior of the random effects diagonal for all mixed effects models\eqn{\xi}
-#' @param Agamma hyperprior \eqn{A} for the half-t prior of the log transformed error for linear mixed effects model \eqn{\gamma}
+# #' @param nueps hyperparameter \eqn{\nu} for the half-t prior of the error parameter for linear mixed effects model \eqn{\sigma_\epsilon}
+#' @param nuxi hyperparameter \eqn{\nu} for the half-t prior of the random effects diagonal for all mixed effects models \eqn{\xi}
+#' @param nugamma hyperparameter \eqn{\nu} for the half-t prior of the log transformed error for linear mixed effects model \eqn{\gamma}
+# #' @param Aeps hyperparameter \eqn{A} for the half-t prior of the error parameter for linear mixed effects model \eqn{\sigma_\epsilon}
+#' @param Axi hyperparameter \eqn{A} for the half-t prior of the random effects diagonal for all mixed effects models\eqn{\xi}
+#' @param Agamma hyperparameter \eqn{A} for the half-t prior of the log transformed error for linear mixed effects model \eqn{\gamma}
 #' @section Generalized Linear Models with available posterior and gradient functions:
 #' \describe{
 #'   \item{`linear_posterior(theta, y, X, a=1e-4, b=1e-4, sig2beta = 1e3)`}{

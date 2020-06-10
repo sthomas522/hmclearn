@@ -1,7 +1,7 @@
 Package: hmclearn
 Type: Package
 Title: Fit Statistical Models Using Hamiltonian Monte Carlo
-Version: 0.0.2
+Version: 0.0.3
 Authors@R: c(
   person("Samuel", "Thomas", email = "samthoma@iu.edu", role = c("cre", "aut")),
   person("Wanzhu", "Tu", email = "wtu1@iu.edu", role = "ctb"))

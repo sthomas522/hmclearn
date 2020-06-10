@@ -34,7 +34,7 @@ $$
 p = Pr(\mathbf{y} = 1 | \mathbf{X}) = [1 + e^{-\mathbf{X}\boldsymbol\beta}]^{-1}.
 $$
 
-The vector of responses is  $\mathbf{y} = (y_1, ..., y_n)^T$. The covariate values for the \textit{i}th subject are $\mathbf{x}_i^T = (x_{i0}, ..., x_{iq})$ for $q$ covariates plus an intercept. We write the full design matrix as $\mathbf{X} = (\mathbf{x}_1^T, ..., \mathbf{x}_n^T)^T \in \mathbb{R}^{n\times(q+1)}$ for $n$ observations. The regression coefficients are a vector of length $q + 1$, $\boldsymbol\beta = (\beta_0, ..., \beta_q)^T$.
+The vector of responses is  $\mathbf{y} = (y_1, ..., y_n)^T$. The covariate values for subject $i$ are $\mathbf{x}_i^T = (x_{i0}, ..., x_{iq})$ for $q$ covariates plus an intercept. We write the full design matrix as $\mathbf{X} = (\mathbf{x}_1^T, ..., \mathbf{x}_n^T)^T \in \mathbb{R}^{n\times(q+1)}$ for $n$ observations. The regression coefficients are a vector of length $q + 1$, $\boldsymbol\beta = (\beta_0, ..., \beta_q)^T$.
 
 ## Derive log posterior and gradient for HMC
 
@@ -149,7 +149,7 @@ We store the Metropolis parameter estimates in \textit{summMH}.
 
 ## Fit model using *hmc*
 
-Next, we fit the logistic regression model using HMC with the same hyperprior for $\sigma_\beta^2$ as in Agresti's example.
+Next, we fit the logistic regression model using HMC with the same hyperparameter for $\sigma_\beta^2$ as in Agresti's example.
 
 ```{r, echo=TRUE}
 N <- 1e4
@@ -180,7 +180,7 @@ The acceptance ratio for each of the HMC chains is sufficiently high for an effi
 f_hmc$accept/N
 ```
 
-The posterior quantiles are summarized after removing an initial *burnin* period. The $\hat{R}$ statistics provide an indication of convergence. Values close to one indicate that the multiple MCMC chains coverged to the same distribution, while values above 1.1 indicate possible convergence problems. All $\hat{R}$ values in our example are close to one.
+The posterior quantiles are summarized after removing an initial *burnin* period. The $\hat{R}$ statistics provide an indication of convergence. Values close to one indicate that the multiple MCMC chains converged to the same distribution, while values above 1.1 indicate possible convergence problems. All $\hat{R}$ values in our example are close to one.
 
 ```{r, echo=TRUE}
 summary(f_hmc, burnin=3000, probs=c(0.025, 0.5, 0.975))

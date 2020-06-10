@@ -1,7 +1,7 @@
 ---
 title: "hmclearn:  Linear Mixed Effects Regression Example"
 author:  "Samuel Thomas"
-date: "2020-06-09"
+date: "2020-06-10"
 output:
   rmarkdown::html_vignette:
     fig_caption: false
@@ -48,7 +48,7 @@ The parameterization approach for this model uses a strategy recommended by Beta
 
 Further, we select a half-t family of distributions appropriate for hierarchical models per Gelman (2006).  This parameterization is well-behaved around 0, in contrast to inverse gamma, and provides flexibility for informed priors.
 
-We select a parameterization of $\mathbf{G}$ such that the likelihood and its gradient can be derived for HMC.  To this end, we uses LDL decomposition of $\mathbf{G}$ to form a flexibile parameterization that can easily handle restrictions (Chan, Jelizkov 2009).
+We select a parameterization of $\mathbf{G}$ such that the likelihood and its gradient can be derived for HMC.  To this end, we uses LDL decomposition of $\mathbf{G}$ to form a flexible parameterization that can easily handle restrictions (Chan, Jelizkov 2009).
 
 $$
 \begin{aligned}
@@ -239,7 +239,7 @@ $$
 
 Note that a random intercept model only has a single $\xi$ parameter, which simplifies the log posterior and gradient formulations. For a random intercept model, $\widetilde{\mathbf{D}}^{1/2} =  e^{\xi}\mathbf{I}_n$.
 
-## Linear mixed effecgts model example data
+## Linear mixed effects model example data
 
 The user must define provide the design matrix directly for use in **hmclearn**.  Our first step is to load the data and store the fixed effect design matrix $\mathbf{X}$, random effects design matrix $\mathbf{Z}$, and dependent variable vector $\mathbf{y}$.
 
@@ -248,6 +248,7 @@ We load drug sleepstudy data (Belenky et. al. 2003) and create the design matric
 
 ```r
 library(lme4)
+#> Loading required package: Matrix
 library(Matrix)
 data(sleepstudy)
 
@@ -316,7 +317,7 @@ summary(fm1)
 
 ## Fit model using *hmc*
 
-Next, we fit the linear mixed effects regression model using HMC.  A vector of *tuning parameter* $\epsilon$ values are specified to align with the data. The hyperparameters for $\nu_\gamma$, $A_\gamma$, $\nu_\xi$, and $A_\xi$ are set to values more appropriate for hierarchical models (Gelman 2006). The hyperprior $\sigma_\beta^2$ is set higher than the default based on the range of the dependent variable.
+Next, we fit the linear mixed effects regression model using HMC.  A vector of *tuning parameter* $\epsilon$ values are specified to align with the data. The hyperparameters for $\nu_\gamma$, $A_\gamma$, $\nu_\xi$, and $A_\xi$ are set to values more appropriate for hierarchical models (Gelman 2006). The hyperparameter $\sigma_\beta^2$ is set higher than the default based on the range of the dependent variable.
 
 
 ```r
@@ -349,7 +350,7 @@ t1.hmc <- Sys.time()
                parallel=FALSE, chains=2)
 t2.hmc <- Sys.time()
 t2.hmc - t1.hmc
-#> Time difference of 1.077049 mins
+#> Time difference of 1.008721 mins
 ```
 
 The acceptance ratio for each of the HMC chains is sufficiently high for an efficient simulation.

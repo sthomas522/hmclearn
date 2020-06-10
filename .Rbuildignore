@@ -12,3 +12,4 @@
 ^vignettes/logistic_mixed_effects_hmclearn\.Rmd\.orig$
 ^vignettes/logistic_regression_hmclearn\.Rmd\.orig$
 ^vignettes/poisson_regression_hmclearn\.Rmd\.orig$
+^R/zzz_vignettes\.R$

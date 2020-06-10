@@ -1,7 +1,7 @@
 ---
 title: "hmclearn:  Poisson Regression Example"
 author: "Samuel Thomas"
-date: "2020-06-09"
+date: "2020-06-10"
 output:
   rmarkdown::html_vignette:
     fig_caption: false
@@ -36,7 +36,7 @@ $$
 \log \boldsymbol\mu &= \mathbf{X}\boldsymbol\beta.
 \end{aligned}
 $$
-The vector of responses is  $\mathbf{y} = (y_1, ..., y_n)^T$. The covariate values for the \textit{i}th subject are $\mathbf{x}_i^T = (x_{i0}, ..., x_{iq})$ for $q$ covariates plus an intercept. We write the full design matrix as $\mathbf{X} = (\mathbf{x}_1^T, ..., \mathbf{x}_n^T)^T \in \mathbb{R}^{n\times(q+1)}$ for $n$ observations. The regression coefficients are a vector of length $q + 1$, $\boldsymbol\beta = (\beta_0, ..., \beta_q)^T$.
+The vector of responses is  $\mathbf{y} = (y_1, ..., y_n)^T$. The covariate values for subject $i$ are $\mathbf{x}_i^T = (x_{i0}, ..., x_{iq})$ for $q$ covariates plus an intercept. We write the full design matrix as $\mathbf{X} = (\mathbf{x}_1^T, ..., \mathbf{x}_n^T)^T \in \mathbb{R}^{n\times(q+1)}$ for $n$ observations. The regression coefficients are a vector of length $q + 1$, $\boldsymbol\beta = (\beta_0, ..., \beta_q)^T$.
 
 ## Derive log posterior and gradient for HMC
 
@@ -130,8 +130,10 @@ summary(f)
 #> glm(formula = y ~ X - 1, family = poisson(link = log))
 #> 
 #> Deviance Residuals: 
-#>        1         2         3         4         5         6         7         8  
-#>  0.02044  -0.02658  -0.09256   0.02890  -0.33428   0.09452   0.49134  -0.03690  
+#>        1         2         3         4         5         6  
+#>  0.02044  -0.02658  -0.09256   0.02890  -0.33428   0.09452  
+#>        7         8  
+#>  0.49134  -0.03690  
 #> 
 #> Coefficients:
 #>              Estimate Std. Error z value Pr(>|z|)    
@@ -175,7 +177,7 @@ t1.hmc <- Sys.time()
                     param=list(y=y, X=X))
 t2.hmc <- Sys.time()
 t2.hmc - t1.hmc
-#> Time difference of 45.84692 secs
+#> Time difference of 42.24332 secs
 ```
 
 

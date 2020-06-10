@@ -1,7 +1,7 @@
 ---
 title: "hmclearn:  Logistic Regression Example"
 author: "Samuel Thomas"
-date: "2020-06-09"
+date: "2020-06-10"
 output:
   rmarkdown::html_vignette:
     fig_caption: false
@@ -30,7 +30,7 @@ $$
 p = Pr(\mathbf{y} = 1 | \mathbf{X}) = [1 + e^{-\mathbf{X}\boldsymbol\beta}]^{-1}.
 $$
 
-The vector of responses is  $\mathbf{y} = (y_1, ..., y_n)^T$. The covariate values for the \textit{i}th subject are $\mathbf{x}_i^T = (x_{i0}, ..., x_{iq})$ for $q$ covariates plus an intercept. We write the full design matrix as $\mathbf{X} = (\mathbf{x}_1^T, ..., \mathbf{x}_n^T)^T \in \mathbb{R}^{n\times(q+1)}$ for $n$ observations. The regression coefficients are a vector of length $q + 1$, $\boldsymbol\beta = (\beta_0, ..., \beta_q)^T$.
+The vector of responses is  $\mathbf{y} = (y_1, ..., y_n)^T$. The covariate values for subject $i$ are $\mathbf{x}_i^T = (x_{i0}, ..., x_{iq})$ for $q$ covariates plus an intercept. We write the full design matrix as $\mathbf{X} = (\mathbf{x}_1^T, ..., \mathbf{x}_n^T)^T \in \mathbb{R}^{n\times(q+1)}$ for $n$ observations. The regression coefficients are a vector of length $q + 1$, $\boldsymbol\beta = (\beta_0, ..., \beta_q)^T$.
 
 ## Derive log posterior and gradient for HMC
 
@@ -161,7 +161,7 @@ The time to fit the logistic regression using MH is
 
 ```r
 t2.mh - t1.mh
-#> Time difference of 2.58681 mins
+#> Time difference of 2.774535 mins
 ```
 
 We store the Metropolis parameter estimates in \textit{summMH}.
@@ -195,7 +195,7 @@ We store the Metropolis parameter estimates in \textit{summMH}.
 
 ## Fit model using *hmc*
 
-Next, we fit the logistic regression model using HMC with the same hyperprior for $\sigma_\beta^2$ as in Agresti's example.
+Next, we fit the logistic regression model using HMC with the same hyperparameter for $\sigma_\beta^2$ as in Agresti's example.
 
 
 ```r
@@ -218,7 +218,7 @@ HMC requires fewer iterations and lower computation time than MH in this example
 
 ```r
 t2.hmc - t1.hmc
-#> Time difference of 34.51053 secs
+#> Time difference of 31.35036 secs
 ```
 
 ## MCMC summary and diagnostics
@@ -231,7 +231,7 @@ f_hmc$accept/N
 #> [1] 0.9104 0.9155
 ```
 
-The posterior quantiles are summarized after removing an initial *burnin* period. The $\hat{R}$ statistics provide an indication of convergence. Values close to one indicate that the multiple MCMC chains coverged to the same distribution, while values above 1.1 indicate possible convergence problems. All $\hat{R}$ values in our example are close to one.
+The posterior quantiles are summarized after removing an initial *burnin* period. The $\hat{R}$ statistics provide an indication of convergence. Values close to one indicate that the multiple MCMC chains converged to the same distribution, while values above 1.1 indicate possible convergence problems. All $\hat{R}$ values in our example are close to one.
 
 
 ```r
