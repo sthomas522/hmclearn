@@ -90,7 +90,7 @@
       <h1 data-toc-skip>hmclearn: Logistic Mixed Effects Regression Example</h1>
                         <h4 class="author">Samuel Thomas</h4>
             
-            <h4 class="date">2020-06-02</h4>
+            <h4 class="date">2020-06-09</h4>
       
       
       <div class="hidden name"><code>logistic_mixed_effects_hmclearn.Rmd</code></div>
@@ -129,7 +129,7 @@ Pr(\mathbf{y} = \mathbf{1} | \mathbf{X}, \mathbf{Z}) = [1 + e^{-\mathbf{X}\bolds
 \]</span></p>
 <p>Let <span class="math inline">\(\boldsymbol{\lambda} = (\lambda_1, ..., \lambda_p)\)</span> denote the diagonal elements of <span class="math inline">\(\mathbf{D}^{1/2}\)</span> where <span class="math inline">\(p\)</span> indicates the number of random effect parameters, specified as <em>nrandom</em> in <strong>hmclearn</strong>. A future release of <strong>hmclearn</strong> will allow prior specification for the off-diagonal elements of <span class="math inline">\(L\)</span>. For the current version, we let <span class="math inline">\(L = I_{p}\)</span>.</p>
 <p><span class="math display">\[
-\mathbf{D}^{1/2} := 
+\mathbf{D}^{1/2} :=
 \begin{pmatrix}
 \lambda_1 &amp; 0 &amp; ... &amp; 0 \\
 0 &amp; \lambda_2 &amp; 0 ... &amp; 0 \\
@@ -156,7 +156,7 @@ Pr(\mathbf{y} = \mathbf{1} | \mathbf{X}, \mathbf{Z}) = [1 + e^{-\mathbf{X}\bolds
 <p><span class="math display">\[
 \begin{aligned}
 \boldsymbol\xi &amp;:= \log\boldsymbol\lambda,  \\
-\boldsymbol\lambda &amp;:= e^{\boldsymbol\xi}. 
+\boldsymbol\lambda &amp;:= e^{\boldsymbol\xi}.
 \end{aligned}
 \]</span></p>
 <p>We need to compute the Jacobian of the transformation</p>
@@ -223,8 +223,8 @@ f(\mathbf{y}|\mathbf{X}, \mathbf{Z}, \boldsymbol\beta, \mathbf{u}) &amp;= \prod_
 <p>Next we derive the partial derivative of each parameter <span class="math inline">\(\xi_1, ..., \xi_p\)</span> where <span class="math inline">\(jj = 1, ..., p\)</span>,</p>
 <p><span class="math display">\[
 \begin{aligned}
-\nabla_{\xi_{jj} }\log f(\boldsymbol\beta, \xi_{jj}, \boldsymbol\tau| \mathbf{y}, \mathbf{X}, \mathbf{Z}, \sigma_\beta^2, \nu_\xi, A_\xi) 
-&amp;\propto e^{\xi_{jj}} \boldsymbol\tau^T \mathbf{Z}^T (\mathbf{y} - \mathbf{1}_{nd})^T + e^{\xi_{jj}}\boldsymbol\tau^T\mathbf{Z}^T\left[1 + e^{-\mathbf{X}\boldsymbol\beta - e^{\xi_{jj}}\mathbf{Z}\boldsymbol\tau} \right ]^{-1} e^{-\mathbf{X}\boldsymbol\beta - e^{\xi_{jj}}\mathbf{Z}\boldsymbol\beta}  
+\nabla_{\xi_{jj} }\log f(\boldsymbol\beta, \xi_{jj}, \boldsymbol\tau| \mathbf{y}, \mathbf{X}, \mathbf{Z}, \sigma_\beta^2, \nu_\xi, A_\xi)
+&amp;\propto e^{\xi_{jj}} \boldsymbol\tau^T \mathbf{Z}^T (\mathbf{y} - \mathbf{1}_{nd})^T + e^{\xi_{jj}}\boldsymbol\tau^T\mathbf{Z}^T\left[1 + e^{-\mathbf{X}\boldsymbol\beta - e^{\xi_{jj}}\mathbf{Z}\boldsymbol\tau} \right ]^{-1} e^{-\mathbf{X}\boldsymbol\beta - e^{\xi_{jj}}\mathbf{Z}\boldsymbol\beta}
 - \frac{\nu_\xi + 1}{1 + \nu_\xi A_\xi^2 e^{-2\xi_{jj}}} + 1, \\
 &amp;\propto e^{\xi_{jj}} \boldsymbol\tau^T \mathbf{Z}^T(\mathbf{y} - \mathbf{1}_{nd})^T + e^{\xi_{jj}}\boldsymbol\tau^T\mathbf{Z}^T \left ( \frac{e^{-\mathbf{X}\boldsymbol\beta - e^{\xi_{jj}}\mathbf{Z}\boldsymbol\tau} }{1 + e^{-\mathbf{X}\boldsymbol\beta - e^{\xi_{jj}}\mathbf{Z}\boldsymbol\tau}}  \right)
 - \frac{\nu_\xi + 1}{1 + \nu_\xi A_\xi^2 e^{-2\xi_{jj}}} + 1, \\
@@ -236,7 +236,7 @@ f(\mathbf{y}|\mathbf{X}, \mathbf{Z}, \boldsymbol\beta, \mathbf{u}) &amp;= \prod_
 <p><span class="math display">\[
 \begin{aligned}
 \nabla_\tau \log f(\boldsymbol\beta, \xi, \boldsymbol\tau | \mathbf{y}, \mathbf{X}, \mathbf{Z}, \sigma_\beta^2, \nu_\xi, A_\xi)
-&amp;\propto \widetilde{\mathbf{D}}^{1/2}\mathbf{Z}^T (\mathbf{y} - \mathbf{1}_{nd}) + \widetilde{\mathbf{D}}^{1/2}\mathbf{Z}^T \left(\frac{e^{-\mathbf{X}\boldsymbol\beta-\mathbf{Z}\widetilde{\mathbf{D}}^{1/2}\boldsymbol\tau}}{1 + e^{-\mathbf{X}\boldsymbol\beta-\mathbf{Z}\widetilde{\mathbf{D}}^{1/2}\boldsymbol\tau}} \right)  - \tau \\ 
+&amp;\propto \widetilde{\mathbf{D}}^{1/2}\mathbf{Z}^T (\mathbf{y} - \mathbf{1}_{nd}) + \widetilde{\mathbf{D}}^{1/2}\mathbf{Z}^T \left(\frac{e^{-\mathbf{X}\boldsymbol\beta-\mathbf{Z}\widetilde{\mathbf{D}}^{1/2}\boldsymbol\tau}}{1 + e^{-\mathbf{X}\boldsymbol\beta-\mathbf{Z}\widetilde{\mathbf{D}}^{1/2}\boldsymbol\tau}} \right)  - \tau \\
 &amp;\propto \widetilde{\mathbf{D}}^{1/2}\mathbf{Z}^T \left(\mathbf{y} - \mathbf{1}_{nd} + \frac{1}{1 + e^{\mathbf{X}\boldsymbol\beta + \mathbf{Z}\widetilde{\mathbf{D}}^{1/2}\boldsymbol\tau}} \right) - \tau .
 \end{aligned}
 \]</span></p>
@@ -245,7 +245,7 @@ f(\mathbf{y}|\mathbf{X}, \mathbf{Z}, \boldsymbol\beta, \mathbf{u}) &amp;= \prod_
 \begin{aligned}
 \nabla_\beta \log f(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z})
 &amp;\propto \mathbf{X}^T \left( \mathbf{y} - \mathbf{1}_{nd} +\frac{1}{1 + e^{\mathbf{X}\boldsymbol\beta+\mathbf{Z}\widetilde{\mathbf{D}}^{1/2}\boldsymbol\tau}} \right) - \boldsymbol\beta / \sigma_\beta^2, \\
-\nabla_{\xi_{jj}} \log f(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z}) 
+\nabla_{\xi_{jj}} \log f(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z})
 &amp;\propto e^{\xi_{jj}}\mathbf{Z}\boldsymbol\tau \left(\mathbf{y} - \mathbf{1}_{nd} +  \frac{1 }{1 + e^{\mathbf{X}\boldsymbol\beta + e^{\xi_{jj}}\mathbf{Z}\boldsymbol\tau}} \right )
 - \frac{\nu_\xi + 1}{1 + \nu_\xi A_\xi^2 e^{-2\xi_{jj}}} + 1,\quad \forall (\xi_1, ..., \xi_p) \in \boldsymbol\xi \\
 \nabla_\tau \log f(\boldsymbol\beta, \xi, \boldsymbol\tau, \gamma | \mathbf{y}, \mathbf{X}, \mathbf{Z}) &amp;\propto \widetilde{\mathbf{D}}^{1/2}\mathbf{Z}^T \left(\mathbf{y} - \mathbf{1}_{nd} + \frac{1}{1 + e^{\mathbf{X}\boldsymbol\beta + \mathbf{Z}\widetilde{\mathbf{D}}^{1/2}\boldsymbol\tau}} \right) - \tau.
@@ -297,7 +297,7 @@ f(\mathbf{y}|\mathbf{X}, \mathbf{Z}, \boldsymbol\beta, \mathbf{u}) &amp;= \prod_
 <span class="no">Rstar</span> <span class="kw">&lt;-</span> <span class="no">R</span> / <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span>(<span class="no">n</span>-<span class="fl">1</span>)
 <span class="no">Rstar_inv</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/solve.html">solve</a></span>(<span class="no">Rstar</span>)
 <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span>(<span class="no">X2</span>) <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"int"</span>, <span class="st">"age"</span>, <span class="st">"age_sq"</span>, <span class="st">"urban"</span>, <span class="st">"liv2"</span>)</pre></body></html></div>
-<p>We could also apply QR decomposition to <span class="math inline">\(\matbf{Z}\)</span>, but this is not necessary for a random intercept model where all elements of <span class="math inline">\(\mathbf{Z}\)</span> are 0 or 1.</p>
+<p>We could also apply QR decomposition to <span class="math inline">\(\mathbf{Z}\)</span>, but this is not necessary for a random intercept model where all elements of <span class="math inline">\(\mathbf{Z}\)</span> are 0 or 1.</p>
 </div>
 <div id="fit-model-using-hmc" class="section level2">
 <h2 class="hasAnchor">
@@ -323,17 +323,17 @@ f(\mathbf{y}|\mathbf{X}, \mathbf{Z}, \boldsymbol\beta, \mathbf{u}) &amp;= \prod_
              <span class="kw">logPOSTERIOR</span> <span class="kw">=</span> <span class="no">glmm_bin_posterior</span>,
              <span class="kw">glogPOSTERIOR</span> <span class="kw">=</span> <span class="no">g_glmm_bin_posterior</span>,
              <span class="kw">varnames</span> <span class="kw">=</span> <span class="no">vnames</span>,
-             <span class="kw">parallel</span><span class="kw">=</span><span class="fl">TRUE</span>, <span class="kw">chains</span><span class="kw">=</span><span class="fl">2</span>,
+             <span class="kw">parallel</span><span class="kw">=</span><span class="fl">FALSE</span>, <span class="kw">chains</span><span class="kw">=</span><span class="fl">2</span>,
              <span class="kw">param</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="kw">y</span> <span class="kw">=</span> <span class="no">y</span>, <span class="kw">X</span><span class="kw">=</span><span class="no">X2</span>, <span class="kw">Z</span><span class="kw">=</span><span class="no">Z</span>, <span class="kw">n</span><span class="kw">=</span><span class="fl">60</span>, <span class="kw">nrandom</span><span class="kw">=</span><span class="fl">1</span>, <span class="kw">sig2beta</span><span class="kw">=</span><span class="fl">5</span>,
                         <span class="kw">nuxi</span><span class="kw">=</span><span class="fl">1</span>, <span class="kw">Axi</span><span class="kw">=</span><span class="fl">25</span>)  )
 
 
 <span class="no">t2.hmc</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span>()
 <span class="no">t2.hmc</span> - <span class="no">t1.hmc</span>
-<span class="co">#&gt; Time difference of 6.275848 mins</span></pre></body></html></div>
+<span class="co">#&gt; Time difference of 11.57773 mins</span></pre></body></html></div>
 <p>The acceptance ratio for each of the HMC chains is sufficiently high for an efficient simulation.</p>
 <div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="no">f_hmc</span>$<span class="no">accept</span>/<span class="no">N</span>
-<span class="co">#&gt; [1] 0.6605 0.6625</span></pre></body></html></div>
+<span class="co">#&gt; [1] 0.670 0.672</span></pre></body></html></div>
 <p>Since we used QR decomposition to transform <span class="math inline">\(\beta\)</span> prior to fitting via HMC, we need to reverse the transformation to obtain the original parameter scale.</p>
 <div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="co"># restore beta from Rstar in QR decomposition</span>
 <span class="no">calc_beta</span> <span class="kw">&lt;-</span> <span class="kw">function</span>(<span class="no">beta_tilde_param</span>, <span class="no">Rstarinv</span>) {
@@ -347,152 +347,86 @@ f(\mathbf{y}|\mathbf{X}, \mathbf{Z}, \boldsymbol\beta, \mathbf{u}) &amp;= \prod_
   <span class="no">xx</span>
 })</pre></body></html></div>
 <p>The posterior quantiles are summarized after removing an initial <em>burnin</em> period. The <span class="math inline">\(\hat{R}\)</span> statistics are close to one, indicating that both HMC chains converged to the same distribution. The <span class="math inline">\(\hat{R}\)</span> statistics provide an indication of convergence. Values close to one indicate that the multiple MCMC chains converged to the same distribution, while values above 1.1 indicate possible convergence problems. All <span class="math inline">\(\hat{R}\)</span> values in our example are close to one.</p>
-<div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">f_hmc2</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">1000</span>)
+<div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">f_hmc2</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">1000</span>, <span class="kw">probs</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0.025</span>, <span class="fl">0.5</span>, <span class="fl">0.975</span>))
 <span class="co">#&gt; Summary of MCMC simulation</span>
-<span class="co">#&gt;                   2.5%           5%           25%          50%          75%</span>
-<span class="co">#&gt; int       -1.347982707 -1.287078698 -1.1195768159 -1.010788702 -0.897982041</span>
-<span class="co">#&gt; age       -0.009686627 -0.007111888  0.0004961223  0.006469324  0.011765937</span>
-<span class="co">#&gt; age_sq    -0.006073445 -0.005912695 -0.0051822367 -0.004715938 -0.004173734</span>
-<span class="co">#&gt; urban      0.433492113  0.477845022  0.6037308490  0.688938740  0.771976364</span>
-<span class="co">#&gt; liv2       0.566767476  0.623618862  0.7720271502  0.869516072  0.968951079</span>
-<span class="co">#&gt; tau_int1  -2.621672493 -2.450800799 -1.8421345207 -1.494947844 -1.203420865</span>
-<span class="co">#&gt; tau_int2  -1.451325197 -1.217003766 -0.5118743041 -0.072101425  0.369880770</span>
-<span class="co">#&gt; tau_int3  -1.405416914 -1.043447424 -0.1776870331  0.471324843  1.103871338</span>
-<span class="co">#&gt; tau_int4  -1.003673166 -0.730904556 -0.0907457564  0.336465106  0.732081033</span>
-<span class="co">#&gt; tau_int5  -0.996924875 -0.768274108 -0.1853611822  0.208067748  0.607339032</span>
-<span class="co">#&gt; tau_int6  -1.500631380 -1.362217607 -0.8340067210 -0.494134288 -0.143899005</span>
-<span class="co">#&gt; tau_int7  -1.750788628 -1.520591971 -0.8959698748 -0.464443859  0.007357822</span>
-<span class="co">#&gt; tau_int8  -0.726329661 -0.516073587 -0.0203761350  0.354837368  0.716853856</span>
-<span class="co">#&gt; tau_int9  -1.810506311 -1.570920715 -0.8335934604 -0.416019369  0.058007944</span>
-<span class="co">#&gt; tau_int10 -2.222624117 -1.973370912 -1.3295651564 -0.801039033 -0.275350736</span>
-<span class="co">#&gt; tau_int11 -3.090022531 -2.921253203 -2.1425151933 -1.613595483 -1.137936267</span>
-<span class="co">#&gt; tau_int12 -1.376482677 -1.154886962 -0.5937618972 -0.220449400  0.190173789</span>
-<span class="co">#&gt; tau_int13 -1.086884367 -0.871467747 -0.2014476392  0.239718159  0.664806028</span>
-<span class="co">#&gt; tau_int14  0.502367411  0.608213573  1.0333374683  1.315831741  1.592114496</span>
-<span class="co">#&gt; tau_int15 -1.422239392 -1.156260426 -0.5557292555 -0.087382675  0.360304462</span>
-<span class="co">#&gt; tau_int16 -0.129241651  0.127768462  0.8602041755  1.344537152  1.829203100</span>
-<span class="co">#&gt; tau_int17 -1.554374167 -1.358993491 -0.7793438493 -0.371672223  0.044695844</span>
-<span class="co">#&gt; tau_int18 -1.215164391 -1.028882073 -0.4935914922 -0.135250240  0.196882600</span>
-<span class="co">#&gt; tau_int19 -1.155920955 -1.010807685 -0.3818582728  0.028804864  0.448327028</span>
-<span class="co">#&gt; tau_int20 -0.941516019 -0.666179041  0.0584130979  0.558910403  1.034584570</span>
-<span class="co">#&gt; tau_int21 -1.125055585 -0.983398426 -0.4057570701  0.039904274  0.473097925</span>
-<span class="co">#&gt; tau_int22 -2.359383646 -2.008768157 -1.2795407484 -0.827806125 -0.404393021</span>
-<span class="co">#&gt; tau_int23 -1.716404243 -1.588072211 -0.9184900552 -0.436827160  0.088370599</span>
-<span class="co">#&gt; tau_int24 -2.663867139 -2.435414290 -1.5700400880 -1.043795568 -0.489530705</span>
-<span class="co">#&gt; tau_int25 -0.598078273 -0.445700230 -0.0114978538  0.291750691  0.607230556</span>
-<span class="co">#&gt; tau_int26 -1.652053308 -1.410830206 -0.6338368646 -0.108216491  0.382427431</span>
-<span class="co">#&gt; tau_int27 -2.283243641 -2.066922930 -1.3324938101 -0.889030453 -0.523753522</span>
-<span class="co">#&gt; tau_int28 -1.807580596 -1.630121178 -1.0193938788 -0.624857585 -0.300043077</span>
-<span class="co">#&gt; tau_int29 -1.613262226 -1.348443974 -0.7073907813 -0.278259550  0.135733849</span>
-<span class="co">#&gt; tau_int30 -0.100253207  0.059621229  0.5034955761  0.838988411  1.184074002</span>
-<span class="co">#&gt; tau_int31 -0.477474277 -0.282152033  0.2662131906  0.709913399  1.115965254</span>
-<span class="co">#&gt; tau_int32 -2.213044399 -1.991019472 -1.3819767578 -0.963883704 -0.545630871</span>
-<span class="co">#&gt; tau_int33 -1.613228742 -1.428585278 -0.7113413536 -0.254453811  0.226260206</span>
-<span class="co">#&gt; tau_int34  0.292167463  0.484369006  0.9997381304  1.339429785  1.731592914</span>
-<span class="co">#&gt; tau_int35 -0.462620000 -0.302935616  0.1528113302  0.525325702  0.878847919</span>
-<span class="co">#&gt; tau_int36 -1.739358662 -1.447278783 -0.7127008842 -0.220849265  0.293509855</span>
-<span class="co">#&gt; tau_int37 -0.778031326 -0.512701455  0.2347611186  0.785704265  1.280025455</span>
-<span class="co">#&gt; tau_int38 -1.814290866 -1.528972895 -0.6859535362 -0.189602073  0.360786004</span>
-<span class="co">#&gt; tau_int39 -0.345247514 -0.043055981  0.4854087408  0.928492927  1.363846673</span>
-<span class="co">#&gt; tau_int40 -0.985784099 -0.776089859 -0.2218664551  0.156821510  0.489659387</span>
-<span class="co">#&gt; tau_int41 -0.779724455 -0.614012168  0.0601502755  0.491582164  0.900294145</span>
-<span class="co">#&gt; tau_int42 -1.020629122 -0.778138698 -0.0320844506  0.485109175  0.985164970</span>
-<span class="co">#&gt; tau_int43 -0.038977761  0.148681159  0.6591682207  0.977496389  1.357014618</span>
-<span class="co">#&gt; tau_int44 -1.940428097 -1.689373756 -1.0945203469 -0.712416643 -0.281990676</span>
-<span class="co">#&gt; tau_int45 -1.357667041 -1.258288637 -0.6817897411 -0.264472261  0.126622205</span>
-<span class="co">#&gt; tau_int46  0.255930006  0.367426251  0.7829697974  1.070807016  1.403849572</span>
-<span class="co">#&gt; tau_int47 -1.085412988 -0.832283834 -0.1477102312  0.354566532  0.846442492</span>
-<span class="co">#&gt; tau_int48 -0.193500336 -0.007577052  0.4898495868  0.869482747  1.237269324</span>
-<span class="co">#&gt; tau_int49 -2.225064428 -1.916378166 -1.0345815585 -0.481252758  0.081411248</span>
-<span class="co">#&gt; tau_int50 -0.795430451 -0.543643690  0.0784622238  0.533190742  1.024269738</span>
-<span class="co">#&gt; tau_int51 -0.881364164 -0.730889707 -0.2041671837  0.130619392  0.483730566</span>
-<span class="co">#&gt; tau_int52 -0.569194903 -0.340126251  0.1426642378  0.479942593  0.798137874</span>
-<span class="co">#&gt; tau_int53 -1.547761494 -1.340630729 -0.6887934565 -0.231799466  0.193930535</span>
-<span class="co">#&gt; tau_int54 -2.573907105 -2.227720658 -1.3248763816 -0.784297464 -0.193458074</span>
-<span class="co">#&gt; tau_int55  0.193637660  0.360109270  0.8442827548  1.229389470  1.633294529</span>
-<span class="co">#&gt; tau_int56 -2.382352700 -2.190713768 -1.5581099043 -1.089108311 -0.643278392</span>
-<span class="co">#&gt; tau_int57 -0.580556568 -0.390200666  0.1543379289  0.556254441  0.932042424</span>
-<span class="co">#&gt; tau_int58 -2.510838240 -2.211700388 -1.3427397790 -0.797716295 -0.203185247</span>
-<span class="co">#&gt; tau_int59 -2.243980864 -2.047302620 -1.3514183470 -0.925560596 -0.460601127</span>
-<span class="co">#&gt; tau_int60 -2.247811484 -2.034983712 -1.4783493011 -1.041297194 -0.657768695</span>
-<span class="co">#&gt; xi        -1.067826111 -0.999673811 -0.7990971502 -0.679518964 -0.558112525</span>
-<span class="co">#&gt;                   95%        97.5%      rhat</span>
-<span class="co">#&gt; int       -0.72450297 -0.669006596 1.0009782</span>
-<span class="co">#&gt; age        0.01917337  0.022150756 1.0000466</span>
-<span class="co">#&gt; age_sq    -0.00342968 -0.003177026 1.0002219</span>
-<span class="co">#&gt; urban      0.90843831  0.942232929 1.0057159</span>
-<span class="co">#&gt; liv2       1.11202357  1.190886377 0.9997967</span>
-<span class="co">#&gt; tau_int1  -0.77682606 -0.667067884 1.0155581</span>
-<span class="co">#&gt; tau_int2   1.04758285  1.236166480 1.0005463</span>
-<span class="co">#&gt; tau_int3   1.92264854  2.212571295 1.0126152</span>
-<span class="co">#&gt; tau_int4   1.36418474  1.652384394 0.9998082</span>
-<span class="co">#&gt; tau_int5   1.13594895  1.324637487 1.0051179</span>
-<span class="co">#&gt; tau_int6   0.34566383  0.542736431 1.0027308</span>
-<span class="co">#&gt; tau_int7   0.58189243  0.732437025 1.0050017</span>
-<span class="co">#&gt; tau_int8   1.33882477  1.547205784 1.0006540</span>
-<span class="co">#&gt; tau_int9   0.76799778  0.999226995 1.0039655</span>
-<span class="co">#&gt; tau_int10  0.44071933  0.751448669 1.0006335</span>
-<span class="co">#&gt; tau_int11 -0.40453255 -0.124841016 1.0038133</span>
-<span class="co">#&gt; tau_int12  0.84608894  0.998787591 1.0011688</span>
-<span class="co">#&gt; tau_int13  1.28451759  1.560694838 0.9995003</span>
-<span class="co">#&gt; tau_int14  2.07221006  2.221955753 1.0008096</span>
-<span class="co">#&gt; tau_int15  0.93623590  1.129999200 1.0005010</span>
-<span class="co">#&gt; tau_int16  2.46311551  2.707427649 1.0004814</span>
-<span class="co">#&gt; tau_int17  0.67394865  0.930489536 0.9998175</span>
-<span class="co">#&gt; tau_int18  0.75568976  0.978682738 1.0002303</span>
-<span class="co">#&gt; tau_int19  1.09802674  1.310068311 1.0002332</span>
-<span class="co">#&gt; tau_int20  1.82938955  2.117771208 1.0064199</span>
-<span class="co">#&gt; tau_int21  1.12445356  1.314574274 1.0023769</span>
-<span class="co">#&gt; tau_int22  0.28686034  0.484459929 1.0046146</span>
-<span class="co">#&gt; tau_int23  0.77544180  0.990101039 0.9995065</span>
-<span class="co">#&gt; tau_int24  0.40900709  0.659114827 1.0229758</span>
-<span class="co">#&gt; tau_int25  1.07630111  1.260588393 1.0017075</span>
-<span class="co">#&gt; tau_int26  1.09978068  1.360578097 0.9997491</span>
-<span class="co">#&gt; tau_int27 -0.00358900  0.144848695 1.0004632</span>
-<span class="co">#&gt; tau_int28  0.21482006  0.382447653 1.0000364</span>
-<span class="co">#&gt; tau_int29  0.66872377  0.784123563 1.0153791</span>
-<span class="co">#&gt; tau_int30  1.66851856  1.849767857 1.0009789</span>
-<span class="co">#&gt; tau_int31  1.72637298  1.882464114 1.0007652</span>
-<span class="co">#&gt; tau_int32  0.05040985  0.192560796 1.0012946</span>
-<span class="co">#&gt; tau_int33  1.01459415  1.161054455 1.0006912</span>
-<span class="co">#&gt; tau_int34  2.33740540  2.563118533 0.9995035</span>
-<span class="co">#&gt; tau_int35  1.38709988  1.586746970 0.9995339</span>
-<span class="co">#&gt; tau_int36  0.97852397  1.210065011 1.0001406</span>
-<span class="co">#&gt; tau_int37  1.90659506  2.168604561 1.0133513</span>
-<span class="co">#&gt; tau_int38  1.20108753  1.452903338 1.0019526</span>
-<span class="co">#&gt; tau_int39  2.00606461  2.223652222 1.0009864</span>
-<span class="co">#&gt; tau_int40  1.04628290  1.218890541 1.0040832</span>
-<span class="co">#&gt; tau_int41  1.46083470  1.682040642 1.0023347</span>
-<span class="co">#&gt; tau_int42  1.72691619  1.952688036 1.0067617</span>
-<span class="co">#&gt; tau_int43  1.93032684  2.070224317 0.9997861</span>
-<span class="co">#&gt; tau_int44  0.31579177  0.450285664 0.9995072</span>
-<span class="co">#&gt; tau_int45  0.66880213  0.897330013 1.0027680</span>
-<span class="co">#&gt; tau_int46  1.88048311  2.008799519 1.0003318</span>
-<span class="co">#&gt; tau_int47  1.58989635  1.782048903 1.0059609</span>
-<span class="co">#&gt; tau_int48  1.82194372  2.023222957 1.0000281</span>
-<span class="co">#&gt; tau_int49  1.07433227  1.412065218 1.0058963</span>
-<span class="co">#&gt; tau_int50  1.75522797  2.072445622 1.0159924</span>
-<span class="co">#&gt; tau_int51  0.93049998  1.090345787 1.0234689</span>
-<span class="co">#&gt; tau_int52  1.21339143  1.350035412 1.0019019</span>
-<span class="co">#&gt; tau_int53  0.82665542  1.023570317 1.0085285</span>
-<span class="co">#&gt; tau_int54  0.62095558  0.897736878 1.0140739</span>
-<span class="co">#&gt; tau_int55  2.19984514  2.367822142 0.9998135</span>
-<span class="co">#&gt; tau_int56 -0.02706240  0.142013478 1.0157393</span>
-<span class="co">#&gt; tau_int57  1.51668858  1.771643670 1.0011220</span>
-<span class="co">#&gt; tau_int58  0.50270888  0.721793365 1.0097047</span>
-<span class="co">#&gt; tau_int59  0.14556821  0.346910132 0.9996231</span>
-<span class="co">#&gt; tau_int60 -0.11039996  0.070580302 1.0116219</span>
-<span class="co">#&gt; xi        -0.39304083 -0.327125991 1.0220726</span></pre></body></html></div>
+<span class="co">#&gt;                   2.5%          50%        97.5%      rhat</span>
+<span class="co">#&gt; int       -1.347499845 -1.002604446 -0.659497972 1.0014634</span>
+<span class="co">#&gt; age       -0.009255767  0.006563724  0.020626589 1.0003654</span>
+<span class="co">#&gt; age_sq    -0.006148684 -0.004683696 -0.003223872 1.0000839</span>
+<span class="co">#&gt; urban      0.452351900  0.683275458  0.929803088 1.0076632</span>
+<span class="co">#&gt; liv2       0.572722550  0.862870463  1.179121304 0.9997327</span>
+<span class="co">#&gt; tau_int1  -2.465594898 -1.504566068 -0.660800597 1.0021200</span>
+<span class="co">#&gt; tau_int2  -1.405244265 -0.046077600  1.353882998 0.9995182</span>
+<span class="co">#&gt; tau_int3  -1.168076289  0.654959461  2.470604063 1.0133501</span>
+<span class="co">#&gt; tau_int4  -0.784816167  0.369202243  1.513985214 0.9998724</span>
+<span class="co">#&gt; tau_int5  -0.928682332  0.183618830  1.251809351 1.0080292</span>
+<span class="co">#&gt; tau_int6  -1.481844791 -0.476888752  0.431850829 0.9995249</span>
+<span class="co">#&gt; tau_int7  -1.747265505 -0.370917817  0.905435106 1.0076276</span>
+<span class="co">#&gt; tau_int8  -0.854870796  0.292412315  1.482049428 1.0110102</span>
+<span class="co">#&gt; tau_int9  -1.644541148 -0.378372534  0.913598514 1.0005747</span>
+<span class="co">#&gt; tau_int10 -2.491775084 -0.682888192  0.954067631 1.0043927</span>
+<span class="co">#&gt; tau_int11 -3.182466810 -1.658293490 -0.215434474 1.0022619</span>
+<span class="co">#&gt; tau_int12 -1.600677101 -0.231618403  0.975786439 1.0017680</span>
+<span class="co">#&gt; tau_int13 -1.170293314  0.169942826  1.320548092 1.0056639</span>
+<span class="co">#&gt; tau_int14  0.486206193  1.315717615  2.241188249 1.0000029</span>
+<span class="co">#&gt; tau_int15 -1.325409211 -0.120115440  1.102520071 1.0000940</span>
+<span class="co">#&gt; tau_int16  0.074031338  1.309742660  2.663588823 1.0212303</span>
+<span class="co">#&gt; tau_int17 -1.744419658 -0.351410830  0.881922589 1.0369249</span>
+<span class="co">#&gt; tau_int18 -1.157279994 -0.065710778  1.011665802 1.0059568</span>
+<span class="co">#&gt; tau_int19 -1.245115805  0.122116020  1.394560353 1.0158353</span>
+<span class="co">#&gt; tau_int20 -1.027153714  0.426563713  1.849936129 1.0071624</span>
+<span class="co">#&gt; tau_int21 -1.254942685  0.017976116  1.351423801 1.0192542</span>
+<span class="co">#&gt; tau_int22 -2.332778090 -0.888691670  0.431605057 0.9998864</span>
+<span class="co">#&gt; tau_int23 -2.000875433 -0.385289018  1.042722201 1.0026830</span>
+<span class="co">#&gt; tau_int24 -2.646888057 -1.094847369  0.434614968 1.0117203</span>
+<span class="co">#&gt; tau_int25 -0.667098400  0.277855404  1.127194544 0.9995049</span>
+<span class="co">#&gt; tau_int26 -1.445290053  0.002781515  1.478335030 1.0561882</span>
+<span class="co">#&gt; tau_int27 -2.132949357 -0.941302524  0.196168094 1.0019260</span>
+<span class="co">#&gt; tau_int28 -1.734535718 -0.632972869  0.451512898 1.0019482</span>
+<span class="co">#&gt; tau_int29 -1.569143502 -0.345303107  0.857115138 1.0011194</span>
+<span class="co">#&gt; tau_int30 -0.131177086  0.875944519  1.882620898 1.0001374</span>
+<span class="co">#&gt; tau_int31 -0.377730313  0.733064073  1.872115600 1.0141730</span>
+<span class="co">#&gt; tau_int32 -2.258770246 -0.946487116  0.344841171 0.9995009</span>
+<span class="co">#&gt; tau_int33 -1.574454654 -0.093608793  1.469875984 1.0019248</span>
+<span class="co">#&gt; tau_int34  0.232098236  1.403767991  2.698852531 1.0184362</span>
+<span class="co">#&gt; tau_int35 -0.477469395  0.513052067  1.514391502 0.9995147</span>
+<span class="co">#&gt; tau_int36 -1.811149118 -0.297759332  1.178609170 1.0004970</span>
+<span class="co">#&gt; tau_int37 -0.652864004  0.633495509  1.949085951 1.0026299</span>
+<span class="co">#&gt; tau_int38 -1.575129436 -0.124136610  1.308530565 1.0231211</span>
+<span class="co">#&gt; tau_int39 -0.303975919  1.037111743  2.273527703 1.0011847</span>
+<span class="co">#&gt; tau_int40 -0.819018408  0.223307506  1.206773302 0.9997188</span>
+<span class="co">#&gt; tau_int41 -0.757190334  0.427436139  1.556769074 0.9998307</span>
+<span class="co">#&gt; tau_int42 -1.119880954  0.573428964  2.067500829 1.0195341</span>
+<span class="co">#&gt; tau_int43  0.067577505  1.075004927  2.100332841 1.0016600</span>
+<span class="co">#&gt; tau_int44 -1.894670996 -0.613922594  0.507643758 1.0057337</span>
+<span class="co">#&gt; tau_int45 -1.414879962 -0.245333852  0.919593280 1.0018127</span>
+<span class="co">#&gt; tau_int46  0.251684442  1.101175417  2.027513018 1.0094651</span>
+<span class="co">#&gt; tau_int47 -1.007326126  0.377783628  1.784483404 1.0095375</span>
+<span class="co">#&gt; tau_int48 -0.144092330  0.862074276  1.879188549 1.0107926</span>
+<span class="co">#&gt; tau_int49 -2.130213651 -0.376494856  1.278222364 1.0118307</span>
+<span class="co">#&gt; tau_int50 -0.827109771  0.472012275  1.807589669 0.9998834</span>
+<span class="co">#&gt; tau_int51 -0.911076928  0.229237417  1.434753593 1.0006495</span>
+<span class="co">#&gt; tau_int52 -0.433086014  0.453052678  1.325939296 1.0033275</span>
+<span class="co">#&gt; tau_int53 -1.615030500 -0.315416767  1.109049230 1.0003612</span>
+<span class="co">#&gt; tau_int54 -2.532241593 -0.956410434  0.605607306 0.9997552</span>
+<span class="co">#&gt; tau_int55  0.156492872  1.202533184  2.291453242 0.9995593</span>
+<span class="co">#&gt; tau_int56 -2.350742836 -1.025277907  0.234839832 0.9996233</span>
+<span class="co">#&gt; tau_int57 -0.653381781  0.583648022  1.781793202 1.0052080</span>
+<span class="co">#&gt; tau_int58 -2.448971701 -0.709517372  0.857475449 1.0001395</span>
+<span class="co">#&gt; tau_int59 -2.231796487 -0.838218291  0.315858751 1.0011856</span>
+<span class="co">#&gt; tau_int60 -2.319355056 -1.042270086  0.124104647 0.9997774</span>
+<span class="co">#&gt; xi        -1.033553459 -0.662905154 -0.343340191 1.0022953</span></pre></body></html></div>
 <p>We create trace plots on the transformed simulation data.</p>
 <div class="sourceCode" id="cb8"><html><body><pre class="r"><span class="fu"><a href="../reference/hmclearn-plots.html">mcmc_trace</a></span>(<span class="no">f_hmc2</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">1000</span>, <span class="kw">pars</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span>(<span class="no">X</span>))</pre></body></html></div>
-<p><img src="logistic_mixed_effects_hmclearn_files/figure-html/unnamed-chunk-8-1.png" width="576"></p>
+<div class="figure">
+<img src="fig1glmm-1.png" alt=""><p class="caption">plot of chunk fig1glmm</p>
+</div>
 </div>
 <div id="comparison-model---frequentist" class="section level2">
 <h2 class="hasAnchor">
 <a href="#comparison-model---frequentist" class="anchor"></a>Comparison model - Frequentist</h2>
 <p>To compare results, we first fit a logistic mixed effects model using the frequentist package <strong>lme4</strong> (Bates et. al. 2015).</p>
 <div class="sourceCode" id="cb9"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">lme4</span>)
-<span class="co">#&gt; Loading required package: Matrix</span>
 
 <span class="no">fm1</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lme4/man/glmer.html">glmer</a></span>(<span class="no">use</span> ~ <span class="no">age</span> + <span class="fu"><a href="https://rdrr.io/r/base/AsIs.html">I</a></span>(<span class="no">age</span>^<span class="fl">2</span>) + <span class="no">urban</span> + <span class="no">liv2</span> + (<span class="fl">1</span> <span class="kw">|</span> <span class="no">district</span>),
            <span class="kw">data</span><span class="kw">=</span><span class="no">Contraception</span>, <span class="kw">family</span><span class="kw">=</span><span class="no">binomial</span>,
@@ -548,7 +482,9 @@ f(\mathbf{y}|\mathbf{X}, \mathbf{Z}, \boldsymbol\beta, \mathbf{u}) &amp;= \prod_
                              <span class="no">freqvals</span>[<span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span>(<span class="no">freqvals</span>)]),
           <span class="kw">cols</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">1</span>:<span class="fu"><a href="https://rdrr.io/r/base/nrow.html">ncol</a></span>(<span class="no">X</span>), <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span>(<span class="no">initvals</span>)))
 <span class="co">#&gt; $histogram</span></pre></body></html></div>
-<p><img src="logistic_mixed_effects_hmclearn_files/figure-html/unnamed-chunk-11-1.png" width="576"></p>
+<div class="figure">
+<img src="fig2glmm-1.png" alt=""><p class="caption">plot of chunk fig2glmm</p>
+</div>
 <p>We also compare the random effects parameter estimates with <strong>lme4</strong>. We apply the linear transformtion back to <span class="math inline">\(\mathbf{u}\)</span> for comparison.</p>
 <div class="sourceCode" id="cb12"><html><body><pre class="r"><span class="no">u.freq</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lme4/man/ranef.html">ranef</a></span>(<span class="no">fm1</span>)$<span class="no">district</span>[, <span class="fl">1</span>]
 <span class="no">lambda.freq</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span>(<span class="fu"><a href="https://rdrr.io/pkg/lme4/man/VarCorr.html">VarCorr</a></span>(<span class="no">fm1</span>)$<span class="no">district</span>[<span class="fl">1</span>])
@@ -565,32 +501,35 @@ f(\mathbf{y}|\mathbf{X}, \mathbf{Z}, \boldsymbol\beta, \mathbf{u}) &amp;= \prod_
 })</pre></body></html></div>
 <p>Since we have 60 random effect parameters plus <span class="math inline">\(\lambda\)</span>, we split the plots into more manageable chunks. The random effects parameters align with frequentist estimates.</p>
 <div class="sourceCode" id="cb13"><html><body><pre class="r"><span class="co"># histograms with lines for frequentist estimates</span>
-<span class="co"># ucols &lt;- which(grepl("^[u][0-9]{1,2}", colnames(f_hmc$thetaCombined[[1]])))</span>
 <span class="no">ucols</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/grep.html">grepl</a></span>(<span class="st">"^[u](?:[1-9]|0[1-9]|1[0-9]|20)$"</span>,
                      <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span>(<span class="no">f_hmc</span>$<span class="no">thetaCombined</span><span class="kw">[[</span><span class="fl">1</span>]])))
 <span class="no">lambdacol</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/grep.html">grepl</a></span>(<span class="st">"^lambda"</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span>(<span class="no">f_hmc</span>$<span class="no">thetaCombined</span><span class="kw">[[</span><span class="fl">1</span>]])))
 <span class="fu"><a href="../reference/diagplots.html">diagplots</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">1000</span>,
           <span class="kw">comparison.theta</span> <span class="kw">=</span> <span class="no">u.freq</span>[<span class="fl">1</span>:<span class="fl">20</span>], <span class="kw">cols</span> <span class="kw">=</span> <span class="no">ucols</span>)
 <span class="co">#&gt; $histogram</span></pre></body></html></div>
-<p><img src="logistic_mixed_effects_hmclearn_files/figure-html/unnamed-chunk-13-1.png" width="768"></p>
+<div class="figure">
+<img src="fig3glmm-1.png" alt=""><p class="caption">plot of chunk fig3glmm</p>
+</div>
 <div class="sourceCode" id="cb14"><html><body><pre class="r"><span class="co"># histograms with lines for frequentist estimates</span>
-<span class="co"># ucols &lt;- which(grepl("^[u][0-9]{1,2}", colnames(f_hmc$thetaCombined[[1]])))</span>
 <span class="no">ucols</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/grep.html">grepl</a></span>(<span class="st">"^[u](?:2[1-9]|3[0-9]|40)$"</span>,
                      <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span>(<span class="no">f_hmc</span>$<span class="no">thetaCombined</span><span class="kw">[[</span><span class="fl">1</span>]])))
 <span class="no">lambdacol</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/grep.html">grepl</a></span>(<span class="st">"^lambda"</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span>(<span class="no">f_hmc</span>$<span class="no">thetaCombined</span><span class="kw">[[</span><span class="fl">1</span>]])))
 <span class="fu"><a href="../reference/diagplots.html">diagplots</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">1000</span>,
           <span class="kw">comparison.theta</span> <span class="kw">=</span> <span class="no">u.freq</span>[<span class="fl">21</span>:<span class="fl">40</span>], <span class="kw">cols</span> <span class="kw">=</span> <span class="no">ucols</span>)
 <span class="co">#&gt; $histogram</span></pre></body></html></div>
-<p><img src="logistic_mixed_effects_hmclearn_files/figure-html/unnamed-chunk-14-1.png" width="768"></p>
+<div class="figure">
+<img src="fig4glmm-1.png" alt=""><p class="caption">plot of chunk fig4glmm</p>
+</div>
 <div class="sourceCode" id="cb15"><html><body><pre class="r"><span class="co"># histograms with lines for frequentist estimates</span>
-<span class="co"># ucols &lt;- which(grepl("^[u][0-9]{1,2}", colnames(f_hmc$thetaCombined[[1]])))</span>
 <span class="no">ucols</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/grep.html">grepl</a></span>(<span class="st">"^[u](?:4[1-9]|5[0-9]|60)$"</span>,
                      <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span>(<span class="no">f_hmc</span>$<span class="no">thetaCombined</span><span class="kw">[[</span><span class="fl">1</span>]])))
 <span class="no">lambdacol</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/grep.html">grepl</a></span>(<span class="st">"^lambda"</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span>(<span class="no">f_hmc</span>$<span class="no">thetaCombined</span><span class="kw">[[</span><span class="fl">1</span>]])))
 <span class="fu"><a href="../reference/diagplots.html">diagplots</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">1000</span>,
           <span class="kw">comparison.theta</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="no">u.freq</span>[<span class="fl">41</span>:<span class="fl">60</span>], <span class="no">lambda.freq</span>), <span class="kw">cols</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="no">ucols</span>, <span class="no">lambdacol</span>))
 <span class="co">#&gt; $histogram</span></pre></body></html></div>
-<p><img src="logistic_mixed_effects_hmclearn_files/figure-html/unnamed-chunk-15-1.png" width="768"></p>
+<div class="figure">
+<img src="fig5glmm-1.png" alt=""><p class="caption">plot of chunk fig5glmm</p>
+</div>
 </div>
 <div id="source" class="section level2">
 <h2 class="hasAnchor">
@@ -601,8 +540,8 @@ f(\mathbf{y}|\mathbf{X}, \mathbf{Z}, \boldsymbol\beta, \mathbf{u}) &amp;= \prod_
 <div id="references" class="section level2">
 <h2 class="hasAnchor">
 <a href="#references" class="anchor"></a>References</h2>
-<p>Bates, D., M"{a}chler, M., Bolker, B., &amp; Walker, S. (2015). Fitting linear mixed-effects models using lme4. <em>Journal of Statistical Software</em> 67(1)</p>
-<p>Bates, D., M"{a}chler, M., &amp; Bolker, B. (2014). mlmRev: Examples from multilevel modelling software review. <em>R package version, 1</em>.</p>
+<p>Bates, D., Mächler, M., Bolker, B., &amp; Walker, S. (2015). Fitting linear mixed-effects models using lme4. <em>Journal of Statistical Software</em> 67(1)</p>
+<p>Bates, D., Mächler, M., &amp; Bolker, B. (2014). mlmRev: Examples from multilevel modelling software review. <em>R package version, 1</em>.</p>
 <p>Agresti, A. (2015). <em>Foundations of linear and generalized linear models</em>. John Wiley &amp; Sons. ISBN: 978-1-118-73003-4</p>
 </div>
   </div>

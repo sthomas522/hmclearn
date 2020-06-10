@@ -90,7 +90,7 @@
       <h1 data-toc-skip>hmclearn: Logistic Regression Example</h1>
                         <h4 class="author">Samuel Thomas</h4>
             
-            <h4 class="date">2020-06-02</h4>
+            <h4 class="date">2020-06-09</h4>
       
       
       <div class="hidden name"><code>logistic_regression_hmclearn.Rmd</code></div>
@@ -118,18 +118,18 @@ p = Pr(\mathbf{y} = 1 | \mathbf{X}) = [1 + e^{-\mathbf{X}\boldsymbol\beta}]^{-1}
 <p><span class="math display">\[
 \begin{aligned}
 f(\mathbf{y} | \mathbf{X},\boldsymbol\beta) &amp;= \prod_{i=1}^n p^{y_i} (1-p)^{1-y_i}, \\
-&amp;= \prod_{i=1}^{n} \left(\frac{1}{1+e^{-\mathbf{x}_i^T\boldsymbol\beta}}\right)^{y_i} 
+&amp;= \prod_{i=1}^{n} \left(\frac{1}{1+e^{-\mathbf{x}_i^T\boldsymbol\beta}}\right)^{y_i}
 \left(\frac{e^{-\mathbf{x}_i^T\boldsymbol\beta}}{1+e^{-\mathbf{x}_i^T\boldsymbol\beta}}\right)^{1-y_i},   \\
 \log f(\mathbf{y} | \mathbf{X}, \boldsymbol\beta) &amp;= \sum_{i=1}^n -y_i\log(1+e^{-\mathbf{x}_i^T\boldsymbol\beta}) + (1-y_i)(-\mathbf{x}_i\boldsymbol\beta - \log(1+e^{-\mathbf{x}_i^T\boldsymbol\beta})),  \\
 &amp;= \sum_{i=1}^n -\log(1+e^{-\mathbf{x}_i\boldsymbol\beta}) - \mathbf{x}_i^T\boldsymbol\beta(1 - y_i),  \\
 &amp;= \sum_{i=1}^n \mathbf{x}_i^T\boldsymbol\beta(y_i - 1) - \log(1 + e^{-\mathbf{x}_i^T\boldsymbol\beta}),  \\
-&amp;= \boldsymbol\beta^T\mathbf{X}^T(\mathbf{y} - \mathbf{1}_n) - \mathbf{1}_n^T [ \log( 1 + e^{-\mathbf{X}\boldsymbol\beta})]. 
+&amp;= \boldsymbol\beta^T\mathbf{X}^T(\mathbf{y} - \mathbf{1}_n) - \mathbf{1}_n^T [ \log( 1 + e^{-\mathbf{X}\boldsymbol\beta})].
 \end{aligned}
 \]</span></p>
 <p>We set a multivariate normal prior for <span class="math inline">\(\boldsymbol\beta\)</span></p>
 <p><span class="math display">\[
 \begin{aligned}
-\boldsymbol\beta &amp;\sim N(0, \sigma_\beta^2 \mathbf{I}), 
+\boldsymbol\beta &amp;\sim N(0, \sigma_\beta^2 \mathbf{I}),
 \end{aligned}
 \]</span></p>
 <p>with pdf, omitting constants</p>
@@ -214,7 +214,7 @@ f(\boldsymbol\beta | \mathbf{X}, \mathbf{y}, \sigma_\beta^2) &amp;\propto f(\mat
 <span class="no">t2.mh</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span>()</pre></body></html></div>
 <p>The time to fit the logistic regression using MH is</p>
 <div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="no">t2.mh</span> - <span class="no">t1.mh</span>
-<span class="co">#&gt; Time difference of 2.428764 mins</span></pre></body></html></div>
+<span class="co">#&gt; Time difference of 2.58681 mins</span></pre></body></html></div>
 <p>We store the Metropolis parameter estimates in .</p>
 <div class="sourceCode" id="cb6"><html><body><pre class="r">(<span class="no">summMH</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">fitMH</span>))
 <span class="co">#&gt; </span>
@@ -255,39 +255,38 @@ f(\boldsymbol\beta | \mathbf{X}, \mathbf{y}, \sigma_\beta^2) &amp;\propto f(\mat
             <span class="kw">glogPOSTERIOR</span> <span class="kw">=</span> <span class="no">g_logistic_posterior</span>,
             <span class="kw">varnames</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span>(<span class="no">X</span>),
             <span class="kw">param</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="kw">y</span> <span class="kw">=</span> <span class="no">y</span>, <span class="kw">X</span><span class="kw">=</span><span class="no">X</span>, <span class="kw">sig2beta</span><span class="kw">=</span><span class="fl">100</span>),
-            <span class="kw">parallel</span><span class="kw">=</span><span class="fl">TRUE</span>, <span class="kw">chains</span><span class="kw">=</span><span class="fl">2</span>)
+            <span class="kw">parallel</span><span class="kw">=</span><span class="fl">FALSE</span>, <span class="kw">chains</span><span class="kw">=</span><span class="fl">2</span>)
 <span class="no">t2.hmc</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span>()</pre></body></html></div>
 <p>HMC requires fewer iterations and lower computation time than MH in this example.</p>
 <div class="sourceCode" id="cb8"><html><body><pre class="r"><span class="no">t2.hmc</span> - <span class="no">t1.hmc</span>
-<span class="co">#&gt; Time difference of 19.88024 secs</span></pre></body></html></div>
+<span class="co">#&gt; Time difference of 34.51053 secs</span></pre></body></html></div>
 </div>
 <div id="mcmc-summary-and-diagnostics" class="section level2">
 <h2 class="hasAnchor">
 <a href="#mcmc-summary-and-diagnostics" class="anchor"></a>MCMC summary and diagnostics</h2>
 <p>The acceptance ratio for each of the HMC chains is sufficiently high for an efficient simulation.</p>
 <div class="sourceCode" id="cb9"><html><body><pre class="r"><span class="no">f_hmc</span>$<span class="no">accept</span>/<span class="no">N</span>
-<span class="co">#&gt; [1] 0.9171 0.9131</span></pre></body></html></div>
+<span class="co">#&gt; [1] 0.9104 0.9155</span></pre></body></html></div>
 <p>The posterior quantiles are summarized after removing an initial <em>burnin</em> period. The <span class="math inline">\(\hat{R}\)</span> statistics provide an indication of convergence. Values close to one indicate that the multiple MCMC chains coverged to the same distribution, while values above 1.1 indicate possible convergence problems. All <span class="math inline">\(\hat{R}\)</span> values in our example are close to one.</p>
-<div class="sourceCode" id="cb10"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">3000</span>)
+<div class="sourceCode" id="cb10"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">3000</span>, <span class="kw">probs</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0.025</span>, <span class="fl">0.5</span>, <span class="fl">0.975</span>))
 <span class="co">#&gt; Summary of MCMC simulation</span>
-<span class="co">#&gt;                   2.5%         5%        25%        50%        75%        95%</span>
-<span class="co">#&gt; (Intercept) -0.4107788 -0.1113821  1.0739432  2.4127409  4.1800931  7.2806561</span>
-<span class="co">#&gt; PI2         -1.4147829 -1.2522527 -0.7569602 -0.4339159 -0.1498777  0.2469826</span>
-<span class="co">#&gt; EH2         -3.4187666 -3.1692325 -2.5120158 -2.1023158 -1.7381757 -1.2453863</span>
-<span class="co">#&gt; NV2          2.0055436  2.5755355  4.9059906  7.4971230 11.0952426 17.2795458</span>
-<span class="co">#&gt;                 97.5%      rhat</span>
-<span class="co">#&gt; (Intercept)  8.272285 1.0011417</span>
-<span class="co">#&gt; PI2          0.363883 1.0001520</span>
-<span class="co">#&gt; EH2         -1.100359 0.9999652</span>
-<span class="co">#&gt; NV2         19.112201 1.0010251</span></pre></body></html></div>
+<span class="co">#&gt;                  2.5%        50%      97.5%      rhat</span>
+<span class="co">#&gt; (Intercept) -0.292832  2.9281285  9.2283365 1.0017419</span>
+<span class="co">#&gt; PI2         -1.444876 -0.4606057  0.3592366 1.0000986</span>
+<span class="co">#&gt; EH2         -3.423364 -2.1016785 -1.0784341 0.9999496</span>
+<span class="co">#&gt; NV2          2.192343  8.5423329 21.0647490 1.0016373</span></pre></body></html></div>
 <p>Trace plots provide a visual indication of stationarity. These plots indicate that the MCMC chains are reasonably stationary.</p>
 <div class="sourceCode" id="cb11"><html><body><pre class="r"><span class="fu"><a href="../reference/hmclearn-plots.html">mcmc_trace</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">3000</span>)</pre></body></html></div>
-<p><img src="logistic_regression_hmclearn_files/figure-html/unnamed-chunk-11-1.png" width="576"></p>
+<div class="figure">
+<img src="fig1lr-1.png" alt=""><p class="caption">plot of chunk fig1lr</p>
+</div>
 <p>Histograms of the posterior distribution show that HMC parameter estimates align with Metropolis estimates from <strong>MCMCpack</strong>.</p>
 <div class="sourceCode" id="cb12"><html><body><pre class="r"><span class="no">beta.mh</span> <span class="kw">&lt;-</span> <span class="no">summMH</span>$<span class="no">quantiles</span>[, <span class="st">"50%"</span>][<span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span>(<span class="no">X</span>)]
 <span class="fu"><a href="../reference/diagplots.html">diagplots</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">3000</span>, <span class="kw">comparison.theta</span><span class="kw">=</span><span class="no">beta.mh</span>)
 <span class="co">#&gt; $histogram</span></pre></body></html></div>
-<p><img src="logistic_regression_hmclearn_files/figure-html/unnamed-chunk-12-1.png" width="576"></p>
+<div class="figure">
+<img src="fig2lr-1.png" alt=""><p class="caption">plot of chunk fig2lr</p>
+</div>
 </div>
 <div id="source" class="section level2">
 <h2 class="hasAnchor">
