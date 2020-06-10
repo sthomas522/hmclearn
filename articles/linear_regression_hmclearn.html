@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">hmclearn</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.3</span>
       </span>
     </div>
 
@@ -90,7 +90,7 @@
       <h1 data-toc-skip>hmclearn: Linear Regression Example</h1>
                         <h4 class="author">Samuel Thomas</h4>
             
-            <h4 class="date">2020-06-09</h4>
+            <h4 class="date">2020-06-10</h4>
       
       
       <div class="hidden name"><code>linear_regression_hmclearn.Rmd</code></div>
@@ -110,7 +110,7 @@
 \end{aligned}
 \]</span></p>
 <p>HMC requires the specification of the log posterior to a proportional constant. In addition, HMC uses the gradient of the log posterior to guide simulations. The full derivations are provided here.</p>
-<p>The vector of responses is <span class="math inline">\(\mathbf{y} = (y_1, ..., y_n)^T\)</span>. The covariate values for the th subject are <span class="math inline">\(\mathbf{x}_i^T = (x_{i0}, ..., x_{iq})\)</span> for <span class="math inline">\(q\)</span> covariates plus an intercept. We write the full design matrix as <span class="math inline">\(\mathbf{X} = (\mathbf{x}_1^T, ..., \mathbf{x}_n^T)^T \in \mathbb{R}^{n\times(q+1)}\)</span> for <span class="math inline">\(n\)</span> observations. The regression coefficients are a vector of length <span class="math inline">\(q + 1\)</span>, <span class="math inline">\(\boldsymbol\beta = (\beta_0, ..., \beta_q)^T\)</span>. The error term for each subject is <span class="math inline">\(\epsilon_i\)</span>. All error terms <span class="math inline">\(\boldsymbol\epsilon = (\epsilon_1, ..., \epsilon_n)^T\)</span> are assumed to be independent and normally distributed with mean zero and constant variance <span class="math inline">\(\sigma_\epsilon^2\)</span>.</p>
+<p>The vector of responses is <span class="math inline">\(\mathbf{y} = (y_1, ..., y_n)^T\)</span>. The covariate values for subject <span class="math inline">\(i\)</span> are <span class="math inline">\(\mathbf{x}_i^T = (x_{i0}, ..., x_{iq})\)</span> for <span class="math inline">\(q\)</span> covariates plus an intercept. We write the full design matrix as <span class="math inline">\(\mathbf{X} = (\mathbf{x}_1^T, ..., \mathbf{x}_n^T)^T \in \mathbb{R}^{n\times(q+1)}\)</span> for <span class="math inline">\(n\)</span> observations. The regression coefficients are a vector of length <span class="math inline">\(q + 1\)</span>, <span class="math inline">\(\boldsymbol\beta = (\beta_0, ..., \beta_q)^T\)</span>. The error term for each subject is <span class="math inline">\(\epsilon_i\)</span>. All error terms <span class="math inline">\(\boldsymbol\epsilon = (\epsilon_1, ..., \epsilon_n)^T\)</span> are assumed to be independent and normally distributed with mean zero and constant variance <span class="math inline">\(\sigma_\epsilon^2\)</span>.</p>
 </div>
 <div id="derive-log-posterior-and-gradient-for-hmc" class="section level2">
 <h2 class="hasAnchor">
@@ -246,7 +246,7 @@ f(\boldsymbol\beta, \gamma| \mathbf{y}, \mathbf{X}, \sigma_\beta^2, a, b) &amp;\
                     <span class="kw">parallel</span><span class="kw">=</span><span class="fl">FALSE</span>, <span class="kw">chains</span><span class="kw">=</span><span class="fl">2</span>)
 <span class="no">t2.hmc</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span>()
 <span class="no">t2.hmc</span> - <span class="no">t1.hmc</span>
-<span class="co">#&gt; Time difference of 36.65226 secs</span></pre></body></html></div>
+<span class="co">#&gt; Time difference of 32.03008 secs</span></pre></body></html></div>
 </div>
 <div id="mcmc-summary-and-diagnostics" class="section level2">
 <h2 class="hasAnchor">
@@ -254,7 +254,7 @@ f(\boldsymbol\beta, \gamma| \mathbf{y}, \mathbf{X}, \sigma_\beta^2, a, b) &amp;\
 <p>The acceptance rate for each of the HMC chains is high for this simple example. More complex applications will often need lower acceptance rates (e.g. between 0.6 and 0.9) for optimal computational efficiency, particularly without an automated tuning algorithm such as NUTS (Hoffman, Gelman 2014).</p>
 <div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="no">f_hmc</span>$<span class="no">accept</span>/<span class="no">N</span>
 <span class="co">#&gt; [1] 0.9754 0.9739</span></pre></body></html></div>
-<p>The posterior quantiles are summarized after removing an initial <em>burnin</em> period. The <span class="math inline">\(\hat{R}\)</span> statistics are close to one, indicating that both HMC chains converged to the same distribution. The <span class="math inline">\(\hat{R}\)</span> statistics provide an indication of convergence. Values close to one indicate that the multiple MCMC chains coverged to the same distribution, while values above 1.1 indicate possible convergence problems. All <span class="math inline">\(\hat{R}\)</span> values in our example are close to one.</p>
+<p>The posterior quantiles are summarized after removing an initial <em>burnin</em> period. The <span class="math inline">\(\hat{R}\)</span> statistics are close to one, indicating that both HMC chains converged to the same distribution. The <span class="math inline">\(\hat{R}\)</span> statistics provide an indication of convergence. Values close to one indicate that the multiple MCMC chains converged to the same distribution, while values above 1.1 indicate possible convergence problems. All <span class="math inline">\(\hat{R}\)</span> values in our example are close to one.</p>
 <div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">2000</span>, <span class="kw">probs</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0.025</span>, <span class="fl">0.5</span>, <span class="fl">0.975</span>))
 <span class="co">#&gt; Summary of MCMC simulation</span>
 <span class="co">#&gt;                         2.5%           50%        97.5%     rhat</span>

@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">hmclearn</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.3</span>
       </span>
     </div>
 
@@ -90,7 +90,7 @@
       <h1 data-toc-skip>hmclearn: Linear Mixed Effects Regression Example</h1>
                         <h4 class="author">Samuel Thomas</h4>
             
-            <h4 class="date">2020-06-09</h4>
+            <h4 class="date">2020-06-10</h4>
       
       
       <div class="hidden name"><code>linear_mixed_effects_hmclearn.Rmd</code></div>
@@ -121,7 +121,7 @@
 \]</span></p>
 <p>The parameterization approach for this model uses a strategy recommended by Betancourt, Girolami (2013) to facilitate more efficient sampling in HMC.</p>
 <p>Further, we select a half-t family of distributions appropriate for hierarchical models per Gelman (2006). This parameterization is well-behaved around 0, in contrast to inverse gamma, and provides flexibility for informed priors.</p>
-<p>We select a parameterization of <span class="math inline">\(\mathbf{G}\)</span> such that the likelihood and its gradient can be derived for HMC. To this end, we uses LDL decomposition of <span class="math inline">\(\mathbf{G}\)</span> to form a flexibile parameterization that can easily handle restrictions (Chan, Jelizkov 2009).</p>
+<p>We select a parameterization of <span class="math inline">\(\mathbf{G}\)</span> such that the likelihood and its gradient can be derived for HMC. To this end, we uses LDL decomposition of <span class="math inline">\(\mathbf{G}\)</span> to form a flexible parameterization that can easily handle restrictions (Chan, Jelizkov 2009).</p>
 <p><span class="math display">\[
 \begin{aligned}
 \mathbf{u} &amp;\sim N(0, \mathbf{G}),  \\
@@ -277,12 +277,13 @@ f(\boldsymbol\beta, \mathbf{u}, \sigma_\epsilon^2, \mathbf{G} | \mathbf{y}, \mat
 \]</span></p>
 <p>Note that a random intercept model only has a single <span class="math inline">\(\xi\)</span> parameter, which simplifies the log posterior and gradient formulations. For a random intercept model, <span class="math inline">\(\widetilde{\mathbf{D}}^{1/2} = e^{\xi}\mathbf{I}_n\)</span>.</p>
 </div>
-<div id="linear-mixed-effecgts-model-example-data" class="section level2">
+<div id="linear-mixed-effects-model-example-data" class="section level2">
 <h2 class="hasAnchor">
-<a href="#linear-mixed-effecgts-model-example-data" class="anchor"></a>Linear mixed effecgts model example data</h2>
+<a href="#linear-mixed-effects-model-example-data" class="anchor"></a>Linear mixed effects model example data</h2>
 <p>The user must define provide the design matrix directly for use in <strong>hmclearn</strong>. Our first step is to load the data and store the fixed effect design matrix <span class="math inline">\(\mathbf{X}\)</span>, random effects design matrix <span class="math inline">\(\mathbf{Z}\)</span>, and dependent variable vector <span class="math inline">\(\mathbf{y}\)</span>.</p>
 <p>We load drug sleepstudy data (Belenky et. al. 2003) and create the design matrices <span class="math inline">\(\mathbf{X}\)</span> and <span class="math inline">\(\mathbf{Z}\)</span> and dependent vector <span class="math inline">\(\mathbf{y}\)</span>. For this model, the random effects design matrix <span class="math inline">\(\mathbf{Z}\)</span> is specified for a random intercept model.</p>
 <div class="sourceCode" id="cb2"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">lme4</span>)
+<span class="co">#&gt; Loading required package: Matrix</span>
 <span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">Matrix</span>)
 <span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span>(<span class="no">sleepstudy</span>)
 
@@ -349,7 +350,7 @@ f(\boldsymbol\beta, \mathbf{u}, \sigma_\epsilon^2, \mathbf{G} | \mathbf{y}, \mat
 <h2 class="hasAnchor">
 <a href="#fit-model-using-hmc" class="anchor"></a>Fit model using <em>hmc</em>
 </h2>
-<p>Next, we fit the linear mixed effects regression model using HMC. A vector of <em>tuning parameter</em> <span class="math inline">\(\epsilon\)</span> values are specified to align with the data. The hyperparameters for <span class="math inline">\(\nu_\gamma\)</span>, <span class="math inline">\(A_\gamma\)</span>, <span class="math inline">\(\nu_\xi\)</span>, and <span class="math inline">\(A_\xi\)</span> are set to values more appropriate for hierarchical models (Gelman 2006). The hyperprior <span class="math inline">\(\sigma_\beta^2\)</span> is set higher than the default based on the range of the dependent variable.</p>
+<p>Next, we fit the linear mixed effects regression model using HMC. A vector of <em>tuning parameter</em> <span class="math inline">\(\epsilon\)</span> values are specified to align with the data. The hyperparameters for <span class="math inline">\(\nu_\gamma\)</span>, <span class="math inline">\(A_\gamma\)</span>, <span class="math inline">\(\nu_\xi\)</span>, and <span class="math inline">\(A_\xi\)</span> are set to values more appropriate for hierarchical models (Gelman 2006). The hyperparameter <span class="math inline">\(\sigma_\beta^2\)</span> is set higher than the default based on the range of the dependent variable.</p>
 <div class="sourceCode" id="cb4"><html><body><pre class="r"><span class="no">N</span> <span class="kw">&lt;-</span> <span class="fl">2e3</span>
 
 <span class="no">theta.init</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0</span>, <span class="fl">1</span>, <span class="co"># beta</span>
@@ -379,7 +380,7 @@ f(\boldsymbol\beta, \mathbf{u}, \sigma_\epsilon^2, \mathbf{G} | \mathbf{y}, \mat
                <span class="kw">parallel</span><span class="kw">=</span><span class="fl">FALSE</span>, <span class="kw">chains</span><span class="kw">=</span><span class="fl">2</span>)
 <span class="no">t2.hmc</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span>()
 <span class="no">t2.hmc</span> - <span class="no">t1.hmc</span>
-<span class="co">#&gt; Time difference of 1.077049 mins</span></pre></body></html></div>
+<span class="co">#&gt; Time difference of 1.008721 mins</span></pre></body></html></div>
 <p>The acceptance ratio for each of the HMC chains is sufficiently high for an efficient simulation.</p>
 <div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="no">f_hmc</span>$<span class="no">accept</span>/<span class="no">N</span>
 <span class="co">#&gt; [1] 0.814 0.805</span></pre></body></html></div>

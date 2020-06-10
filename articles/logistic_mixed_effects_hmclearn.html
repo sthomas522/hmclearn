@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">hmclearn</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.3</span>
       </span>
     </div>
 
@@ -90,7 +90,7 @@
       <h1 data-toc-skip>hmclearn: Logistic Mixed Effects Regression Example</h1>
                         <h4 class="author">Samuel Thomas</h4>
             
-            <h4 class="date">2020-06-09</h4>
+            <h4 class="date">2020-06-10</h4>
       
       
       <div class="hidden name"><code>logistic_mixed_effects_hmclearn.Rmd</code></div>
@@ -119,7 +119,7 @@ Pr(\mathbf{y} = \mathbf{1} | \mathbf{X}, \mathbf{Z}) = [1 + e^{-\mathbf{X}\bolds
 <p>We set <span class="math inline">\(\mathbf{u}\)</span> as one of our priors, following a multivariate normal distribution, <span class="math inline">\(\mathbf{u} \sim N(0, \mathbf{G})\)</span>. For our random intercept model, the specification of the covariance matrix <span class="math inline">\(\mathbf{G}\)</span> is expanded to facilitate efficient sampling using HMC. We let <span class="math inline">\(\mathbf{u} = \mathbf{G}^{1/2}\boldsymbol\tau\)</span> where <span class="math inline">\(\mathbf{G}^{1/2} = \lambda \mathbf{I}_n\)</span>. An additional parameter <span class="math inline">\(\boldsymbol\tau = (\tau_1, ..., \tau_n)^T\)</span> where each of these parameters is standard normal <span class="math inline">\(\tau_i \sim N(0, 1)\)</span>. The full covariance matrix is then <span class="math inline">\(\mathbf{G} = \lambda^2 \mathbf{I}_n \boldsymbol\tau\)</span>.</p>
 <p>The parameterization approach for this model uses a strategy recommended by Betancourt, Girolami (2013) to facilitate more efficient sampling in HMC.</p>
 <p>Further, we select a half-t family of distributions appropriate for hierarchical models per Gelman (2006). This parameterization is well-behaved around 0, in contrast to inverse gamma, and provides flexibility for informed priors.</p>
-<p>We select a parameterization of <span class="math inline">\(\mathbf{G}\)</span> such that the likelihood and its gradient can be derived for HMC. To this end, we uses LDL decomposition of <span class="math inline">\(\mathbf{G}\)</span> to form a flexibile parameterization that can easily handle restrictions (Chan, Jelizkov 2009).</p>
+<p>We select a parameterization of <span class="math inline">\(\mathbf{G}\)</span> such that the likelihood and its gradient can be derived for HMC. To this end, we uses LDL decomposition of <span class="math inline">\(\mathbf{G}\)</span> to form a flexible parameterization that can easily handle restrictions (Chan, Jelizkov 2009).</p>
 <p><span class="math display">\[
 \begin{aligned}
 \mathbf{u} &amp;\sim N(0, \mathbf{G}),  \\
@@ -303,7 +303,7 @@ f(\mathbf{y}|\mathbf{X}, \mathbf{Z}, \boldsymbol\beta, \mathbf{u}) &amp;= \prod_
 <h2 class="hasAnchor">
 <a href="#fit-model-using-hmc" class="anchor"></a>Fit model using <em>hmc</em>
 </h2>
-<p>Next, we fit the linear mixed effects regression model using HMC. A vector of <em>tuning parameter</em> <span class="math inline">\(\epsilon\)</span> values are specified to align with the data. The hyperparameters for <span class="math inline">\(\nu_\xi\)</span> and <span class="math inline">\(A_\xi\)</span> are set to defaults in <strong>hmclearn</strong> (Gelman 2006). The hyperprior <span class="math inline">\(\sigma_\beta^2\)</span> is set lower than the default based on the dependent variable variance for this hierarchical model.</p>
+<p>Next, we fit the linear mixed effects regression model using HMC. A vector of <em>tuning parameter</em> <span class="math inline">\(\epsilon\)</span> values are specified to align with the data. The hyperparameters for <span class="math inline">\(\nu_\xi\)</span> and <span class="math inline">\(A_\xi\)</span> are set to defaults in <strong>hmclearn</strong> (Gelman 2006). The hyperparameter <span class="math inline">\(\sigma_\beta^2\)</span> is set lower than the default based on the dependent variable variance for this hierarchical model.</p>
 <div class="sourceCode" id="cb4"><html><body><pre class="r"><span class="no">N</span> <span class="kw">&lt;-</span> <span class="fl">2e3</span>
 
 <span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span>(<span class="fl">412</span>)
@@ -330,7 +330,7 @@ f(\mathbf{y}|\mathbf{X}, \mathbf{Z}, \boldsymbol\beta, \mathbf{u}) &amp;= \prod_
 
 <span class="no">t2.hmc</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span>()
 <span class="no">t2.hmc</span> - <span class="no">t1.hmc</span>
-<span class="co">#&gt; Time difference of 11.57773 mins</span></pre></body></html></div>
+<span class="co">#&gt; Time difference of 11.52061 mins</span></pre></body></html></div>
 <p>The acceptance ratio for each of the HMC chains is sufficiently high for an efficient simulation.</p>
 <div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="no">f_hmc</span>$<span class="no">accept</span>/<span class="no">N</span>
 <span class="co">#&gt; [1] 0.670 0.672</span></pre></body></html></div>
@@ -485,7 +485,7 @@ f(\mathbf{y}|\mathbf{X}, \mathbf{Z}, \boldsymbol\beta, \mathbf{u}) &amp;= \prod_
 <div class="figure">
 <img src="fig2glmm-1.png" alt=""><p class="caption">plot of chunk fig2glmm</p>
 </div>
-<p>We also compare the random effects parameter estimates with <strong>lme4</strong>. We apply the linear transformtion back to <span class="math inline">\(\mathbf{u}\)</span> for comparison.</p>
+<p>We also compare the random effects parameter estimates with <strong>lme4</strong>. We apply the linear transformation back to <span class="math inline">\(\mathbf{u}\)</span> for comparison.</p>
 <div class="sourceCode" id="cb12"><html><body><pre class="r"><span class="no">u.freq</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lme4/man/ranef.html">ranef</a></span>(<span class="no">fm1</span>)$<span class="no">district</span>[, <span class="fl">1</span>]
 <span class="no">lambda.freq</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span>(<span class="fu"><a href="https://rdrr.io/pkg/lme4/man/VarCorr.html">VarCorr</a></span>(<span class="no">fm1</span>)$<span class="no">district</span>[<span class="fl">1</span>])
 
