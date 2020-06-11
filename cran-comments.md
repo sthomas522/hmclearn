@@ -28,3 +28,15 @@ Revised per feedback from CRAN volunteer, version 0.0.2
 * Changed some of the parameters to match a paper in development. These changes are primarily in sample_posterior_gradients.R.
 
 * First package submission to CRAN was on 4/1/2020, commit cc48b5283a
+
+## Second resubmission
+
+Revised from version 0.0.2 to version 0.0.3
+
+* Converted all vignettes to use pre-compiled results. This has reduced the check time to less than 10 minutes. 
+
+* Fixed a few terminology errors in the documentation.
+
+* Corrected some typos and special characters for the references in the vignettes. 
+
+* Second package submission to CRAN was on 6/2/2020, commmit 067724a7ef

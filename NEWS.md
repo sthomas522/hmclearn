@@ -1,3 +1,3 @@
-# hmclearn 0.0.2
+# hmclearn 0.0.3
 
 In development
