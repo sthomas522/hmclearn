@@ -33,10 +33,12 @@ Revised per feedback from CRAN volunteer, version 0.0.2
 
 Revised from version 0.0.2 to version 0.0.3
 
-* Converted all vignettes to use pre-compiled results. This has reduced the check time to less than 10 minutes. 
+* Converted all vignettes to use pre-compiled results.
 
 * Fixed a few terminology errors in the documentation.
 
 * Corrected some typos and special characters for the references in the vignettes. 
+
+* Reduced the number of simulations in the longer tests, which reduced the testing runtime.
 
 * Second package submission to CRAN was on 6/2/2020, commmit 067724a7ef
