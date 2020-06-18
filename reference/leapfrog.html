@@ -140,14 +140,14 @@
     </div>
 
     <pre class="usage"><span class='fu'>leapfrog</span>(
-  <span class='no'>theta_lf</span>,
-  <span class='no'>r</span>,
-  <span class='no'>epsilon</span>,
-  <span class='no'>glogPOSTERIOR</span>,
-  <span class='no'>Minv</span>,
-  <span class='no'>constrain</span>,
-  <span class='kw'>lastSTEP</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='no'>...</span>
+  <span class='kw'>theta_lf</span>,
+  <span class='kw'>r</span>,
+  <span class='kw'>epsilon</span>,
+  <span class='kw'>glogPOSTERIOR</span>,
+  <span class='kw'>Minv</span>,
+  <span class='kw'>constrain</span>,
+  lastSTEP = <span class='fl'>FALSE</span>,
+  <span class='kw'>...</span>
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -196,11 +196,11 @@
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span>(<span class='fl'>321</span>)
-<span class='no'>X</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>cbind</a></span>(<span class='fl'>1</span>, <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span>(<span class='fl'>10</span>))
-<span class='no'>y</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span>(<span class='fl'>10</span>)
-<span class='no'>p</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/Uniform.html'>runif</a></span>(<span class='fl'>3</span>) - <span class='fl'>0.5</span>
-<span class='fu'>leapfrog</span>(<span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span>(<span class='fl'>0</span>,<span class='fl'>3</span>), <span class='no'>p</span>, <span class='fl'>0.01</span>, <span class='no'>g_linear_posterior</span>,
-         <span class='fu'><a href='https://rdrr.io/r/base/diag.html'>diag</a></span>(<span class='fl'>3</span>), <span class='fl'>FALSE</span>, <span class='kw'>X</span><span class='kw'>=</span><span class='no'>X</span>, <span class='kw'>y</span><span class='kw'>=</span><span class='no'>y</span>)</div><div class='output co'>#&gt; $theta.new
+<span class='kw'>X</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>cbind</a></span>(<span class='fl'>1</span>, <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span>(<span class='fl'>10</span>))
+<span class='kw'>y</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span>(<span class='fl'>10</span>)
+<span class='kw'>p</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/Uniform.html'>runif</a></span>(<span class='fl'>3</span>) <span class='op'>-</span> <span class='fl'>0.5</span>
+<span class='fu'>leapfrog</span>(<span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span>(<span class='fl'>0</span>,<span class='fl'>3</span>), <span class='kw'>p</span>, <span class='fl'>0.01</span>, <span class='kw'>g_linear_posterior</span>,
+         <span class='fu'><a href='https://rdrr.io/r/base/diag.html'>diag</a></span>(<span class='fl'>3</span>), <span class='fl'>FALSE</span>, X=<span class='kw'>X</span>, y=<span class='kw'>y</span>)</div><div class='output co'>#&gt; $theta.new
 #&gt; [1]  0.003425262 -0.002263951 -0.000395666
 #&gt; 
 #&gt; $r.new

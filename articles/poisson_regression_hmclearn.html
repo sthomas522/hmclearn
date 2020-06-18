@@ -84,7 +84,7 @@
 
       
 
-      </header><div class="row">
+      </header><script src="poisson_regression_hmclearn_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>hmclearn: Poisson Regression Example</h1>
@@ -103,7 +103,9 @@
 <h2 class="hasAnchor">
 <a href="#introduction" class="anchor"></a>Introduction</h2>
 <p>This vignette demonstrates fitting a Poisson regression model via Hamiltonian Monte Carlo (HMC) using the <strong>hmclearn</strong> package.</p>
-<div class="sourceCode" id="cb1"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">hmclearn</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb1"><pre class="downlit">
+<span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="kw">hmclearn</span>)
+</pre></div>
 <p>For a count response, we let</p>
 <p><span class="math display">\[
 p(y | \mu) = \frac{e^{-\mu}\mu^y}{y!},
@@ -171,22 +173,25 @@ f(\boldsymbol\beta | \mathbf{X}, \mathbf{y}, \sigma_\beta^2) &amp;\propto f(\mat
 <a href="#poisson-regression-example-data" class="anchor"></a>Poisson Regression Example Data</h2>
 <p>The user must define provide the design matrix directly for use in <strong>hmclearn</strong>. Our first step is to load the data and store the design matrix <span class="math inline">\(X\)</span> and dependent variable vector <span class="math inline">\(y\)</span>.</p>
 <p>We load drug usage data and create the design matrix <span class="math inline">\(X\)</span> and dependent vector <span class="math inline">\(y\)</span>. This example also appears in Agresti (2015), and we compare results to his.</p>
-<div class="sourceCode" id="cb2"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span>(<span class="no">Drugs</span>)
+<div class="sourceCode" id="cb2"><pre class="downlit">
+<span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span>(<span class="kw">Drugs</span>)
 
 <span class="co"># design matrix</span>
-<span class="no">X</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html">model.matrix</a></span>(<span class="no">count</span> ~ <span class="no">A</span> + <span class="no">C</span> + <span class="no">M</span> + <span class="no">A</span>:<span class="no">C</span> + <span class="no">A</span>:<span class="no">M</span> + <span class="no">C</span>:<span class="no">M</span> , <span class="kw">data</span><span class="kw">=</span><span class="no">Drugs</span>)
-<span class="no">X</span> <span class="kw">&lt;-</span> <span class="no">X</span>[, <span class="fl">1</span>:<span class="fu"><a href="https://rdrr.io/r/base/nrow.html">ncol</a></span>(<span class="no">X</span>)]
+<span class="kw">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html">model.matrix</a></span>(<span class="kw">count</span> <span class="op">~</span> <span class="kw">A</span> <span class="op">+</span> <span class="kw">C</span> <span class="op">+</span> <span class="kw">M</span> <span class="op">+</span> <span class="kw">A</span><span class="op">:</span><span class="kw">C</span> <span class="op">+</span> <span class="kw">A</span><span class="op">:</span><span class="kw">M</span> <span class="op">+</span> <span class="kw">C</span><span class="op">:</span><span class="kw">M</span> , data=<span class="kw">Drugs</span>)
+<span class="kw">X</span> <span class="op">&lt;-</span> <span class="kw">X</span>[, <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">ncol</a></span>(<span class="kw">X</span>)]
 
 <span class="co"># independent variable is count data</span>
-<span class="no">y</span> <span class="kw">&lt;-</span> <span class="no">Drugs</span>$<span class="no">count</span></pre></body></html></div>
+<span class="kw">y</span> <span class="op">&lt;-</span> <span class="kw">Drugs</span><span class="op">$</span><span class="kw">count</span>
+</pre></div>
 </div>
 <div id="comparison-model---frequentist" class="section level2">
 <h2 class="hasAnchor">
 <a href="#comparison-model---frequentist" class="anchor"></a>Comparison model - Frequentist</h2>
 <p>To compare results, we first fit a standard linear model using the frequentist function <em>glm</em>.</p>
-<div class="sourceCode" id="cb3"><html><body><pre class="r"><span class="co"># matrix representation</span>
-<span class="no">f</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html">glm</a></span>(<span class="no">y</span> ~ <span class="no">X</span>-<span class="fl">1</span>, <span class="kw">family</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/stats/family.html">poisson</a></span>(<span class="kw">link</span><span class="kw">=</span><span class="no">log</span>))
-<span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">f</span>)
+<div class="sourceCode" id="cb3"><pre class="downlit">
+<span class="co"># matrix representation</span>
+<span class="kw">f</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html">glm</a></span>(<span class="kw">y</span> <span class="op">~</span> <span class="kw">X</span><span class="op">-</span><span class="fl">1</span>, family=<span class="fu"><a href="https://rdrr.io/r/stats/family.html">poisson</a></span>(link=<span class="kw">log</span>))
+<span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="kw">f</span>)
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Call:</span>
 <span class="co">#&gt; glm(formula = y ~ X - 1, family = poisson(link = log))</span>
@@ -215,38 +220,44 @@ f(\boldsymbol\beta | \mathbf{X}, \mathbf{y}, \sigma_\beta^2) &amp;\propto f(\mat
 <span class="co">#&gt; Residual deviance: 3.7399e-01  on 1  degrees of freedom</span>
 <span class="co">#&gt; AIC: 63.417</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Number of Fisher Scoring iterations: 4</span></pre></body></html></div>
+<span class="co">#&gt; Number of Fisher Scoring iterations: 4</span>
+</pre></div>
 </div>
 <div id="fit-model-using-hmc" class="section level2">
 <h2 class="hasAnchor">
 <a href="#fit-model-using-hmc" class="anchor"></a>Fit model using <em>hmc</em>
 </h2>
 <p>Next, we fit the poisson regression model using HMC. A vector of <span class="math inline">\(\epsilon\)</span> values are specified to align with the data.</p>
-<div class="sourceCode" id="cb4"><html><body><pre class="r"><span class="no">N</span> <span class="kw">&lt;-</span> <span class="fl">1e4</span>
+<div class="sourceCode" id="cb4"><pre class="downlit">
+<span class="kw">N</span> <span class="op">&lt;-</span> <span class="fl">1e4</span>
 
-<span class="no">eps_vals</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span>(<span class="fl">5e-4</span>, <span class="fl">2</span>), <span class="fl">1e-3</span>, <span class="fl">2e-3</span>, <span class="fl">1e-3</span>, <span class="fl">2e-3</span>, <span class="fl">5e-4</span>)
+<span class="kw">eps_vals</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span>(<span class="fl">5e-4</span>, <span class="fl">2</span>), <span class="fl">1e-3</span>, <span class="fl">2e-3</span>, <span class="fl">1e-3</span>, <span class="fl">2e-3</span>, <span class="fl">5e-4</span>)
 
 <span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span>(<span class="fl">412</span>)
-<span class="no">t1.hmc</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span>()
- <span class="no">f_hmc</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/hmc.html">hmc</a></span>(<span class="kw">N</span> <span class="kw">=</span> <span class="no">N</span>, <span class="kw">theta.init</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span>(<span class="fl">0</span>, <span class="fl">7</span>),
-                    <span class="kw">epsilon</span> <span class="kw">=</span> <span class="no">eps_vals</span>, <span class="kw">L</span> <span class="kw">=</span> <span class="fl">50</span>,
-                    <span class="kw">logPOSTERIOR</span> <span class="kw">=</span> <span class="no">poisson_posterior</span>,
-                    <span class="kw">glogPOSTERIOR</span> <span class="kw">=</span> <span class="no">g_poisson_posterior</span>,
-                    <span class="kw">varnames</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span>(<span class="no">X</span>),
-                    <span class="kw">parallel</span><span class="kw">=</span><span class="fl">FALSE</span>, <span class="kw">chains</span><span class="kw">=</span><span class="fl">2</span>,
-                    <span class="kw">param</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="kw">y</span><span class="kw">=</span><span class="no">y</span>, <span class="kw">X</span><span class="kw">=</span><span class="no">X</span>))
-<span class="no">t2.hmc</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span>()
-<span class="no">t2.hmc</span> - <span class="no">t1.hmc</span>
-<span class="co">#&gt; Time difference of 42.24332 secs</span></pre></body></html></div>
+<span class="kw">t1.hmc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span>()
+ <span class="kw">f_hmc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/hmc.html">hmc</a></span>(N = <span class="kw">N</span>, theta.init = <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span>(<span class="fl">0</span>, <span class="fl">7</span>),
+                    epsilon = <span class="kw">eps_vals</span>, L = <span class="fl">50</span>,
+                    logPOSTERIOR = <span class="kw">poisson_posterior</span>,
+                    glogPOSTERIOR = <span class="kw">g_poisson_posterior</span>,
+                    varnames = <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span>(<span class="kw">X</span>),
+                    parallel=<span class="fl">FALSE</span>, chains=<span class="fl">2</span>,
+                    param=<span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(y=<span class="kw">y</span>, X=<span class="kw">X</span>))
+<span class="kw">t2.hmc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span>()
+<span class="kw">t2.hmc</span> <span class="op">-</span> <span class="kw">t1.hmc</span>
+<span class="co">#&gt; Time difference of 42.24332 secs</span>
+</pre></div>
 </div>
 <div id="mcmc-summary-and-diagnostics" class="section level2">
 <h2 class="hasAnchor">
 <a href="#mcmc-summary-and-diagnostics" class="anchor"></a>MCMC summary and diagnostics</h2>
 <p>The acceptance ratio for each of the HMC chains is sufficiently high for an efficient simulation.</p>
-<div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="no">f_hmc</span>$<span class="no">accept</span>/<span class="no">N</span>
-<span class="co">#&gt; [1] 0.9804 0.9829</span></pre></body></html></div>
+<div class="sourceCode" id="cb5"><pre class="downlit">
+<span class="kw">f_hmc</span><span class="op">$</span><span class="kw">accept</span><span class="op">/</span><span class="kw">N</span>
+<span class="co">#&gt; [1] 0.9804 0.9829</span>
+</pre></div>
 <p>The posterior quantiles are summarized after removing an initial <em>burnin</em> period. The <span class="math inline">\(\hat{R}\)</span> statistics provide an indication of convergence. Values close to one indicate that the multiple MCMC chains coverged to the same distribution, while values above 1.1 indicate possible convergence problems. All <span class="math inline">\(\hat{R}\)</span> values in our example are close to one.</p>
-<div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">3000</span>, <span class="kw">probs</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0.025</span>, <span class="fl">0.5</span>, <span class="fl">0.975</span>))
+<div class="sourceCode" id="cb6"><pre class="downlit">
+<span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="kw">f_hmc</span>, burnin=<span class="fl">3000</span>, probs=<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0.025</span>, <span class="fl">0.5</span>, <span class="fl">0.975</span>))
 <span class="co">#&gt; Summary of MCMC simulation</span>
 <span class="co">#&gt;                   2.5%        50%      97.5%     rhat</span>
 <span class="co">#&gt; (Intercept)  5.5238199  5.6327435  5.7521131 1.001527</span>
@@ -255,16 +266,21 @@ f(\boldsymbol\beta | \mathbf{X}, \mathbf{y}, \sigma_\beta^2) &amp;\propto f(\mat
 <span class="co">#&gt; Myes        -6.3840770 -5.3643129 -4.4945189 1.007716</span>
 <span class="co">#&gt; Ayes:Cyes    1.7495447  2.0670083  2.4061751 1.005151</span>
 <span class="co">#&gt; Ayes:Myes    2.1572253  3.0200944  4.1225859 1.018774</span>
-<span class="co">#&gt; Cyes:Myes    2.5174705  2.8574315  3.1983475 1.026709</span></pre></body></html></div>
+<span class="co">#&gt; Cyes:Myes    2.5174705  2.8574315  3.1983475 1.026709</span>
+</pre></div>
 <p>Trace plots provide a visual indication of stationarity. These plots indicate that the MCMC chains are reasonably stationary.</p>
-<div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="fu"><a href="../reference/hmclearn-plots.html">mcmc_trace</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">3000</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb7"><pre class="downlit">
+<span class="fu"><a href="../reference/hmclearn-plots.html">mcmc_trace</a></span>(<span class="kw">f_hmc</span>, burnin=<span class="fl">3000</span>)
+</pre></div>
 <div class="figure">
 <img src="fig1poisson-1.png" alt=""><p class="caption">plot of chunk fig1poisson</p>
 </div>
 <p>Histograms of the posterior distribution show that Bayesian parameter estimates align with Frequentist estimates.</p>
-<div class="sourceCode" id="cb8"><html><body><pre class="r"><span class="no">beta.freq</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span>(<span class="no">f</span>)
-<span class="fu"><a href="../reference/diagplots.html">diagplots</a></span>(<span class="no">f_hmc</span>, <span class="kw">burnin</span><span class="kw">=</span><span class="fl">3000</span>, <span class="kw">comparison.theta</span><span class="kw">=</span><span class="no">beta.freq</span>)
-<span class="co">#&gt; $histogram</span></pre></body></html></div>
+<div class="sourceCode" id="cb8"><pre class="downlit">
+<span class="kw">beta.freq</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span>(<span class="kw">f</span>)
+<span class="fu"><a href="../reference/diagplots.html">diagplots</a></span>(<span class="kw">f_hmc</span>, burnin=<span class="fl">3000</span>, comparison.theta=<span class="kw">beta.freq</span>)
+<span class="co">#&gt; $histogram</span>
+</pre></div>
 <div class="figure">
 <img src="fit2poisson-1.png" alt=""><p class="caption">plot of chunk fit2poisson</p>
 </div>

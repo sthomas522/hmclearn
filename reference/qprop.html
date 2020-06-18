@@ -139,7 +139,7 @@
     <p>Provided for Random Walk Metropolis algorithm</p>
     </div>
 
-    <pre class="usage"><span class='fu'>qprop</span>(<span class='no'>theta1</span>, <span class='no'>nu</span>)</pre>
+    <pre class="usage"><span class='fu'>qprop</span>(<span class='kw'>theta1</span>, <span class='kw'>nu</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -164,9 +164,9 @@
 <p>Venables, W. N. and Ripley, B. D. (2002) <em>Modern Applied Statistics with S.</em> Fourth edition. Springer.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='no'>s</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>replicate</a></span>(<span class='fl'>1000</span>, <span class='fu'>qprop</span>(<span class='fl'>0</span>, <span class='fl'>1</span>))
-<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='no'>s</span>)</div><div class='output co'>#&gt;     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
-#&gt; -3.28849 -0.67223  0.07392  0.04726  0.74391  4.02702 </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/hist.html'>hist</a></span>(<span class='no'>s</span>, <span class='kw'>col</span><span class='kw'>=</span><span class='st'>'light blue'</span>)</div><div class='img'><img src='qprop-1.png' alt='' width='700' height='433' /></div></pre>
+    <pre class="examples"><div class='input'><span class='kw'>s</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>replicate</a></span>(<span class='fl'>1000</span>, <span class='fu'>qprop</span>(<span class='fl'>0</span>, <span class='fl'>1</span>))
+<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='kw'>s</span>)</div><div class='output co'>#&gt;     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+#&gt; -3.28849 -0.67223  0.07392  0.04726  0.74391  4.02702 </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/hist.html'>hist</a></span>(<span class='kw'>s</span>, col=<span class='st'>'light blue'</span>)</div><div class='img'><img src='qprop-1.png' alt='' width='700' height='433' /></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

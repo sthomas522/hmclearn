@@ -140,7 +140,7 @@
     </div>
 
     <pre class="usage"><span class='co'># S3 method for hmclearn</span>
-<span class='fu'><a href='https://rdrr.io/r/stats/coef.html'>coef</a></span>(<span class='no'>object</span>, <span class='kw'>burnin</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='fl'>0.5</span>, <span class='no'>...</span>)</pre>
+<span class='fu'><a href='https://rdrr.io/r/stats/coef.html'>coef</a></span>(<span class='kw'>object</span>, burnin = <span class='kw'>NULL</span>, prob = <span class='fl'>0.5</span>, <span class='kw'>...</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -170,20 +170,20 @@
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'># Linear regression example</span>
 <span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span>(<span class='fl'>521</span>)
-<span class='no'>X</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>cbind</a></span>(<span class='fl'>1</span>, <span class='fu'><a href='https://rdrr.io/r/base/matrix.html'>matrix</a></span>(<span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span>(<span class='fl'>300</span>), <span class='kw'>ncol</span><span class='kw'>=</span><span class='fl'>3</span>))
-<span class='no'>betavals</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>0.5</span>, -<span class='fl'>1</span>, <span class='fl'>2</span>, -<span class='fl'>3</span>)
-<span class='no'>y</span> <span class='kw'>&lt;-</span> <span class='no'>X</span><span class='kw'>%*%</span><span class='no'>betavals</span> + <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span>(<span class='fl'>100</span>, <span class='kw'>sd</span><span class='kw'>=</span><span class='fl'>.2</span>)
+<span class='kw'>X</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>cbind</a></span>(<span class='fl'>1</span>, <span class='fu'><a href='https://rdrr.io/r/base/matrix.html'>matrix</a></span>(<span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span>(<span class='fl'>300</span>), ncol=<span class='fl'>3</span>))
+<span class='kw'>betavals</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>0.5</span>, <span class='op'>-</span><span class='fl'>1</span>, <span class='fl'>2</span>, <span class='op'>-</span><span class='fl'>3</span>)
+<span class='kw'>y</span> <span class='op'>&lt;-</span> <span class='kw'>X</span><span class='op'>%*%</span><span class='kw'>betavals</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span>(<span class='fl'>100</span>, sd=<span class='fl'>.2</span>)
 
-<span class='no'>f1</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='hmc.html'>hmc</a></span>(<span class='kw'>N</span> <span class='kw'>=</span> <span class='fl'>500</span>,
-          <span class='kw'>theta.init</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span>(<span class='fl'>0</span>, <span class='fl'>4</span>), <span class='fl'>1</span>),
-          <span class='kw'>epsilon</span> <span class='kw'>=</span> <span class='fl'>0.01</span>,
-          <span class='kw'>L</span> <span class='kw'>=</span> <span class='fl'>10</span>,
-          <span class='kw'>logPOSTERIOR</span> <span class='kw'>=</span> <span class='no'>linear_posterior</span>,
-          <span class='kw'>glogPOSTERIOR</span> <span class='kw'>=</span> <span class='no'>g_linear_posterior</span>,
-          <span class='kw'>varnames</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste0</a></span>(<span class='st'>"beta"</span>, <span class='fl'>0</span>:<span class='fl'>3</span>), <span class='st'>"log_sigma_sq"</span>),
-          <span class='kw'>param</span><span class='kw'>=</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='kw'>y</span><span class='kw'>=</span><span class='no'>y</span>, <span class='kw'>X</span><span class='kw'>=</span><span class='no'>X</span>), <span class='kw'>parallel</span><span class='kw'>=</span><span class='fl'>FALSE</span>, <span class='kw'>chains</span><span class='kw'>=</span><span class='fl'>1</span>)
+<span class='kw'>f1</span> <span class='op'>&lt;-</span> <span class='fu'>hmc</span>(N = <span class='fl'>500</span>,
+          theta.init = <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span>(<span class='fl'>0</span>, <span class='fl'>4</span>), <span class='fl'>1</span>),
+          epsilon = <span class='fl'>0.01</span>,
+          L = <span class='fl'>10</span>,
+          logPOSTERIOR = <span class='kw'>linear_posterior</span>,
+          glogPOSTERIOR = <span class='kw'>g_linear_posterior</span>,
+          varnames = <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste0</a></span>(<span class='st'>"beta"</span>, <span class='fl'>0</span><span class='op'>:</span><span class='fl'>3</span>), <span class='st'>"log_sigma_sq"</span>),
+          param=<span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(y=<span class='kw'>y</span>, X=<span class='kw'>X</span>), parallel=<span class='fl'>FALSE</span>, chains=<span class='fl'>1</span>)
 
-<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='no'>f1</span>)</div><div class='output co'>#&gt; Summary of MCMC simulation
+<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='kw'>f1</span>)</div><div class='output co'>#&gt; Summary of MCMC simulation
 #&gt; </div><div class='output co'>#&gt;                    2.5%         5%        25%        50%        75%        95%
 #&gt; beta0         0.3761942  0.4648189  0.5155872  0.5325537  0.5497568  0.5781873
 #&gt; beta1        -1.0739748 -1.0488209 -1.0281105 -1.0118904 -0.9965476 -0.9627243
@@ -195,7 +195,7 @@
 #&gt; beta1        -0.9602134
 #&gt; beta2         2.0591168
 #&gt; beta3        -1.8103326
-#&gt; log_sigma_sq  1.5343091</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/stats/coef.html'>coef</a></span>(<span class='no'>f1</span>)</div><div class='output co'>#&gt;        beta0        beta1        beta2        beta3 log_sigma_sq 
+#&gt; log_sigma_sq  1.5343091</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/stats/coef.html'>coef</a></span>(<span class='kw'>f1</span>)</div><div class='output co'>#&gt;        beta0        beta1        beta2        beta3 log_sigma_sq 
 #&gt;    0.5325537   -1.0118904    2.0164956   -2.9807522   -3.0392322 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

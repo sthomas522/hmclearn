@@ -140,15 +140,15 @@
     </div>
 
     <pre class="usage"><span class='fu'>mh.fit</span>(
-  <span class='no'>N</span>,
-  <span class='no'>theta.init</span>,
-  <span class='no'>qPROP</span>,
-  <span class='no'>qFUN</span>,
-  <span class='no'>logPOSTERIOR</span>,
-  <span class='kw'>nu</span> <span class='kw'>=</span> <span class='fl'>0.001</span>,
-  <span class='kw'>varnames</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>param</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(),
-  <span class='no'>...</span>
+  <span class='kw'>N</span>,
+  <span class='kw'>theta.init</span>,
+  <span class='kw'>qPROP</span>,
+  <span class='kw'>qFUN</span>,
+  <span class='kw'>logPOSTERIOR</span>,
+  nu = <span class='fl'>0.001</span>,
+  varnames = <span class='kw'>NULL</span>,
+  param = <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(),
+  <span class='kw'>...</span>
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -216,26 +216,26 @@
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'># Logistic regression example</span>
-<span class='no'>X</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>cbind</a></span>(<span class='fl'>1</span>, <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span>(-<span class='fl'>100</span>, <span class='fl'>100</span>, <span class='kw'>by</span><span class='kw'>=</span><span class='fl'>0.25</span>))
-<span class='no'>betavals</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(-<span class='fl'>0.9</span>, <span class='fl'>0.2</span>)
-<span class='no'>lodds</span> <span class='kw'>&lt;-</span> <span class='no'>X</span> <span class='kw'>%*%</span> <span class='no'>betavals</span>
-<span class='no'>prob1</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/numeric.html'>as.numeric</a></span>(<span class='fl'>1</span> / (<span class='fl'>1</span> + <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>exp</a></span>(-<span class='no'>lodds</span>)))
+<span class='kw'>X</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>cbind</a></span>(<span class='fl'>1</span>, <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span>(<span class='op'>-</span><span class='fl'>100</span>, <span class='fl'>100</span>, by=<span class='fl'>0.25</span>))
+<span class='kw'>betavals</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='op'>-</span><span class='fl'>0.9</span>, <span class='fl'>0.2</span>)
+<span class='kw'>lodds</span> <span class='op'>&lt;-</span> <span class='kw'>X</span> <span class='op'>%*%</span> <span class='kw'>betavals</span>
+<span class='kw'>prob1</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/numeric.html'>as.numeric</a></span>(<span class='fl'>1</span> <span class='op'>/</span> (<span class='fl'>1</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>exp</a></span>(<span class='op'>-</span><span class='kw'>lodds</span>)))
 
 <span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span>(<span class='fl'>9874</span>)
-<span class='no'>y</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>sapply</a></span>(<span class='no'>prob1</span>, <span class='kw'>function</span>(<span class='no'>xx</span>) {
-  <span class='fu'><a href='https://rdrr.io/r/base/sample.html'>sample</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>0</span>, <span class='fl'>1</span>), <span class='fl'>1</span>, <span class='kw'>prob</span><span class='kw'>=</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>1</span>-<span class='no'>xx</span>, <span class='no'>xx</span>))
+<span class='kw'>y</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>sapply</a></span>(<span class='kw'>prob1</span>, <span class='fu'>function</span>(<span class='kw'>xx</span>) {
+  <span class='fu'><a href='https://rdrr.io/r/base/sample.html'>sample</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>0</span>, <span class='fl'>1</span>), <span class='fl'>1</span>, prob=<span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>1</span><span class='op'>-</span><span class='kw'>xx</span>, <span class='kw'>xx</span>))
 })
 
-<span class='no'>f1</span> <span class='kw'>&lt;-</span> <span class='fu'>mh.fit</span>(<span class='kw'>N</span> <span class='kw'>=</span> <span class='fl'>2000</span>,
-         <span class='kw'>theta.init</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span>(<span class='fl'>0</span>, <span class='fl'>2</span>),
-         <span class='kw'>nu</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>0.03</span>, <span class='fl'>0.001</span>),
-         <span class='kw'>qPROP</span> <span class='kw'>=</span> <span class='no'>qprop</span>,
-         <span class='kw'>qFUN</span> <span class='kw'>=</span> <span class='no'>qfun</span>,
-         <span class='kw'>logPOSTERIOR</span> <span class='kw'>=</span> <span class='no'>logistic_posterior</span>,
-         <span class='kw'>varnames</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste0</a></span>(<span class='st'>"beta"</span>, <span class='fl'>0</span>:<span class='fl'>1</span>),
-         <span class='kw'>y</span><span class='kw'>=</span><span class='no'>y</span>, <span class='kw'>X</span><span class='kw'>=</span><span class='no'>X</span>)
+<span class='kw'>f1</span> <span class='op'>&lt;-</span> <span class='fu'>mh.fit</span>(N = <span class='fl'>2000</span>,
+         theta.init = <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span>(<span class='fl'>0</span>, <span class='fl'>2</span>),
+         nu = <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>0.03</span>, <span class='fl'>0.001</span>),
+         qPROP = <span class='kw'>qprop</span>,
+         qFUN = <span class='kw'>qfun</span>,
+         logPOSTERIOR = <span class='kw'>logistic_posterior</span>,
+         varnames = <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste0</a></span>(<span class='st'>"beta"</span>, <span class='fl'>0</span><span class='op'>:</span><span class='fl'>1</span>),
+         y=<span class='kw'>y</span>, X=<span class='kw'>X</span>)
 
-<span class='no'>f1</span>$<span class='no'>accept</span> / <span class='no'>f1</span>$<span class='no'>N</span></div><div class='output co'>#&gt; [1] 0.4705</div></pre>
+<span class='kw'>f1</span><span class='op'>$</span><span class='kw'>accept</span> <span class='op'>/</span> <span class='kw'>f1</span><span class='op'>$</span><span class='kw'>N</span></div><div class='output co'>#&gt; [1] 0.4705</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

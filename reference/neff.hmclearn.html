@@ -142,7 +142,7 @@ adjusted for autocorrelation.</p>
     </div>
 
     <pre class="usage"><span class='co'># S3 method for hmclearn</span>
-<span class='fu'><a href='neff.html'>neff</a></span>(<span class='no'>object</span>, <span class='kw'>burnin</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>lagmax</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>...</span>)</pre>
+<span class='fu'>neff</span>(<span class='kw'>object</span>, burnin = <span class='kw'>NULL</span>, lagmax = <span class='kw'>NULL</span>, <span class='kw'>...</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -175,22 +175,22 @@ adjusted for autocorrelation.</p>
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'># poisson regression example</span>
 <span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span>(<span class='fl'>7363</span>)
-<span class='no'>X</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>cbind</a></span>(<span class='fl'>1</span>, <span class='fu'><a href='https://rdrr.io/r/base/matrix.html'>matrix</a></span>(<span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span>(<span class='fl'>40</span>), <span class='kw'>ncol</span><span class='kw'>=</span><span class='fl'>2</span>))
-<span class='no'>betavals</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>0.8</span>, -<span class='fl'>0.5</span>, <span class='fl'>1.1</span>)
-<span class='no'>lmu</span> <span class='kw'>&lt;-</span> <span class='no'>X</span> <span class='kw'>%*%</span> <span class='no'>betavals</span>
-<span class='no'>y</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>sapply</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/Log.html'>exp</a></span>(<span class='no'>lmu</span>), <span class='kw'>FUN</span> <span class='kw'>=</span> <span class='no'>rpois</span>, <span class='kw'>n</span><span class='kw'>=</span><span class='fl'>1</span>)
+<span class='kw'>X</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>cbind</a></span>(<span class='fl'>1</span>, <span class='fu'><a href='https://rdrr.io/r/base/matrix.html'>matrix</a></span>(<span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span>(<span class='fl'>40</span>), ncol=<span class='fl'>2</span>))
+<span class='kw'>betavals</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>0.8</span>, <span class='op'>-</span><span class='fl'>0.5</span>, <span class='fl'>1.1</span>)
+<span class='kw'>lmu</span> <span class='op'>&lt;-</span> <span class='kw'>X</span> <span class='op'>%*%</span> <span class='kw'>betavals</span>
+<span class='kw'>y</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>sapply</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/Log.html'>exp</a></span>(<span class='kw'>lmu</span>), FUN = <span class='kw'>rpois</span>, n=<span class='fl'>1</span>)
 
-<span class='no'>f</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='hmc.html'>hmc</a></span>(<span class='kw'>N</span> <span class='kw'>=</span> <span class='fl'>1000</span>,
-          <span class='kw'>theta.init</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span>(<span class='fl'>0</span>, <span class='fl'>3</span>),
-          <span class='kw'>epsilon</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>0.03</span>, <span class='fl'>0.02</span>, <span class='fl'>0.015</span>),
-          <span class='kw'>L</span> <span class='kw'>=</span> <span class='fl'>10</span>,
-          <span class='kw'>logPOSTERIOR</span> <span class='kw'>=</span> <span class='no'>poisson_posterior</span>,
-          <span class='kw'>glogPOSTERIOR</span> <span class='kw'>=</span> <span class='no'>g_poisson_posterior</span>,
-          <span class='kw'>varnames</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste0</a></span>(<span class='st'>"beta"</span>, <span class='fl'>0</span>:<span class='fl'>2</span>),
-          <span class='kw'>param</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='kw'>y</span><span class='kw'>=</span><span class='no'>y</span>, <span class='kw'>X</span><span class='kw'>=</span><span class='no'>X</span>),
-          <span class='kw'>parallel</span><span class='kw'>=</span><span class='fl'>FALSE</span>, <span class='kw'>chains</span><span class='kw'>=</span><span class='fl'>2</span>)
+<span class='kw'>f</span> <span class='op'>&lt;-</span> <span class='fu'>hmc</span>(N = <span class='fl'>1000</span>,
+          theta.init = <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span>(<span class='fl'>0</span>, <span class='fl'>3</span>),
+          epsilon = <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>0.03</span>, <span class='fl'>0.02</span>, <span class='fl'>0.015</span>),
+          L = <span class='fl'>10</span>,
+          logPOSTERIOR = <span class='kw'>poisson_posterior</span>,
+          glogPOSTERIOR = <span class='kw'>g_poisson_posterior</span>,
+          varnames = <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste0</a></span>(<span class='st'>"beta"</span>, <span class='fl'>0</span><span class='op'>:</span><span class='fl'>2</span>),
+          param = <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(y=<span class='kw'>y</span>, X=<span class='kw'>X</span>),
+          parallel=<span class='fl'>FALSE</span>, chains=<span class='fl'>2</span>)
 
-<span class='fu'><a href='neff.html'>neff</a></span>(<span class='no'>f</span>, <span class='kw'>burnin</span><span class='kw'>=</span><span class='fl'>100</span>)</div><div class='output co'>#&gt; [1]  877 2310  797</div></pre>
+<span class='fu'>neff</span>(<span class='kw'>f</span>, burnin=<span class='fl'>100</span>)</div><div class='output co'>#&gt; [1]  877 2310  797</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
