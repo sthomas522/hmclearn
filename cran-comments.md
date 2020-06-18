@@ -39,6 +39,6 @@ Revised from version 0.0.2 to version 0.0.3
 
 * Corrected some typos and special characters for the references in the vignettes. 
 
-* Reduced the number of simulations in the longer tests, which reduced the testing runtime.
+* Reduced the runtime of most of the tests by reducing the number of simulations.
 
 * Second package submission to CRAN was on 6/2/2020, commmit 067724a7ef
