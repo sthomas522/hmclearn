@@ -111,7 +111,7 @@ test_that("hmc testing", {
   X <- cbind(1, as.matrix(PimaIndiansDiabetes[, -which(colnames(PimaIndiansDiabetes) == "diabetes")]))
   colnames(X)[1] <- "int"
 
-  N <- 1e3
+  N <- 500
   eps_vals <- c(5e-2, 2e-3, 2e-4, 1e-3, 1e-3,
                 1e-4, 1e-3, 3e-2, 4e-4)
 
@@ -126,15 +126,15 @@ test_that("hmc testing", {
   # test values
   c5_hmc <- as.vector(round(coef(f5_hmc), 6))
 
-  test5 <- c(-8.486601, 0.127246, 0.035835, -0.013833,
-             0.000857, -0.001223, 0.089886, 0.950046, 0.013887)
+  test5 <- c(-8.379256, 0.128070, 0.035848, -0.013882,
+             0.000350, -0.001111, 0.089129, 0.942763, 0.012301)
 
   expect_equal(c5_hmc, test5)
 
   p5_hmc <- as.vector(round(psrf(f5_hmc), 6))
 
-  test5b <- c(1.011002, 1.002309, 1.000229, 0.999595,
-              1.002694, 1.007651, 1.003839, 0.999561, 1.017046)
+  test5b <- c(1.021646, 0.999362, 1.021543, 1.003941,
+              0.999211, 1.004038, 1.019888, 0.999990, 1.004335)
 
   expect_equal(p5_hmc, test5b)
 
@@ -148,7 +148,7 @@ test_that("hmc testing", {
   y <- AMSsurvey$count
   p <- ncol(X)
 
-  N <- 2e3
+  N <- 500
 
   eps_vals <- c(2.2e-3, 2e-3, 2e-3, 2e-3, 2e-3, 3e-3,
                 2e-3, 2e-3)
@@ -163,15 +163,15 @@ test_that("hmc testing", {
   # test values
   c6_hmc <- as.vector(round(coef(f6_hmc), 6))
 
-  test6 <- c(3.564045, 0.458186, 0.311374, -0.188827,
-             0.535655, -0.850916, 0.743093, -0.128503)
+  test6 <- c(3.598755, 0.427669, 0.279027, -0.223528,
+             0.497268, -0.890527, 0.735901, -0.122957)
 
   expect_equal(c6_hmc, test6)
 
   p6_hmc <- as.vector(round(psrf(f6_hmc), 6))
 
-  test6b <- c(1.008315, 1.011858, 1.021309, 1.005917,
-              1.017213, 1.003739, 1.013696, 1.000277)
+  test6b <- c(0.999394, 1.023099, 1.002032, 1.002959,
+              1.012165, 1.000424, 1.002384, 0.999250)
 
   expect_equal(p6_hmc, test6b)
 

@@ -5,7 +5,7 @@ test_that("mh testing", {
   betavals <- c(0.5, -1, 2, -3)
   y <- X%*%betavals + rnorm(100, sd=.2)
 
-  f1 <- mh(N = 5e3,
+  f1 <- mh(N = 500,
            theta.init = c(rep(0, 4), 1),
            nu <- c(rep(0.001, 4), 0.1),
            qPROP = qprop,
@@ -14,14 +14,14 @@ test_that("mh testing", {
            varnames = c(paste0("beta", 0:3), "log_sigma_sq"),
            param=list(y=y, X=X), parallel=FALSE, chains=2)
 
-  medparam1 <- as.vector(summary(f1, burnin=1000)[, 4])
+  medparam1 <- as.vector(summary(f1, burnin=100)[, 4])
 
   expect_equal(round(medparam1, 6),
-               c(0.535630,
-                 -1.008264,
-                 2.016371,
-                 -2.981911,
-                 -3.057343))
+               c(0.275273,
+                 -0.406307,
+                 0.523975,
+                 -1.207012,
+                 1.914187))
 
 
   # Logistic regression example
@@ -35,7 +35,7 @@ test_that("mh testing", {
     sample(c(0, 1), 1, prob=c(1-xx, xx))
   })
 
-  f2 <- mh(N = 2000,
+  f2 <- mh(N = 500,
             theta.init = rep(0, 2),
             nu = c(0.03, 0.001),
             qPROP = qprop,
@@ -45,10 +45,10 @@ test_that("mh testing", {
             param = list(y=y, X=X, sig2beta=100),
             parallel=FALSE, chains=2)
 
-  medparam2 <- as.vector(summary(f2, burnin=200)[, 4])
+  medparam2 <- as.vector(summary(f2, burnin=100)[, 4])
 
   expect_equal(round(medparam2, 6),
-               c(-0.872098, 0.188425))
+               c(-0.851867, 0.188651))
 
   # poisson regression example
   set.seed(7363)
@@ -57,7 +57,7 @@ test_that("mh testing", {
   lmu <- X %*% betavals
   y <- sapply(exp(lmu), FUN = rpois, n=1)
 
-  f3 <- mh(N = 5e3,
+  f3 <- mh(N = 500,
             theta.init = rep(0, 3),
             nu = rep(0.01, 3),
             qPROP = qprop,
@@ -67,10 +67,10 @@ test_that("mh testing", {
             param = list(y=y, X=X, sig2beta=100),
             parallel=FALSE, chains=2)
 
-  medparam3 <- as.vector(summary(f3, burnin=1000)[, 4])
+  medparam3 <- as.vector(summary(f3, burnin=100)[, 4])
 
   expect_equal(round(medparam3, 6),
-               c(0.809711, -0.515971, 1.190307))
+               c(0.836656, -0.508513, 1.163681))
 
 })
 
