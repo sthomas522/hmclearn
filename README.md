@@ -6,9 +6,9 @@ While the core functions are included for both **hmc** and **mh** algorithms, us
 
 # Installation
 
-The most recent **hmclearn** package can be installed from github via
+The most recent **hmclearn** package can be installed from CRAN via
 
 ```r
-devtools::install_github("sthomas522/hmclearn")
+install.packages("hmclearn")
 ```
 
