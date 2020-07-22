@@ -42,3 +42,15 @@ Revised from version 0.0.2 to version 0.0.3
 * Reduced the runtime of most of the tests by reducing the number of simulations.
 
 * Second package submission to CRAN was on 6/2/2020, commmit 067724a7ef
+
+## Version 0.0.4
+
+* Changed HMC paper reference for Thomas/Tu paper to arXiv since it is openly accessible. 
+
+* Changed relevant help references and vignettes for Thomas/Tu to arXiv paper
+
+
+
+
+
+

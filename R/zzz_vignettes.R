@@ -2,7 +2,7 @@
 # rebuild vignettes
 if (FALSE) {
   # 1. run these commands to update vignettes with pre-compiled results
-  # 2. move the image files to the vignettes directory
+  # 2. move the image files from the figure to the vignettes directory
   # 3. delete the figure directory
   # 4. in each of the .Rmd files, copy/paste delete the figures/ folder reference
 

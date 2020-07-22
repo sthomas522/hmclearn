@@ -432,3 +432,5 @@ Bates, D., M&auml;chler, M., Bolker, B., & Walker, S. (2015). Fitting linear mix
 Bates, D., M&auml;chler, M., & Bolker, B. (2014). mlmRev: Examples from multilevel modelling software review. *R package version, 1*.
 
 Agresti, A. (2015). *Foundations of linear and generalized linear models*. John Wiley & Sons.  ISBN: 978-1-118-73003-4
+
+Thomas, Samuel, and Wanzhu Tu. "Learning Hamiltonian Monte Carlo in R." arXiv preprint arXiv:2006.16194 (2020).

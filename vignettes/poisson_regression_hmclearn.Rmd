@@ -1,7 +1,7 @@
 ---
 title: "hmclearn:  Poisson Regression Example"
 author: "Samuel Thomas"
-date: "2020-06-10"
+date: "2020-07-22"
 output:
   rmarkdown::html_vignette:
     fig_caption: false
@@ -177,7 +177,7 @@ t1.hmc <- Sys.time()
                     param=list(y=y, X=X))
 t2.hmc <- Sys.time()
 t2.hmc - t1.hmc
-#> Time difference of 42.24332 secs
+#> Time difference of 40.8924 secs
 ```
 
 
@@ -215,7 +215,7 @@ Trace plots provide a visual indication of stationarity.  These plots indicate t
 mcmc_trace(f_hmc, burnin=3000)
 ```
 
-![plot of chunk fig1poisson](fig1poisson-1.png)
+![plot of chunk fig1poisson](figure/fig1poisson-1.png)
 
 Histograms of the posterior distribution show that Bayesian parameter estimates align with Frequentist estimates.
 
@@ -226,7 +226,7 @@ diagplots(f_hmc, burnin=3000, comparison.theta=beta.freq)
 #> $histogram
 ```
 
-![plot of chunk fit2poisson](fit2poisson-1.png)
+![plot of chunk fit2poisson](figure/fit2poisson-1.png)
 
 ## Source
 
@@ -236,4 +236,5 @@ Data originally provided by Harry Khamis, Wright State University
 
 Agresti, A. (2015). *Foundations of linear and generalized linear models*. John Wiley & Sons.  ISBN: 978-1-118-73003-4
 
+Thomas, Samuel, and Wanzhu Tu. "Learning Hamiltonian Monte Carlo in R." arXiv preprint arXiv:2006.16194 (2020).
 

@@ -1,7 +1,7 @@
 ---
 title: "hmclearn:  Linear Regression Example"
 author: "Samuel Thomas"
-date: "2020-06-10"
+date: "2020-07-22"
 output:
   rmarkdown::html_vignette:
     fig_caption: false
@@ -192,7 +192,7 @@ t1.hmc <- Sys.time()
                     parallel=FALSE, chains=2)
 t2.hmc <- Sys.time()
 t2.hmc - t1.hmc
-#> Time difference of 32.03008 secs
+#> Time difference of 1.103369 mins
 ```
 
 ## MCMC summary and diagnostics
@@ -227,7 +227,7 @@ Trace plots provide a visual indication of stationarity.  These plots indicate t
 mcmc_trace(f_hmc, burnin=2000)
 ```
 
-![plot of chunk figlm](figlm-1.png)
+![plot of chunk figlm](figure/figlm-1.png)
 
 Histograms of the posterior distribution show that Bayesian parameter estimates align with frequentist estimates for this example.
 
@@ -237,7 +237,7 @@ diagplots(f_hmc, comparison.theta=theta.freq, burnin=2000)
 #> $histogram
 ```
 
-![plot of chunk fig2lm](fig2lm-1.png)
+![plot of chunk fig2lm](figure/fig2lm-1.png)
 
 ## Source
 
@@ -252,4 +252,6 @@ Gelman, Andrew. (2006) "Prior distributions for variance parameters in hierarchi
 Agresti, A. (2015). *Foundations of linear and generalized linear models*. John Wiley & Sons.  ISBN: 978-1-118-73003-4
 
 Hoffman, M. D., & Gelman, A. (2014). The No-U-Turn sampler: adaptively setting path lengths in Hamiltonian Monte Carlo. *Journal of Machine Learning Research*, 15(1), 1593-1623.
+
+Thomas, Samuel, and Wanzhu Tu. "Learning Hamiltonian Monte Carlo in R." arXiv preprint arXiv:2006.16194 (2020).
 
