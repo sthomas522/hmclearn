@@ -407,7 +407,7 @@ We create trace plots on the transformed simulation data.
 mcmc_trace(f_hmc2, burnin=1000, pars=colnames(X))
 ```
 
-![plot of chunk fig1glmm](figure/fig1glmm-1.png)
+![plot of chunk fig1glmm](fig1glmm-1.png)
 
 ## Comparison model - Frequentist
 
@@ -483,7 +483,7 @@ diagplots(f_hmc2, burnin=1000,
 #> $histogram
 ```
 
-![plot of chunk fig2glmm](figure/fig2glmm-1.png)
+![plot of chunk fig2glmm](fig2glmm-1.png)
 
 
 We also compare the random effects parameter estimates with **lme4**. We apply the linear transformation back to $\mathbf{u}$ for comparison.
@@ -518,7 +518,7 @@ diagplots(f_hmc, burnin=1000,
 #> $histogram
 ```
 
-![plot of chunk fig3glmm](figure/fig3glmm-1.png)
+![plot of chunk fig3glmm](fig3glmm-1.png)
 
 
 ```r
@@ -531,7 +531,7 @@ diagplots(f_hmc, burnin=1000,
 #> $histogram
 ```
 
-![plot of chunk fig4glmm](figure/fig4glmm-1.png)
+![plot of chunk fig4glmm](fig4glmm-1.png)
 
 
 
@@ -545,7 +545,7 @@ diagplots(f_hmc, burnin=1000,
 #> $histogram
 ```
 
-![plot of chunk fig5glmm](figure/fig5glmm-1.png)
+![plot of chunk fig5glmm](fig5glmm-1.png)
 
 
 

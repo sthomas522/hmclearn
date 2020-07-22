@@ -227,7 +227,7 @@ Trace plots provide a visual indication of stationarity.  These plots indicate t
 mcmc_trace(f_hmc, burnin=2000)
 ```
 
-![plot of chunk figlm](figure/figlm-1.png)
+![plot of chunk figlm](figlm-1.png)
 
 Histograms of the posterior distribution show that Bayesian parameter estimates align with frequentist estimates for this example.
 
@@ -237,7 +237,7 @@ diagplots(f_hmc, comparison.theta=theta.freq, burnin=2000)
 #> $histogram
 ```
 
-![plot of chunk fig2lm](figure/fig2lm-1.png)
+![plot of chunk fig2lm](fig2lm-1.png)
 
 ## Source
 

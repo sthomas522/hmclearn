@@ -371,7 +371,7 @@ Trace plots provide a visual indication of stationarity.  These plots indicate t
 mcmc_trace(f_hmc, burnin=trunc(N*.3), pars=c("beta0", "beta1", "sigeps", "xi"))
 ```
 
-![plot of chunk lmmtrace](figure/lmmtrace-1.png)
+![plot of chunk lmmtrace](lmmtrace-1.png)
 
 The posterior quantiles are summarized after removing an initial *burnin* period.  The $\hat{R}$ statistics are close to one, indicating that both HMC chains converged to the same distribution. The $\hat{R}$ statistics provide an indication of convergence. Values close to one indicate that the multiple MCMC chains converged to the same distribution, while values above 1.1 indicate possible convergence problems. All $\hat{R}$ values in our example are close to one.
 
@@ -442,7 +442,7 @@ diagplots(f_hmc, burnin=trunc(N*.3),
 #> $histogram
 ```
 
-![plot of chunk fig1lmm](figure/fig1lmm-1.png)
+![plot of chunk fig1lmm](fig1lmm-1.png)
 
 We also compare the random effects parameter estimates with **lme4**. The random effects parameters align with frequentist estimates.
 
@@ -470,7 +470,7 @@ diagplots(f_hmc, burnin=trunc(N*.3),
 #> $histogram
 ```
 
-![plot of chunk fig2lmm](figure/fig2lmm-1.png)
+![plot of chunk fig2lmm](fig2lmm-1.png)
 
 ## Source
 
