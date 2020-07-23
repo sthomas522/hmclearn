@@ -190,9 +190,9 @@ summary(fm2_hmc, burnin=100)
 \references{
 Neal, Radford. 2011. \emph{MCMC Using Hamiltonian Dynamics.} In Handbook of Markov Chain Monte Carlo, edited by Steve Brooks, Andrew Gelman, Galin L. Jones, and Xiao-Li Meng, 116–62. Chapman; Hall/CRC.
 
-Betancourt, Michael. 2017.  \emph{A Conceptual Introduction to Hamiltonian Monte Carlo} <arXiv:1701.02434>
+Betancourt, Michael. 2017.  \emph{A Conceptual Introduction to Hamiltonian Monte Carlo}.
 
-Thomas, S., Tu, W. 2020. \emph{Learning Hamiltonian Monte Carlo in R}. <arXiv:2006.16194>
+Thomas, S., Tu, W. 2020. \emph{Learning Hamiltonian Monte Carlo in R}.
 }
 \author{
 Samuel Thomas \email{samthoma@iu.edu}, Wanzhu Tu \email{wtu@iu.edu}
