@@ -7,7 +7,7 @@ articles:
   logistic_mixed_effects_hmclearn: logistic_mixed_effects_hmclearn.html
   logistic_regression_hmclearn: logistic_regression_hmclearn.html
   poisson_regression_hmclearn: poisson_regression_hmclearn.html
-last_built: 2020-10-04T14:47Z
+last_built: 2020-10-04T15:06Z
 urls:
   reference: http://sthomas522.github.io/hmclearn/reference
   article: http://sthomas522.github.io/hmclearn/articles
