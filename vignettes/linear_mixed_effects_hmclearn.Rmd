@@ -1,7 +1,7 @@
 ---
 title: "hmclearn:  Linear Mixed Effects Regression Example"
 author:  "Samuel Thomas"
-date: "2020-07-22"
+date: "2020-10-04"
 output:
   rmarkdown::html_vignette:
     fig_caption: false
@@ -288,15 +288,12 @@ To compare results, we first fit a linear mixed effects model using the frequent
 ## linear mixed models - reference values from older code
 fm1 <- lmer(Reaction ~ Days + (1 | Subject), sleepstudy, REML = FALSE)
 summary(fm1)
-#> Linear mixed model fit by maximum
-#>   likelihood [lmerMod]
+#> Linear mixed model fit by maximum likelihood  ['lmerMod']
 #> Formula: Reaction ~ Days + (1 | Subject)
 #>    Data: sleepstudy
 #> 
-#>      AIC      BIC   logLik deviance 
-#>   1802.1   1814.9   -897.0   1794.1 
-#> df.resid 
-#>      176 
+#>      AIC      BIC   logLik deviance df.resid 
+#>   1802.1   1814.9   -897.0   1794.1      176 
 #> 
 #> Scaled residuals: 
 #>     Min      1Q  Median      3Q     Max 
@@ -353,7 +350,7 @@ t1.hmc <- Sys.time()
                parallel=FALSE, chains=2)
 t2.hmc <- Sys.time()
 t2.hmc - t1.hmc
-#> Time difference of 1.046855 mins
+#> Time difference of 1.229958 mins
 ```
 
 The acceptance ratio for each of the HMC chains is sufficiently high for an efficient simulation.
@@ -379,52 +376,29 @@ The posterior quantiles are summarized after removing an initial *burnin* period
 ```r
 summary(f_hmc, burnin=trunc(N*.3), probs=c(0.025, 0.5, 0.975))
 #> Summary of MCMC simulation
-#>                   2.5%           50%
-#> beta0     230.00128348 248.352552693
-#> beta1       9.07725919  10.532795892
-#> tau_int1    0.52735664   1.167452224
-#> tau_int2   -2.99320429  -2.020047420
-#> tau_int3   -2.51312415  -1.628754913
-#> tau_int4   -0.45362162   0.195555766
-#> tau_int5   -0.23646113   0.357780409
-#> tau_int6   -0.31019917   0.288832127
-#> tau_int7   -0.10531375   0.521949974
-#> tau_int8   -0.63986239  -0.002182091
-#> tau_int9   -1.91743204  -1.147736157
-#> tau_int10   1.23663902   2.013683784
-#> tau_int11  -1.16431522  -0.503604123
-#> tau_int12  -0.18447810   0.463964937
-#> tau_int13  -0.79561699  -0.107625210
-#> tau_int14   0.40947078   1.045747168
-#> tau_int15  -0.36458092   0.263111730
-#> tau_int16  -0.74043732  -0.079167619
-#> tau_int17  -0.64757366  -0.008004814
-#> tau_int18  -0.08046339   0.554203574
-#> sigeps      3.31911275   3.420776537
-#> xi          3.27813272   3.599906725
-#>                 97.5%      rhat
-#> beta0     266.1468368 1.0001273
-#> beta1      12.0676729 1.0152341
-#> tau_int1    1.9842790 1.0006277
-#> tau_int2   -1.2014881 1.0136249
-#> tau_int3   -0.8825962 1.0033839
-#> tau_int4    0.8650832 1.0040567
-#> tau_int5    1.0473653 0.9996973
-#> tau_int6    0.9860583 1.0019383
-#> tau_int7    1.1716498 1.0004302
-#> tau_int8    0.5988963 0.9997383
-#> tau_int9   -0.3619272 1.0020873
-#> tau_int10   2.9351339 1.0036116
-#> tau_int11   0.1287776 1.0047227
-#> tau_int12   1.1617360 0.9996900
-#> tau_int13   0.4973619 1.0025572
-#> tau_int14   1.8118583 1.0016279
-#> tau_int15   0.9484060 0.9998920
-#> tau_int16   0.5489269 0.9996697
-#> tau_int17   0.6005836 1.0002093
-#> tau_int18   1.2893995 1.0051712
-#> sigeps      3.5331037 0.9998044
-#> xi          3.9952374 1.0162299
+#>                   2.5%           50%       97.5%      rhat
+#> beta0     230.00128348 248.352552693 266.1468368 1.0001273
+#> beta1       9.07725919  10.532795892  12.0676729 1.0152341
+#> tau_int1    0.52735664   1.167452224   1.9842790 1.0006277
+#> tau_int2   -2.99320429  -2.020047420  -1.2014881 1.0136249
+#> tau_int3   -2.51312415  -1.628754913  -0.8825962 1.0033839
+#> tau_int4   -0.45362162   0.195555766   0.8650832 1.0040567
+#> tau_int5   -0.23646113   0.357780409   1.0473653 0.9996973
+#> tau_int6   -0.31019917   0.288832127   0.9860583 1.0019383
+#> tau_int7   -0.10531375   0.521949974   1.1716498 1.0004302
+#> tau_int8   -0.63986239  -0.002182091   0.5988963 0.9997383
+#> tau_int9   -1.91743204  -1.147736157  -0.3619272 1.0020873
+#> tau_int10   1.23663902   2.013683784   2.9351339 1.0036116
+#> tau_int11  -1.16431522  -0.503604123   0.1287776 1.0047227
+#> tau_int12  -0.18447810   0.463964937   1.1617360 0.9996900
+#> tau_int13  -0.79561699  -0.107625210   0.4973619 1.0025572
+#> tau_int14   0.40947078   1.045747168   1.8118583 1.0016279
+#> tau_int15  -0.36458092   0.263111730   0.9484060 0.9998920
+#> tau_int16  -0.74043732  -0.079167619   0.5489269 0.9996697
+#> tau_int17  -0.64757366  -0.008004814   0.6005836 1.0002093
+#> tau_int18  -0.08046339   0.554203574   1.2893995 1.0051712
+#> sigeps      3.31911275   3.420776537   3.5331037 0.9998044
+#> xi          3.27813272   3.599906725   3.9952374 1.0162299
 ```
 
 Histograms of the posterior distribution show that Bayesian parameter estimates align with frequentist estimates.  The *cols* parameter specifies the parameters to be displayed in *diagplots*, based on the order provided to the *hmc* function.

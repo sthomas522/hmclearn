@@ -1,7 +1,7 @@
 ---
 title: "hmclearn:  Linear Regression Example"
 author: "Samuel Thomas"
-date: "2020-07-22"
+date: "2020-10-04"
 output:
   rmarkdown::html_vignette:
     fig_caption: false
@@ -192,7 +192,7 @@ t1.hmc <- Sys.time()
                     parallel=FALSE, chains=2)
 t2.hmc <- Sys.time()
 t2.hmc - t1.hmc
-#> Time difference of 1.103369 mins
+#> Time difference of 33.60683 secs
 ```
 
 ## MCMC summary and diagnostics

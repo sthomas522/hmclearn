@@ -1,7 +1,7 @@
 ---
 title: "hmclearn:  Logistic Mixed Effects Regression Example"
 author: "Samuel Thomas"
-date: "2020-07-22"
+date: "2020-10-04"
 output:
   rmarkdown::html_vignette:
     fig_caption: false
@@ -297,7 +297,7 @@ f_hmc <- hmc(N = N, theta.init = initvals,
 
 t2.hmc <- Sys.time()
 t2.hmc - t1.hmc
-#> Time difference of 16.14619 mins
+#> Time difference of 13.35735 mins
 ```
 
 The acceptance ratio for each of the HMC chains is sufficiently high for an efficient simulation.

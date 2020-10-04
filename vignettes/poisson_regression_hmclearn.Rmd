@@ -1,7 +1,7 @@
 ---
 title: "hmclearn:  Poisson Regression Example"
 author: "Samuel Thomas"
-date: "2020-07-22"
+date: "2020-10-04"
 output:
   rmarkdown::html_vignette:
     fig_caption: false
@@ -177,7 +177,7 @@ t1.hmc <- Sys.time()
                     param=list(y=y, X=X))
 t2.hmc <- Sys.time()
 t2.hmc - t1.hmc
-#> Time difference of 40.8924 secs
+#> Time difference of 51.99019 secs
 ```
 
 

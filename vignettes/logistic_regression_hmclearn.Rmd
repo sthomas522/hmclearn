@@ -1,7 +1,7 @@
 ---
 title: "hmclearn:  Logistic Regression Example"
 author: "Samuel Thomas"
-date: "2020-07-22"
+date: "2020-10-04"
 output:
   rmarkdown::html_vignette:
     fig_caption: false
@@ -161,7 +161,7 @@ The time to fit the logistic regression using MH is
 
 ```r
 t2.mh - t1.mh
-#> Time difference of 3.181784 mins
+#> Time difference of 2.589012 mins
 ```
 
 We store the Metropolis parameter estimates in \textit{summMH}.
@@ -218,7 +218,7 @@ HMC requires fewer iterations and lower computation time than MH in this example
 
 ```r
 t2.hmc - t1.hmc
-#> Time difference of 30.55051 secs
+#> Time difference of 39.86357 secs
 ```
 
 ## MCMC summary and diagnostics
