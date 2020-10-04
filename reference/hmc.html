@@ -76,19 +76,13 @@ Leapfrog algorithm." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">hmclearn</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.4</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
-  <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
-     
-  </a>
-</li>
-<li>
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
@@ -147,23 +141,23 @@ The tuning parameters <code>epsilon</code> and <code>L</code> are passed to the
 Leapfrog algorithm.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>hmc</span>(
-  N = <span class='fl'>10000</span>,
-  <span class='kw'>theta.init</span>,
-  epsilon = <span class='fl'>0.01</span>,
-  L = <span class='fl'>10</span>,
-  <span class='kw'>logPOSTERIOR</span>,
-  <span class='kw'>glogPOSTERIOR</span>,
-  randlength = <span class='fl'>FALSE</span>,
-  Mdiag = <span class='kw'>NULL</span>,
-  constrain = <span class='kw'>NULL</span>,
-  verbose = <span class='fl'>FALSE</span>,
-  varnames = <span class='kw'>NULL</span>,
-  param = <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(),
-  chains = <span class='fl'>1</span>,
-  parallel = <span class='fl'>FALSE</span>,
-  <span class='kw'>...</span>
-)</pre>
+    <pre class="usage"><span class='fu'>hmc</span><span class='op'>(</span>
+  N <span class='op'>=</span> <span class='fl'>10000</span>,
+  <span class='va'>theta.init</span>,
+  epsilon <span class='op'>=</span> <span class='fl'>0.01</span>,
+  L <span class='op'>=</span> <span class='fl'>10</span>,
+  <span class='va'>logPOSTERIOR</span>,
+  <span class='va'>glogPOSTERIOR</span>,
+  randlength <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  Mdiag <span class='op'>=</span> <span class='cn'>NULL</span>,
+  constrain <span class='op'>=</span> <span class='cn'>NULL</span>,
+  verbose <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  varnames <span class='op'>=</span> <span class='cn'>NULL</span>,
+  param <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='op'>)</span>,
+  chains <span class='op'>=</span> <span class='fl'>1</span>,
+  parallel <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -276,29 +270,30 @@ Leapfrog algorithm.</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
     <p>Neal, Radford. 2011. <em>MCMC Using Hamiltonian Dynamics.</em> In Handbook of Markov Chain Monte Carlo, edited by Steve Brooks, Andrew Gelman, Galin L. Jones, and Xiao-Li Meng, 116–62. Chapman; Hall/CRC.</p>
-<p>Betancourt, Michael. 2017.  <em>A Conceptual Introduction to Hamiltonian Monte Carlo</em></p>
-<p>Thomas, S., Tu, W. 2020. <em>Hamiltonian Monte Carlo</em>. In Wiley StatsRef: Statistics Reference Online (eds N. Balakrishnan, T. Colton, B. Everitt, W. Piegorsch, F. Ruggeri and J.L. Teugels).</p>
+<p>Betancourt, Michael. 2017.  <em>A Conceptual Introduction to Hamiltonian Monte Carlo</em>.</p>
+<p>Thomas, S., Tu, W. 2020. <em>Learning Hamiltonian Monte Carlo in R</em>.</p>
     <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
 
     <p>Samuel Thomas <a href='mailto:samthoma@iu.edu'>samthoma@iu.edu</a>, Wanzhu Tu <a href='mailto:wtu@iu.edu'>wtu@iu.edu</a></p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'># Linear regression example</span>
-<span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span>(<span class='fl'>521</span>)
-<span class='kw'>X</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>cbind</a></span>(<span class='fl'>1</span>, <span class='fu'><a href='https://rdrr.io/r/base/matrix.html'>matrix</a></span>(<span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span>(<span class='fl'>300</span>), ncol=<span class='fl'>3</span>))
-<span class='kw'>betavals</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>0.5</span>, <span class='op'>-</span><span class='fl'>1</span>, <span class='fl'>2</span>, <span class='op'>-</span><span class='fl'>3</span>)
-<span class='kw'>y</span> <span class='op'>&lt;-</span> <span class='kw'>X</span><span class='op'>%*%</span><span class='kw'>betavals</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span>(<span class='fl'>100</span>, sd=<span class='fl'>.2</span>)
+<span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>521</span><span class='op'>)</span>
+<span class='va'>X</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>cbind</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fu'><a href='https://rdrr.io/r/base/matrix.html'>matrix</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span><span class='op'>(</span><span class='fl'>300</span><span class='op'>)</span>, ncol<span class='op'>=</span><span class='fl'>3</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>betavals</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>0.5</span>, <span class='op'>-</span><span class='fl'>1</span>, <span class='fl'>2</span>, <span class='op'>-</span><span class='fl'>3</span><span class='op'>)</span>
+<span class='va'>y</span> <span class='op'>&lt;-</span> <span class='va'>X</span><span class='op'>%*%</span><span class='va'>betavals</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span><span class='op'>(</span><span class='fl'>100</span>, sd<span class='op'>=</span><span class='fl'>.2</span><span class='op'>)</span>
 
-<span class='kw'>fm1_hmc</span> <span class='op'>&lt;-</span> <span class='fu'>hmc</span>(N = <span class='fl'>500</span>,
-          theta.init = <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span>(<span class='fl'>0</span>, <span class='fl'>4</span>), <span class='fl'>1</span>),
-          epsilon = <span class='fl'>0.01</span>,
-          L = <span class='fl'>10</span>,
-          logPOSTERIOR = <span class='kw'>linear_posterior</span>,
-          glogPOSTERIOR = <span class='kw'>g_linear_posterior</span>,
-          varnames = <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste0</a></span>(<span class='st'>"beta"</span>, <span class='fl'>0</span><span class='op'>:</span><span class='fl'>3</span>), <span class='st'>"log_sigma_sq"</span>),
-          param=<span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(y=<span class='kw'>y</span>, X=<span class='kw'>X</span>), parallel=<span class='fl'>FALSE</span>, chains=<span class='fl'>1</span>)
+<span class='va'>fm1_hmc</span> <span class='op'>&lt;-</span> <span class='fu'>hmc</span><span class='op'>(</span>N <span class='op'>=</span> <span class='fl'>500</span>,
+          theta.init <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>4</span><span class='op'>)</span>, <span class='fl'>1</span><span class='op'>)</span>,
+          epsilon <span class='op'>=</span> <span class='fl'>0.01</span>,
+          L <span class='op'>=</span> <span class='fl'>10</span>,
+          logPOSTERIOR <span class='op'>=</span> <span class='va'>linear_posterior</span>,
+          glogPOSTERIOR <span class='op'>=</span> <span class='va'>g_linear_posterior</span>,
+          varnames <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste0</a></span><span class='op'>(</span><span class='st'>"beta"</span>, <span class='fl'>0</span><span class='op'>:</span><span class='fl'>3</span><span class='op'>)</span>, <span class='st'>"log_sigma_sq"</span><span class='op'>)</span>,
+          param<span class='op'>=</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>y<span class='op'>=</span><span class='va'>y</span>, X<span class='op'>=</span><span class='va'>X</span><span class='op'>)</span>, parallel<span class='op'>=</span><span class='cn'>FALSE</span>, chains<span class='op'>=</span><span class='fl'>1</span><span class='op'>)</span>
 
-<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='kw'>fm1_hmc</span>, burnin=<span class='fl'>100</span>)</div><div class='output co'>#&gt; Summary of MCMC simulation
+<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>fm1_hmc</span>, burnin<span class='op'>=</span><span class='fl'>100</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; Summary of MCMC simulation
 #&gt; </div><div class='output co'>#&gt;                    2.5%         5%       25%        50%        75%        95%
 #&gt; beta0         0.4778379  0.4847789  0.518149  0.5321988  0.5474873  0.5726653
 #&gt; beta1        -1.0435956 -1.0398451 -1.022090 -1.0099795 -0.9969146 -0.9695882
@@ -313,23 +308,24 @@ Leapfrog algorithm.</p>
 #&gt; log_sigma_sq -2.7737642</div><div class='input'>
 
 <span class='co'># poisson regression example</span>
-<span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span>(<span class='fl'>7363</span>)
-<span class='kw'>X</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>cbind</a></span>(<span class='fl'>1</span>, <span class='fu'><a href='https://rdrr.io/r/base/matrix.html'>matrix</a></span>(<span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span>(<span class='fl'>40</span>), ncol=<span class='fl'>2</span>))
-<span class='kw'>betavals</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>0.8</span>, <span class='op'>-</span><span class='fl'>0.5</span>, <span class='fl'>1.1</span>)
-<span class='kw'>lmu</span> <span class='op'>&lt;-</span> <span class='kw'>X</span> <span class='op'>%*%</span> <span class='kw'>betavals</span>
-<span class='kw'>y</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>sapply</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/Log.html'>exp</a></span>(<span class='kw'>lmu</span>), FUN = <span class='kw'>rpois</span>, n=<span class='fl'>1</span>)
+<span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>7363</span><span class='op'>)</span>
+<span class='va'>X</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>cbind</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fu'><a href='https://rdrr.io/r/base/matrix.html'>matrix</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span><span class='op'>(</span><span class='fl'>40</span><span class='op'>)</span>, ncol<span class='op'>=</span><span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>betavals</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>0.8</span>, <span class='op'>-</span><span class='fl'>0.5</span>, <span class='fl'>1.1</span><span class='op'>)</span>
+<span class='va'>lmu</span> <span class='op'>&lt;-</span> <span class='va'>X</span> <span class='op'>%*%</span> <span class='va'>betavals</span>
+<span class='va'>y</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>sapply</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Log.html'>exp</a></span><span class='op'>(</span><span class='va'>lmu</span><span class='op'>)</span>, FUN <span class='op'>=</span> <span class='va'>rpois</span>, n<span class='op'>=</span><span class='fl'>1</span><span class='op'>)</span>
 
-<span class='kw'>fm2_hmc</span> <span class='op'>&lt;-</span> <span class='fu'>hmc</span>(N = <span class='fl'>500</span>,
-          theta.init = <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span>(<span class='fl'>0</span>, <span class='fl'>3</span>),
-          epsilon = <span class='fl'>0.01</span>,
-          L = <span class='fl'>10</span>,
-          logPOSTERIOR = <span class='kw'>poisson_posterior</span>,
-          glogPOSTERIOR = <span class='kw'>g_poisson_posterior</span>,
-          varnames = <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste0</a></span>(<span class='st'>"beta"</span>, <span class='fl'>0</span><span class='op'>:</span><span class='fl'>2</span>),
-          param = <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(y=<span class='kw'>y</span>, X=<span class='kw'>X</span>),
-          parallel=<span class='fl'>FALSE</span>, chains=<span class='fl'>1</span>)
+<span class='va'>fm2_hmc</span> <span class='op'>&lt;-</span> <span class='fu'>hmc</span><span class='op'>(</span>N <span class='op'>=</span> <span class='fl'>500</span>,
+          theta.init <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>3</span><span class='op'>)</span>,
+          epsilon <span class='op'>=</span> <span class='fl'>0.01</span>,
+          L <span class='op'>=</span> <span class='fl'>10</span>,
+          logPOSTERIOR <span class='op'>=</span> <span class='va'>poisson_posterior</span>,
+          glogPOSTERIOR <span class='op'>=</span> <span class='va'>g_poisson_posterior</span>,
+          varnames <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste0</a></span><span class='op'>(</span><span class='st'>"beta"</span>, <span class='fl'>0</span><span class='op'>:</span><span class='fl'>2</span><span class='op'>)</span>,
+          param <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>y<span class='op'>=</span><span class='va'>y</span>, X<span class='op'>=</span><span class='va'>X</span><span class='op'>)</span>,
+          parallel<span class='op'>=</span><span class='cn'>FALSE</span>, chains<span class='op'>=</span><span class='fl'>1</span><span class='op'>)</span>
 
-<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='kw'>fm2_hmc</span>, burnin=<span class='fl'>100</span>)</div><div class='output co'>#&gt; Summary of MCMC simulation
+<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>fm2_hmc</span>, burnin<span class='op'>=</span><span class='fl'>100</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; Summary of MCMC simulation
 #&gt; </div><div class='output co'>#&gt;             2.5%         5%        25%        50%        75%        95%
 #&gt; beta0  0.5168403  0.5581553  0.6644147  0.7756224  0.8917828  1.0520828
 #&gt; beta1 -0.6815951 -0.6505318 -0.5738573 -0.5167261 -0.4646123 -0.3867174
@@ -338,6 +334,7 @@ Leapfrog algorithm.</p>
 #&gt; beta0  1.1026491
 #&gt; beta1 -0.3636618
 #&gt; beta2  1.4163911</div><div class='input'>
+
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -354,7 +351,7 @@ Leapfrog algorithm.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.9000.</p>
 </div>
 
       </footer>

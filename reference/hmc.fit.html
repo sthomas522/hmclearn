@@ -72,19 +72,13 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">hmclearn</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.4</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
-  <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
-     
-  </a>
-</li>
-<li>
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
@@ -139,20 +133,20 @@
     <p>This is the basic computing function for HMC and should not be called directly except by experienced users.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>hmc.fit</span>(
-  <span class='kw'>N</span>,
-  <span class='kw'>theta.init</span>,
-  <span class='kw'>epsilon</span>,
-  <span class='kw'>L</span>,
-  <span class='kw'>logPOSTERIOR</span>,
-  <span class='kw'>glogPOSTERIOR</span>,
-  varnames = <span class='kw'>NULL</span>,
-  randlength = <span class='fl'>FALSE</span>,
-  Mdiag = <span class='kw'>NULL</span>,
-  constrain = <span class='kw'>NULL</span>,
-  verbose = <span class='fl'>FALSE</span>,
-  <span class='kw'>...</span>
-)</pre>
+    <pre class="usage"><span class='fu'>hmc.fit</span><span class='op'>(</span>
+  <span class='va'>N</span>,
+  <span class='va'>theta.init</span>,
+  <span class='va'>epsilon</span>,
+  <span class='va'>L</span>,
+  <span class='va'>logPOSTERIOR</span>,
+  <span class='va'>glogPOSTERIOR</span>,
+  varnames <span class='op'>=</span> <span class='cn'>NULL</span>,
+  randlength <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  Mdiag <span class='op'>=</span> <span class='cn'>NULL</span>,
+  constrain <span class='op'>=</span> <span class='cn'>NULL</span>,
+  verbose <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -231,30 +225,31 @@
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
     <p>Neal, Radford. 2011. <em>MCMC Using Hamiltonian Dynamics.</em> In Handbook of Markov Chain Monte Carlo, edited by Steve Brooks, Andrew Gelman, Galin L. Jones, and Xiao-Li Meng, 116–62. Chapman; Hall/CRC.</p>
-<p>Betancourt, Michael. 2017.  <em>A Conceptual Introduction to Hamiltonian Monte Carlo</em></p>
-<p>Thomas, S., Tu, W. 2020. <em>Hamiltonian Monte Carlo</em>. In Wiley StatsRef: Statistics Reference Online (eds N. Balakrishnan, T. Colton, B. Everitt, W. Piegorsch, F. Ruggeri and J.L. Teugels).</p>
+<p>Betancourt, Michael. 2017.  <em>A Conceptual Introduction to Hamiltonian Monte Carlo</em>.</p>
+<p>Thomas, S., Tu, W. 2020. <em>Learning Hamiltonian Monte Carlo in R</em>.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'># Logistic regression example</span>
-<span class='kw'>X</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>cbind</a></span>(<span class='fl'>1</span>, <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span>(<span class='op'>-</span><span class='fl'>100</span>, <span class='fl'>100</span>, by=<span class='fl'>0.25</span>))
-<span class='kw'>betavals</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='op'>-</span><span class='fl'>0.9</span>, <span class='fl'>0.2</span>)
-<span class='kw'>lodds</span> <span class='op'>&lt;-</span> <span class='kw'>X</span> <span class='op'>%*%</span> <span class='kw'>betavals</span>
-<span class='kw'>prob1</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/numeric.html'>as.numeric</a></span>(<span class='fl'>1</span> <span class='op'>/</span> (<span class='fl'>1</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>exp</a></span>(<span class='op'>-</span><span class='kw'>lodds</span>)))
+<span class='va'>X</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>cbind</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span><span class='op'>(</span><span class='op'>-</span><span class='fl'>100</span>, <span class='fl'>100</span>, by<span class='op'>=</span><span class='fl'>0.25</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>betavals</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='op'>-</span><span class='fl'>0.9</span>, <span class='fl'>0.2</span><span class='op'>)</span>
+<span class='va'>lodds</span> <span class='op'>&lt;-</span> <span class='va'>X</span> <span class='op'>%*%</span> <span class='va'>betavals</span>
+<span class='va'>prob1</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/numeric.html'>as.numeric</a></span><span class='op'>(</span><span class='fl'>1</span> <span class='op'>/</span> <span class='op'>(</span><span class='fl'>1</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>exp</a></span><span class='op'>(</span><span class='op'>-</span><span class='va'>lodds</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
 
-<span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span>(<span class='fl'>9874</span>)
-<span class='kw'>y</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>sapply</a></span>(<span class='kw'>prob1</span>, <span class='fu'>function</span>(<span class='kw'>xx</span>) {
-  <span class='fu'><a href='https://rdrr.io/r/base/sample.html'>sample</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>0</span>, <span class='fl'>1</span>), <span class='fl'>1</span>, prob=<span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>1</span><span class='op'>-</span><span class='kw'>xx</span>, <span class='kw'>xx</span>))
-})
+<span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>9874</span><span class='op'>)</span>
+<span class='va'>y</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>sapply</a></span><span class='op'>(</span><span class='va'>prob1</span>, <span class='kw'>function</span><span class='op'>(</span><span class='va'>xx</span><span class='op'>)</span> <span class='op'>{</span>
+  <span class='fu'><a href='https://rdrr.io/r/base/sample.html'>sample</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span><span class='op'>)</span>, <span class='fl'>1</span>, prob<span class='op'>=</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>-</span><span class='va'>xx</span>, <span class='va'>xx</span><span class='op'>)</span><span class='op'>)</span>
+<span class='op'>}</span><span class='op'>)</span>
 
-<span class='kw'>f1</span> <span class='op'>&lt;-</span> <span class='fu'>hmc.fit</span>(N = <span class='fl'>500</span>,
-          theta.init = <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span>(<span class='fl'>0</span>, <span class='fl'>2</span>),
-          epsilon = <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>0.1</span>, <span class='fl'>0.002</span>),
-          L = <span class='fl'>10</span>,
-          logPOSTERIOR = <span class='kw'>logistic_posterior</span>,
-          glogPOSTERIOR = <span class='kw'>g_logistic_posterior</span>,
-          y=<span class='kw'>y</span>, X=<span class='kw'>X</span>)
+<span class='va'>f1</span> <span class='op'>&lt;-</span> <span class='fu'>hmc.fit</span><span class='op'>(</span>N <span class='op'>=</span> <span class='fl'>500</span>,
+          theta.init <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>2</span><span class='op'>)</span>,
+          epsilon <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>0.1</span>, <span class='fl'>0.002</span><span class='op'>)</span>,
+          L <span class='op'>=</span> <span class='fl'>10</span>,
+          logPOSTERIOR <span class='op'>=</span> <span class='va'>logistic_posterior</span>,
+          glogPOSTERIOR <span class='op'>=</span> <span class='va'>g_logistic_posterior</span>,
+          y<span class='op'>=</span><span class='va'>y</span>, X<span class='op'>=</span><span class='va'>X</span><span class='op'>)</span>
 
-<span class='kw'>f1</span><span class='op'>$</span><span class='kw'>accept</span> <span class='op'>/</span> <span class='kw'>f1</span><span class='op'>$</span><span class='kw'>N</span></div><div class='output co'>#&gt; [1] 0.93</div></pre>
+<span class='va'>f1</span><span class='op'>$</span><span class='va'>accept</span> <span class='op'>/</span> <span class='va'>f1</span><span class='op'>$</span><span class='va'>N</span>
+</div><div class='output co'>#&gt; [1] 0.93</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -270,7 +265,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.9000.</p>
 </div>
 
       </footer>

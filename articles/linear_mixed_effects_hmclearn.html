@@ -31,18 +31,12 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">hmclearn</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.4</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-<li>
-  <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
-     
-  </a>
-</li>
 <li>
   <a href="../reference/index.html">Reference</a>
 </li>
@@ -90,7 +84,7 @@
       <h1 data-toc-skip>hmclearn: Linear Mixed Effects Regression Example</h1>
                         <h4 class="author">Samuel Thomas</h4>
             
-            <h4 class="date">2020-06-10</h4>
+            <h4 class="date">2020-10-04</h4>
       
       
       <div class="hidden name"><code>linear_mixed_effects_hmclearn.Rmd</code></div>
@@ -104,8 +98,7 @@
 <a href="#introduction" class="anchor"></a>Introduction</h2>
 <p>This vignette demonstrates fitting a linear mixed effects regression model via Hamiltonian Monte Carlo (HMC) using the <strong>hmclearn</strong> package,</p>
 <div class="sourceCode" id="cb1"><pre class="downlit">
-<span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="kw">hmclearn</span>)
-</pre></div>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">hmclearn</span><span class="op">)</span></pre></div>
 <p>We specify the model and prior distributions for <span class="math inline">\(\mathbf{u}\)</span> and <span class="math inline">\(\boldsymbol\epsilon\)</span>,</p>
 <p><span class="math display">\[
 \begin{aligned}
@@ -285,35 +278,34 @@ f(\boldsymbol\beta, \mathbf{u}, \sigma_\epsilon^2, \mathbf{G} | \mathbf{y}, \mat
 <p>The user must define provide the design matrix directly for use in <strong>hmclearn</strong>. Our first step is to load the data and store the fixed effect design matrix <span class="math inline">\(\mathbf{X}\)</span>, random effects design matrix <span class="math inline">\(\mathbf{Z}\)</span>, and dependent variable vector <span class="math inline">\(\mathbf{y}\)</span>.</p>
 <p>We load drug sleepstudy data (Belenky et. al. 2003) and create the design matrices <span class="math inline">\(\mathbf{X}\)</span> and <span class="math inline">\(\mathbf{Z}\)</span> and dependent vector <span class="math inline">\(\mathbf{y}\)</span>. For this model, the random effects design matrix <span class="math inline">\(\mathbf{Z}\)</span> is specified for a random intercept model.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit">
-<span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="kw"><a href="https://github.com/lme4/lme4">lme4</a></span>)
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/lme4/lme4/">lme4</a></span><span class="op">)</span>
 <span class="co">#&gt; Loading required package: Matrix</span>
-<span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="kw"><a href="http://Matrix.R-forge.R-project.org">Matrix</a></span>)
-<span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span>(<span class="kw">sleepstudy</span>)
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://Matrix.R-forge.R-project.org/">Matrix</a></span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">sleepstudy</span><span class="op">)</span>
 
 <span class="co"># dependent variable</span>
-<span class="kw">y</span> <span class="op">&lt;-</span> <span class="kw">sleepstudy</span><span class="op">$</span><span class="kw">Reaction</span>
+<span class="va">y</span> <span class="op">&lt;-</span> <span class="va">sleepstudy</span><span class="op">$</span><span class="va">Reaction</span>
 
-<span class="kw">yi.lst</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/split.html">split</a></span>(<span class="kw">sleepstudy</span><span class="op">$</span><span class="kw">Reaction</span>, <span class="kw">sleepstudy</span><span class="op">$</span><span class="kw">Subject</span>)
+<span class="va">yi.lst</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/split.html">split</a></span><span class="op">(</span><span class="va">sleepstudy</span><span class="op">$</span><span class="va">Reaction</span>, <span class="va">sleepstudy</span><span class="op">$</span><span class="va">Subject</span><span class="op">)</span>
 
 <span class="co"># fixed effects</span>
-<span class="kw">ss2</span> <span class="op">&lt;-</span> <span class="kw">sleepstudy</span>
-<span class="kw">ss2</span><span class="op">$</span><span class="kw">int</span> <span class="op">&lt;-</span> <span class="fl">1</span>
-<span class="kw">ss2</span> <span class="op">&lt;-</span> <span class="kw">ss2</span>[, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">4</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span>)] <span class="co"># rearrange columns to store in list</span>
-<span class="kw">Xi.lst</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/split.html">split</a></span>(<span class="kw">ss2</span>[, <span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span>(<span class="kw">ss2</span>) <span class="op">%in%</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"Days"</span>, <span class="st">"int"</span>))],
-                <span class="kw">ss2</span><span class="op">$</span><span class="kw">Subject</span>)
-<span class="kw">Xi.lst</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span>(<span class="kw">Xi.lst</span>, <span class="kw">as.matrix</span>)
+<span class="va">ss2</span> <span class="op">&lt;-</span> <span class="va">sleepstudy</span>
+<span class="va">ss2</span><span class="op">$</span><span class="va">int</span> <span class="op">&lt;-</span> <span class="fl">1</span>
+<span class="va">ss2</span> <span class="op">&lt;-</span> <span class="va">ss2</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span><span class="op">]</span> <span class="co"># rearrange columns to store in list</span>
+<span class="va">Xi.lst</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/split.html">split</a></span><span class="op">(</span><span class="va">ss2</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">ss2</span><span class="op">)</span> <span class="op">%in%</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Days"</span>, <span class="st">"int"</span><span class="op">)</span><span class="op">)</span><span class="op">]</span>,
+                <span class="va">ss2</span><span class="op">$</span><span class="va">Subject</span><span class="op">)</span>
+<span class="va">Xi.lst</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="va">Xi.lst</span>, <span class="va">as.matrix</span><span class="op">)</span>
 
-<span class="kw">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/do.call.html">do.call</a></span>(<span class="kw">rbind</span>, <span class="kw">Xi.lst</span>))
+<span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/do.call.html">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="va">Xi.lst</span><span class="op">)</span><span class="op">)</span>
 
 <span class="co"># random effects</span>
-<span class="kw">n</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span>(<span class="kw">sleepstudy</span><span class="op">$</span><span class="kw">Subject</span>))
-<span class="kw">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span>(<span class="kw">y</span>)<span class="op">/</span><span class="kw">n</span>
-<span class="kw">nrandom</span> <span class="op">&lt;-</span> <span class="fl">1</span>
+<span class="va">n</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="va">sleepstudy</span><span class="op">$</span><span class="va">Subject</span><span class="op">)</span><span class="op">)</span>
+<span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span><span class="op">/</span><span class="va">n</span>
+<span class="va">nrandom</span> <span class="op">&lt;-</span> <span class="fl">1</span>
 
 <span class="co">##########</span>
 <span class="co"># intercept</span>
-<span class="kw">Z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/kronecker.html">kronecker</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/diag.html">diag</a></span>(<span class="kw">n</span>), <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span>(<span class="fl">1</span>, <span class="kw">d</span>), ncol=<span class="fl">1</span>))
-</pre></div>
+<span class="va">Z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/kronecker.html">kronecker</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html">diag</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">d</span><span class="op">)</span>, ncol<span class="op">=</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></pre></div>
 </div>
 <div id="comparison-model---frequentist" class="section level2">
 <h2 class="hasAnchor">
@@ -323,8 +315,8 @@ f(\boldsymbol\beta, \mathbf{u}, \sigma_\epsilon^2, \mathbf{G} | \mathbf{y}, \mat
 <span class="co"># random intercept</span>
 
 <span class="co">## linear mixed models - reference values from older code</span>
-<span class="kw">fm1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lme4/man/lmer.html">lmer</a></span>(<span class="kw">Reaction</span> <span class="op">~</span> <span class="kw">Days</span> <span class="op">+</span> (<span class="fl">1</span> <span class="op">|</span> <span class="kw">Subject</span>), <span class="kw">sleepstudy</span>, REML = <span class="fl">FALSE</span>)
-<span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="kw">fm1</span>)
+<span class="va">fm1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lme4/man/lmer.html">lmer</a></span><span class="op">(</span><span class="va">Reaction</span> <span class="op">~</span> <span class="va">Days</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">Subject</span><span class="op">)</span>, <span class="va">sleepstudy</span>, REML <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">fm1</span><span class="op">)</span>
 <span class="co">#&gt; Linear mixed model fit by maximum likelihood  ['lmerMod']</span>
 <span class="co">#&gt; Formula: Reaction ~ Days + (1 | Subject)</span>
 <span class="co">#&gt;    Data: sleepstudy</span>
@@ -349,8 +341,7 @@ f(\boldsymbol\beta, \mathbf{u}, \sigma_\epsilon^2, \mathbf{G} | \mathbf{y}, \mat
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Correlation of Fixed Effects:</span>
 <span class="co">#&gt;      (Intr)</span>
-<span class="co">#&gt; Days -0.380</span>
-</pre></div>
+<span class="co">#&gt; Days -0.380</span></pre></div>
 </div>
 <div id="fit-model-using-hmc" class="section level2">
 <h2 class="hasAnchor">
@@ -358,52 +349,49 @@ f(\boldsymbol\beta, \mathbf{u}, \sigma_\epsilon^2, \mathbf{G} | \mathbf{y}, \mat
 </h2>
 <p>Next, we fit the linear mixed effects regression model using HMC. A vector of <em>tuning parameter</em> <span class="math inline">\(\epsilon\)</span> values are specified to align with the data. The hyperparameters for <span class="math inline">\(\nu_\gamma\)</span>, <span class="math inline">\(A_\gamma\)</span>, <span class="math inline">\(\nu_\xi\)</span>, and <span class="math inline">\(A_\xi\)</span> are set to values more appropriate for hierarchical models (Gelman 2006). The hyperparameter <span class="math inline">\(\sigma_\beta^2\)</span> is set higher than the default based on the range of the dependent variable.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit">
-<span class="kw">N</span> <span class="op">&lt;-</span> <span class="fl">2e3</span>
+<span class="va">N</span> <span class="op">&lt;-</span> <span class="fl">2e3</span>
 
-<span class="kw">theta.init</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0</span>, <span class="fl">1</span>, <span class="co"># beta</span>
-               <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span>(<span class="fl">0</span>, <span class="fl">18</span>), <span class="co"># tau</span>
+<span class="va">theta.init</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="co"># beta</span>
+               <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">18</span><span class="op">)</span>, <span class="co"># tau</span>
                <span class="fl">3</span>, <span class="co"># gamma (log sig2eps)</span>
-               <span class="fl">1</span>) <span class="co"># xi</span>
+               <span class="fl">1</span><span class="op">)</span> <span class="co"># xi</span>
 
-<span class="kw">vnames</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span>(<span class="st">"beta"</span>, <span class="fl">0</span><span class="op">:</span><span class="fl">1</span>),
-            <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span>(<span class="st">"tau_int"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">18</span>),
-           <span class="st">"sigeps"</span>, <span class="st">"xi"</span>)
+<span class="va">vnames</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"beta"</span>, <span class="fl">0</span><span class="op">:</span><span class="fl">1</span><span class="op">)</span>,
+            <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"tau_int"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">18</span><span class="op">)</span>,
+           <span class="st">"sigeps"</span>, <span class="st">"xi"</span><span class="op">)</span>
 
-<span class="kw">eps_vals</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">5e-1</span>, <span class="fl">5e-2</span>,
-              <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span>(<span class="fl">3e-2</span>, <span class="fl">18</span>),
+<span class="va">eps_vals</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">5e-1</span>, <span class="fl">5e-2</span>,
+              <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">3e-2</span>, <span class="fl">18</span><span class="op">)</span>,
               <span class="fl">6e-3</span>,
-              <span class="fl">5e-2</span>)
+              <span class="fl">5e-2</span><span class="op">)</span>
 
-<span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span>(<span class="fl">41132</span>)
-<span class="kw">t1.hmc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span>()
- <span class="kw">f_hmc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/hmc.html">hmc</a></span>(N = <span class="kw">N</span>, theta.init = <span class="kw">theta.init</span>,
-               epsilon = <span class="kw">eps_vals</span>, L = <span class="fl">10</span>,
-               logPOSTERIOR = <span class="kw">lmm_posterior</span>,
-               glogPOSTERIOR = <span class="kw">g_lmm_posterior</span>,
-               varnames = <span class="kw">vnames</span>,
-               param=<span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(y = <span class="kw">y</span>, X=<span class="kw">X</span>, Z=<span class="kw">Z</span>, n=<span class="kw">n</span>, d=<span class="kw">d</span>, nrandom=<span class="fl">1</span>,
-                          nugamma=<span class="fl">4</span>, Agamma=<span class="fl">1</span>,
-                          nuxi=<span class="fl">1</span>, Axi=<span class="fl">1</span>, sig2beta=<span class="fl">1e5</span>),
-               parallel=<span class="fl">FALSE</span>, chains=<span class="fl">2</span>)
-<span class="kw">t2.hmc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span>()
-<span class="kw">t2.hmc</span> <span class="op">-</span> <span class="kw">t1.hmc</span>
-<span class="co">#&gt; Time difference of 1.008721 mins</span>
-</pre></div>
+<span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">41132</span><span class="op">)</span>
+<span class="va">t1.hmc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span><span class="op">(</span><span class="op">)</span>
+ <span class="va">f_hmc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/hmc.html">hmc</a></span><span class="op">(</span>N <span class="op">=</span> <span class="va">N</span>, theta.init <span class="op">=</span> <span class="va">theta.init</span>,
+               epsilon <span class="op">=</span> <span class="va">eps_vals</span>, L <span class="op">=</span> <span class="fl">10</span>,
+               logPOSTERIOR <span class="op">=</span> <span class="va">lmm_posterior</span>,
+               glogPOSTERIOR <span class="op">=</span> <span class="va">g_lmm_posterior</span>,
+               varnames <span class="op">=</span> <span class="va">vnames</span>,
+               param<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">y</span>, X<span class="op">=</span><span class="va">X</span>, Z<span class="op">=</span><span class="va">Z</span>, n<span class="op">=</span><span class="va">n</span>, d<span class="op">=</span><span class="va">d</span>, nrandom<span class="op">=</span><span class="fl">1</span>,
+                          nugamma<span class="op">=</span><span class="fl">4</span>, Agamma<span class="op">=</span><span class="fl">1</span>,
+                          nuxi<span class="op">=</span><span class="fl">1</span>, Axi<span class="op">=</span><span class="fl">1</span>, sig2beta<span class="op">=</span><span class="fl">1e5</span><span class="op">)</span>,
+               parallel<span class="op">=</span><span class="cn">FALSE</span>, chains<span class="op">=</span><span class="fl">2</span><span class="op">)</span>
+<span class="va">t2.hmc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span><span class="op">(</span><span class="op">)</span>
+<span class="va">t2.hmc</span> <span class="op">-</span> <span class="va">t1.hmc</span>
+<span class="co">#&gt; Time difference of 1.229958 mins</span></pre></div>
 <p>The acceptance ratio for each of the HMC chains is sufficiently high for an efficient simulation.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit">
-<span class="kw">f_hmc</span><span class="op">$</span><span class="kw">accept</span><span class="op">/</span><span class="kw">N</span>
-<span class="co">#&gt; [1] 0.814 0.805</span>
-</pre></div>
+<span class="va">f_hmc</span><span class="op">$</span><span class="va">accept</span><span class="op">/</span><span class="va">N</span>
+<span class="co">#&gt; [1] 0.814 0.805</span></pre></div>
 <p>Trace plots provide a visual indication of stationarity. These plots indicate that the MCMC chains are reasonably stationary.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit">
-<span class="fu"><a href="../reference/hmclearn-plots.html">mcmc_trace</a></span>(<span class="kw">f_hmc</span>, burnin=<span class="fu"><a href="https://rdrr.io/r/base/Round.html">trunc</a></span>(<span class="kw">N</span><span class="op">*</span><span class="fl">.3</span>), pars=<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"beta0"</span>, <span class="st">"beta1"</span>, <span class="st">"sigeps"</span>, <span class="st">"xi"</span>))
-</pre></div>
+<span class="fu"><a href="../reference/hmclearn-plots.html">mcmc_trace</a></span><span class="op">(</span><span class="va">f_hmc</span>, burnin<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html">trunc</a></span><span class="op">(</span><span class="va">N</span><span class="op">*</span><span class="fl">.3</span><span class="op">)</span>, pars<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"beta0"</span>, <span class="st">"beta1"</span>, <span class="st">"sigeps"</span>, <span class="st">"xi"</span><span class="op">)</span><span class="op">)</span></pre></div>
 <div class="figure">
 <img src="lmmtrace-1.png" alt=""><p class="caption">plot of chunk lmmtrace</p>
 </div>
 <p>The posterior quantiles are summarized after removing an initial <em>burnin</em> period. The <span class="math inline">\(\hat{R}\)</span> statistics are close to one, indicating that both HMC chains converged to the same distribution. The <span class="math inline">\(\hat{R}\)</span> statistics provide an indication of convergence. Values close to one indicate that the multiple MCMC chains converged to the same distribution, while values above 1.1 indicate possible convergence problems. All <span class="math inline">\(\hat{R}\)</span> values in our example are close to one.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit">
-<span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="kw">f_hmc</span>, burnin=<span class="fu"><a href="https://rdrr.io/r/base/Round.html">trunc</a></span>(<span class="kw">N</span><span class="op">*</span><span class="fl">.3</span>), probs=<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0.025</span>, <span class="fl">0.5</span>, <span class="fl">0.975</span>))
+<span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">f_hmc</span>, burnin<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html">trunc</a></span><span class="op">(</span><span class="va">N</span><span class="op">*</span><span class="fl">.3</span><span class="op">)</span>, probs<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0.025</span>, <span class="fl">0.5</span>, <span class="fl">0.975</span><span class="op">)</span><span class="op">)</span>
 <span class="co">#&gt; Summary of MCMC simulation</span>
 <span class="co">#&gt;                   2.5%           50%       97.5%      rhat</span>
 <span class="co">#&gt; beta0     230.00128348 248.352552693 266.1468368 1.0001273</span>
@@ -427,46 +415,43 @@ f(\boldsymbol\beta, \mathbf{u}, \sigma_\epsilon^2, \mathbf{G} | \mathbf{y}, \mat
 <span class="co">#&gt; tau_int17  -0.64757366  -0.008004814   0.6005836 1.0002093</span>
 <span class="co">#&gt; tau_int18  -0.08046339   0.554203574   1.2893995 1.0051712</span>
 <span class="co">#&gt; sigeps      3.31911275   3.420776537   3.5331037 0.9998044</span>
-<span class="co">#&gt; xi          3.27813272   3.599906725   3.9952374 1.0162299</span>
-</pre></div>
+<span class="co">#&gt; xi          3.27813272   3.599906725   3.9952374 1.0162299</span></pre></div>
 <p>Histograms of the posterior distribution show that Bayesian parameter estimates align with frequentist estimates. The <em>cols</em> parameter specifies the parameters to be displayed in <em>diagplots</em>, based on the order provided to the <em>hmc</em> function.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit">
-<span class="kw">beta.freq</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lme4/man/fixef.html">fixef</a></span>(<span class="kw">fm1</span>)
-<span class="kw">xi.freq</span> <span class="op">&lt;-</span> <span class="fl">1</span><span class="op">/</span><span class="fl">2</span><span class="op">*</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html">log</a></span>(<span class="fu"><a href="https://rdrr.io/pkg/lme4/man/VarCorr.html">VarCorr</a></span>(<span class="kw">fm1</span>)<span class="op">$</span><span class="kw">Subject</span>[<span class="fl">1</span>])
-<span class="kw">sigeps.freq</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">log</a></span>(<span class="fu"><a href="https://rdrr.io/pkg/lme4/man/sigma.html">sigma</a></span>(<span class="kw">fm1</span>))
-<span class="kw">theta.freq</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="kw">beta.freq</span>, <span class="kw">sigeps.freq</span>, <span class="kw">xi.freq</span>)
+<span class="va">beta.freq</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lme4/man/fixef.html">fixef</a></span><span class="op">(</span><span class="va">fm1</span><span class="op">)</span>
+<span class="va">xi.freq</span> <span class="op">&lt;-</span> <span class="fl">1</span><span class="op">/</span><span class="fl">2</span><span class="op">*</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html">log</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/lme4/man/VarCorr.html">VarCorr</a></span><span class="op">(</span><span class="va">fm1</span><span class="op">)</span><span class="op">$</span><span class="va">Subject</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>
+<span class="va">sigeps.freq</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">log</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/lme4/man/sigma.html">sigma</a></span><span class="op">(</span><span class="va">fm1</span><span class="op">)</span><span class="op">)</span>
+<span class="va">theta.freq</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">beta.freq</span>, <span class="va">sigeps.freq</span>, <span class="va">xi.freq</span><span class="op">)</span>
 
 <span class="co"># histograms with lines for frequentist estimates</span>
-<span class="fu"><a href="../reference/diagplots.html">diagplots</a></span>(<span class="kw">f_hmc</span>, burnin=<span class="fu"><a href="https://rdrr.io/r/base/Round.html">trunc</a></span>(<span class="kw">N</span><span class="op">*</span><span class="fl">.3</span>),
-          comparison.theta=<span class="kw">theta.freq</span>, cols=<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, <span class="fl">21</span><span class="op">:</span><span class="fl">22</span>))
-<span class="co">#&gt; $histogram</span>
-</pre></div>
+<span class="fu"><a href="../reference/diagplots.html">diagplots</a></span><span class="op">(</span><span class="va">f_hmc</span>, burnin<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html">trunc</a></span><span class="op">(</span><span class="va">N</span><span class="op">*</span><span class="fl">.3</span><span class="op">)</span>,
+          comparison.theta<span class="op">=</span><span class="va">theta.freq</span>, cols<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, <span class="fl">21</span><span class="op">:</span><span class="fl">22</span><span class="op">)</span><span class="op">)</span>
+<span class="co">#&gt; $histogram</span></pre></div>
 <div class="figure">
 <img src="fig1lmm-1.png" alt=""><p class="caption">plot of chunk fig1lmm</p>
 </div>
 <p>We also compare the random effects parameter estimates with <strong>lme4</strong>. The random effects parameters align with frequentist estimates.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit">
-<span class="kw">u.freq</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lme4/man/ranef.html">ranef</a></span>(<span class="kw">fm1</span>)<span class="op">$</span><span class="kw">Subject</span>[, <span class="fl">1</span>]
-<span class="kw">lambda.freq</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span>(<span class="fu"><a href="https://rdrr.io/pkg/lme4/man/VarCorr.html">VarCorr</a></span>(<span class="kw">fm1</span>)<span class="op">$</span><span class="kw">Subject</span>[<span class="fl">1</span>])
+<span class="va">u.freq</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lme4/man/ranef.html">ranef</a></span><span class="op">(</span><span class="va">fm1</span><span class="op">)</span><span class="op">$</span><span class="va">Subject</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>
+<span class="va">lambda.freq</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/lme4/man/VarCorr.html">VarCorr</a></span><span class="op">(</span><span class="va">fm1</span><span class="op">)</span><span class="op">$</span><span class="va">Subject</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>
 
 <span class="co"># transform parameters back to original scale</span>
-<span class="kw">f_hmc</span><span class="op">$</span><span class="kw">thetaCombined</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span>(<span class="kw">f_hmc</span><span class="op">$</span><span class="kw">thetaCombined</span>, <span class="fu">function</span>(<span class="kw">xx</span>) {
-  <span class="kw">tau_mx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span>(<span class="kw">xx</span>[, <span class="fu"><a href="https://rdrr.io/r/base/grep.html">grepl</a></span>(<span class="st">"tau"</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span>(<span class="kw">xx</span>))])
-  <span class="kw">u_mx</span> <span class="op">&lt;-</span> <span class="kw">tau_mx</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">exp</a></span>(<span class="kw">xx</span>[, <span class="st">"xi"</span>])
-  <span class="kw">u_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span>(<span class="kw">u_mx</span>)
-  <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span>(<span class="kw">u_df</span>) <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span>(<span class="st">"u"</span>, <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">ncol</a></span>(<span class="kw">u_df</span>))
-  <span class="kw">xx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span>(<span class="kw">xx</span>, <span class="kw">u_df</span>, <span class="fu"><a href="https://rdrr.io/r/base/Log.html">exp</a></span>(<span class="kw">xx</span>[, <span class="st">"xi"</span>]))
-  <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span>(<span class="kw">xx</span>)[<span class="fu"><a href="https://rdrr.io/r/base/nrow.html">ncol</a></span>(<span class="kw">xx</span>)] <span class="op">&lt;-</span> <span class="st">"lambda"</span>
-  <span class="kw">xx</span>
-})
+<span class="va">f_hmc</span><span class="op">$</span><span class="va">thetaCombined</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="va">f_hmc</span><span class="op">$</span><span class="va">thetaCombined</span>, <span class="kw">function</span><span class="op">(</span><span class="va">xx</span><span class="op">)</span> <span class="op">{</span>
+  <span class="va">tau_mx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">xx</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/grep.html">grepl</a></span><span class="op">(</span><span class="st">"tau"</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">xx</span><span class="op">)</span><span class="op">)</span><span class="op">]</span><span class="op">)</span>
+  <span class="va">u_mx</span> <span class="op">&lt;-</span> <span class="va">tau_mx</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">exp</a></span><span class="op">(</span><span class="va">xx</span><span class="op">[</span>, <span class="st">"xi"</span><span class="op">]</span><span class="op">)</span>
+  <span class="va">u_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">u_mx</span><span class="op">)</span>
+  <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">u_df</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"u"</span>, <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">ncol</a></span><span class="op">(</span><span class="va">u_df</span><span class="op">)</span><span class="op">)</span>
+  <span class="va">xx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="va">xx</span>, <span class="va">u_df</span>, <span class="fu"><a href="https://rdrr.io/r/base/Log.html">exp</a></span><span class="op">(</span><span class="va">xx</span><span class="op">[</span>, <span class="st">"xi"</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>
+  <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">xx</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">ncol</a></span><span class="op">(</span><span class="va">xx</span><span class="op">)</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="st">"lambda"</span>
+  <span class="va">xx</span>
+<span class="op">}</span><span class="op">)</span>
 
 <span class="co"># histograms with lines for frequentist estimates</span>
-<span class="kw">ucols</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/grep.html">grepl</a></span>(<span class="st">"^u"</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span>(<span class="kw">f_hmc</span><span class="op">$</span><span class="kw">thetaCombined</span>[[<span class="fl">1</span>]])))
-<span class="kw">lambdacol</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/grep.html">grepl</a></span>(<span class="st">"^lambda"</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span>(<span class="kw">f_hmc</span><span class="op">$</span><span class="kw">thetaCombined</span>[[<span class="fl">1</span>]])))
-<span class="fu"><a href="../reference/diagplots.html">diagplots</a></span>(<span class="kw">f_hmc</span>, burnin=<span class="fu"><a href="https://rdrr.io/r/base/Round.html">trunc</a></span>(<span class="kw">N</span><span class="op">*</span><span class="fl">.3</span>),
-          comparison.theta = <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="kw">u.freq</span>, <span class="kw">lambda.freq</span>), cols = <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="kw">ucols</span>, <span class="kw">lambdacol</span>))
-<span class="co">#&gt; $histogram</span>
-</pre></div>
+<span class="va">ucols</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html">grepl</a></span><span class="op">(</span><span class="st">"^u"</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">f_hmc</span><span class="op">$</span><span class="va">thetaCombined</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
+<span class="va">lambdacol</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html">grepl</a></span><span class="op">(</span><span class="st">"^lambda"</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">f_hmc</span><span class="op">$</span><span class="va">thetaCombined</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
+<span class="fu"><a href="../reference/diagplots.html">diagplots</a></span><span class="op">(</span><span class="va">f_hmc</span>, burnin<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html">trunc</a></span><span class="op">(</span><span class="va">N</span><span class="op">*</span><span class="fl">.3</span><span class="op">)</span>,
+          comparison.theta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">u.freq</span>, <span class="va">lambda.freq</span><span class="op">)</span>, cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">ucols</span>, <span class="va">lambdacol</span><span class="op">)</span><span class="op">)</span>
+<span class="co">#&gt; $histogram</span></pre></div>
 <div class="figure">
 <img src="fig2lmm-1.png" alt=""><p class="caption">plot of chunk fig2lmm</p>
 </div>
@@ -484,6 +469,7 @@ f(\boldsymbol\beta, \mathbf{u}, \sigma_\epsilon^2, \mathbf{G} | \mathbf{y}, \mat
 <p>Gelman, Andrew. (2006) “Prior distributions for variance parameters in hierarchical models (comment on article by Browne and Draper).” <em>Bayesian analysis</em> 1.3: 515-534.</p>
 <p>Chan, J. C. C., &amp; Jeliazkov, I. (2009). MCMC estimation of restricted covariance matrices. <em>Journal of Computational and Graphical Statistics</em>, 18(2), 457-480.</p>
 <p>Agresti, A. (2015). <em>Foundations of linear and generalized linear models</em>. John Wiley &amp; Sons. ISBN: 978-1-118-73003-4</p>
+<p>Thomas, Samuel, and Wanzhu Tu. “Learning Hamiltonian Monte Carlo in R.” arXiv preprint arXiv:2006.16194 (2020).</p>
 </div>
   </div>
 
@@ -502,7 +488,7 @@ f(\boldsymbol\beta, \mathbf{u}, \sigma_\epsilon^2, \mathbf{G} | \mathbf{y}, \mat
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.9000.</p>
 </div>
 
       </footer>

@@ -31,18 +31,12 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">hmclearn</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.4</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-<li>
-  <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
-     
-  </a>
-</li>
 <li>
   <a href="../reference/index.html">Reference</a>
 </li>
@@ -90,7 +84,7 @@
       <h1 data-toc-skip>hmclearn: Logistic Regression Example</h1>
                         <h4 class="author">Samuel Thomas</h4>
             
-            <h4 class="date">2020-06-10</h4>
+            <h4 class="date">2020-10-04</h4>
       
       
       <div class="hidden name"><code>logistic_regression_hmclearn.Rmd</code></div>
@@ -104,9 +98,8 @@
 <a href="#introduction" class="anchor"></a>Introduction</h2>
 <p>This vignette demonstrates fitting a logistic regression model via Hamiltonian Monte Carlo (HMC) using the <strong>hmclearn</strong> package.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit">
-<span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="kw">hmclearn</span>)
-<span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="kw"><a href="https://CRAN.R-project.org/package=MCMCpack">MCMCpack</a></span>)
-</pre></div>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">hmclearn</span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://CRAN.R-project.org/package=MCMCpack">MCMCpack</a></span><span class="op">)</span></pre></div>
 <p>For binary response, we let</p>
 <p><span class="math display">\[
 p = Pr(\mathbf{y} = 1 | \mathbf{X}) = [1 + e^{-\mathbf{X}\boldsymbol\beta}]^{-1}.
@@ -164,27 +157,26 @@ f(\boldsymbol\beta | \mathbf{X}, \mathbf{y}, \sigma_\beta^2) &amp;\propto f(\mat
 <p>The user must define provide the design matrix directly for use in <strong>hmclearn</strong>. Our first step is to load the data and store the design matrix <span class="math inline">\(X\)</span> and dependent variable vector <span class="math inline">\(y\)</span>.</p>
 <p>First, we load the Endometrial cancer data set (Heinze and Schember 2002) and create <span class="math inline">\(X\)</span> and <span class="math inline">\(y\)</span>. This example also appears in Agresti (2015), and we compare results to his.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit">
-<span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span>(<span class="kw">Endometrial</span>)
+<span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">Endometrial</span><span class="op">)</span>
 
 <span class="co"># data prep</span>
-<span class="kw">Endometrial</span><span class="op">$</span><span class="kw">PI2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/with.html">with</a></span>(<span class="kw">Endometrial</span>, (<span class="kw">PI</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span>(<span class="kw">PI</span>)) <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html">sd</a></span>(<span class="kw">PI</span>))
-<span class="kw">Endometrial</span><span class="op">$</span><span class="kw">EH2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/with.html">with</a></span>(<span class="kw">Endometrial</span>, (<span class="kw">EH</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span>(<span class="kw">EH</span>)) <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html">sd</a></span>(<span class="kw">EH</span>))
-<span class="kw">Endometrial</span><span class="op">$</span><span class="kw">NV2</span> <span class="op">&lt;-</span> <span class="kw">Endometrial</span><span class="op">$</span><span class="kw">NV</span> <span class="op">-</span> <span class="fl">0.5</span>
+<span class="va">Endometrial</span><span class="op">$</span><span class="va">PI2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/with.html">with</a></span><span class="op">(</span><span class="va">Endometrial</span>, <span class="op">(</span><span class="va">PI</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">PI</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html">sd</a></span><span class="op">(</span><span class="va">PI</span><span class="op">)</span><span class="op">)</span>
+<span class="va">Endometrial</span><span class="op">$</span><span class="va">EH2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/with.html">with</a></span><span class="op">(</span><span class="va">Endometrial</span>, <span class="op">(</span><span class="va">EH</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">EH</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html">sd</a></span><span class="op">(</span><span class="va">EH</span><span class="op">)</span><span class="op">)</span>
+<span class="va">Endometrial</span><span class="op">$</span><span class="va">NV2</span> <span class="op">&lt;-</span> <span class="va">Endometrial</span><span class="op">$</span><span class="va">NV</span> <span class="op">-</span> <span class="fl">0.5</span>
 
-<span class="kw">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span>(<span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span>(<span class="kw">Endometrial</span>[, <span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span>(<span class="kw">Endometrial</span>)
-            <span class="op">%in%</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"PI2"</span>, <span class="st">"EH2"</span>, <span class="st">"NV2"</span>))]))
-<span class="kw">y</span> <span class="op">&lt;-</span> <span class="kw">Endometrial</span><span class="op">$</span><span class="kw">HG</span>
+<span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">Endometrial</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">Endometrial</span><span class="op">)</span>
+            <span class="op">%in%</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"PI2"</span>, <span class="st">"EH2"</span>, <span class="st">"NV2"</span><span class="op">)</span><span class="op">)</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>
+<span class="va">y</span> <span class="op">&lt;-</span> <span class="va">Endometrial</span><span class="op">$</span><span class="va">HG</span>
 
-<span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span>(<span class="kw">X</span>) <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"(Intercept)"</span>, <span class="st">"PI2"</span>, <span class="st">"EH2"</span>, <span class="st">"NV2"</span>)
-</pre></div>
+<span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"(Intercept)"</span>, <span class="st">"PI2"</span>, <span class="st">"EH2"</span>, <span class="st">"NV2"</span><span class="op">)</span></pre></div>
 </div>
 <div id="comparison-models---frequentist-and-metropolis-hastings" class="section level2">
 <h2 class="hasAnchor">
 <a href="#comparison-models---frequentist-and-metropolis-hastings" class="anchor"></a>Comparison models - Frequentist and Metropolis-Hastings</h2>
 <p>To compare results, we first fit a standard linear model using the frequentist function <em>glm</em>. Note the high standard error estimates for the Intercept and NV2. This occurs because all 13 subjects with neovasculation present also have <span class="math inline">\(y_i = 1\)</span>. See section 11.1.8 of Agresti (2015).</p>
 <div class="sourceCode" id="cb3"><pre class="downlit">
-<span class="kw">f</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html">glm</a></span>(<span class="kw">y</span> <span class="op">~</span> <span class="kw">X</span><span class="op">-</span><span class="fl">1</span>, family = <span class="fu"><a href="https://rdrr.io/r/stats/family.html">binomial</a></span>())
-<span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="kw">f</span>)
+<span class="va">f</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html">glm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">X</span><span class="op">-</span><span class="fl">1</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html">binomial</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">f</span><span class="op">)</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Call:</span>
 <span class="co">#&gt; glm(formula = y ~ X - 1, family = binomial())</span>
@@ -208,26 +200,23 @@ f(\boldsymbol\beta | \mathbf{X}, \mathbf{y}, \sigma_\beta^2) &amp;\propto f(\mat
 <span class="co">#&gt; Residual deviance:  55.393  on 75  degrees of freedom</span>
 <span class="co">#&gt; AIC: 63.393</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Number of Fisher Scoring iterations: 17</span>
-</pre></div>
+<span class="co">#&gt; Number of Fisher Scoring iterations: 17</span></pre></div>
 <p>As a result of challenges with the frequentist fit, Agresti (2015) in section 10.3.2 also fits this logistic regression model using a random walk Metropolis algorithm from the  package (Martin, Quinn, Park 2011). We fit the model with the same number of MCMC iterations, prior distributions, and hyperparameters as in the text.</p>
 <p>This model also assigns a normal prior for <span class="math inline">\(\boldsymbol\beta\)</span> where <span class="math inline">\(\sigma_\beta^2 = 100\)</span>.  uses a precision parameterization, where <span class="math inline">\(B0 = 1/\sigma_\beta^2\)</span>. The mean hyperparameter is 0 as specified in <span class="math inline">\(b0\)</span>.</p>
 <p>Note the high number of Metropolis iterations specified in  and the time required to fit, even with optimized compiled code. Our abbreviation MH refers to the general Metropolis-Hastings algorithm.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit">
-<span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span>(<span class="fl">921</span>)
-<span class="kw">t1.mh</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span>()
-<span class="kw">fitMH</span> <span class="op">&lt;-</span> <span class="kw">MCMCpack</span>::<span class="fu"><a href="https://rdrr.io/pkg/MCMCpack/man/MCMClogit.html">MCMClogit</a></span>(<span class="kw">HG</span> <span class="op">~</span> <span class="kw">NV2</span> <span class="op">+</span> <span class="kw">PI2</span> <span class="op">+</span> <span class="kw">EH2</span>, data=<span class="kw">Endometrial</span>,
-                   mcmc=<span class="fl">10000000</span>, b0=<span class="fl">0</span>, B0=<span class="fl">0.01</span>)
-<span class="kw">t2.mh</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span>()
-</pre></div>
+<span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">921</span><span class="op">)</span>
+<span class="va">t1.mh</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span><span class="op">(</span><span class="op">)</span>
+<span class="va">fitMH</span> <span class="op">&lt;-</span> <span class="fu">MCMCpack</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/MCMCpack/man/MCMClogit.html">MCMClogit</a></span><span class="op">(</span><span class="va">HG</span> <span class="op">~</span> <span class="va">NV2</span> <span class="op">+</span> <span class="va">PI2</span> <span class="op">+</span> <span class="va">EH2</span>, data<span class="op">=</span><span class="va">Endometrial</span>,
+                   mcmc<span class="op">=</span><span class="fl">10000000</span>, b0<span class="op">=</span><span class="fl">0</span>, B0<span class="op">=</span><span class="fl">0.01</span><span class="op">)</span>
+<span class="va">t2.mh</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span><span class="op">(</span><span class="op">)</span></pre></div>
 <p>The time to fit the logistic regression using MH is</p>
 <div class="sourceCode" id="cb5"><pre class="downlit">
-<span class="kw">t2.mh</span> <span class="op">-</span> <span class="kw">t1.mh</span>
-<span class="co">#&gt; Time difference of 2.774535 mins</span>
-</pre></div>
+<span class="va">t2.mh</span> <span class="op">-</span> <span class="va">t1.mh</span>
+<span class="co">#&gt; Time difference of 2.589012 mins</span></pre></div>
 <p>We store the Metropolis parameter estimates in .</p>
 <div class="sourceCode" id="cb6"><pre class="downlit">
-(<span class="kw">summMH</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="kw">fitMH</span>))
+<span class="op">(</span><span class="va">summMH</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">fitMH</span><span class="op">)</span><span class="op">)</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Iterations = 1001:10001000</span>
 <span class="co">#&gt; Thinning interval = 1 </span>
@@ -249,8 +238,7 @@ f(\boldsymbol\beta | \mathbf{X}, \mathbf{y}, \sigma_\beta^2) &amp;\propto f(\mat
 <span class="co">#&gt; (Intercept) -0.3453  1.2675  2.7207  4.6828  9.3351</span>
 <span class="co">#&gt; NV2          2.1065  5.2285  8.1258 12.0409 21.3190</span>
 <span class="co">#&gt; PI2         -1.4132 -0.7664 -0.4545 -0.1584  0.3664</span>
-<span class="co">#&gt; EH2         -3.4015 -2.5152 -2.1004 -1.7222 -1.0815</span>
-</pre></div>
+<span class="co">#&gt; EH2         -3.4015 -2.5152 -2.1004 -1.7222 -1.0815</span></pre></div>
 </div>
 <div id="fit-model-using-hmc" class="section level2">
 <h2 class="hasAnchor">
@@ -258,56 +246,50 @@ f(\boldsymbol\beta | \mathbf{X}, \mathbf{y}, \sigma_\beta^2) &amp;\propto f(\mat
 </h2>
 <p>Next, we fit the logistic regression model using HMC with the same hyperparameter for <span class="math inline">\(\sigma_\beta^2\)</span> as in Agresti’s example.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit">
-<span class="kw">N</span> <span class="op">&lt;-</span> <span class="fl">1e4</span>
+<span class="va">N</span> <span class="op">&lt;-</span> <span class="fl">1e4</span>
 
-<span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span>(<span class="fl">412</span>)
-<span class="kw">t1.hmc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span>()
- <span class="kw">f_hmc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/hmc.html">hmc</a></span>(N = <span class="kw">N</span>, theta.init = <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span>(<span class="fl">1</span>, <span class="fl">4</span>),
-            epsilon = <span class="fl">0.1</span>, L = <span class="fl">20</span>,
-            logPOSTERIOR = <span class="kw">logistic_posterior</span>,
-            glogPOSTERIOR = <span class="kw">g_logistic_posterior</span>,
-            varnames = <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span>(<span class="kw">X</span>),
-            param=<span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(y = <span class="kw">y</span>, X=<span class="kw">X</span>, sig2beta=<span class="fl">100</span>),
-            parallel=<span class="fl">FALSE</span>, chains=<span class="fl">2</span>)
-<span class="kw">t2.hmc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span>()
-</pre></div>
+<span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">412</span><span class="op">)</span>
+<span class="va">t1.hmc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span><span class="op">(</span><span class="op">)</span>
+ <span class="va">f_hmc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/hmc.html">hmc</a></span><span class="op">(</span>N <span class="op">=</span> <span class="va">N</span>, theta.init <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">4</span><span class="op">)</span>,
+            epsilon <span class="op">=</span> <span class="fl">0.1</span>, L <span class="op">=</span> <span class="fl">20</span>,
+            logPOSTERIOR <span class="op">=</span> <span class="va">logistic_posterior</span>,
+            glogPOSTERIOR <span class="op">=</span> <span class="va">g_logistic_posterior</span>,
+            varnames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span>,
+            param<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">y</span>, X<span class="op">=</span><span class="va">X</span>, sig2beta<span class="op">=</span><span class="fl">100</span><span class="op">)</span>,
+            parallel<span class="op">=</span><span class="cn">FALSE</span>, chains<span class="op">=</span><span class="fl">2</span><span class="op">)</span>
+<span class="va">t2.hmc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span><span class="op">(</span><span class="op">)</span></pre></div>
 <p>HMC requires fewer iterations and lower computation time than MH in this example.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit">
-<span class="kw">t2.hmc</span> <span class="op">-</span> <span class="kw">t1.hmc</span>
-<span class="co">#&gt; Time difference of 31.35036 secs</span>
-</pre></div>
+<span class="va">t2.hmc</span> <span class="op">-</span> <span class="va">t1.hmc</span>
+<span class="co">#&gt; Time difference of 39.86357 secs</span></pre></div>
 </div>
 <div id="mcmc-summary-and-diagnostics" class="section level2">
 <h2 class="hasAnchor">
 <a href="#mcmc-summary-and-diagnostics" class="anchor"></a>MCMC summary and diagnostics</h2>
 <p>The acceptance ratio for each of the HMC chains is sufficiently high for an efficient simulation.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit">
-<span class="kw">f_hmc</span><span class="op">$</span><span class="kw">accept</span><span class="op">/</span><span class="kw">N</span>
-<span class="co">#&gt; [1] 0.9104 0.9155</span>
-</pre></div>
+<span class="va">f_hmc</span><span class="op">$</span><span class="va">accept</span><span class="op">/</span><span class="va">N</span>
+<span class="co">#&gt; [1] 0.9104 0.9155</span></pre></div>
 <p>The posterior quantiles are summarized after removing an initial <em>burnin</em> period. The <span class="math inline">\(\hat{R}\)</span> statistics provide an indication of convergence. Values close to one indicate that the multiple MCMC chains converged to the same distribution, while values above 1.1 indicate possible convergence problems. All <span class="math inline">\(\hat{R}\)</span> values in our example are close to one.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit">
-<span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="kw">f_hmc</span>, burnin=<span class="fl">3000</span>, probs=<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0.025</span>, <span class="fl">0.5</span>, <span class="fl">0.975</span>))
+<span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">f_hmc</span>, burnin<span class="op">=</span><span class="fl">3000</span>, probs<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0.025</span>, <span class="fl">0.5</span>, <span class="fl">0.975</span><span class="op">)</span><span class="op">)</span>
 <span class="co">#&gt; Summary of MCMC simulation</span>
 <span class="co">#&gt;                  2.5%        50%      97.5%      rhat</span>
 <span class="co">#&gt; (Intercept) -0.292832  2.9281285  9.2283365 1.0017419</span>
 <span class="co">#&gt; PI2         -1.444876 -0.4606057  0.3592366 1.0000986</span>
 <span class="co">#&gt; EH2         -3.423364 -2.1016785 -1.0784341 0.9999496</span>
-<span class="co">#&gt; NV2          2.192343  8.5423329 21.0647490 1.0016373</span>
-</pre></div>
+<span class="co">#&gt; NV2          2.192343  8.5423329 21.0647490 1.0016373</span></pre></div>
 <p>Trace plots provide a visual indication of stationarity. These plots indicate that the MCMC chains are reasonably stationary.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit">
-<span class="fu"><a href="../reference/hmclearn-plots.html">mcmc_trace</a></span>(<span class="kw">f_hmc</span>, burnin=<span class="fl">3000</span>)
-</pre></div>
+<span class="fu"><a href="../reference/hmclearn-plots.html">mcmc_trace</a></span><span class="op">(</span><span class="va">f_hmc</span>, burnin<span class="op">=</span><span class="fl">3000</span><span class="op">)</span></pre></div>
 <div class="figure">
 <img src="fig1lr-1.png" alt=""><p class="caption">plot of chunk fig1lr</p>
 </div>
 <p>Histograms of the posterior distribution show that HMC parameter estimates align with Metropolis estimates from <strong>MCMCpack</strong>.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit">
-<span class="kw">beta.mh</span> <span class="op">&lt;-</span> <span class="kw">summMH</span><span class="op">$</span><span class="kw">quantiles</span>[, <span class="st">"50%"</span>][<span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span>(<span class="kw">X</span>)]
-<span class="fu"><a href="../reference/diagplots.html">diagplots</a></span>(<span class="kw">f_hmc</span>, burnin=<span class="fl">3000</span>, comparison.theta=<span class="kw">beta.mh</span>)
-<span class="co">#&gt; $histogram</span>
-</pre></div>
+<span class="va">beta.mh</span> <span class="op">&lt;-</span> <span class="va">summMH</span><span class="op">$</span><span class="va">quantiles</span><span class="op">[</span>, <span class="st">"50%"</span><span class="op">]</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">]</span>
+<span class="fu"><a href="../reference/diagplots.html">diagplots</a></span><span class="op">(</span><span class="va">f_hmc</span>, burnin<span class="op">=</span><span class="fl">3000</span>, comparison.theta<span class="op">=</span><span class="va">beta.mh</span><span class="op">)</span>
+<span class="co">#&gt; $histogram</span></pre></div>
 <div class="figure">
 <img src="fig2lr-1.png" alt=""><p class="caption">plot of chunk fig2lr</p>
 </div>
@@ -322,6 +304,7 @@ f(\boldsymbol\beta | \mathbf{X}, \mathbf{y}, \sigma_\beta^2) &amp;\propto f(\mat
 <a href="#reference" class="anchor"></a>Reference</h2>
 <p>Agresti, A. (2015). <em>Foundations of linear and generalized linear models</em>. John Wiley &amp; Sons. ISBN: 978-1-118-73003-4</p>
 <p>Martin AD, Quinn KM, Park JH (2011). “MCMCpack: Markov Chain Monte Carlo in R.” <em>Journal of Statistical</em> Software, 42(9), 22. <a href="http://www.jstatsoft.org/v42/i09/" class="uri">http://www.jstatsoft.org/v42/i09/</a>.</p>
+<p>Thomas, Samuel, and Wanzhu Tu. “Learning Hamiltonian Monte Carlo in R.” arXiv preprint arXiv:2006.16194 (2020).</p>
 </div>
   </div>
 
@@ -340,7 +323,7 @@ f(\boldsymbol\beta | \mathbf{X}, \mathbf{y}, \sigma_\beta^2) &amp;\propto f(\mat
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.9000.</p>
 </div>
 
       </footer>
