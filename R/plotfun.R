@@ -89,7 +89,7 @@
 #'  }
 #' }
 #' @return These functions call various plotting functions from the \code{bayesplot} package, which returns a list including \code{ggplot2} objects.
-#' @references Gabry, Jonah and Mahr, Tristan (2019).  \emph{bayesplot:  Plotting for Bayesian Models}.  \url{https://mc-stan.org/bayesplot}
+#' @references Gabry, Jonah and Mahr, Tristan (2019).  \emph{bayesplot:  Plotting for Bayesian Models}.  \url{https://mc-stan.org/bayesplot/}
 #' @references Gabry, J., Simpson, D., Vehtari, A., Betancourt, M., and Gelman, A (2019).  \emph{Visualization in Bayesian Workflow}.  Journal of the Royal Statistical Society: Series A. Vol 182.  Issue 2.  p.389-402.
 #' @references Gelman, A. and Rubin, D. (1992) \emph{Inference from Iterative Simulation Using Multiple Sequences}.  Statistical Science 7(4) 457-472.
 #' @references Gelman, A., et. al. (2013) \emph{Bayesian Data Analysis}.  Chapman and Hall/CRC.
@@ -378,7 +378,7 @@ mcmc_violin.hmclearn <- function(object, burnin=NULL, ...) {
 #' @param burnin optional numeric parameter for the number of initial MCMC samples to omit from the summary
 #' @param ... optional additional arguments to pass to the \code{bayesplot} functions
 #'
-#' @references Gabry, Jonah and Mahr, Tristan (2019).  \emph{bayesplot:  Plotting for Bayesian Models}.  \url{https://mc-stan.org/bayesplot}
+#' @references Gabry, Jonah and Mahr, Tristan (2019).  \emph{bayesplot:  Plotting for Bayesian Models}.  \url{https://mc-stan.org/bayesplot/}
 #' @return Calls \code{mcmc_hist} from the \code{bayesplot} package, which returns a list including a \code{ggplot2} object.
 #' @export
 #' @examples

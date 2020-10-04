@@ -148,7 +148,7 @@ coef.hmclearn <- function(object, burnin=NULL, prob=0.5, ...) {
 #'   Numeric design matrix
 #'   }
 #' }
-#' @references Gabry, Jonah and Mahr, Tristan (2019).  \emph{bayesplot:  Plotting for Bayesian Models}.  \url{https://mc-stan.org/bayesplot}
+#' @references Gabry, Jonah and Mahr, Tristan (2019).  \emph{bayesplot:  Plotting for Bayesian Models}.  \url{https://mc-stan.org/bayesplot/}
 #' @references Gabry, J., Simpson, D., Vehtari, A., Betancourt, M., and Gelman, A (2019).  \emph{Visualization in Bayesian Workflow}.  Journal of the Royal Statistical Society: Series A. Vol 182.  Issue 2.  p.389-402.
 #' @export
 #'
@@ -267,7 +267,7 @@ predict.hmclearn <- function(object, X, fam = "linear", burnin=NULL, draws=NULL,
 #' #'    observed data, `stat(y)`, is overlaid as a vertical line.
 #' #'   }
 #' #' }
-#' #' @references Gabry, Jonah and Mahr, Tristan (2019).  \emph{bayesplot:  Plotting for Bayesian Models}.  \url{https://mc-stan.org/bayesplot}
+#' #' @references Gabry, Jonah and Mahr, Tristan (2019).  \emph{bayesplot:  Plotting for Bayesian Models}.  \url{https://mc-stan.org/bayesplot/}
 #' #' @references Gabry, J., Simpson, D., Vehtari, A., Betancourt, M., and Gelman, A (2019).  \emph{Visualization in Bayesian Workflow}.  Journal of the Royal Statistical Society: Series A. Vol 182.  Issue 2.  p.389-402.
 #' #' @export
 #' pp_check <- function(object, type, ...) {
@@ -305,7 +305,7 @@ predict.hmclearn <- function(object, X, fam = "linear", burnin=NULL, draws=NULL,
 #' #'    observed data, `stat(y)`, is overlaid as a vertical line.
 #' #'   }
 #' #' }
-#' #' @references Gabry, Jonah and Mahr, Tristan (2019).  \emph{bayesplot:  Plotting for Bayesian Models}.  \url{https://mc-stan.org/bayesplot}
+#' #' @references Gabry, Jonah and Mahr, Tristan (2019).  \emph{bayesplot:  Plotting for Bayesian Models}.  \url{https://mc-stan.org/bayesplot/}
 #' #' @references Gabry, J., Simpson, D., Vehtari, A., Betancourt, M., and Gelman, A (2019).  \emph{Visualization in Bayesian Workflow}.  Journal of the Royal Statistical Society: Series A. Vol 182.  Issue 2.  p.389-402.
 #' #' @export
 #' pp_check.hmclearnpred <- function(object,

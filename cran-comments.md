@@ -49,7 +49,11 @@ Revised from version 0.0.2 to version 0.0.3
 
 * Changed relevant help references and vignettes for Thomas/Tu to arXiv paper
 
+## Version 0.0.5
 
+* DESCRIPTION: url correction for Thomas/Tu paper
+
+* URL corrections for bayesplot and jstatsoft
 
 
 
